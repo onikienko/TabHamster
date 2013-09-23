@@ -1,5 +1,5 @@
 {
-    "exclude": [".*"],
+    "exclude": [".*", "readme.md"],
     "reminder": "",
     "minify": {
         "dirs": ["../js", "../lib/jsTabs"],
