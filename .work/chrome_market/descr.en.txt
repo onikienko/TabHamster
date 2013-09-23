@@ -1,5 +1,5 @@
 ► Save open tabs in the group.
-	✓ Tab Groups stored in the sync Chrome storage. Sign in to browser to get them.
+	✓ Tab Groups are stored in the sync Chrome storage. Sign in to browser to get them on other PC.
 	✓ Assign a group name.
 	✓ Edit, add new tabs, delete, move the group from the list.
 
@@ -14,4 +14,4 @@
 	● "Ctrl + click" on group name (or session) - open tabs in a new window.
 
 
-Source code: https://github.com/onikienko/TabHamster
+Tab Hamster source code: https://github.com/onikienko/TabHamster

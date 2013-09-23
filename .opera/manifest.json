@@ -1,13 +1,12 @@
 {
     "name": "__MSG_extName__",
     "description": "__MSG_extDescr__",
-    "version": "0.1",
+    "version": "0.1.1",
     "manifest_version": 2,
 
     "developer": { "name": "Michael Onikienko",
                     "url": "http://onikienko.pp.ua" },
 
-    "minimum_opera_version": "15",
     "default_locale": "en",
     "icons": {
         "16": "img/ext_icons/16.png",
