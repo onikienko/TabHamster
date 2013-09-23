@@ -145,7 +145,7 @@
         "description": "US date format"
     },
     "o_help_syncStorage": {
-        "message": "Tab Groups stored in the sync browser's storage. All saved tabs will be available to you (e.g. at home, at work). Sign in to browser to get them.",
+        "message": "Tab Groups stored in the sync storage. All saved tabs will be available to you (e.g. at home, at work). Sign in to browser to get them.",
         "description": ""
     },
     "o_help_syncStorage_0": {

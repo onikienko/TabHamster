@@ -1,0 +1,17 @@
+► Save open tabs in the group.
+	✓ Tab Groups stored in the sync Chrome storage. Sign in to browser to get them.
+	✓ Assign a group name.
+	✓ Edit, add new tabs, delete, move the group from the list.
+
+► Session Manager provides quick and convenient access to the latest browser sessions.
+	✓ Access to the currently open (and earlier) browser session.
+	✓ Rapid recovery of any session in one click.
+	✓! Sessions are not synchronized.
+
+
+☀ Tips:
+	● To quickly save all open tabs in a group, open the extension window and press "ENTER". Later, you can edit the name of the group.
+	● "Ctrl + click" on group name (or session) - open tabs in a new window.
+
+
+Source code: https://github.com/onikienko/TabHamster
