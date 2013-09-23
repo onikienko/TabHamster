@@ -1,0 +1,12 @@
+{
+    "exclude": [".*"],
+    "reminder": "",
+    "minify": {
+        "dirs": ["../js", "../lib/jsTabs"],
+        "exclude": ["*.min.js"]
+    },
+    "changelog": {
+        "filename": "changelog.txt",
+        "datetimeformat": "%d.%m.%Y %H:%M"
+    }
+}

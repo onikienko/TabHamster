@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="lib/jsTabs/tabs.css">
+    <link rel="stylesheet" href="css/popup.css">
+
+</head>
+<body>
+<header>
+    <input id="new_group_name" type="text" autofocus="autofocus" placeholder="{{ p_GroupNameToSave }}"  maxlength="37"/>
+    <a id="new_group" href="" title="{{ p_groupBtn }}">+</a>
+    <span id="window_actions">
+        <a href="options.html#help" title="{{ p_helpBtn }}" target="_blank">?</a>
+        <a href="options.html" title="{{ p_optionsBtn }}" target="_blank">&#9776;</a>
+    </span>
+</header>
+
+<!--Popup windows-->
+<div class="popup__overlay" id="edit_group_name">
+    <div class="popup">
+        <div class="popup-form__row">
+            <label for="popup-new_group_name">{{ p_newGroupName_popup }}</label>
+            <input type="text" class="data" id="popup-new_group_name" value=""  maxlength="37"/>
+        </div>
+        <input type="button" class="submit_btn" id="save_new_name" value="Ok" />
+        <input type="button" class="cancel" value="Cancel" />
+    </div>
+</div>
+<div class="popup__overlay" id="add_link">
+    <div class="popup">
+        <div class="popup-form__row">
+            <label for="popup-new_group_name">{{ p_addLinkTitle_popup }}</label>
+            <input type="text" class="data" id="popup-add_link_name" value="" />
+        </div>
+        <div class="popup-form__row">
+            <label for="popup-new_group_name">{{ p_addLinkLink_popup }}</label>
+            <input type="text" class="data" id="popup-add_link_link" value="" />
+        </div>
+        <input type="button" class="submit_btn" id="save_new_link" value="Ok" />
+        <input type="button" class="cancel" value="Cancel" />
+    </div>
+</div>
+<div class="popup__overlay" id="edit_link">
+    <div class="popup">
+        <div class="popup-form__row">
+            <label for="popup-new_group_name">{{ p_addLinkTitle_popup }}</label>
+            <input type="text" class="data" id="popup-edit_link_name" value="" />
+        </div>
+        <div class="popup-form__row">
+            <label for="popup-new_group_name">{{ p_addLinkLink_popup }}</label>
+            <input type="text" class="data" id="popup-edit_link_url" value="" />
+        </div>
+        <input type="button" class="submit_btn" id="save_edited_link" value="Ok" />
+        <input type="button" class="cancel" value="Cancel" />
+    </div>
+</div>
+<!--Popup windows END-->
+
+<section id="main_tabs">
+    <ul class="tabs_nav">
+        <li><a href="#saved" title="{{ p_synStorageUsage_title }}">{{ p_tabName_Saved }} |&nbsp;</a></li>
+        <li><a href="#sessions">{{ p_tabName_Sessions }}</a></li>
+    </ul>
+
+    <div class="tabs_content">
+        <div id="saved"></div>
+        <div id="sessions"></div>
+    </div>
+</section>
+
+<script src="js/helpers/localizer.js"></script>
+<script src="lib/jsTabs/tabs.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/utils.js"></script>
+
+<script src="js/popup.js"></script>
+
+</body>
+</html>

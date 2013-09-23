@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>{{extName}}</title>
+    <link rel="stylesheet" type="text/css" href="css/options.css">
+    <link rel="stylesheet" type="text/css" href="lib/jsTabs/tabs.css">
+</head>
+<body>
+
+<div id=message_place>
+    <span id="error">{{o_error}}</span>
+    <span id="success">{{o_saved}}</span>
+</div>
+
+<div id="page">
+    <header>
+        <img src="img/ext_icons/48.png" title="{{extDescr}}" width="48" height="48">
+        <strong>{{extName}}</strong>
+    </header>
+
+    <section id="main_tabs" class="tabs">
+        <ul class="tabs_nav">
+            <li><a href="#main">{{o_tabs_main}}</a></li>
+            <li><a href="#help">{{o_tabs_help}}</a></li>
+            <li><a href="#about">{{o_tabs_about}}</a></li>
+        </ul>
+
+        <div class="tabs_content">
+
+            <div id="main">
+                <fieldset>
+                    <legend>{{ o_common_legend }}</legend>
+                    <p>
+                        {{ o_dateFormat_text }}
+                        <select data-storage="date_format">
+                            <option value="eu">{{ o_dateFormat_eu }}</option>
+                            <option value="us">{{ o_dateFormat_us }}</option>
+                        </select>
+                    </p>
+                </fieldset>
+
+                <fieldset>
+                    <legend>{{ o_savedTabs_legend }}</legend>
+                    <p><label><input type="checkbox" data-storage="pinned"/>{{ o_savedTabs_pinned }}</label></p>
+
+                    <p><label><input type="checkbox" data-storage="cur_win"/>{{ o_savedTabs_cur_win }}</label></p>
+                </fieldset>
+            </div>
+
+            <div id="help">
+                <p>{{ o_help_syncStorage }}</p>
+                <p>{{ o_help_syncStorage_0 }}</p>
+                <p>{{ o_help_syncStorage_1 }}</p>
+                <p>{{ o_help_syncStorage_2 }}</p>
+
+                <div class="help_screenshot"><img src="img/help_screen.png"/></div>
+                <fieldset>
+                    <legend>{{ o_help_tipsLegend }}</legend>
+                    <ul>
+                        <li>{{ o_help_quickAdd }}</li>
+                        <li>{{ o_help_showLinks }}</li>
+                        <li>{{ o_help_inNewWindow }}</li>
+                        <li>{{ o_help_editGroup }}</li>
+                        <li>{{ o_help_settings }}</li>
+                    </ul>
+                </fieldset>
+            </div>
+
+            <div id="about">
+                <dl>
+                    <!--<dt>Dev:</dt>-->
+                    <!--<dd><a href="http://onikienko.pp.ua">onikienko.pp.ua</a></dd>-->
+
+                    <dt>Source:</dt>
+                    <dd><a href="http://">GitHub</a></dd>
+                    <dt>Contacts:</dt>
+                    <dd><a href="mailto:michael.onikienko@gmail.com">michael.onikienko@gmail.com</a>
+                        <br>
+                        <a href="http://onikienko.pp.ua">onikienko.pp.ua</a>
+                    </dd>
+                </dl>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p class="copyright">by <a href="http://onikienko.pp.ua">Michael Onikienko</a></p>
+    </footer>
+</div>
+
+<script src="js/helpers/localizer.js"></script>
+<script src="lib/jsTabs/tabs.js"></script>
+
+<script src="js/storage.js"></script>
+<script src="js/helpers/quick_options.js"></script>
+<!--<script src="lib/jquery.min.js"></script>-->
+<script src="js/options.js"></script>
+
+</body>
+</html>
