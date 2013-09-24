@@ -10,4 +10,4 @@ Plain javaScript with no jQuery and other libraries.
 
 **Chrome** - [in market](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)
 
-**Opera 15+** - is waiting for 'Accepted'
+**Opera 15+** - [in Opera Extensions Repository](https://addons.opera.com/ru/extensions/details/tabhamster/?display=ru)
