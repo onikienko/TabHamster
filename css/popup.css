@@ -87,7 +87,7 @@ ul.tabs_nav {
     color: lightgrey;
 }
 
-.spoiler:hover, .group_action>span:hover, .link_action>span:hover, .up:hover, .down:hover {
+.spoiler:hover, .group_action>span:hover, .link_action>span:hover, .up:hover, .down:hover,  .open_in_new_window:hover {
     color: #4a4a4a;
 }
 
@@ -128,6 +128,13 @@ ul.tabs_nav {
     height: 16px;
     vertical-align: middle;
     margin: 0 8px;
+}
+
+.pinned_icon {
+    width: 12px;
+    height: 12px;
+    margin-right: 3px;
+    vertical-align: middle;
 }
 
 /* popup form */

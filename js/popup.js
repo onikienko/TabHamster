@@ -250,7 +250,6 @@ chrome.storage.local.get(function (session_items) {
             tabsGrabber = {
                 tabsFilter: function () {
                     return {
-                        pinned: items.pinned === 0 ? false : true,
                         currentWindow: items.cur_win === 0 ? false : true
                     };
                 },
@@ -259,10 +258,12 @@ chrome.storage.local.get(function (session_items) {
                         var links = [];
                         tabs.forEach(function (tab, index) {
                             var link = {};
-                            link.url = tab.url;
-                            link.title = tab.title;
-                            link.id = index;
-                            links.push(link);
+                            if (!tab.pinned || items.pinned === 1) {
+                                link.url = tab.url;
+                                link.title = tab.title;
+                                link.id = index;
+                                links.push(link);
+                            }
                         });
                         callback(links);
                     });
@@ -635,7 +636,8 @@ chrome.storage.local.get(function (session_items) {
                 linkHtmlElement: function (storage_name, link) {
                     var a_text = link.title,
                         a_title = '',
-                        text_length = 46,
+                        text_length = 44,
+                        pin_icon = link.pinned === true ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
                         favicon_src = localStorage.browser === 'chrome' ? 'chrome://favicon/' + link.url : 'opera://favicon/' + link.url;
                     if (link.title.length > text_length) {
                         a_text = link.title.slice(0, text_length) + '...';
@@ -645,7 +647,7 @@ chrome.storage.local.get(function (session_items) {
                         '<span class="link_action">' +
 //                        '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
                         '<a href="' + link.url + '" target="_blank" ' + a_title + '>' +
-                        '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + a_text + '</a>' +
+                        '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + pin_icon + a_text + '</a>' +
                         '</span>' +
                         '</div>';
                 },
@@ -799,6 +801,8 @@ chrome.storage.local.get(function (session_items) {
                     this.setHandlers();
                 }
             },
+
+//            mainUI =
 
             navigation;
 
