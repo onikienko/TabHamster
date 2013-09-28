@@ -180,6 +180,10 @@
         "message": "You can edit, delete, change position for every saved group  (No.4 on the  screenshot)",
         "description": ""
     },
+    "o_help_overFavicon": {
+        "message": "Place mouse pointer over favicon to view url of tab.",
+        "description": ""
+    },
     "o_help_settings": {
         "message": "Look at the extensions settings",
         "description": ""
