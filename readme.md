@@ -8,6 +8,6 @@ Extension is written with [Chrome Extension Box](https://github.com/onikienko/ch
 
 Plain javaScript with no jQuery and other libraries.
 
-**Chrome** - [market](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)
+**[Chrome](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
 
-**Opera 15+** - [Opera Extensions Repository](https://addons.opera.com/ru/extensions/details/tabhamster/?display=ru)
+**[Opera 15+](https://addons.opera.com/ru/extensions/details/tabhamster/?display=ru)**
