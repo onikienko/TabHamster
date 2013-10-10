@@ -145,7 +145,7 @@
         "description": "Formato americano"
     },
     "o_help_syncStorage": {
-        "message": "Los grupos de pestañas son guardados en el espacio de sincronización. Inicie sesión en el navegador para obtenerlas en el PC.",
+        "message": "Los grupos de pestañas son guardados en el espacio de sincronización. Inicie sesión en el navegador para obtenerlos en otro dispositivo.",
         "description": ""
     },
     "o_help_syncStorage_0": {
