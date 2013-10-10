@@ -1,0 +1,17 @@
+► Guarda pestañas abiertas como un grupo.
+	✓ Los Grupos de Pestañas se guardan el espacio de almacenamiento para sincronización. Ingrese a su cuenta en el navegador para obtenerlos en otro PC.
+	✓ Asigne un nombre al grupo.
+	✓ Edite, agregue nuevas pestañas, elimine, mueva el grupo dentro de la lista.
+
+► El Administrador de Sesiones brinda una rápida y conveniente forma de acceso a las ultimas sesiones de navegación.
+	✓ Acceda a la sesión del navegador actualmente abierta, así como a las anteriores.
+	✓ Recupere rápidamente cualquier sesión con un sólo clic.
+	✓! Las sesiones NO se sincronizan.
+
+
+☀ Consejos:
+	● Para guardar rápidamente todas las pestañas abiertas en un grupo, abra la ventana de la extensión y presione 'ENTER'. Luego, puede editar el nombre del grupo.
+	● 'Ctrl + click' en el nombre de un grupo (o sesión) lo abrirá en una nueva ventana.
+
+
+Código fuente de Tab Hamster: https://github.com/onikienko/TabHamster

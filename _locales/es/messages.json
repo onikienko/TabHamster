@@ -1,0 +1,191 @@
+{
+    "extName": {
+        "message": "TabHamster",
+        "description": "no traducir el nombre de la extensión"
+    },
+    "extDescr": {
+        "message": "Administrador de sesiones y almacén de pestañas. Con sincronización.",
+        "description": ""
+    },
+
+    "p_optionsBtn": {
+        "message": "Opciones",
+        "description": "Prefix 'p_' - popup"
+    },
+    "p_helpBtn": {
+        "message": "Ayuda",
+        "description": "Título para el botón de ayuda"
+    },
+    "p_GroupNameToSave": {
+        "message": "Pestañas a un nuevo grupo",
+        "description": "Indicador de lugar para ingreso de texto"
+    },
+    "p_groupBtn": {
+        "message": "Guardar",
+        "description": "Ayuda para Botón"
+    },
+    "p_tabName_Saved": {
+        "message": "Grupos guardados",
+        "description": ""
+    },
+    "p_tabName_Sessions": {
+        "message": "Sesiones",
+        "description": ""
+    },
+    "p_synStorageUsage_title": {
+        "message": "Uso del espacio de sincronización del Navegador",
+        "description": ""
+    },
+
+    "p_newGroupName_popup": {
+        "message": "Nuevo nombre para el grupo:",
+        "description": ""
+    },
+    "p_addLinkTitle_popup": {
+        "message": "Título",
+        "description": ""
+    },
+    "p_addLinkLink_popup": {
+        "message": "URL",
+        "description": ""
+    },
+    "p_delGroup_btn_title": {
+        "message": "Eliminar grupo"
+    },
+    "p_editGroupName_btn_title": {
+        "message": "Editar nombre del grupo"
+    },
+    "p_groupInNewWindow_btn_title": {
+        "message": "Abrir en una nueva ventana (Ctrl + click)"
+    },
+    "p_addLinkToGroup_btn_title": {
+        "message": "Nuevo vínculo a grupo"
+    },
+    "p_delLinkFromGroup_btn_title": {
+        "message": "Eliminar"
+    },
+    "p_editLink_btn_title": {
+        "message": "Editar"
+    },
+    "p_upGroup_btn_title": {
+        "message": "Subir"
+    },
+    "p_downGroup_btn_title": {
+        "message": "Bajar"
+    },
+    "p_windowsNumbers_text": {
+        "message": "Ventana:"
+    },
+    "p_tabsNumbers_text": {
+        "message": "Pestaña:"
+    },
+    "p_window_text": {
+        "message": "Ventana"
+    },
+    "p_quotaBitesPerItem_error": {
+        "message": "No se puede guardar al almacenamiento de sincronización. Muchas Pestañas. Intente cerrar alguna."
+    },
+    "p_quotaBites_error": {
+        "message": "El espacio de Sincronización está lleno. Eliminar grupos en desuso."
+    },
+    "p_syncStorageDefault_error": {
+        "message": "Error al almacenar sincronización. Intente nuevamente luego."
+    },
+    "p_currentSession": {
+        "message": "Actual"
+    },
+
+
+    "o_tabs_help": {
+        "message": "Ayuda",
+        "description": "Nombre de la Pestaña. Prefijo 'o_' por Opciones"
+    },
+    "o_tabs_main": {
+        "message": "Opciones",
+        "description": "Pestaña Opciones"
+    },
+    "o_tabs_about": {
+        "message": "Acerca de",
+        "description": "Pestaña con información del producto"
+    },
+    "o_error": {
+        "message": "Error al guardar",
+        "description": "Error al guardar las opciones"
+    },
+    "o_saved": {
+        "message": "Guardado",
+        "description": "Opciones correctamente guardadas"
+    },
+    "o_savedTabs_legend": {
+        "message": "Filtro para guardado de pestañas (no sesiones)",
+        "description": "Etiqueta para leyenda"
+    },
+    "o_savedTabs_pinned": {
+        "message": "Agregar pestañas Fijas al conjunto",
+        "description": ""
+    },
+    "o_savedTabs_cur_win": {
+        "message": "Únicamente ventana actual",
+        "description": ""
+    },
+    "o_common_legend": {
+        "message": "Principal",
+        "description": ""
+    },
+    "o_dateFormat_text": {
+        "message": "Formato de fecha",
+        "description": ""
+    },
+    "o_dateFormat_eu": {
+        "message": "DD-MM-YYYY",
+        "description": "Formato europeo"
+    },
+    "o_dateFormat_us": {
+        "message": "YYYY-MM-DD",
+        "description": "Formato americano"
+    },
+    "o_help_syncStorage": {
+        "message": "Los grupos de pestañas son guardados en el espacio de sincronización. Inicie sesión en el navegador para obtenerlas en el PC.",
+        "description": ""
+    },
+    "o_help_syncStorage_0": {
+        "message": "Las sesiones no se sincronizan.",
+        "description": ""
+    },
+    "o_help_syncStorage_1": {
+        "message": "El espacio de sincronización es de tamaño limitado. Puede consultar el uso de dicho espacio (Vea No.1 en la captura de pantalla).",
+        "description": ""
+    },
+    "o_help_syncStorage_2": {
+        "message": "Existe también un limite en el tamaño de la información guardada para un mismo momento. Es de aproximadamente 17 a 20 pestañas.",
+        "description": ""
+    },
+    "o_help_tipsLegend": {
+        "message": "Consejos",
+        "description": ""
+    },
+    "o_help_quickAdd": {
+        "message": "Para guardar rápidamente todas las pestañas abiertas en un grupo, abra la ventana de la extensión y presione 'ENTER'.",
+        "description": ""
+    },
+    "o_help_showLinks": {
+        "message": "Para ver las pestañas guardadas en un grupo presione sobre el triángulo gris (No.2 en la captura de pantalla)",
+        "description": ""
+    },
+    "o_help_inNewWindow": {
+        "message": "'Ctrl + click' en el nombre de un grupo (o sesión) lo abrirá en una nueva ventana. O presione en el icono al costado del nombre del grupo (No.3 en la captura de pantalla).",
+        "description": ""
+    },
+    "o_help_editGroup": {
+        "message": "Usted puede editar, eliminar y cambiar la posición para cada grupo guardado (No.4 en la captura de pantalla)",
+        "description": ""
+    },
+    "o_help_overFavicon": {
+        "message": "Ubique el puntero del ratón sobre el favicon para ver la url de una pestaña.",
+        "description": ""
+    },
+    "o_help_settings": {
+        "message": "Mire las opciones de la extensión",
+        "description": ""
+    }
+}
