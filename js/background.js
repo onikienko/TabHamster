@@ -107,25 +107,20 @@ chrome.runtime.onUpdateAvailable.addListener(function (details) {
 
     /* tabs event listeners*/
     chrome.tabs.onUpdated.addListener(function (tab_id, change_info) {
-//        console.log('onUpdated');
         if (change_info.url) {
             updateCurrentSession();
         }
     });
     chrome.tabs.onMoved.addListener(function () {
-//        console.log('onMoved');
         updateCurrentSession();
     });
     chrome.tabs.onAttached.addListener(function () {
-//        console.log('onAttached');
         updateCurrentSession();
     });
     chrome.tabs.onRemoved.addListener(function () {
-//        console.log('onRemoved');
         updateCurrentSession();
     });
     chrome.tabs.onReplaced.addListener(function () {
-//        console.log('onReplaced');
         updateCurrentSession();
     });
 

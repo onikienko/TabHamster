@@ -802,7 +802,15 @@ chrome.storage.local.get(function (session_items) {
                 }
             },
 
-//            mainUI =
+//            mainUI = {
+//                setHandlers: function () {
+//                    document.body.onkeyup = function (e) {
+//                        if (e.keyCode === 78 && e.target.tagName !== 'input') {
+//                            alert(e.target.tagName);
+//                        }
+//                    };
+//                }
+//            },
 
             navigation;
 
@@ -817,9 +825,10 @@ chrome.storage.local.get(function (session_items) {
 
             sessionsUI.go();
             savedUI.go();
+            mainUI.setHandlers();
 
         } else {
-            // show sycn storage error
+            // show sync storage error
             document.getElementById('error_msg').style.display = 'block';
             document.getElementById('error_msg').innerText = ui_msg.quota_default_item;
         }

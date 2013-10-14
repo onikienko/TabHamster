@@ -17,7 +17,7 @@
         "description": "Title for help button"
     },
     "p_GroupNameToSave": {
-        "message": "Tabs to new group",
+        "message": "New group from opened tabs",
         "description": "Placeholder in text input"
     },
     "p_groupBtn": {
