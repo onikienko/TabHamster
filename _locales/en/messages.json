@@ -157,7 +157,7 @@
         "description": ""
     },
     "o_help_syncStorage_2": {
-        "message": "There is also a limit on the size of the recorded data at a time. It is approximately 17 - 20 tabs.",
+        "message": "There is also a limit on the size of the recorded data at a time. It is approximately 17 - 24 tabs.",
         "description": ""
     },
     "o_help_tipsLegend": {
@@ -165,7 +165,7 @@
         "description": ""
     },
     "o_help_quickAdd": {
-        "message": "To quickly save all open tabs in a group, just open a extension window  and click 'ENTER'.",
+        "message": "To quickly save all open tabs in a group, just open extension window and press 'ENTER'.",
         "description": ""
     },
     "o_help_showLinks": {
