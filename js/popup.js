@@ -226,6 +226,7 @@ chrome.storage.local.get(function (session_items) {
             linkModel = new LinkModel('saved'),
             sessionModel = new GroupModel('session'),
             sessionLinkModel = new LinkModel('session'),
+            TAB_TITLE_LENGTH = 48,
             ui_msg = {
                 title_del_group: chrome.i18n.getMessage('p_delGroup_btn_title'),
                 title_edit_group_name: chrome.i18n.getMessage('p_editGroupName_btn_title'),
@@ -260,7 +261,7 @@ chrome.storage.local.get(function (session_items) {
                             var link = {};
                             if (!tab.pinned || items.pinned === 1) {
                                 link.url = tab.url;
-                                link.title = tab.title;
+                                link.title = tab.title.length > TAB_TITLE_LENGTH ? tab.title.slice(0, TAB_TITLE_LENGTH + 1) : tab.title;
                                 link.id = index;
                                 links.push(link);
                             }
@@ -293,10 +294,9 @@ chrome.storage.local.get(function (session_items) {
                 linkHtmlElement: function (storage_name, link) {
                     var a_text = link.title,
                         a_title = '',
-                        text_length = 48,
                         favicon_src = localStorage.browser === 'chrome' ? 'chrome://favicon/' + link.url : 'opera://favicon/' + link.url;
-                    if (link.title.length > text_length) {
-                        a_text = link.title.slice(0, text_length) + '...';
+                    if (link.title.length >= TAB_TITLE_LENGTH) {
+                        a_text = link.title.slice(0, TAB_TITLE_LENGTH) + '...';
                         a_title = 'title="' + link.title + '"';
                     }
                     return '<div id="' + storage_name + '_' + link.id + '" class="link">' +
@@ -480,10 +480,10 @@ chrome.storage.local.get(function (session_items) {
                         text = ui_msg.quota_default_item;
                     el.style.display = 'block';
                     switch (msg) {
-                    case 'QUOTA_BYTES_PER_ITEM quota exceeded.':
+                    case 'QUOTA_BYTES_PER_ITEM quota exceeded':
                         text = ui_msg.quota_bytes_per_item;
                         break;
-                    case 'QUOTA_BYTES quota exceeded.':
+                    case 'QUOTA_BYTES quota exceeded':
                         text = ui_msg.quota_bytes_item;
                         break;
                     }
@@ -825,7 +825,7 @@ chrome.storage.local.get(function (session_items) {
 
             sessionsUI.go();
             savedUI.go();
-            mainUI.setHandlers();
+//          mainUI.setHandlers();
 
         } else {
             // show sync storage error

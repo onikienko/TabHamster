@@ -1,7 +1,7 @@
 {
     "name": "__MSG_extName__",
     "description": "__MSG_extDescr__",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "manifest_version": 2,
 
     "developer": { "name": "Michael Onikienko",

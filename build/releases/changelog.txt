@@ -1,3 +1,6 @@
+0.2.2 (31.01.2014 16:51)
+	Fix error messages
+	Minimize tab title to 49 chars
 0.2.1 (15.10.2013 19:31)
 	Fix error with edit link which starts with 'file://' or 'chrome-devtools://'
 0.2 (14.10.2013 16:02)
