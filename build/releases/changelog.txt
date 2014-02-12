@@ -1,3 +1,7 @@
+0.2.3 (12.02.2014 08:54)
+	Add Ukrainian translation
+	Pinned tabs are shown as Pinned in Saved Groups
+	Pinned tabs open as Pinned
 0.2.2 (31.01.2014 16:51)
 	Fix error messages
 	Minimize tab title to 49 chars

@@ -251,7 +251,7 @@ chrome.storage.local.get(function (session_items) {
             tabsGrabber = {
                 tabsFilter: function () {
                     return {
-                        currentWindow: items.cur_win === 0 ? false : true
+                        currentWindow: items.cur_win !== 0
                     };
                 },
                 collectTabs: function (callback) {
@@ -263,12 +263,23 @@ chrome.storage.local.get(function (session_items) {
                                 link.url = tab.url;
                                 link.title = tab.title.length > TAB_TITLE_LENGTH ? tab.title.slice(0, TAB_TITLE_LENGTH + 1) : tab.title;
                                 link.id = index;
+                                if (tab.pinned) {
+                                    link.pinned = tab.pinned;
+                                }
                                 links.push(link);
                             }
                         });
                         callback(links);
                     });
                 }
+            },
+            openLinksInNewWindow = function (links) {
+                chrome.windows.create({'type': 'normal', 'focused': true}, function (win) {
+                    links.forEach(function (el) {
+                        chrome.tabs.create({'windowId': win.id, 'url': el.url, 'pinned': el.pinned});
+                    });
+                    chrome.tabs.remove(win.tabs[0].id); // remove default New Tab Page
+                });
             },
 
 
@@ -294,6 +305,7 @@ chrome.storage.local.get(function (session_items) {
                 linkHtmlElement: function (storage_name, link) {
                     var a_text = link.title,
                         a_title = '',
+                        pin_icon = link.pinned ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
                         favicon_src = localStorage.browser === 'chrome' ? 'chrome://favicon/' + link.url : 'opera://favicon/' + link.url;
                     if (link.title.length >= TAB_TITLE_LENGTH) {
                         a_text = link.title.slice(0, TAB_TITLE_LENGTH) + '...';
@@ -304,23 +316,19 @@ chrome.storage.local.get(function (session_items) {
                         '<span class="edit_link" title="' + ui_msg.title_edit_link + '">&#9776;</span>' +
                         '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
                         '<a href="' + link.url + '" target="_blank" ' + a_title + '>' +
-                        '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + a_text + '</a>' +
+                        '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + pin_icon + a_text + '</a>' +
                         '</span>' +
                         '</div>';
                 },
                 openGroup: function (storage_name, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
-                    var tabs = (groupModel.getGroups())[storage_name].tabs,
-                        urls = [];
+                    var tabs = (groupModel.getGroups())[storage_name].tabs;
                     window.close();
-                    tabs.forEach(function (el) {
-                        urls.push(el.url);
-                    });
                     if (mouse_button === 1) {
-                        chrome.windows.create({'url': urls, 'type': 'normal', 'focused': true});
+                        openLinksInNewWindow(tabs);
                     } else {
-                        urls.forEach(function (el) {
-                            chrome.tabs.create({'url': el});
+                        tabs.forEach(function (el) {
+                            chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
                         });
                     }
                 },
@@ -661,13 +669,13 @@ chrome.storage.local.get(function (session_items) {
                         grouped.windowId_arr.forEach(function (el, index) {
                             links = [];
                             grouped.grouped_by_windowId[index].forEach(function (link) {
-                                links.push(link.url);
+                                links.push(link);
                             });
-                            chrome.windows.create({'url': links, 'type': 'normal', 'focused': true});
+                            openLinksInNewWindow(links);
                         });
                     } else {
                         (sessionModel.getGroups())[storage_name].tabs.forEach(function (el) {
-                            chrome.tabs.create({'url': el.url});
+                            chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
                         });
                     }
                 },
@@ -679,14 +687,14 @@ chrome.storage.local.get(function (session_items) {
                     if (mouse_button === 1) {
                         tabs.forEach(function (el) {
                             if (el.windowId === parseInt(window_id, 10)) {
-                                links.push(el.url);
+                                links.push(el);
                             }
                         });
-                        chrome.windows.create({'url': links, 'type': 'normal', 'focused': true});
+                        openLinksInNewWindow(links);
                     } else {
                         tabs.forEach(function (el) {
                             if (el.windowId === parseInt(window_id, 10)) {
-                                chrome.tabs.create({'url': el.url});
+                                chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
                             }
                         });
                     }
@@ -835,5 +843,4 @@ chrome.storage.local.get(function (session_items) {
     });
 });
 // TODO blink group el after create, move
-// TODO place special icon for pinned tabs
 // TODO hоt keys
