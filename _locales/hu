@@ -1,0 +1,187 @@
+{
+   "extDescr": {
+      "description": "",
+      "message": "Böngészési folyamatok kezelése és fülek mentése. Szinkronizációval"
+   },
+   "extName": {
+      "description": "do not translate extension name",
+      "message": "TabHamster"
+   },
+   "o_common_legend": {
+      "description": "",
+      "message": "Fő beállítások"
+   },
+   "o_dateFormat_eu": {
+      "description": "EU date format",
+      "message": "nap / hónap / év"
+   },
+   "o_dateFormat_text": {
+      "description": "",
+      "message": "Időformátum"
+   },
+   "o_dateFormat_us": {
+      "description": "US date format",
+      "message": "év / hónap / nap"
+   },
+   "o_error": {
+      "description": "Error during save settings",
+      "message": "Hiba a mentésnél"
+   },
+   "o_help_editGroup": {
+      "description": "",
+      "message": "Egyszerűen tudjuk szerkeszteni, törölni és módosítani a mentett csoportokat (a negyedik pont a képernyőfotón)."
+   },
+   "o_help_inNewWindow": {
+      "description": "",
+      "message": "'Ctrl + klikk' a mentett csoport (vagy folyamat) nevén új ablakba nyitja meg a füleket. Járható út még a kis ikonokra történő kattintás is. (a harmadik pont a képernyőképen)"
+   },
+   "o_help_overFavicon": {
+      "description": "",
+      "message": "Ha az egérmutatót a favikonokra mozgatjuk, akkor rögtön meglátjuk a hivatkozásokat."
+   },
+   "o_help_quickAdd": {
+      "description": "",
+      "message": "A kiterjesztés ablakában az ENTER billentyű lenyomásával azonnal egy csoportba menthetjük a megnyitott füleket."
+   },
+   "o_help_settings": {
+      "description": "",
+      "message": "Tekintsük át a beállításokat!"
+   },
+   "o_help_showLinks": {
+      "description": "",
+      "message": "Ahhoz, hogy áttekintsük a csoportba mentett lapokat, kattintsunk a szürke háromszögre (a második pont a képernyőfotón)."
+   },
+   "o_help_syncStorage": {
+      "description": "",
+      "message": "A fülcsoportok bekerülnek a szinkronizációs adatbázisba. Ezeket a bejelentkezés után egy másik számítógépen is elérhetjük."
+   },
+   "o_help_syncStorage_0": {
+      "description": "",
+      "message": "A folyamatok nem kerülnek szinkronizálásra."
+   },
+   "o_help_syncStorage_1": {
+      "description": "",
+      "message": "A szinkronizációs adatbázis mérete limitált. A kihasználtságot mi magunk is ellenőrizhetjük (első pont a lenti képernyőképen)."
+   },
+   "o_help_syncStorage_2": {
+      "description": "",
+      "message": "Az egy időben történő adatrögzítés limitálva van. Ez körülbelül 17 - 24 fület jelent."
+   },
+   "o_help_tipsLegend": {
+      "description": "",
+      "message": "Tippek"
+   },
+   "o_saved": {
+      "description": "Settings saved OK",
+      "message": "Mentve"
+   },
+   "o_savedTabs_cur_win": {
+      "description": "",
+      "message": "Csak a jelenlegi ablak"
+   },
+   "o_savedTabs_legend": {
+      "description": "Legend tag",
+      "message": "Szűrő a fülek mentéséhez (nem folyamatok)"
+   },
+   "o_savedTabs_pinned": {
+      "description": "",
+      "message": "A rögzített füleket is hozzáadja"
+   },
+   "o_tabs_about": {
+      "description": "About tab",
+      "message": "Névjegy"
+   },
+   "o_tabs_help": {
+      "description": "Tab name. Prefix 'o_' for options page",
+      "message": "Segítség"
+   },
+   "o_tabs_main": {
+      "description": "Settings tab",
+      "message": "Beállítások"
+   },
+   "p_GroupNameToSave": {
+      "description": "Placeholder in text input",
+      "message": "Új csoport a megnyitott fülekkel"
+   },
+   "p_addLinkLink_popup": {
+      "description": "",
+      "message": "Hivatkozás"
+   },
+   "p_addLinkTitle_popup": {
+      "description": "",
+      "message": "Cím"
+   },
+   "p_addLinkToGroup_btn_title": {
+      "message": "Új hivatkozás a csoportba"
+   },
+   "p_currentSession": {
+      "message": "Aktuális"
+   },
+   "p_delGroup_btn_title": {
+      "message": "Csoport törlés"
+   },
+   "p_delLinkFromGroup_btn_title": {
+      "message": "Törlés"
+   },
+   "p_downGroup_btn_title": {
+      "message": "Le"
+   },
+   "p_editGroupName_btn_title": {
+      "message": "Csoportnév szerkesztés"
+   },
+   "p_editLink_btn_title": {
+      "message": "Szerkesztés"
+   },
+   "p_groupBtn": {
+      "description": "Btn hint",
+      "message": "Mentés"
+   },
+   "p_groupInNewWindow_btn_title": {
+      "message": "Megnyitás új ablakban (Ctrl + klikk)"
+   },
+   "p_helpBtn": {
+      "description": "Title for help button",
+      "message": "Segítség"
+   },
+   "p_newGroupName_popup": {
+      "description": "",
+      "message": "Az új csoport neve:"
+   },
+   "p_optionsBtn": {
+      "description": "Prefix 'p_' - popup",
+      "message": "Beállítások"
+   },
+   "p_quotaBitesPerItem_error": {
+      "message": "A szinkronizációs adatbázisba történő mentés nem sikerült. Túl sok a fül. Próbáljon meg bezárni párat."
+   },
+   "p_quotaBites_error": {
+      "message": "A szinkronizációs adatbázis megtelt. Érdemes törölni a használaton kívüli csoportokat."
+   },
+   "p_synStorageUsage_title": {
+      "description": "",
+      "message": "A böngészők szinkronizációs adatbázisának kihasználtsága"
+   },
+   "p_syncStorageDefault_error": {
+      "message": "Szinkronizációs hiba. Próbálja megismételni a műveletet."
+   },
+   "p_tabName_Saved": {
+      "description": "",
+      "message": "Mentett csoportok"
+   },
+   "p_tabName_Sessions": {
+      "description": "",
+      "message": "Folyamatok"
+   },
+   "p_tabsNumbers_text": {
+      "message": "Fülek:"
+   },
+   "p_upGroup_btn_title": {
+      "message": "Fel"
+   },
+   "p_window_text": {
+      "message": "Ablak"
+   },
+   "p_windowsNumbers_text": {
+      "message": "Ablak:"
+   }
+}
