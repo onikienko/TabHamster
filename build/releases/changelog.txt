@@ -1,3 +1,5 @@
+0.2.4 (02.06.2014 18:39)
+	Hungarian translation (thanks to Zoltan Mihics aka Med1on)
 0.2.3 (12.02.2014 08:54)
 	Add Ukrainian translation
 	Pinned tabs are shown as Pinned in Saved Groups
