@@ -1,5 +1,5 @@
 ► A megnyitott fülek csoportokba történő mentése.
-	✓ A fül csoportok az Opera szinkronizációs adatbázisában tárolódnak. Ezeket a bejelentkezés után egy másik számítógépen 		is elérhetjük.
+	✓ A fül csoportok a Chrome szinkronizációs adatbázisában tárolódnak. Ezeket a bejelentkezés után egy másik számítógépen 		is elérhetjük.
 	✓ Név hozzárendelése a csoportokhoz.
 	✓ Szerkesztés, új fülek hozzáadása, törlés és a csoportok mozgatása a listán.
 
