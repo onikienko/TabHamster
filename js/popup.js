@@ -421,7 +421,7 @@ chrome.storage.local.get(function (session_items) {
                     });
                     link_list.classList.add('links');
                     link_list.innerHTML = html;
-                    el.insertBefore(link_list);
+                    el.insertBefore(link_list, null);
                     spoiler.setAttribute('name', 'opened');
                     spoiler.innerHTML = ' &#9660;';
                 },
@@ -741,7 +741,7 @@ chrome.storage.local.get(function (session_items) {
                     });
                     link_list.classList.add('links');
                     link_list.innerHTML = html;
-                    el.insertBefore(link_list);
+                    el.insertBefore(link_list, null);
                     spoiler.setAttribute('name', 'opened');
                     spoiler.innerHTML = ' &#9660;';
                 },
