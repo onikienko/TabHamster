@@ -1,3 +1,6 @@
+0.2.5 (12.11.2014 17:37)
+	Fix problem with group and session expanding (thanks to Ricardo J. Barberis aka richarson)
+	Fix Open In New Window bug
 0.2.4 (02.06.2014 18:39)
 	Hungarian translation (thanks to Zoltan Mihics aka Med1on)
 0.2.3 (12.02.2014 08:54)
