@@ -279,6 +279,7 @@ chrome.storage.local.get(function (session_items) {
                         chrome.tabs.create({'windowId': win.id, 'url': el.url, 'pinned': el.pinned});
                     });
                     chrome.tabs.remove(win.tabs[0].id); // remove default New Tab Page
+                    window.close();
                 });
             },
 
@@ -323,7 +324,6 @@ chrome.storage.local.get(function (session_items) {
                 openGroup: function (storage_name, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
                     var tabs = (groupModel.getGroups())[storage_name].tabs;
-                    window.close();
                     if (mouse_button === 1) {
                         openLinksInNewWindow(tabs);
                     } else {
@@ -663,7 +663,6 @@ chrome.storage.local.get(function (session_items) {
                     // mouse_button = 0  - cur window, 1 - new
                     var grouped,
                         links = [];
-                    window.close();
                     if (mouse_button === 1) {
                         grouped = sessionLinkModel.groupLinksByWindowId(storage_name);
                         grouped.windowId_arr.forEach(function (el, index) {
@@ -683,7 +682,6 @@ chrome.storage.local.get(function (session_items) {
                     // mouse_button = 0  - cur window, 1 - new
                     var tabs = (sessionModel.getGroups())[storage_name].tabs,
                         links = [];
-                    window.close();
                     if (mouse_button === 1) {
                         tabs.forEach(function (el) {
                             if (el.windowId === parseInt(window_id, 10)) {

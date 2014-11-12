@@ -187,5 +187,9 @@
     "o_help_settings": {
         "message": "Look at the extensions settings",
         "description": ""
+    },
+    "o_sessionWatcher_toggle": {
+        "message": "Watch sessions. Unchecked will disable the automatic session saving. Restart the browser for the changes to take effect",
+        "description": ""
     }
 }

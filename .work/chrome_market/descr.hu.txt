@@ -1,16 +1,16 @@
 ► A megnyitott fülek csoportokba történő mentése.
-	✓ A fül csoportok a Chrome szinkronizációs adatbázisában tárolódnak. Ezeket a bejelentkezés után egy másik számítógépen 		is elérhetjük.
+	✓ A fül csoportok a Chrome szinkronizációs adatbázisában tárolódnak. Ezeket a bejelentkezés után egy másik számítógépen is elérhetjük.
 	✓ Név hozzárendelése a csoportokhoz.
 	✓ Szerkesztés, új fülek hozzáadása, törlés és a csoportok mozgatása a listán.
 
-► A folyamatmenedzselő gyors és kényelmes hozzáférést biztosít az Opera folyamatokhoz.
+► A folyamatmenedzselő gyors és kényelmes hozzáférést biztosít a Chrome folyamatokhoz.
 	✓ Hozzáférés az éppen megnyitott (és a korábbi) böngészési folyamatokhoz.
 	✓ Egy kattintással visszaállítható bármelyik folyamat.
 	✓! A folyamatok nem szinkronizálódnak.
 
 
 ☀ Tippek:
-	● Gyorsan el tudjuk menteni az összes megnyitott fület egy csoportba, ha a kiterjesztés ablakában megnyomjuk az "ENTER" 		billentyűt. A csoportot később tudjuk szerkeszteni.
+	● Gyorsan el tudjuk menteni az összes megnyitott fület egy csoportba, ha a kiterjesztés ablakában megnyomjuk az "ENTER" billentyűt. A csoportot később tudjuk szerkeszteni.
 	● "Ctrl + klikk' a mentett csoport (vagy folyamat) nevén új ablakba nyitja meg a füleket.
 
 Tab Hamster forráskód: https://github.com/onikienko/TabHamster
