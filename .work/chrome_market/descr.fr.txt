@@ -1,0 +1,17 @@
+► Enregistrer les onglets ouverts dans le groupe.
+  ✓ Les groupes d'onglets sont synchronisés avec l'espace de stockage de Chrome. Connectez-vous au navigateur afin de les récupérer sur un autre PC.
+  ✓ Attribuer un nom de groupe.
+  ✓ Modifier, ajouter de nouveaux onglets, supprimer, déplacer le groupe de la liste.
+
+► Le Gestionnaire de Session fournit un accès rapide et pratique aux dernières sessions du navigateur.
+  ✓ Accès à la session actuellement ouverte (et versions antérieures) du navigateur.
+  ✓ Récupération d'une session en un seul clic.
+  ✓! Les sessions ne sont pas synchronisés.
+
+
+☀ Conseils:
+  ● Pour sauvegarder rapidement tous les onglets ouverts dans un groupe, ouvrez la fenêtre d'extension et appuyez sur "ENTRER". Plus tard, vous pouvez modifier le nom du groupe.
+  ● "Ctrl + clic" sur le nom du groupe (ou session) - ouvre les onglets dans une nouvelle fenêtre.
+
+
+Tab Hamster source code : https://github.com/onikienko/TabHamster
