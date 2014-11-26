@@ -64,7 +64,6 @@ ul.tabs_nav {
 }
 
 .group {
-    font-family: "Lucida Console", monospace;
     font-size: 14px;
     padding: 8px 3px;
     border-bottom: 1px solid #E2F4FB;
@@ -92,7 +91,7 @@ ul.tabs_nav {
 }
 
 .link {
-    font-size: 12px;
+    font-size: 13px;
     margin-top: 8px;
 }
 
@@ -145,7 +144,6 @@ ul.tabs_nav {
     top: 0;
     width: 100%;
     height: 100%;
-    /*background: rgba(0,0,0,.7);*/
     text-align: center
 }
 
@@ -164,7 +162,6 @@ ul.tabs_nav {
     padding: 15px;
     border: 1px solid gray;
     border-radius: 2px;
-    /*box-shadow: inset 0 2px 2px 2px rgba(0,0,0,.4);*/
     background: #fff;
     vertical-align: middle
 }
