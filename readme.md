@@ -6,7 +6,7 @@ Session manager and tabs saver. With sync.
 
 Extension is written with [Chrome Extension Box](https://github.com/onikienko/chrome-extensions-box)
 
-Plain javaScript with no jQuery and other libraries.
+Plain javaScript with no jQuery.
 
 **[Chrome](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
 
