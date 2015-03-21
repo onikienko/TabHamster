@@ -100,3 +100,8 @@ fieldset {
     text-align: center;
     margin-bottom: 20px;
 }
+
+#ua_flag {
+    height: 20px;
+    background: url("../img/ua_1px.png") 0 50% repeat-x;
+}
