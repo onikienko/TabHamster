@@ -1,5 +1,5 @@
 chrome.storage.local.get(function (session_items) {
-    chrome.storage.sync.get(function (items) {
+    chrome.storage.sync.get(function (storage_items) {
         /**
          * Popup window for edit operation
          * @param popup_id
@@ -54,7 +54,7 @@ chrome.storage.local.get(function (session_items) {
             this.data_local_copy = (function () {
                 var item,
                     groups_data = (function () {
-                        return area === 'session' ? session_items : items;
+                        return area === 'session' ? session_items : storage_items;
                     }()),
                     obj = {};
                 for (item in groups_data) {
@@ -251,7 +251,7 @@ chrome.storage.local.get(function (session_items) {
             tabsGrabber = {
                 tabsFilter: function () {
                     return {
-                        currentWindow: items.cur_win !== 0
+                        currentWindow: storage_items.cur_win !== 0
                     };
                 },
                 collectTabs: function (callback) {
@@ -259,7 +259,7 @@ chrome.storage.local.get(function (session_items) {
                         var links = [];
                         tabs.forEach(function (tab, index) {
                             var link = {};
-                            if (!tab.pinned || items.pinned === 1) {
+                            if (!tab.pinned || storage_items.pinned === 1) {
                                 link.url = tab.url;
                                 link.title = tab.title.length > TAB_TITLE_LENGTH ? tab.title.slice(0, TAB_TITLE_LENGTH + 1) : tab.title;
                                 link.id = index;
@@ -288,7 +288,7 @@ chrome.storage.local.get(function (session_items) {
                 groupHtmlElement: function (storage_name, group) {
                     var title = group.name;
                     if (group.name === '') {
-                        title = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), items.date_format);
+                        title = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), storage_items.date_format);
                     }
                     return '<div id="' + storage_name + '" class="group">' +
                         '<span class="spoiler" name = "closed"> &#9658;</span>' +
@@ -488,12 +488,12 @@ chrome.storage.local.get(function (session_items) {
                         text = ui_msg.quota_default_item;
                     el.style.display = 'block';
                     switch (msg) {
-                    case 'QUOTA_BYTES_PER_ITEM quota exceeded':
-                        text = ui_msg.quota_bytes_per_item;
-                        break;
-                    case 'QUOTA_BYTES quota exceeded':
-                        text = ui_msg.quota_bytes_item;
-                        break;
+                        case 'QUOTA_BYTES_PER_ITEM quota exceeded':
+                            text = ui_msg.quota_bytes_per_item;
+                            break;
+                        case 'QUOTA_BYTES quota exceeded':
+                            text = ui_msg.quota_bytes_item;
+                            break;
                     }
                     el.innerText = text;
                     setTimeout(function () {
@@ -532,6 +532,7 @@ chrome.storage.local.get(function (session_items) {
                                 id: link_node_id.slice(link_node_id.lastIndexOf('_') + 1)
                             };
                         }
+
                         var el = e.target,
                             group_node,
                             link_node,
@@ -543,64 +544,64 @@ chrome.storage.local.get(function (session_items) {
                             link;
                         e.stopPropagation();
                         switch (el.className) {
-                        case 'open_group':
-                            // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
-                            // mouse wheel works only with no scroll
-                            btn = e.button;
-                            if (btn === 0 && e.ctrlKey === true) {
+                            case 'open_group':
+                                // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
+                                // mouse wheel works only with no scroll
+                                btn = e.button;
+                                if (btn === 0 && e.ctrlKey === true) {
+                                    self.openGroup(el.parentNode.id, 1);
+                                } else {
+                                    self.openGroup(el.parentNode.id, e.button);
+                                }
+                                break;
+                            case 'open_in_new_window':
+                                // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
                                 self.openGroup(el.parentNode.id, 1);
-                            } else {
-                                self.openGroup(el.parentNode.id, e.button);
-                            }
-                            break;
-                        case 'open_in_new_window':
-                            // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
-                            self.openGroup(el.parentNode.id, 1);
-                            break;
-                        case 'up':
-                            group_node = el.parentNode.parentNode;
-                            sibling = group_node.previousSibling;
-                            if (sibling && sibling.className === 'group') {
-                                self.moveGroup(group_node.id, sibling.id);
-                            }
-                            break;
-                        case 'down':
-                            group_node = el.parentNode.parentNode;
-                            sibling = group_node.nextSibling;
-                            if (sibling && sibling.className === 'group') {
-                                self.moveGroup(group_node.id, sibling.id);
-                            }
-                            break;
-                        case 'del_group':
-                            group_node = el.parentNode.parentNode;
-                            self.delGroup(group_node.id, group_node);
-                            break;
-                        case 'edit_group':
-                            group_node = el.parentNode.parentNode;
-                            self.editGroupName(group_node.id, group_node);
-                            break;
-                        case 'add_link':
-                            group_node = el.parentNode.parentNode;
-                            self.addLink(group_node.id, group_node);
-                            break;
-                        case 'spoiler':
-                            group_node = el.parentNode;
-                            if (el.getAttribute('name') === 'closed') {
-                                self.showGroupLinks(group_node.id, group_node);
-                            } else {
-                                self.hideGroupLinks(group_node);
-                            }
-                            break;
-                        case 'del_link':
-                            link_node = el.parentNode.parentNode;
-                            link = linkInfo(link_node.id);
-                            self.delLink(link.storage_name, link.id, link_node);
-                            break;
-                        case 'edit_link':
-                            link_node = el.parentNode.parentNode;
-                            link = linkInfo(link_node.id);
-                            self.editLink(link.storage_name, link.id, link_node);
-                            break;
+                                break;
+                            case 'up':
+                                group_node = el.parentNode.parentNode;
+                                sibling = group_node.previousSibling;
+                                if (sibling && sibling.className === 'group') {
+                                    self.moveGroup(group_node.id, sibling.id);
+                                }
+                                break;
+                            case 'down':
+                                group_node = el.parentNode.parentNode;
+                                sibling = group_node.nextSibling;
+                                if (sibling && sibling.className === 'group') {
+                                    self.moveGroup(group_node.id, sibling.id);
+                                }
+                                break;
+                            case 'del_group':
+                                group_node = el.parentNode.parentNode;
+                                self.delGroup(group_node.id, group_node);
+                                break;
+                            case 'edit_group':
+                                group_node = el.parentNode.parentNode;
+                                self.editGroupName(group_node.id, group_node);
+                                break;
+                            case 'add_link':
+                                group_node = el.parentNode.parentNode;
+                                self.addLink(group_node.id, group_node);
+                                break;
+                            case 'spoiler':
+                                group_node = el.parentNode;
+                                if (el.getAttribute('name') === 'closed') {
+                                    self.showGroupLinks(group_node.id, group_node);
+                                } else {
+                                    self.hideGroupLinks(group_node);
+                                }
+                                break;
+                            case 'del_link':
+                                link_node = el.parentNode.parentNode;
+                                link = linkInfo(link_node.id);
+                                self.delLink(link.storage_name, link.id, link_node);
+                                break;
+                            case 'edit_link':
+                                link_node = el.parentNode.parentNode;
+                                link = linkInfo(link_node.id);
+                                self.editLink(link.storage_name, link.id, link_node);
+                                break;
                         }
 
                     }, false);
@@ -616,7 +617,7 @@ chrome.storage.local.get(function (session_items) {
             sessionsUI = {
                 groupHtmlElement: function (storage_name, group) {
                     var title,
-                        date = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), items.date_format),
+                        date = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), storage_items.date_format),
                         group_info = (function () {
                             return {
                                 numbers_of_windows: sessionLinkModel.groupLinksByWindowId(storage_name).windowId_arr.length,
@@ -758,46 +759,49 @@ chrome.storage.local.get(function (session_items) {
                             win_info;
                         e.stopPropagation();
                         switch (el.className) {
-                        case 'del_group':
-                            group_node = el.parentNode.parentNode;
-                            self.delGroup(group_node.id, group_node);
-                            break;
-                        case 'spoiler':
-                            group_node = el.parentNode;
-                            if (el.getAttribute('name') === 'closed') {
-                                self.showGroupLinks(group_node.id, group_node);
-                            } else {
-                                self.hideGroupLinks(group_node);
-                            }
-                            break;
-                        case 'open_group':
-                            // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
-                            // mouse wheel works only with no scroll
-                            btn = e.button;
-                            if (btn === 0 && e.ctrlKey === true) {
+                            case 'del_group':
+                                group_node = el.parentNode.parentNode;
+                                self.delGroup(group_node.id, group_node);
+                                break;
+                            case 'spoiler':
+                                group_node = el.parentNode;
+                                if (el.getAttribute('name') === 'closed') {
+                                    self.showGroupLinks(group_node.id, group_node);
+                                } else {
+                                    self.hideGroupLinks(group_node);
+                                }
+                                break;
+                            case 'open_group':
+                                // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
+                                // mouse wheel works only with no scroll
+                                btn = e.button;
+                                if (btn === 0 && e.ctrlKey === true) {
+                                    self.openGroup(el.parentNode.id, 1);
+                                } else {
+                                    self.openGroup(el.parentNode.id, e.button);
+                                }
+                                break;
+                            case 'open_in_new_window':
+                                // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
                                 self.openGroup(el.parentNode.id, 1);
-                            } else {
-                                self.openGroup(el.parentNode.id, e.button);
-                            }
-                            break;
-                        case 'open_in_new_window':
-                            // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
-                            self.openGroup(el.parentNode.id, 1);
-                            break;
-                        case 'win_title':
-                            // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
-                            // mouse wheel works only with no scroll
-                            btn = e.button;
-                            win_info = (function () {
-                                var win_id_start = el.id.lastIndexOf('_');
-                                return {storage_name: el.id.slice(0, win_id_start), window_id: el.id.slice(win_id_start + 1)};
-                            }());
-                            if (btn === 0 && e.ctrlKey === true) {
-                                self.openWindow(win_info.storage_name, win_info.window_id, 1);
-                            } else {
-                                self.openWindow(win_info.storage_name, win_info.window_id, 0);
-                            }
-                            break;
+                                break;
+                            case 'win_title':
+                                // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
+                                // mouse wheel works only with no scroll
+                                btn = e.button;
+                                win_info = (function () {
+                                    var win_id_start = el.id.lastIndexOf('_');
+                                    return {
+                                        storage_name: el.id.slice(0, win_id_start),
+                                        window_id: el.id.slice(win_id_start + 1)
+                                    };
+                                }());
+                                if (btn === 0 && e.ctrlKey === true) {
+                                    self.openWindow(win_info.storage_name, win_info.window_id, 1);
+                                } else {
+                                    self.openWindow(win_info.storage_name, win_info.window_id, 0);
+                                }
+                                break;
                         }
 
                     }, false);
@@ -823,13 +827,19 @@ chrome.storage.local.get(function (session_items) {
         if (!chrome.runtime.lastError) {
             /* window tab navigation */
             navigation = new Tabs('#main_tabs');
-            navigation.toggle(items.active_tab);
+            navigation.toggle(storage_items.active_tab);
             navigation.onToggle(function (tab_name) {
                 chrome.storage.sync.set({active_tab: tab_name});
             });
             /* popup tab END */
 
-            sessionsUI.go();
+            if (storage_items.session_watcher) {
+                sessionsUI.go();
+            } else {
+                navigation.toggle('#saved');
+                // hide session tab
+                document.querySelector('.tabs_nav').querySelector('[href="#sessions"]').parentNode.style.display = 'none';
+            }
             savedUI.go();
 //          mainUI.setHandlers();
 
