@@ -13,6 +13,7 @@ ul.tabs_nav {
     margin-bottom: -1px;
     border-top-right-radius: 3px;
     border-top-left-radius: 3px;
+	cursor: pointer;
 }
 .tabs_nav li.active {
     border-bottom: 1px solid #ffffff;
