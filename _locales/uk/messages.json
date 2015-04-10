@@ -1,7 +1,7 @@
 {
     "extName": {
         "message": "TabHamster",
-        "description": "І'мя розширення. Не перекладати"
+        "description": "Ім'я розширення. Не перекладати"
     },
     "extDescr": {
         "message": "Зберігай відкриті вкладки, керуй сесіями браузера",
@@ -26,11 +26,11 @@
     },
     "p_tabName_Saved": {
         "message": "Збережені",
-        "description": "І'мя таба для збережених груп вкладок"
+        "description": "Ім'я таба для збережених груп вкладок"
     },
     "p_tabName_Sessions": {
         "message": "Сесії",
-        "description": "І'мя таба для збережених сесій"
+        "description": "Ім'я таба для збережених сесій"
     },
     "p_synStorageUsage_title": {
         "message": "Відсоток використання сховища Chrome",
@@ -48,6 +48,10 @@
     "p_addLinkLink_popup": {
         "message": "URL",
         "description": "Модальне вікно для редагування імені групи вкладок"
+    },
+    "p_overwriteGroup_popup": {
+        "message": "Група з таким ім'ям вже існує. Переписати вже існуючу групу поточним набором вкладок?",
+        "description": "Модальне вікно "
     },
     "p_delGroup_btn_title": {
         "message": "Видалити групу"

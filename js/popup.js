@@ -14,7 +14,8 @@ chrome.storage.local.get(function (session_items) {
         Popup.prototype = {
             go: function () {
                 var self = this,
-                    data_container = self.popup_container.querySelectorAll('.data');
+                    data_container = self.popup_container.querySelectorAll('.data'),
+                    submit_btn = this.popup_container.querySelector('.submit_btn');
 
                 function submitData() {
                     var data = {};
@@ -26,19 +27,30 @@ chrome.storage.local.get(function (session_items) {
                 }
 
                 this.popup_container.style.display = 'block';
-                data_container[0].focus();
-                data_container[0].select();
-                this.popup_container.querySelector('.submit_btn').onclick = function (e) {
-                    submitData();
-                };
-                // submit on 'enter' for last text input
-                if (data_container[data_container.length - 1].getAttribute('type') === 'text') {
-                    data_container[data_container.length - 1].onkeyup = function (e) {
+                if (data_container.length) {
+                    data_container[0].focus();
+                    data_container[0].select();
+                    // submit on 'enter' for last text input
+                    if (data_container[data_container.length - 1].getAttribute('type') === 'text') {
+                        data_container[data_container.length - 1].onkeyup = function (e) {
+                            if (e.keyCode === 13) {
+                                submitData();
+                            }
+                        };
+                    }
+                } else {
+                    submit_btn.focus();
+                    this.popup_container.onkeyup = function (e) {
                         if (e.keyCode === 13) {
                             submitData();
                         }
                     };
                 }
+
+                submit_btn.onclick = function (e) {
+                    submitData();
+                };
+
                 this.popup_container.querySelector('.cancel').onclick = function (e) {
                     self.popup_container.style.display = 'none';
                 };
@@ -57,6 +69,7 @@ chrome.storage.local.get(function (session_items) {
                         return area === 'session' ? session_items : storage_items;
                     }()),
                     obj = {};
+
                 for (item in groups_data) {
                     if (item.indexOf('tg_') === 0) {
                         obj[item] = groups_data[item];
@@ -69,6 +82,17 @@ chrome.storage.local.get(function (session_items) {
         GroupModel.prototype = {
             getGroups: function () {
                 return this.data_local_copy;
+            },
+
+            getStorageNameByName: function (name) {
+                var storage_name;
+
+                for (storage_name in this.data_local_copy) {
+                    if (this.data_local_copy[storage_name].name === name) {
+                        return storage_name;
+                    }
+                }
+                return false;
             },
 
             nextIndex: function () {
@@ -101,20 +125,25 @@ chrome.storage.local.get(function (session_items) {
                     storage_name = 'tg_' + now.getTime(),
                     self = this;
 
-                new_group[storage_name] = {
-                    name: name === undefined || name.length === 0 ? '' : name,
-                    index: this.nextIndex(),
-                    color: '', // TODO personal color for each group
-                    tabs: group
-                };
-                this.storageArea.set(new_group, function () {
-                    if (!chrome.runtime.lastError) {
-                        self.data_local_copy[storage_name] = new_group[storage_name];
-                        callback({err: 0, storage_name: storage_name, new_group: new_group[storage_name]});
-                    } else {
-                        callback({err: 1, msg: chrome.runtime.lastError.message});
-                    }
-                });
+                if (this.getStorageNameByName(name) !== false) {
+                    // group with this name already exist
+                    callback({err: 2});
+                } else {
+                    new_group[storage_name] = {
+                        name: name === undefined || name.length === 0 ? '' : name,
+                        index: this.nextIndex(),
+                        color: '', // TODO personal color for each group
+                        tabs: group
+                    };
+                    this.storageArea.set(new_group, function () {
+                        if (!chrome.runtime.lastError) {
+                            self.data_local_copy[storage_name] = new_group[storage_name];
+                            callback({err: 0, storage_name: storage_name, new_group: new_group[storage_name]});
+                        } else {
+                            callback({err: 1, msg: chrome.runtime.lastError.message});
+                        }
+                    });
+                }
             },
 
             upd: function (storage_name, value, callback) {
@@ -299,7 +328,7 @@ chrome.storage.local.get(function (session_items) {
                         title = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), storage_items.date_format);
                     }
                     return '<div id="' + storage_name + '" class="group">' +
-                        '<span class="spoiler" name = "closed"> &#9658;</span>' +
+                        '<span class="spoiler" name="closed"> &#9658;</span>' +
                         '<span class="open_group">' + title + '</span>' +
                         '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                         '<span class="group_action">' +
@@ -366,6 +395,24 @@ chrome.storage.local.get(function (session_items) {
                         popup,
                         self = this;
 
+                    function overwritePopup (tabs) {
+                        popup = new Popup('overwrite_group', function (data) {
+                            //new_name = data['popup-new_group_name'];
+                            //if (new_name !== undefined || new_name !== '') {
+                            //    group.name = new_name;
+                            //    groupModel.upd(storage_name, group, function (answ) {
+                            //        if (answ.err === 0) {
+                            //            el.getElementsByClassName('open_group')[0].innerText = new_name;
+                            //            self.showSyncStorageUsage();
+                            //        } else {
+                            //            self.showErrorMsg(answ.msg);
+                            //        }
+                            //    });
+                            //}
+
+                        });
+                    }
+
                     input_field.value = '';
                     tabsGrabber.collectTabs(function (tabs) {
                         groupModel.add(name, tabs, function (answ) {
@@ -379,7 +426,14 @@ chrome.storage.local.get(function (session_items) {
                                 groups_el.insertBefore(el, groups_el.getElementsByTagName('div')[0]);
                                 groups_el.innerHTML = groups_el.innerHTML.replace(/(<div>)*|(<\/div>)*/g, '');
                             } else {
-                                self.showErrorMsg(answ.msg);
+                                if (answ.err === 2) {
+                                    // group name already exist
+                                    // show Popup with dialog
+                                    overwritePopup(tabs);
+                                } else {
+                                    // storage Error
+                                    self.showErrorMsg(answ.msg);
+                                }
                             }
                         });
                     });
@@ -666,7 +720,7 @@ chrome.storage.local.get(function (session_items) {
                         title = ui_msg.current_session + ' (' + date + ')';
                     }
                     return '<div id="' + storage_name + '" class="group">' +
-                        '<span class="spoiler" name = "closed"> &#9658;</span>' +
+                        '<span class="spoiler" name="closed"> &#9658;</span>' +
                         '<span class="open_group">' + title + '</span>' +
                         '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                         '<span class="numbers_of_windows">' + ui_msg.windows_numbers + ' ' + group_info.numbers_of_windows + '</span>' +
@@ -854,7 +908,7 @@ chrome.storage.local.get(function (session_items) {
 
                     }, false);
                 },
-                
+
                 go: function () {
                     this.showGroups();
                     this.setHandlers();

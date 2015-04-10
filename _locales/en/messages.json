@@ -39,15 +39,19 @@
 
     "p_newGroupName_popup": {
         "message": "New group name:",
-        "description": ""
+        "description": "Modal window dialog"
     },
     "p_addLinkTitle_popup": {
         "message": "Title",
-        "description": ""
+        "description": "Modal window dialog"
     },
     "p_addLinkLink_popup": {
         "message": "URL",
-        "description": ""
+        "description": "Modal window dialog"
+    },
+    "p_overwriteGroup_popup": {
+        "message": "The group with the same name already exists. Do you want overwrite old one with current tabs?",
+        "description": "Modal window dialog"
     },
     "p_delGroup_btn_title": {
         "message": "Del group"
