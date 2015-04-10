@@ -6,6 +6,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
             var default_options = storage.default_options,
                 option,
                 new_options = {};
+
             for (option in default_options) {
                 if (!stored_options.hasOwnProperty(option)) {
                     new_options[option] = default_options[option];
@@ -50,84 +51,86 @@ chrome.runtime.onUpdateAvailable.addListener(function (details) {
 
 
 /*SESSION WATCHER*/
-if (storage.default_options.session_watcher) {
-    (function () {
-        var config = {
-                session_numbers: 30,
-                prefix: 'tg_'
-            },
-            session_id = config.prefix + (new Date()).getTime(); //current session id
+storage.area.get('session_watcher', function (from_storage) {
+    if (from_storage.session_watcher) {
+        (function () {
+            var config = {
+                    session_numbers: 30,
+                    prefix: 'tg_'
+                },
+                session_id = config.prefix + (new Date()).getTime(); //current session id
 
-        localStorage.session_id = session_id;
+            localStorage.session_id = session_id;
 
-        // remove old sessions from chrome.storage.local (if sessions numbers >= config.session_numbers)
-        chrome.storage.local.get(function (items) {
-            var key = (function () {
-                    var item,
-                        id;
-                    for (item in items) {
-                        if (item.indexOf(config.prefix) === 0) {
-                            id = item;
-                            break;
+            // remove old sessions from chrome.storage.local (if sessions numbers >= config.session_numbers)
+            chrome.storage.local.get(function (items) {
+                var key = (function () {
+                        var item,
+                            id;
+                        for (item in items) {
+                            if (item.indexOf(config.prefix) === 0) {
+                                id = item;
+                                break;
+                            }
                         }
-                    }
-                    return id ? id.slice(config.prefix.length) : id;
-                }()),
-                items_keys = Object.keys(items);
+                        return id ? id.slice(config.prefix.length) : id;
+                    }()),
+                    items_keys = Object.keys(items);
 
-            if (key && items_keys.length >= config.session_numbers) {
-                items_keys.forEach(function (el) {
-                    var el_id = el.slice(config.prefix.length);
-                    key = el_id < key ? el_id : key;
-                });
-                chrome.storage.local.remove(config.prefix + key);
-            }
-        });
-
-        function updateCurrentSession() {
-            chrome.tabs.query({}, function (tabs) {
-                var session = {
-                        name: '',
-                        tabs: []
-                    },
-                    obj = {};
-                tabs.forEach(function (tab) {
-                    var obj = {};
-                    if (tab.url.indexOf('chrome-devtools://') !== 0) {
-                        obj.pinned = tab.pinned;
-                        obj.title = tab.title;
-                        obj.url = tab.url;
-                        obj.windowId = tab.windowId;
-                        session.tabs.push(obj);
-                    }
-                });
-                obj[session_id] = session;
-                chrome.storage.local.set(obj);
+                if (key && items_keys.length >= config.session_numbers) {
+                    items_keys.forEach(function (el) {
+                        var el_id = el.slice(config.prefix.length);
+                        key = el_id < key ? el_id : key;
+                    });
+                    chrome.storage.local.remove(config.prefix + key);
+                }
             });
-        }
 
-        /* tabs event listeners*/
-        chrome.tabs.onUpdated.addListener(function (tab_id, change_info) {
-            if (change_info.url) {
-                updateCurrentSession();
+            function updateCurrentSession() {
+                chrome.tabs.query({}, function (tabs) {
+                    var session = {
+                            name: '',
+                            tabs: []
+                        },
+                        obj = {};
+                    tabs.forEach(function (tab) {
+                        var obj = {};
+                        if (tab.url.indexOf('chrome-devtools://') !== 0) {
+                            obj.pinned = tab.pinned;
+                            obj.title = tab.title;
+                            obj.url = tab.url;
+                            obj.windowId = tab.windowId;
+                            session.tabs.push(obj);
+                        }
+                    });
+                    obj[session_id] = session;
+                    chrome.storage.local.set(obj);
+                });
             }
-        });
-        chrome.tabs.onMoved.addListener(function () {
-            updateCurrentSession();
-        });
-        chrome.tabs.onAttached.addListener(function () {
-            updateCurrentSession();
-        });
-        chrome.tabs.onRemoved.addListener(function () {
-            updateCurrentSession();
-        });
-        chrome.tabs.onReplaced.addListener(function () {
-            updateCurrentSession();
-        });
 
-        updateCurrentSession();
-    }());
-}
+            /* tabs event listeners*/
+            chrome.tabs.onUpdated.addListener(function (tab_id, change_info) {
+                if (change_info.url) {
+                    updateCurrentSession();
+                }
+            });
+            chrome.tabs.onMoved.addListener(function () {
+                updateCurrentSession();
+            });
+            chrome.tabs.onAttached.addListener(function () {
+                updateCurrentSession();
+            });
+            chrome.tabs.onRemoved.addListener(function () {
+                updateCurrentSession();
+            });
+            chrome.tabs.onReplaced.addListener(function () {
+                updateCurrentSession();
+            });
+
+            updateCurrentSession();
+        }());
+    }
+});
 
 
 // TODO index optimization for groups and links. (on startup)
