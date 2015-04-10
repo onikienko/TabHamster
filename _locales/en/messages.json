@@ -189,7 +189,7 @@
         "description": ""
     },
     "o_sessionWatcher_toggle": {
-        "message": "Watch sessions. Unchecked will disable the automatic session saving. Restart the browser for the changes to take effect",
+        "message": "Watch sessions. Unchecked will disable the automatic session saving. Extension will reload automatically!!!",
         "description": ""
     }
 }
