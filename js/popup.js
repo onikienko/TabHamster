@@ -70,9 +70,11 @@ chrome.storage.local.get(function (session_items) {
             getGroups: function () {
                 return this.data_local_copy;
             },
+
             nextIndex: function () {
                 var last_index = 0,
                     group;
+
                 for (group in this.data_local_copy) {
                     if (this.data_local_copy[group].index > last_index) {
                         last_index = this.data_local_copy[group].index;
@@ -80,6 +82,7 @@ chrome.storage.local.get(function (session_items) {
                 }
                 return last_index + 1;
             },
+
             del: function (storage_name, callback) {
                 var self = this;
                 this.storageArea.remove(storage_name, function () {
@@ -97,6 +100,7 @@ chrome.storage.local.get(function (session_items) {
                     new_group = {},
                     storage_name = 'tg_' + now.getTime(),
                     self = this;
+
                 new_group[storage_name] = {
                     name: name === undefined || name.length === 0 ? '' : name,
                     index: this.nextIndex(),
@@ -116,6 +120,7 @@ chrome.storage.local.get(function (session_items) {
             upd: function (storage_name, value, callback) {
                 var obj = {},
                     self = this;
+
                 obj[storage_name] = value;
                 this.storageArea.set(obj, function () {
                     if (!chrome.runtime.lastError) {
@@ -132,6 +137,7 @@ chrome.storage.local.get(function (session_items) {
                     obj = {},
                     sibling_obj = {},
                     i = this.data_local_copy[storage_name].index;
+
                 obj[storage_name] = this.data_local_copy[storage_name];
                 obj[storage_name].index = this.data_local_copy[sibling_storage_name].index;
                 sibling_obj[sibling_storage_name] = this.data_local_copy[sibling_storage_name];
@@ -248,6 +254,7 @@ chrome.storage.local.get(function (session_items) {
 
                 current_session: chrome.i18n.getMessage('p_currentSession')
             },
+
             tabsGrabber = {
                 tabsFilter: function () {
                     return {
@@ -273,6 +280,7 @@ chrome.storage.local.get(function (session_items) {
                     });
                 }
             },
+
             openLinksInNewWindow = function (links) {
                 chrome.windows.create({'type': 'normal', 'focused': true}, function (win) {
                     links.forEach(function (el) {
@@ -283,10 +291,10 @@ chrome.storage.local.get(function (session_items) {
                 });
             },
 
-
             savedUI = {
                 groupHtmlElement: function (storage_name, group) {
                     var title = group.name;
+
                     if (group.name === '') {
                         title = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), storage_items.date_format);
                     }
@@ -303,11 +311,13 @@ chrome.storage.local.get(function (session_items) {
                         '</span>' +
                         '</div>';
                 },
+
                 linkHtmlElement: function (storage_name, link) {
                     var a_text = link.title,
                         a_title = '',
                         pin_icon = link.pinned ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
                         favicon_src = localStorage.browser === 'chrome' ? 'chrome://favicon/' + link.url : 'opera://favicon/' + link.url;
+
                     if (link.title.length >= TAB_TITLE_LENGTH) {
                         a_text = link.title.slice(0, TAB_TITLE_LENGTH) + '...';
                         a_title = 'title="' + link.title + '"';
@@ -321,9 +331,11 @@ chrome.storage.local.get(function (session_items) {
                         '</span>' +
                         '</div>';
                 },
+
                 openGroup: function (storage_name, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
                     var tabs = (groupModel.getGroups())[storage_name].tabs;
+
                     if (mouse_button === 1) {
                         openLinksInNewWindow(tabs);
                     } else {
@@ -332,6 +344,7 @@ chrome.storage.local.get(function (session_items) {
                         });
                     }
                 },
+
                 showGroups: function () {
                     var html = '<section id="error_msg"></section>',
                         self = this,
@@ -346,14 +359,18 @@ chrome.storage.local.get(function (session_items) {
                     tag.innerHTML = html;
                     this.showSyncStorageUsage();
                 },
+
                 addGroup: function () {
                     var input_field = document.getElementById('new_group_name'),
                         name = input_field.value,
+                        popup,
                         self = this;
+
                     input_field.value = '';
                     tabsGrabber.collectTabs(function (tabs) {
                         groupModel.add(name, tabs, function (answ) {
                             var el, groups_el;
+
                             if (answ.err === 0) {
                                 self.showSyncStorageUsage();
                                 el = document.createElement("div");
@@ -367,11 +384,13 @@ chrome.storage.local.get(function (session_items) {
                         });
                     });
                 },
+
                 editGroupName: function (storage_name, el) {
                     var group = (groupModel.getGroups())[storage_name],
                         new_name,
                         popup,
                         self = this;
+
                     document.getElementById('popup-new_group_name').value = group.name;
                     popup = new Popup('edit_group_name', function (data) {
                         new_name = data['popup-new_group_name'];
@@ -389,8 +408,10 @@ chrome.storage.local.get(function (session_items) {
 
                     });
                 },
+
                 delGroup: function (storage_name, el) {
                     var self = this;
+
                     groupModel.del(storage_name, function (answ) {
                         if (answ.err === 0) {
                             el.remove();
@@ -400,8 +421,10 @@ chrome.storage.local.get(function (session_items) {
                         }
                     });
                 },
+
                 moveGroup: function (storage_name, sibling_storage_name) {
                     var self = this;
+
                     groupModel.move(storage_name, sibling_storage_name, function (answ) {
                         if (answ.err === 0) {
                             self.showGroups();
@@ -410,6 +433,7 @@ chrome.storage.local.get(function (session_items) {
                         }
                     });
                 },
+
                 showGroupLinks: function (storage_name, el) {
                     var link_list = document.createElement("div"),
                         spoiler = el.getElementsByClassName('spoiler')[0],
@@ -425,12 +449,15 @@ chrome.storage.local.get(function (session_items) {
                     spoiler.setAttribute('name', 'opened');
                     spoiler.innerHTML = ' &#9660;';
                 },
+
                 hideGroupLinks: function (el) {
                     var spoiler = el.getElementsByClassName('spoiler')[0];
+
                     spoiler.setAttribute('name', 'closed');
                     spoiler.innerHTML = ' &#9658;';
                     el.getElementsByClassName('links')[0].remove();
                 },
+
                 delLink: function (storage_name, link_id, el) {
                     linkModel.del(storage_name, link_id, function (answ) {
                         if (answ.err === 0) {
@@ -438,6 +465,7 @@ chrome.storage.local.get(function (session_items) {
                         }
                     });
                 },
+
                 addLink: function (storage_name, el) {
                     var self = this,
                         popup = new Popup('add_link', function (data) {
@@ -460,12 +488,14 @@ chrome.storage.local.get(function (session_items) {
                             });
                         });
                 },
+
                 editLink: function (storage_name, link_id, el) {
                     var group_node = el.parentNode.parentNode,
                         tabs = (groupModel.getGroups())[storage_name].tabs,
                         link_index = linkModel.getLocalLinkIndexById(storage_name, link_id),
                         popup,
                         self = this;
+
                     document.getElementById('popup-edit_link_name').value = tabs[link_index].title;
                     document.getElementById('popup-edit_link_url').value = tabs[link_index].url;
                     popup = new Popup('edit_link', function (data) {
@@ -483,9 +513,11 @@ chrome.storage.local.get(function (session_items) {
                         });
                     });
                 },
+
                 showErrorMsg: function (msg) {
                     var el = document.getElementById('error_msg'),
                         text = ui_msg.quota_default_item;
+
                     el.style.display = 'block';
                     switch (msg) {
                         case 'QUOTA_BYTES_PER_ITEM quota exceeded':
@@ -506,6 +538,7 @@ chrome.storage.local.get(function (session_items) {
                         var percent_in_use = (bytesInUse * 100 / chrome.storage.sync.QUOTA_BYTES).toFixed(2),
                             el = document.querySelector('ul.tabs_nav>li a'),
                             text = el.innerText;
+
                         el.innerText = text.slice(0, text.indexOf('|')) + '| ' + percent_in_use + '%';
                     });
                 },
@@ -526,13 +559,6 @@ chrome.storage.local.get(function (session_items) {
                     }, false);
 
                     saved.addEventListener('click', function (e) {
-                        function linkInfo(link_node_id) {
-                            return {
-                                storage_name: link_node_id.slice(0, link_node_id.lastIndexOf('_')),
-                                id: link_node_id.slice(link_node_id.lastIndexOf('_') + 1)
-                            };
-                        }
-
                         var el = e.target,
                             group_node,
                             link_node,
@@ -542,6 +568,14 @@ chrome.storage.local.get(function (session_items) {
                             btn,
                             sibling,
                             link;
+
+                        function linkInfo(link_node_id) {
+                            return {
+                                storage_name: link_node_id.slice(0, link_node_id.lastIndexOf('_')),
+                                id: link_node_id.slice(link_node_id.lastIndexOf('_') + 1)
+                            };
+                        }
+
                         e.stopPropagation();
                         switch (el.className) {
                             case 'open_group':
@@ -624,6 +658,7 @@ chrome.storage.local.get(function (session_items) {
                                 numbers_of_tabs: (sessionModel.getGroups())[storage_name].tabs.length
                             };
                         }());
+
                     if (group.name === '') {
                         title = date;
                     }
@@ -648,6 +683,7 @@ chrome.storage.local.get(function (session_items) {
                         text_length = 44,
                         pin_icon = link.pinned === true ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
                         favicon_src = localStorage.browser === 'chrome' ? 'chrome://favicon/' + link.url : 'opera://favicon/' + link.url;
+
                     if (link.title.length > text_length) {
                         a_text = link.title.slice(0, text_length) + '...';
                         a_title = 'title="' + link.title + '"';
@@ -660,10 +696,12 @@ chrome.storage.local.get(function (session_items) {
                         '</span>' +
                         '</div>';
                 },
+
                 openGroup: function (storage_name, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
                     var grouped,
                         links = [];
+
                     if (mouse_button === 1) {
                         grouped = sessionLinkModel.groupLinksByWindowId(storage_name);
                         grouped.windowId_arr.forEach(function (el, index) {
@@ -679,10 +717,12 @@ chrome.storage.local.get(function (session_items) {
                         });
                     }
                 },
+
                 openWindow: function (storage_name, window_id, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
                     var tabs = (sessionModel.getGroups())[storage_name].tabs,
                         links = [];
+
                     if (mouse_button === 1) {
                         tabs.forEach(function (el) {
                             if (el.windowId === parseInt(window_id, 10)) {
@@ -698,6 +738,7 @@ chrome.storage.local.get(function (session_items) {
                         });
                     }
                 },
+
                 showGroups: function () {
                     var html = '<section id="sessions_error_msg"></section>',
                         groups = sessionModel.getGroups(),
@@ -711,8 +752,10 @@ chrome.storage.local.get(function (session_items) {
                     });
                     tag.innerHTML = html;
                 },
+
                 delGroup: function (storage_name, el) {
                     var self = this;
+
                     sessionModel.del(storage_name, function (answ) {
                         if (answ.err === 0) {
                             el.remove();
@@ -721,6 +764,7 @@ chrome.storage.local.get(function (session_items) {
                         }
                     });
                 },
+
                 showGroupLinks: function (storage_name, el) {
                     var link_list = document.createElement("div"),
                         spoiler = el.getElementsByClassName('spoiler')[0],
@@ -744,19 +788,23 @@ chrome.storage.local.get(function (session_items) {
                     spoiler.setAttribute('name', 'opened');
                     spoiler.innerHTML = ' &#9660;';
                 },
+
                 hideGroupLinks: function (el) {
                     var spoiler = el.getElementsByClassName('spoiler')[0];
+
                     spoiler.setAttribute('name', 'closed');
                     spoiler.innerHTML = ' &#9658;';
                     el.getElementsByClassName('links')[0].remove();
                 },
                 setHandlers: function () {
                     var self = this;
+
                     document.getElementById('sessions').addEventListener('click', function (e) {
                         var el = e.target,
                             group_node,
                             btn,
                             win_info;
+
                         e.stopPropagation();
                         switch (el.className) {
                             case 'del_group':
@@ -806,6 +854,7 @@ chrome.storage.local.get(function (session_items) {
 
                     }, false);
                 },
+                
                 go: function () {
                     this.showGroups();
                     this.setHandlers();
