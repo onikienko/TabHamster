@@ -104,6 +104,10 @@
         "message": "Допомога",
         "description": "Підказка для кнопки.  Префікс 'o_' вказує, що текст відноситься до  options.html"
     },
+    "o_tabs_backup": {
+        "message": "Резерв/Відновлення",
+        "description": "Ім'я вкладки"
+    },
     "o_tabs_main": {
         "message": "Налаштування",
         "description": "Ім'я вкладки"

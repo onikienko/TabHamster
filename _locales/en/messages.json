@@ -104,6 +104,10 @@
         "message": "Help",
         "description": "Tab name. Prefix 'o_' for options page"
     },
+    "o_tabs_backup": {
+        "message": "Backup/Restore",
+        "description": "Tab name"
+    },
     "o_tabs_main": {
         "message": "Settings",
         "description": "Settings tab"

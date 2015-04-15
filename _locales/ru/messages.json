@@ -104,6 +104,10 @@
         "message": "Помощь",
         "description": "Имя вкладки. Префикс 'o_' в имени указывает, что текст относится к странице настроек options.html"
     },
+    "o_tabs_backup": {
+        "message": "Резерв/Восстановление",
+        "description": "Имя вкладки"
+    },
     "o_tabs_main": {
         "message": "Настройки",
         "description": "Имя вкладки"
