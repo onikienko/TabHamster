@@ -109,6 +109,7 @@ chrome.storage.local.get(function (session_items) {
 
             del: function (storage_name, callback) {
                 var self = this;
+
                 this.storageArea.remove(storage_name, function () {
                     if (!chrome.runtime.lastError) {
                         delete self.data_local_copy[storage_name];
@@ -125,25 +126,20 @@ chrome.storage.local.get(function (session_items) {
                     storage_name = 'tg_' + now.getTime(),
                     self = this;
 
-                if (this.getStorageNameByName(name) !== false) {
-                    // group with this name already exist
-                    callback({err: 2});
-                } else {
-                    new_group[storage_name] = {
-                        name: name === undefined || name.length === 0 ? '' : name,
-                        index: this.nextIndex(),
-                        color: '', // TODO personal color for each group
-                        tabs: group
-                    };
-                    this.storageArea.set(new_group, function () {
-                        if (!chrome.runtime.lastError) {
-                            self.data_local_copy[storage_name] = new_group[storage_name];
-                            callback({err: 0, storage_name: storage_name, new_group: new_group[storage_name]});
-                        } else {
-                            callback({err: 1, msg: chrome.runtime.lastError.message});
-                        }
-                    });
-                }
+                new_group[storage_name] = {
+                    name: name === undefined || name.length === 0 ? '' : name,
+                    index: this.nextIndex(),
+                    color: '', // TODO personal color for each group
+                    tabs: group
+                };
+                this.storageArea.set(new_group, function () {
+                    if (!chrome.runtime.lastError) {
+                        self.data_local_copy[storage_name] = new_group[storage_name];
+                        callback({err: 0, storage_name: storage_name, new_group: new_group[storage_name]});
+                    } else {
+                        callback({err: 1, msg: chrome.runtime.lastError.message});
+                    }
+                });
             },
 
             upd: function (storage_name, value, callback) {
@@ -202,16 +198,19 @@ chrome.storage.local.get(function (session_items) {
                 var i,
                     tabs = (this.model.getGroups())[storage_name].tabs,
                     max = tabs.length;
+
                 for (i = 0; i < max; i++) {
                     if (tabs[i].id === parseInt(link_id, 10)) {
                         return i;
                     }
                 }
             },
+
             groupLinksByWindowId: function (storage_name) {
                 var tabs = (this.model.getGroups())[storage_name].tabs,
                     windows = [], // arr with unique windowId
                     grouped_by_windows = []; // links grouped by windowId [[{tab1}, {tab2}],[{tab3}]]...
+
                 tabs.forEach(function (el) {
                     var window_index = windows.indexOf(el.windowId);
                     if (window_index === -1) {
@@ -224,9 +223,11 @@ chrome.storage.local.get(function (session_items) {
                 });
                 return {grouped_by_windowId: grouped_by_windows, windowId_arr: windows};
             },
+
             nextIndex: function (storage_name) {
                 var tabs = (this.model.getGroups())[storage_name].tabs,
                     last_index = 0;
+
                 tabs.forEach(function (el) {
                     if (el.id > last_index) {
                         last_index = el.id;
@@ -234,22 +235,28 @@ chrome.storage.local.get(function (session_items) {
                 });
                 return last_index + 1;
             },
+
             del: function (storage_name, link_id, callback) {
                 var group = (this.model.getGroups())[storage_name];
                 group.tabs.splice(this.getLocalLinkIndexById(storage_name, link_id), 1);
+
                 this.model.upd(storage_name, group, function (answ) {
                     callback(answ);
                 });
             },
+
             add: function (storage_name, link_data, callback) {
                 var group = (this.model.getGroups())[storage_name];
+
                 group.tabs.push(link_data);
                 this.model.upd(storage_name, group, function (answ) {
                     callback(answ);
                 });
             },
+
             upd: function (storage_name, link_index, link_data, callback) {
                 var group = (this.model.getGroups())[storage_name];
+
                 group.tabs[link_index] = link_data;
                 this.model.upd(storage_name, group, function (answ) {
                     callback(answ);
@@ -393,49 +400,47 @@ chrome.storage.local.get(function (session_items) {
                     var input_field = document.getElementById('new_group_name'),
                         name = input_field.value,
                         popup,
+                        storage_name = groupModel.getStorageNameByName(name),
+                        stored_group,
                         self = this;
 
-                    function overwritePopup (tabs) {
-                        popup = new Popup('overwrite_group', function (data) {
-                            //new_name = data['popup-new_group_name'];
-                            //if (new_name !== undefined || new_name !== '') {
-                            //    group.name = new_name;
-                            //    groupModel.upd(storage_name, group, function (answ) {
-                            //        if (answ.err === 0) {
-                            //            el.getElementsByClassName('open_group')[0].innerText = new_name;
-                            //            self.showSyncStorageUsage();
-                            //        } else {
-                            //            self.showErrorMsg(answ.msg);
-                            //        }
-                            //    });
-                            //}
-
-                        });
-                    }
-
-                    input_field.value = '';
                     tabsGrabber.collectTabs(function (tabs) {
-                        groupModel.add(name, tabs, function (answ) {
-                            var el, groups_el;
+                        // check if group name already exist
+                        if (storage_name !== false && name !== '') {
+                            // group with the same name already exist
+                            // show Popup with dialog
+                            popup = new Popup('overwrite_group', function (data) {
+                                input_field.value = '';
+                                stored_group = groupModel.getGroups()[storage_name];
+                                stored_group.tabs = tabs;
+                                groupModel.upd(storage_name, stored_group, function (answ) {
+                                    if (answ.err === 0) {
+                                        self.showSyncStorageUsage();
+                                    } else {
+                                        self.showErrorMsg(answ.msg);
+                                    }
+                                });
+                            });
+                        } else {
+                            // new group name
+                            input_field.value = '';
+                            groupModel.add(name, tabs, function (answ) {
+                                var el,
+                                    groups_el;
 
-                            if (answ.err === 0) {
-                                self.showSyncStorageUsage();
-                                el = document.createElement("div");
-                                groups_el = document.getElementById('saved');
-                                el.innerHTML = self.groupHtmlElement(answ.storage_name, answ.new_group);
-                                groups_el.insertBefore(el, groups_el.getElementsByTagName('div')[0]);
-                                groups_el.innerHTML = groups_el.innerHTML.replace(/(<div>)*|(<\/div>)*/g, '');
-                            } else {
-                                if (answ.err === 2) {
-                                    // group name already exist
-                                    // show Popup with dialog
-                                    overwritePopup(tabs);
+                                if (answ.err === 0) {
+                                    self.showSyncStorageUsage();
+                                    el = document.createElement("div");
+                                    groups_el = document.getElementById('saved');
+                                    el.innerHTML = self.groupHtmlElement(answ.storage_name, answ.new_group);
+                                    groups_el.insertBefore(el, groups_el.getElementsByTagName('div')[0]);
+                                    groups_el.innerHTML = groups_el.innerHTML.replace(/(<div>)*|(<\/div>)*/g, '');
                                 } else {
                                     // storage Error
                                     self.showErrorMsg(answ.msg);
                                 }
-                            }
-                        });
+                            });
+                        }
                     });
                 },
 
@@ -616,9 +621,6 @@ chrome.storage.local.get(function (session_items) {
                         var el = e.target,
                             group_node,
                             link_node,
-                            link_node_id,
-                            storage_group_name,
-                            link_id,
                             btn,
                             sibling,
                             link;
@@ -695,6 +697,7 @@ chrome.storage.local.get(function (session_items) {
                     }, false);
 
                 },
+
                 go: function () {
                     this.showGroups();
                     this.setHandlers();

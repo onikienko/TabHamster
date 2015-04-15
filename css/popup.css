@@ -160,11 +160,11 @@ ul.tabs_nav {
 .popup {
     display: inline-block;
     position: relative;
-    max-width: 90%;
+    max-width: 85%;
     padding: 15px;
-    border: 1px solid gray;
-    border-radius: 2px;
-    background: #fff;
+    border: 1px solid #606060;
+    border-radius: 4px;
+    background: #fdfdfd;
     vertical-align: middle;
 }
 
