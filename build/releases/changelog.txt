@@ -1,3 +1,6 @@
+0.2.8 (15.04.2015 10:04)
+	Save with the same name dialogue
+	Fix styles
 0.2.7 (10.04.2015 10:54)
 	Ability to turn off Session Watcher (see Options page)
 	Fix locales
