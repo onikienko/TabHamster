@@ -293,15 +293,21 @@ chrome.storage.local.get(function (session_items) {
 
             tabsGrabber = {
                 tabsFilter: function () {
-                    return {
-                        currentWindow: storage_items.cur_win !== 0
-                    };
+                    var obj = {};
+
+                    if (storage_items.cur_win) {
+                        obj.currentWindow = true
+                    }
+                    return obj;
                 },
+
                 collectTabs: function (callback) {
                     chrome.tabs.query(this.tabsFilter(), function (tabs) {
                         var links = [];
+
                         tabs.forEach(function (tab, index) {
                             var link = {};
+
                             if (!tab.pinned || storage_items.pinned === 1) {
                                 link.url = tab.url;
                                 link.title = tab.title.length > TAB_TITLE_LENGTH ? tab.title.slice(0, TAB_TITLE_LENGTH + 1) : tab.title;
