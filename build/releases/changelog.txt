@@ -1,3 +1,5 @@
+0.2.8.1 (16.04.2015 09:29)
+	Fix error with Group Saving when option 'Current window only' unchecked
 0.2.8 (15.04.2015 10:04)
 	Save with the same name dialogue
 	Fix styles
