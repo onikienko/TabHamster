@@ -105,3 +105,15 @@ fieldset {
     height: 20px;
     background: url("../img/ua_1px.png") 0 50% repeat-x;
 }
+
+textarea {
+    width: 100%;
+    /*margin: 0 auto;*/
+}
+
+#restore_btn {
+    margin: 15px auto;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}

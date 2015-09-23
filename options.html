@@ -22,6 +22,7 @@
     <section id="main_tabs" class="tabs">
         <ul class="tabs_nav">
             <li><a href="#main">{{o_tabs_main}}</a></li>
+            <li><a href="#backup">{{o_tabs_backup}}</a></li>
             <li><a href="#help">{{o_tabs_help}}</a></li>
             <li><a href="#about">{{o_tabs_about}}</a></li>
         </ul>
@@ -46,6 +47,22 @@
                     <p><label><input type="checkbox" data-storage="pinned"/>{{ o_savedTabs_pinned }}</label></p>
 
                     <p><label><input type="checkbox" data-storage="cur_win"/>{{ o_savedTabs_cur_win }}</label></p>
+                </fieldset>
+            </div>
+
+            <div id="backup">
+                <fieldset>
+                    <legend>{{ o_backup_restoreLegend }}</legend>
+                    <p>{{ o_backup_restoreInstruction }}</p>
+                    <p><strong>{{ o_backup_restoreInstructionMore }}</strong></p>
+                    <textarea id="restore_text" cols="60" rows="10"></textarea>
+                    <button id="restore_btn">{{ o_backup_restoreButton }}</button>
+                </fieldset>
+                <fieldset>
+                    <legend>{{ o_backup_backupLegend }}</legend>
+                    <p> {{ o_backup_backupInstruction }}</p>
+                    <p> {{ o_backup_backupInstructionMore }}</p>
+                    <textarea id="backup_text" cols="60" rows="10"></textarea>
                 </fieldset>
             </div>
 
@@ -108,6 +125,7 @@
 <script src="js/storage.js"></script>
 <script src="js/helpers/quick_options.js"></script>
 <!--<script src="lib/jquery.min.js"></script>-->
+<script src="js/backup.js"></script>
 <script src="js/options.js"></script>
 
 </body>
