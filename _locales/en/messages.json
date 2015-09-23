@@ -218,7 +218,7 @@
         "description": ""
     },
     "o_backup_restoreInstruction": {
-        "message": "Past your previously saved backup in this textarea. Make sure that you past UTF-8 encoded text. Then press 'Restore' button.",
+        "message": "Past your previously saved backup in this textarea. Make sure that you past UTF-8 encoded text. Then press 'Restore' button. Extension will be automatically restarted.",
         "description": ""
     },
     "o_backup_restoreInstructionMore": {

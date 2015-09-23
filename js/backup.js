@@ -38,8 +38,14 @@ var backup = {
     },
 
     replaceFromBackup: function (backup_data, callback) {
-        var backup = JSON.parse(backup_data),
+        var backup,
             storage_area = this.storage_area;
+
+        try {
+            backup = JSON.parse(backup_data);
+        } catch(e) {
+            callback('error');
+        }
 
         if (backup && typeof backup === 'object') {
             this.cleanupBeforeReplace(function (cleanup_error) {
