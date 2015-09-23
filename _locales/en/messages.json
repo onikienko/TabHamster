@@ -200,12 +200,13 @@
         "message": "Watch sessions. Unchecked will disable the automatic session saving. Extension will reload automatically!!!",
         "description": ""
     },
+
     "o_backup_backupLegend": {
         "message": "Backup ",
         "description": ""
     },
     "o_backup_backupInstruction": {
-        "message": "Copy text from textarea below (CTRL+A to select whole text and CTRL+C to copy). Then past (CTRL+V) and save text in a file. For example TabHamsterBackup.txt. Use UTF-8 encoding for this file.",
+        "message": "Copy text from text area below (CTRL+A to select whole text and CTRL+C to copy). Then past (CTRL+V) and save text in a file. For example TabHamsterBackup.txt. Use UTF-8 encoding for this file.",
         "description": ""
     },
     "o_backup_backupInstructionMore": {
@@ -218,7 +219,7 @@
         "description": ""
     },
     "o_backup_restoreInstruction": {
-        "message": "Past your previously saved backup in this textarea. Make sure that you past UTF-8 encoded text. Then press 'Restore' button. Extension will be automatically restarted.",
+        "message": "Past your previously saved backup in this text area. Make sure that you past UTF-8 encoded text. Then press 'Restore...' button. Extension will be automatically restarted.",
         "description": ""
     },
     "o_backup_restoreInstructionMore": {
