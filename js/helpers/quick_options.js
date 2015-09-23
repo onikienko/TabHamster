@@ -2,21 +2,31 @@
  * This is a part of Chrome Extensions Box
  * Read more on GitHub - https://github.com/onikienko/chrome-extensions-box
  */
-window.addEventListener('load', function () {
-    /*This event will dispatch as soon as options page will be ready*/
-    var event = new CustomEvent('optionsPageReady');
 
-    function showMessage(msg) {
+/*
+Modified Chrome Extensions Box
+Make showMessage global
+ */
+var quick_options = {
+    showMessage: function (msg) {
         var el = document.getElementById(msg === 'error' ? 'error' : 'success');
         el.style.display = 'inline';
         setTimeout(function () {
             el.style.display = 'none';
         }, 2501);
     }
+};
+/*
+end of modifications
+ */
+
+window.addEventListener('load', function () {
+    /*This event will dispatch as soon as options page will be ready*/
+    var event = new CustomEvent('optionsPageReady');
 
     function saveToStorage(val) {
         storage.area.set(val, function () {
-            showMessage(chrome.runtime.lastError ? showMessage('error') : showMessage('success'));
+            quick_options.showMessage(chrome.runtime.lastError ? quick_options.showMessage('error') : quick_options.showMessage('success'));
             // dispatch custom event
             document.dispatchEvent(new CustomEvent('optionSaved', {
                 detail: {
