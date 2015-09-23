@@ -51,7 +51,19 @@
             </div>
 
             <div id="backup">
-
+                <fieldset>
+                    <legend>{{ o_backup_restoreLegend }}</legend>
+                    <p>{{ o_backup_restoreInstruction }}</p>
+                    <p><strong>{{ o_backup_restoreInstructionMore }}</strong></p>
+                    <textarea id="restore_text" cols="60" rows="10"></textarea>
+                    <button id="restore_btn">{{ o_backup_restoreButton }}</button>
+                </fieldset>
+                <fieldset>
+                    <legend>{{ o_backup_backupLegend }}</legend>
+                    <p> {{ o_backup_backupInstruction }}</p>
+                    <p> {{ o_backup_backupInstructionMore }}</p>
+                    <textarea id="backup_text" cols="60" rows="10"></textarea>
+                </fieldset>
             </div>
 
             <div id="help">
@@ -113,6 +125,7 @@
 <script src="js/storage.js"></script>
 <script src="js/helpers/quick_options.js"></script>
 <!--<script src="lib/jquery.min.js"></script>-->
+<script src="js/backup.js"></script>
 <script src="js/options.js"></script>
 
 </body>

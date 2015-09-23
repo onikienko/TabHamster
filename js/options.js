@@ -6,3 +6,9 @@ document.addEventListener('optionSaved', function (event) {
         chrome.runtime.reload();
     }
 }, false);
+
+document.addEventListener('optionsPageReady', function () {
+    backup.getBackupData(function (data) {
+        document.getElementById('backup_text').value = data;
+    });
+}, false);

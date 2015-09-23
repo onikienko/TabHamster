@@ -105,7 +105,7 @@
         "description": "Tab name. Prefix 'o_' for options page"
     },
     "o_tabs_backup": {
-        "message": "Backup/Restore",
+        "message": "Backup / Restore",
         "description": "Tab name"
     },
     "o_tabs_main": {
@@ -198,6 +198,35 @@
     },
     "o_sessionWatcher_toggle": {
         "message": "Watch sessions. Unchecked will disable the automatic session saving. Extension will reload automatically!!!",
+        "description": ""
+    },
+    "o_backup_backupLegend": {
+        "message": "Backup ",
+        "description": ""
+    },
+    "o_backup_backupInstruction": {
+        "message": "Copy text from textarea below (CTRL+A to select whole text and CTRL+C to copy). Then past (CTRL+V) and save text in a file. For example TabHamsterBackup.txt. Use UTF-8 encoding for this file.",
+        "description": ""
+    },
+    "o_backup_backupInstructionMore": {
+        "message": "You will be able to use this data to restore your saved groups and extension options. You cannot restore sessions.",
+        "description": ""
+    },
+
+    "o_backup_restoreLegend": {
+        "message": "Restore",
+        "description": ""
+    },
+    "o_backup_restoreInstruction": {
+        "message": "Past your previously saved backup in this textarea. Make sure that you past UTF-8 encoded text. Then press 'Restore' button.",
+        "description": ""
+    },
+    "o_backup_restoreInstructionMore": {
+        "message": "Attention! All your currently saved groups and options will be erased.",
+        "description": ""
+    },
+    "o_backup_restoreButton": {
+        "message": "Restore options and saved groups",
         "description": ""
     }
 }
