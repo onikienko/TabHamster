@@ -15,4 +15,5 @@
 		● "Ctrl + клик" по имени группы (или сессии) - открыть все вкладки в новом окне. 
 		
 
-Tab Hamster source code: https://github.com/onikienko/TabHamster		
+Tab Hamster source code: https://github.com/onikienko/TabHamster
+		

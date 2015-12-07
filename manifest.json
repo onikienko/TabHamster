@@ -1,9 +1,9 @@
 {
     "name": "__MSG_extName__",
     "description": "__MSG_extDescr__",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "manifest_version": 2,
-    "author": "Michael Onikienko",
+    "author": "Mykhailo Onikiienko",
 
     "minimum_chrome_version": "25",
     "default_locale": "en",

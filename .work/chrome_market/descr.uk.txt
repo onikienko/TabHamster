@@ -15,4 +15,4 @@
 		● "Ctrl + клік" на імені групи (або сесії) - відкрити всі вкладки в новому вікні. 
 		
 
-Tab Hamster source code: https://github.com/onikienko/TabHamster		
+Tab Hamster source code: https://github.com/onikienko/TabHamster
