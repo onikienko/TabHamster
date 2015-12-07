@@ -1,0 +1,227 @@
+{
+   "extDescr": {
+      "description": "",
+      "message": "Менаџер сесија и чувар картица"
+   },
+   "extName": {
+      "description": "do not translate extension name",
+      "message": "TabHamster"
+   },
+   "o_backup_backupInstruction": {
+      "description": "",
+      "message": "Копирајте текст са текстуалног поља испод (CTRL+A за избор целог текста и CTRL+C за копирање). Затим налепите (CTRL+V) и сачувајте текст у датотеку, на пример TabHamsterBackup.txt (користите UTF-8 кодирање)."
+   },
+   "o_backup_backupInstructionMore": {
+      "description": "",
+      "message": "Моћи ћете да користите ове податке за враћање сачуваних група и опција проширења. Не можете вратити сесије."
+   },
+   "o_backup_backupLegend": {
+      "description": "",
+      "message": "Сачувај резервну копију "
+   },
+   "o_backup_restoreButton": {
+      "description": "",
+      "message": "Врати опције и сачуване групе"
+   },
+   "o_backup_restoreInstruction": {
+      "description": "",
+      "message": "Налепите претходно сачувану резервну копију у ово текстуално поље (будите сигурни да сте налепили UTF-8 кодирани текст) а затим притисните дугме 'Врати...'. Проширење ће се аутоматски поново покренути."
+   },
+   "o_backup_restoreInstructionMore": {
+      "description": "",
+      "message": "Пажња! Све тренутне сачуване групе и опције ће бити избрисане."
+   },
+   "o_backup_restoreLegend": {
+      "description": "",
+      "message": "Врати"
+   },
+   "o_common_legend": {
+      "description": "",
+      "message": "Опште"
+   },
+   "o_dateFormat_eu": {
+      "description": "EU date format",
+      "message": "ДД-ММ-ГГГГ"
+   },
+   "o_dateFormat_text": {
+      "description": "",
+      "message": "Формат датума"
+   },
+   "o_dateFormat_us": {
+      "description": "US date format",
+      "message": "ГГГГ-ММ-ДД"
+   },
+   "o_error": {
+      "description": "Error during save settings",
+      "message": "Грешка приликом чувања подешавања"
+   },
+   "o_help_editGroup": {
+      "description": "",
+      "message": "Можете уређивати, брисати, мењати позицију сваке сачуване групе (бр.4 на слици)."
+   },
+   "o_help_inNewWindow": {
+      "description": "",
+      "message": "'Ctrl + клик' на име групе (или сесије) ће отворити картице у новом прозору. Такође и клик на иконицу поред имена групе (бр.3 на слици)."
+   },
+   "o_help_overFavicon": {
+      "description": "",
+      "message": "Поставите курсор миша преко фавикона да бисте видели УРЛ картице."
+   },
+   "o_help_quickAdd": {
+      "description": "",
+      "message": "Да бисте брзо сачували све отворене картице као групу, само отворите прозор проширења и притисните 'ENTER'."
+   },
+   "o_help_settings": {
+      "description": "",
+      "message": "У подешавањима проширења можете одабрати формат датума и изменити филтер за чување картица."
+   },
+   "o_help_showLinks": {
+      "description": "",
+      "message": "Да бисте видели картице у сачуваној групи кликните на сиви троугао (бр.2 на слици)."
+   },
+   "o_help_syncStorage": {
+      "description": "",
+      "message": "Групе картица се чувају у складишту синхронизације. Пријавите се својим налогом у прегледачу да бисте их имали на другом рачунару."
+   },
+   "o_help_syncStorage_0": {
+      "description": "",
+      "message": "Сесије се не синхронизују."
+   },
+   "o_help_syncStorage_1": {
+      "description": "",
+      "message": "Складиште синхронизације је ограничено величином. Можете видети искоришћеност складишта (бр.1 на слици). Ако је складиште пуно, избришите групе које не користите."
+   },
+   "o_help_syncStorage_2": {
+      "description": "",
+      "message": "Постоји и ограничење у величини снимљених података у исто време. То је око 17 - 24 картица."
+   },
+   "o_help_tipsLegend": {
+      "description": "",
+      "message": "Савети"
+   },
+   "o_saved": {
+      "description": "Settings saved OK",
+      "message": "Сачувано"
+   },
+   "o_savedTabs_cur_win": {
+      "description": "",
+      "message": "Само тренутни прозор"
+   },
+   "o_savedTabs_legend": {
+      "description": "Legend tag",
+      "message": "Филтер за чување картица (не сесија)"
+   },
+   "o_savedTabs_pinned": {
+      "description": "",
+      "message": "Додај закачене картице у групу"
+   },
+   "o_sessionWatcher_toggle": {
+      "description": "",
+      "message": "Надгледај сесије. Одчекирајте да бисте онемогућили аутоматско чување сесија. Проширење ће се аутоматски поново покренути!!!"
+   },
+   "o_tabs_about": {
+      "description": "About tab",
+      "message": "Информације"
+   },
+   "o_tabs_backup": {
+      "description": "Tab name",
+      "message": "Сачувај резервну копију / Врати"
+   },
+   "o_tabs_help": {
+      "description": "Tab name. Prefix 'o_' for options page",
+      "message": "Помоћ"
+   },
+   "o_tabs_main": {
+      "description": "Settings tab",
+      "message": "Подешавања"
+   },
+   "p_GroupNameToSave": {
+      "description": "Placeholder in text input",
+      "message": "Нова група од отворених картица"
+   },
+   "p_addLinkLink_popup": {
+      "description": "Modal window dialog",
+      "message": "УРЛ"
+   },
+   "p_addLinkTitle_popup": {
+      "description": "Modal window dialog",
+      "message": "Наслов"
+   },
+   "p_addLinkToGroup_btn_title": {
+      "message": "Додај линк у групу"
+   },
+   "p_currentSession": {
+      "message": "Тренутна"
+   },
+   "p_delGroup_btn_title": {
+      "message": "Избриши групу"
+   },
+   "p_delLinkFromGroup_btn_title": {
+      "message": "Избриши"
+   },
+   "p_downGroup_btn_title": {
+      "message": "Доле"
+   },
+   "p_editGroupName_btn_title": {
+      "message": "Уреди име групе"
+   },
+   "p_editLink_btn_title": {
+      "message": "Уреди"
+   },
+   "p_groupBtn": {
+      "description": "Btn hint",
+      "message": "Сачувај"
+   },
+   "p_groupInNewWindow_btn_title": {
+      "message": "Отвори у новом прозору (Ctrl + клик)"
+   },
+   "p_helpBtn": {
+      "description": "Title for help button",
+      "message": "Помоћ"
+   },
+   "p_newGroupName_popup": {
+      "description": "Modal window dialog",
+      "message": "Ново име групе:"
+   },
+   "p_optionsBtn": {
+      "description": "Prefix 'p_' - popup",
+      "message": "Подешавања"
+   },
+   "p_overwriteGroup_popup": {
+      "description": "Modal window dialog",
+      "message": "Група са истим именом већ постоји. Да ли желите да замените стару са тренутним картицама?"
+   },
+   "p_quotaBitesPerItem_error": {
+      "message": "Не може се сачувати у складишту синхронизације. Има превише картица. Покушајте са брисањем једне или више њих."
+   },
+   "p_quotaBites_error": {
+      "message": "Скаладиште синхронизације је пуно. Избриши некоришћене групе."
+   },
+   "p_synStorageUsage_title": {
+      "description": "",
+      "message": "Искоришћеност складишта синхронизације прегледача"
+   },
+   "p_syncStorageDefault_error": {
+      "message": "Грешка при синхронизовању складишта. Покушајте поново касније."
+   },
+   "p_tabName_Saved": {
+      "description": "",
+      "message": "Сачуване групе"
+   },
+   "p_tabName_Sessions": {
+      "description": "",
+      "message": "Сесије"
+   },
+   "p_tabsNumbers_text": {
+      "message": "Картица:"
+   },
+   "p_upGroup_btn_title": {
+      "message": "Горе"
+   },
+   "p_window_text": {
+      "message": "Прозор"
+   },
+   "p_windowsNumbers_text": {
+      "message": "Прозора:"
+   }
+}
