@@ -324,12 +324,25 @@ chrome.storage.local.get(function (session_items) {
             },
 
             openLinksInNewWindow = function (links) {
-                chrome.windows.create({'type': 'normal', 'focused': true}, function (win) {
-                    links.forEach(function (el) {
-                        chrome.tabs.create({'windowId': win.id, 'url': el.url, 'pinned': el.pinned});
-                    });
-                    chrome.tabs.remove(win.tabs[0].id); // remove default New Tab Page
-                    window.close();
+                chrome.runtime.sendMessage({
+                    msg: 'openLinksInNewWindow',
+                    links: links
+                });
+                window.close();
+            },
+
+            openLinksInCurrentWindow = function (links) {
+                chrome.runtime.sendMessage({
+                    msg: 'openLinksInCurrentWindow',
+                    links: links
+                });
+            },
+
+            openWindowLinksInCurrentWindow = function (links, window_id) {
+                chrome.runtime.sendMessage({
+                    msg: 'openWindowLinksInCurrentWindow',
+                    links: links,
+                    window_id: window_id
                 });
             },
 
@@ -381,9 +394,10 @@ chrome.storage.local.get(function (session_items) {
                     if (mouse_button === 1) {
                         openLinksInNewWindow(tabs);
                     } else {
-                        tabs.forEach(function (el) {
-                            chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
-                        });
+                        openLinksInCurrentWindow(tabs);
+                        //tabs.forEach(function (el) {
+                        //    chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
+                        //});
                     }
                 },
 
@@ -775,9 +789,10 @@ chrome.storage.local.get(function (session_items) {
                             openLinksInNewWindow(links);
                         });
                     } else {
-                        (sessionModel.getGroups())[storage_name].tabs.forEach(function (el) {
-                            chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
-                        });
+                        openLinksInCurrentWindow((sessionModel.getGroups())[storage_name].tabs);
+                        //(sessionModel.getGroups())[storage_name].tabs.forEach(function (el) {
+                        //    chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
+                        //});
                     }
                 },
 
@@ -794,11 +809,12 @@ chrome.storage.local.get(function (session_items) {
                         });
                         openLinksInNewWindow(links);
                     } else {
-                        tabs.forEach(function (el) {
-                            if (el.windowId === parseInt(window_id, 10)) {
-                                chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
-                            }
-                        });
+                        openWindowLinksInCurrentWindow(tabs, window_id);
+                        //tabs.forEach(function (el) {
+                        //    if (el.windowId === parseInt(window_id, 10)) {
+                        //        chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
+                        //    }
+                        //});
                     }
                 },
 

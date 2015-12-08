@@ -49,6 +49,32 @@ chrome.runtime.onUpdateAvailable.addListener(function (details) {
     chrome.runtime.reload();
 });
 
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    switch (msg.msg) {
+        case 'openLinksInNewWindow':
+            chrome.windows.create({'type': 'normal', 'focused': true}, function (win) {
+                msg.links.forEach(function (el) {
+                    chrome.tabs.create({'windowId': win.id, 'url': el.url, 'pinned': el.pinned});
+                });
+                chrome.tabs.remove(win.tabs[0].id); // remove default New Tab Page
+                //sendResponse({msg: 'OK'});
+                //window.close();
+            });
+            break;
+        case 'openLinksInCurrentWindow':
+            msg.links.forEach(function (el) {
+                chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
+            });
+            break;
+        case 'openWindowLinksInCurrentWindow':
+            msg.links.forEach(function (el) {
+                if (el.windowId === parseInt(msg.window_id, 10)) {
+                    chrome.tabs.create({'url': el.url, 'pinned': el.pinned});
+                }
+            });
+            break;
+    }
+});
 
 /*SESSION WATCHER*/
 storage.area.get('session_watcher', function (from_storage) {
