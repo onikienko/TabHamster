@@ -1,3 +1,7 @@
+0.2.10 (08.12.2015 12:32)
+	Add Serbian translation (thanks to Sijera)
+	Fix Opera manifest to persistent background page
+	Open tabs from background page (not from popup)
 0.2.9 (23.09.2015 13:49)
 	Manual Backup/Restore for saved groups and options (see Options Page).
 0.2.8.1 (16.04.2015 09:29)
