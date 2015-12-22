@@ -10,7 +10,7 @@ Extension is written with [Chrome Extension Box](https://github.com/onikienko/ch
 
 Plain javaScript with no jQuery.    
 
-Download for your broweser:
+Install for your broweser:
 
 **[Chrome Market](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
 
