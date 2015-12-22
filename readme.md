@@ -8,8 +8,8 @@ Session manager and tabs saver. With sync.
 
 Extension is written with [Chrome Extension Box](https://github.com/onikienko/chrome-extensions-box)
 
-Plain javaScript with no jQuery.
+Plain javaScript with no jQuery. Download for your broweser:
 
-**[Chrome](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
+**[Chrome Market](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
 
-**[Opera 15+](https://addons.opera.com/ru/extensions/details/tabhamster/?display=ru)**
+**[Opera Market](https://addons.opera.com/ru/extensions/details/tabhamster/?display=ru)**
