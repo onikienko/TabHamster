@@ -65,6 +65,9 @@
     "p_addLinkToGroup_btn_title": {
         "message": "New link to group"
     },
+    "p_syncLink_btn_title": {
+        "message": "Sync"
+    },
     "p_delLinkFromGroup_btn_title": {
         "message": "Delete"
     },

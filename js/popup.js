@@ -1,5 +1,5 @@
-chrome.storage.local.get(function (session_items) {
-    chrome.storage.sync.get(function (storage_items) {
+chrome.storage.local.get(function(session_items) {
+    chrome.storage.sync.get(function(storage_items) {
         /**
          * Popup window for edit operation
          * @param popup_id
@@ -12,14 +12,14 @@ chrome.storage.local.get(function (session_items) {
         }
 
         Popup.prototype = {
-            go: function () {
+            go: function() {
                 var self = this,
                     data_container = self.popup_container.querySelectorAll('.data'),
                     submit_btn = this.popup_container.querySelector('.submit_btn');
 
                 function submitData() {
                     var data = {};
-                    [].forEach.call(data_container, function (el) {
+                    [].forEach.call(data_container, function(el) {
                         data[el.id] = el.value;
                     });
                     self.popup_container.style.display = 'none';
@@ -32,7 +32,7 @@ chrome.storage.local.get(function (session_items) {
                     data_container[0].select();
                     // submit on 'enter' for last text input
                     if (data_container[data_container.length - 1].getAttribute('type') === 'text') {
-                        data_container[data_container.length - 1].onkeyup = function (e) {
+                        data_container[data_container.length - 1].onkeyup = function(e) {
                             if (e.keyCode === 13) {
                                 submitData();
                             }
@@ -40,18 +40,18 @@ chrome.storage.local.get(function (session_items) {
                     }
                 } else {
                     submit_btn.focus();
-                    this.popup_container.onkeyup = function (e) {
+                    this.popup_container.onkeyup = function(e) {
                         if (e.keyCode === 13) {
                             submitData();
                         }
                     };
                 }
 
-                submit_btn.onclick = function (e) {
+                submit_btn.onclick = function(e) {
                     submitData();
                 };
 
-                this.popup_container.querySelector('.cancel').onclick = function (e) {
+                this.popup_container.querySelector('.cancel').onclick = function(e) {
                     self.popup_container.style.display = 'none';
                 };
             }
@@ -59,13 +59,13 @@ chrome.storage.local.get(function (session_items) {
 
 
         function GroupModel(area) {
-            this.storageArea = (function () {
+            this.storageArea = (function() {
                 return area === 'session' ? chrome.storage.local : chrome.storage.sync;
             }());
             // all saved groups as object
-            this.data_local_copy = (function () {
+            this.data_local_copy = (function() {
                 var item,
-                    groups_data = (function () {
+                    groups_data = (function() {
                         return area === 'session' ? session_items : storage_items;
                     }()),
                     obj = {};
@@ -80,11 +80,11 @@ chrome.storage.local.get(function (session_items) {
         }
 
         GroupModel.prototype = {
-            getGroups: function () {
+            getGroups: function() {
                 return this.data_local_copy;
             },
 
-            getStorageNameByName: function (name) {
+            getStorageNameByName: function(name) {
                 var storage_name;
 
                 for (storage_name in this.data_local_copy) {
@@ -95,7 +95,7 @@ chrome.storage.local.get(function (session_items) {
                 return false;
             },
 
-            nextIndex: function () {
+            nextIndex: function() {
                 var last_index = 0,
                     group;
 
@@ -107,20 +107,20 @@ chrome.storage.local.get(function (session_items) {
                 return last_index + 1;
             },
 
-            del: function (storage_name, callback) {
+            del: function(storage_name, callback) {
                 var self = this;
 
-                this.storageArea.remove(storage_name, function () {
+                this.storageArea.remove(storage_name, function() {
                     if (!chrome.runtime.lastError) {
                         delete self.data_local_copy[storage_name];
-                        callback({err: 0});
+                        callback({ err: 0 });
                     } else {
-                        callback({err: 1, msg: chrome.runtime.lastError.message});
+                        callback({ err: 1, msg: chrome.runtime.lastError.message });
                     }
                 });
             },
 
-            add: function (name, group, callback) {
+            add: function(name, group, callback) {
                 var now = new Date(),
                     new_group = {},
                     storage_name = 'tg_' + now.getTime(),
@@ -132,32 +132,32 @@ chrome.storage.local.get(function (session_items) {
                     color: '', // TODO personal color for each group
                     tabs: group
                 };
-                this.storageArea.set(new_group, function () {
+                this.storageArea.set(new_group, function() {
                     if (!chrome.runtime.lastError) {
                         self.data_local_copy[storage_name] = new_group[storage_name];
-                        callback({err: 0, storage_name: storage_name, new_group: new_group[storage_name]});
+                        callback({ err: 0, storage_name: storage_name, new_group: new_group[storage_name] });
                     } else {
-                        callback({err: 1, msg: chrome.runtime.lastError.message});
+                        callback({ err: 1, msg: chrome.runtime.lastError.message });
                     }
                 });
             },
 
-            upd: function (storage_name, value, callback) {
+            upd: function(storage_name, value, callback) {
                 var obj = {},
                     self = this;
 
                 obj[storage_name] = value;
-                this.storageArea.set(obj, function () {
+                this.storageArea.set(obj, function() {
                     if (!chrome.runtime.lastError) {
                         self.data_local_copy[storage_name] = value;
-                        callback({err: 0, storage_name: storage_name, new_group: obj[storage_name]});
+                        callback({ err: 0, storage_name: storage_name, new_group: obj[storage_name] });
                     } else {
-                        callback({err: 1, msg: chrome.runtime.lastError.message});
+                        callback({ err: 1, msg: chrome.runtime.lastError.message });
                     }
                 });
             },
 
-            move: function (storage_name, sibling_storage_name, callback) {
+            move: function(storage_name, sibling_storage_name, callback) {
                 var self = this,
                     obj = {},
                     sibling_obj = {},
@@ -167,19 +167,19 @@ chrome.storage.local.get(function (session_items) {
                 obj[storage_name].index = this.data_local_copy[sibling_storage_name].index;
                 sibling_obj[sibling_storage_name] = this.data_local_copy[sibling_storage_name];
                 sibling_obj[sibling_storage_name].index = i;
-                this.storageArea.set(obj, function () {
+                this.storageArea.set(obj, function() {
                     if (!chrome.runtime.lastError) {
-                        self.storageArea.set(sibling_obj, function () {
+                        self.storageArea.set(sibling_obj, function() {
                             if (!chrome.runtime.lastError) {
                                 self.data_local_copy[storage_name] = obj[storage_name];
                                 self.data_local_copy[sibling_storage_name] = sibling_obj[sibling_storage_name];
-                                callback({err: 0});
+                                callback({ err: 0 });
                             } else {
-                                callback({err: 1, msg: chrome.runtime.lastError.message});
+                                callback({ err: 1, msg: chrome.runtime.lastError.message });
                             }
                         });
                     } else {
-                        callback({err: 1, msg: chrome.runtime.lastError.message});
+                        callback({ err: 1, msg: chrome.runtime.lastError.message });
                     }
                 });
             }
@@ -187,14 +187,14 @@ chrome.storage.local.get(function (session_items) {
 
 
         function LinkModel(area) {
-            this.storage = (function () {
+            this.storage = (function() {
                 return area === 'session' ? chrome.storage.local : chrome.storage.sync;
             }());
             this.model = area === 'session' ? sessionModel : groupModel;
         }
 
         LinkModel.prototype = {
-            getLocalLinkIndexById: function (storage_name, link_id) {
+            getLocalLinkIndexById: function(storage_name, link_id) {
                 var i,
                     tabs = (this.model.getGroups())[storage_name].tabs,
                     max = tabs.length;
@@ -206,12 +206,12 @@ chrome.storage.local.get(function (session_items) {
                 }
             },
 
-            groupLinksByWindowId: function (storage_name) {
+            groupLinksByWindowId: function(storage_name) {
                 var tabs = (this.model.getGroups())[storage_name].tabs,
                     windows = [], // arr with unique windowId
                     grouped_by_windows = []; // links grouped by windowId [[{tab1}, {tab2}],[{tab3}]]...
 
-                tabs.forEach(function (el) {
+                tabs.forEach(function(el) {
                     var window_index = windows.indexOf(el.windowId);
                     if (window_index === -1) {
                         windows.push(el.windowId);
@@ -221,14 +221,14 @@ chrome.storage.local.get(function (session_items) {
                         grouped_by_windows[window_index].push(el);
                     }
                 });
-                return {grouped_by_windowId: grouped_by_windows, windowId_arr: windows};
+                return { grouped_by_windowId: grouped_by_windows, windowId_arr: windows };
             },
 
-            nextIndex: function (storage_name) {
+            nextIndex: function(storage_name) {
                 var tabs = (this.model.getGroups())[storage_name].tabs,
                     last_index = 0;
 
-                tabs.forEach(function (el) {
+                tabs.forEach(function(el) {
                     if (el.id > last_index) {
                         last_index = el.id;
                     }
@@ -236,29 +236,29 @@ chrome.storage.local.get(function (session_items) {
                 return last_index + 1;
             },
 
-            del: function (storage_name, link_id, callback) {
+            del: function(storage_name, link_id, callback) {
                 var group = (this.model.getGroups())[storage_name];
                 group.tabs.splice(this.getLocalLinkIndexById(storage_name, link_id), 1);
 
-                this.model.upd(storage_name, group, function (answ) {
+                this.model.upd(storage_name, group, function(answ) {
                     callback(answ);
                 });
             },
 
-            add: function (storage_name, link_data, callback) {
+            add: function(storage_name, link_data, callback) {
                 var group = (this.model.getGroups())[storage_name];
 
                 group.tabs.push(link_data);
-                this.model.upd(storage_name, group, function (answ) {
+                this.model.upd(storage_name, group, function(answ) {
                     callback(answ);
                 });
             },
 
-            upd: function (storage_name, link_index, link_data, callback) {
+            upd: function(storage_name, link_index, link_data, callback) {
                 var group = (this.model.getGroups())[storage_name];
 
                 group.tabs[link_index] = link_data;
-                this.model.upd(storage_name, group, function (answ) {
+                this.model.upd(storage_name, group, function(answ) {
                     callback(answ);
                 });
             }
@@ -272,6 +272,7 @@ chrome.storage.local.get(function (session_items) {
             ui_msg = {
                 title_del_group: chrome.i18n.getMessage('p_delGroup_btn_title'),
                 title_edit_group_name: chrome.i18n.getMessage('p_editGroupName_btn_title'),
+                title_p_syncLink_btn_title: chrome.i18n.getMessage('p_syncLink_btn_title'),
                 title_add_link_to_group: chrome.i18n.getMessage('p_addLinkToGroup_btn_title'),
                 title_group_in_new_window: chrome.i18n.getMessage('p_groupInNewWindow_btn_title'),
                 title_edit_link: chrome.i18n.getMessage('p_editLink_btn_title'),
@@ -292,7 +293,7 @@ chrome.storage.local.get(function (session_items) {
             },
 
             tabsGrabber = {
-                tabsFilter: function () {
+                tabsFilter: function() {
                     var obj = {};
 
                     if (storage_items.cur_win) {
@@ -301,11 +302,11 @@ chrome.storage.local.get(function (session_items) {
                     return obj;
                 },
 
-                collectTabs: function (callback) {
-                    chrome.tabs.query(this.tabsFilter(), function (tabs) {
+                collectTabs: function(callback) {
+                    chrome.tabs.query(this.tabsFilter(), function(tabs) {
                         var links = [];
 
-                        tabs.forEach(function (tab, index) {
+                        tabs.forEach(function(tab, index) {
                             var link = {};
 
                             if (!tab.pinned || storage_items.pinned === 1) {
@@ -323,7 +324,7 @@ chrome.storage.local.get(function (session_items) {
                 }
             },
 
-            openLinksInNewWindow = function (links) {
+            openLinksInNewWindow = function(links) {
                 chrome.runtime.sendMessage({
                     msg: 'openLinksInNewWindow',
                     links: links
@@ -331,14 +332,14 @@ chrome.storage.local.get(function (session_items) {
                 window.close();
             },
 
-            openLinksInCurrentWindow = function (links) {
+            openLinksInCurrentWindow = function(links) {
                 chrome.runtime.sendMessage({
                     msg: 'openLinksInCurrentWindow',
                     links: links
                 });
             },
 
-            openWindowLinksInCurrentWindow = function (links, window_id) {
+            openWindowLinksInCurrentWindow = function(links, window_id) {
                 chrome.runtime.sendMessage({
                     msg: 'openWindowLinksInCurrentWindow',
                     links: links,
@@ -347,7 +348,7 @@ chrome.storage.local.get(function (session_items) {
             },
 
             savedUI = {
-                groupHtmlElement: function (storage_name, group) {
+                groupHtmlElement: function(storage_name, group) {
                     var title = group.name;
 
                     if (group.name === '') {
@@ -358,6 +359,7 @@ chrome.storage.local.get(function (session_items) {
                         '<span class="open_group">' + title + '</span>' +
                         '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                         '<span class="group_action">' +
+                        '<span class="refresh" title="' + ui_msg.title_p_syncLink_btn_title + '">&#10227;</span>' +
                         '<span class="add_link" title="' + ui_msg.title_add_link_to_group + '">&#10010;</span>' +
                         '<span class="up" title="' + ui_msg.title_up_link + '">&#9650;</span>' +
                         '<span class="down" title="' + ui_msg.title_down_link + '">&#9660;</span>' +
@@ -367,7 +369,7 @@ chrome.storage.local.get(function (session_items) {
                         '</div>';
                 },
 
-                linkHtmlElement: function (storage_name, link) {
+                linkHtmlElement: function(storage_name, link) {
                     var a_text = link.title,
                         a_title = '',
                         pin_icon = link.pinned ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
@@ -387,7 +389,7 @@ chrome.storage.local.get(function (session_items) {
                         '</div>';
                 },
 
-                openGroup: function (storage_name, mouse_button) {
+                openGroup: function(storage_name, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
                     var tabs = (groupModel.getGroups())[storage_name].tabs;
 
@@ -401,39 +403,39 @@ chrome.storage.local.get(function (session_items) {
                     }
                 },
 
-                showGroups: function () {
+                showGroups: function() {
                     var html = '<section id="error_msg"></section>',
                         self = this,
                         groups = groupModel.getGroups(),
                         tag = document.getElementById('saved'),
-                        sorted_group_list = Object.keys(groups).sort(function (a, b) {
+                        sorted_group_list = Object.keys(groups).sort(function(a, b) {
                             return groups[b].index - groups[a].index;
                         });
-                    sorted_group_list.forEach(function (el) {
+                    sorted_group_list.forEach(function(el) {
                         html += self.groupHtmlElement(el, groups[el]);
                     });
                     tag.innerHTML = html;
                     this.showSyncStorageUsage();
                 },
 
-                addGroup: function () {
+                addGroup: function(old_name) {
                     var input_field = document.getElementById('new_group_name'),
-                        name = input_field.value,
+                        name = (old_name ? old_name : input_field.value),
                         popup,
                         storage_name = groupModel.getStorageNameByName(name),
                         stored_group,
                         self = this;
 
-                    tabsGrabber.collectTabs(function (tabs) {
+                    tabsGrabber.collectTabs(function(tabs) {
                         // check if group name already exist
                         if (storage_name !== false && name !== '') {
                             // group with the same name already exist
                             // show Popup with dialog
-                            popup = new Popup('overwrite_group', function (data) {
+                            popup = new Popup('overwrite_group', function(data) {
                                 input_field.value = '';
                                 stored_group = groupModel.getGroups()[storage_name];
                                 stored_group.tabs = tabs;
-                                groupModel.upd(storage_name, stored_group, function (answ) {
+                                groupModel.upd(storage_name, stored_group, function(answ) {
                                     if (answ.err === 0) {
                                         self.showSyncStorageUsage();
                                     } else {
@@ -444,7 +446,7 @@ chrome.storage.local.get(function (session_items) {
                         } else {
                             // new group name
                             input_field.value = '';
-                            groupModel.add(name, tabs, function (answ) {
+                            groupModel.add(name, tabs, function(answ) {
                                 var el,
                                     groups_el;
 
@@ -464,18 +466,18 @@ chrome.storage.local.get(function (session_items) {
                     });
                 },
 
-                editGroupName: function (storage_name, el) {
+                editGroupName: function(storage_name, el) {
                     var group = (groupModel.getGroups())[storage_name],
                         new_name,
                         popup,
                         self = this;
 
                     document.getElementById('popup-new_group_name').value = group.name;
-                    popup = new Popup('edit_group_name', function (data) {
+                    popup = new Popup('edit_group_name', function(data) {
                         new_name = data['popup-new_group_name'];
                         if (new_name !== undefined || new_name !== '') {
                             group.name = new_name;
-                            groupModel.upd(storage_name, group, function (answ) {
+                            groupModel.upd(storage_name, group, function(answ) {
                                 if (answ.err === 0) {
                                     el.getElementsByClassName('open_group')[0].innerText = new_name;
                                     self.showSyncStorageUsage();
@@ -488,10 +490,10 @@ chrome.storage.local.get(function (session_items) {
                     });
                 },
 
-                delGroup: function (storage_name, el) {
+                delGroup: function(storage_name, el) {
                     var self = this;
 
-                    groupModel.del(storage_name, function (answ) {
+                    groupModel.del(storage_name, function(answ) {
                         if (answ.err === 0) {
                             el.remove();
                             self.showSyncStorageUsage();
@@ -501,10 +503,10 @@ chrome.storage.local.get(function (session_items) {
                     });
                 },
 
-                moveGroup: function (storage_name, sibling_storage_name) {
+                moveGroup: function(storage_name, sibling_storage_name) {
                     var self = this;
 
-                    groupModel.move(storage_name, sibling_storage_name, function (answ) {
+                    groupModel.move(storage_name, sibling_storage_name, function(answ) {
                         if (answ.err === 0) {
                             self.showGroups();
                         } else {
@@ -513,13 +515,13 @@ chrome.storage.local.get(function (session_items) {
                     });
                 },
 
-                showGroupLinks: function (storage_name, el) {
+                showGroupLinks: function(storage_name, el) {
                     var link_list = document.createElement("div"),
                         spoiler = el.getElementsByClassName('spoiler')[0],
                         html = '',
                         self = this;
 
-                    (groupModel.getGroups())[storage_name].tabs.forEach(function (el) {
+                    (groupModel.getGroups())[storage_name].tabs.forEach(function(el) {
                         html += self.linkHtmlElement(storage_name, el);
                     });
                     link_list.classList.add('links');
@@ -529,7 +531,7 @@ chrome.storage.local.get(function (session_items) {
                     spoiler.innerHTML = ' &#9660;';
                 },
 
-                hideGroupLinks: function (el) {
+                hideGroupLinks: function(el) {
                     var spoiler = el.getElementsByClassName('spoiler')[0];
 
                     spoiler.setAttribute('name', 'closed');
@@ -537,23 +539,23 @@ chrome.storage.local.get(function (session_items) {
                     el.getElementsByClassName('links')[0].remove();
                 },
 
-                delLink: function (storage_name, link_id, el) {
-                    linkModel.del(storage_name, link_id, function (answ) {
+                delLink: function(storage_name, link_id, el) {
+                    linkModel.del(storage_name, link_id, function(answ) {
                         if (answ.err === 0) {
                             el.remove();
                         }
                     });
                 },
 
-                addLink: function (storage_name, el) {
+                addLink: function(storage_name, el) {
                     var self = this,
-                        popup = new Popup('add_link', function (data) {
+                        popup = new Popup('add_link', function(data) {
                             var obj = {
                                 id: linkModel.nextIndex(storage_name),
                                 title: data['popup-add_link_name'],
                                 url: utils.correctUrl(data['popup-add_link_link'])
                             };
-                            linkModel.add(storage_name, obj, function (answ) {
+                            linkModel.add(storage_name, obj, function(answ) {
                                 if (answ.err === 0) {
                                     var links_div = el.getElementsByClassName('links');
                                     if (links_div.length) {
@@ -568,7 +570,7 @@ chrome.storage.local.get(function (session_items) {
                         });
                 },
 
-                editLink: function (storage_name, link_id, el) {
+                editLink: function(storage_name, link_id, el) {
                     var group_node = el.parentNode.parentNode,
                         tabs = (groupModel.getGroups())[storage_name].tabs,
                         link_index = linkModel.getLocalLinkIndexById(storage_name, link_id),
@@ -577,11 +579,11 @@ chrome.storage.local.get(function (session_items) {
 
                     document.getElementById('popup-edit_link_name').value = tabs[link_index].title;
                     document.getElementById('popup-edit_link_url').value = tabs[link_index].url;
-                    popup = new Popup('edit_link', function (data) {
+                    popup = new Popup('edit_link', function(data) {
                         var link_data = tabs[link_index];
                         link_data.title = data['popup-edit_link_name'];
                         link_data.url = utils.correctUrl(data['popup-edit_link_url']);
-                        linkModel.upd(storage_name, link_index, link_data, function (answ) {
+                        linkModel.upd(storage_name, link_index, link_data, function(answ) {
                             if (answ.err === 0) {
                                 self.hideGroupLinks(group_node);
                                 self.showGroupLinks(storage_name, group_node);
@@ -593,7 +595,7 @@ chrome.storage.local.get(function (session_items) {
                     });
                 },
 
-                showErrorMsg: function (msg) {
+                showErrorMsg: function(msg) {
                     var el = document.getElementById('error_msg'),
                         text = ui_msg.quota_default_item;
 
@@ -607,13 +609,13 @@ chrome.storage.local.get(function (session_items) {
                             break;
                     }
                     el.innerText = text;
-                    setTimeout(function () {
+                    setTimeout(function() {
                         el.style.display = 'none';
                     }, 4581);
                 },
 
-                showSyncStorageUsage: function () {
-                    chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
+                showSyncStorageUsage: function() {
+                    chrome.storage.sync.getBytesInUse(null, function(bytesInUse) {
                         var percent_in_use = (bytesInUse * 100 / chrome.storage.sync.QUOTA_BYTES).toFixed(2),
                             el = document.querySelector('ul.tabs_nav>li a'),
                             text = el.innerText;
@@ -622,22 +624,22 @@ chrome.storage.local.get(function (session_items) {
                     });
                 },
 
-                setHandlers: function () {
+                setHandlers: function() {
                     var self = this,
                         saved = document.getElementById('saved');
 
-                    document.getElementById('new_group').addEventListener('click', function (e) {
+                    document.getElementById('new_group').addEventListener('click', function(e) {
                         e.preventDefault();
                         self.addGroup();
                     }, false);
 
-                    document.getElementById('new_group_name').addEventListener('keyup', function (e) {
+                    document.getElementById('new_group_name').addEventListener('keyup', function(e) {
                         if (e.keyCode === 13) {
                             self.addGroup();
                         }
                     }, false);
 
-                    saved.addEventListener('click', function (e) {
+                    saved.addEventListener('click', function(e) {
                         var el = e.target,
                             group_node,
                             link_node,
@@ -690,6 +692,12 @@ chrome.storage.local.get(function (session_items) {
                                 group_node = el.parentNode.parentNode;
                                 self.editGroupName(group_node.id, group_node);
                                 break;
+                            case 'refresh':
+                                group_node = el.parentNode.parentNode;
+                                self.delGroup(group_node.id, group_node);
+                                var nn = el.parentNode.parentNode.childNodes[1].innerHTML;
+                                self.addGroup(nn);
+                                break;
                             case 'add_link':
                                 group_node = el.parentNode.parentNode;
                                 self.addLink(group_node.id, group_node);
@@ -718,7 +726,7 @@ chrome.storage.local.get(function (session_items) {
 
                 },
 
-                go: function () {
+                go: function() {
                     this.showGroups();
                     this.setHandlers();
                 }
@@ -726,10 +734,10 @@ chrome.storage.local.get(function (session_items) {
 
 
             sessionsUI = {
-                groupHtmlElement: function (storage_name, group) {
+                groupHtmlElement: function(storage_name, group) {
                     var title,
                         date = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), storage_items.date_format),
-                        group_info = (function () {
+                        group_info = (function() {
                             return {
                                 numbers_of_windows: sessionLinkModel.groupLinksByWindowId(storage_name).windowId_arr.length,
                                 numbers_of_tabs: (sessionModel.getGroups())[storage_name].tabs.length
@@ -754,7 +762,7 @@ chrome.storage.local.get(function (session_items) {
                         '</div>';
                 },
 
-                linkHtmlElement: function (storage_name, link) {
+                linkHtmlElement: function(storage_name, link) {
                     var a_text = link.title,
                         a_title = '',
                         text_length = 44,
@@ -767,23 +775,23 @@ chrome.storage.local.get(function (session_items) {
                     }
                     return '<div class="link">' +
                         '<span class="link_action">' +
-//                        '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
+                        //                        '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
                         '<a href="' + link.url + '" target="_blank" ' + a_title + '>' +
                         '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + pin_icon + a_text + '</a>' +
                         '</span>' +
                         '</div>';
                 },
 
-                openGroup: function (storage_name, mouse_button) {
+                openGroup: function(storage_name, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
                     var grouped,
                         links = [];
 
                     if (mouse_button === 1) {
                         grouped = sessionLinkModel.groupLinksByWindowId(storage_name);
-                        grouped.windowId_arr.forEach(function (el, index) {
+                        grouped.windowId_arr.forEach(function(el, index) {
                             links = [];
-                            grouped.grouped_by_windowId[index].forEach(function (link) {
+                            grouped.grouped_by_windowId[index].forEach(function(link) {
                                 links.push(link);
                             });
                             openLinksInNewWindow(links);
@@ -796,13 +804,13 @@ chrome.storage.local.get(function (session_items) {
                     }
                 },
 
-                openWindow: function (storage_name, window_id, mouse_button) {
+                openWindow: function(storage_name, window_id, mouse_button) {
                     // mouse_button = 0  - cur window, 1 - new
                     var tabs = (sessionModel.getGroups())[storage_name].tabs,
                         links = [];
 
                     if (mouse_button === 1) {
-                        tabs.forEach(function (el) {
+                        tabs.forEach(function(el) {
                             if (el.windowId === parseInt(window_id, 10)) {
                                 links.push(el);
                             }
@@ -818,24 +826,24 @@ chrome.storage.local.get(function (session_items) {
                     }
                 },
 
-                showGroups: function () {
+                showGroups: function() {
                     var html = '<section id="sessions_error_msg"></section>',
                         groups = sessionModel.getGroups(),
                         self = this,
                         tag = document.getElementById('sessions'),
-                        sorted_names_list = Object.keys(groups).sort(function (a, b) {
+                        sorted_names_list = Object.keys(groups).sort(function(a, b) {
                             return parseInt(b.slice('tg_'.length), 10) - parseInt(a.slice('tg_'.length), 10);
                         });
-                    sorted_names_list.forEach(function (el) {
+                    sorted_names_list.forEach(function(el) {
                         html += self.groupHtmlElement(el, groups[el]);
                     });
                     tag.innerHTML = html;
                 },
 
-                delGroup: function (storage_name, el) {
+                delGroup: function(storage_name, el) {
                     var self = this;
 
-                    sessionModel.del(storage_name, function (answ) {
+                    sessionModel.del(storage_name, function(answ) {
                         if (answ.err === 0) {
                             el.remove();
                         } else {
@@ -844,18 +852,18 @@ chrome.storage.local.get(function (session_items) {
                     });
                 },
 
-                showGroupLinks: function (storage_name, el) {
+                showGroupLinks: function(storage_name, el) {
                     var link_list = document.createElement("div"),
                         spoiler = el.getElementsByClassName('spoiler')[0],
                         html = '',
                         self = this,
                         grouped_links = sessionLinkModel.groupLinksByWindowId(storage_name);
 
-                    grouped_links.grouped_by_windowId.forEach(function (link_arr, ind) {
+                    grouped_links.grouped_by_windowId.forEach(function(link_arr, ind) {
                         var win_html = '<div class="win">' +
                             '<div class="win_title" id="' + storage_name + '_' + grouped_links.windowId_arr[ind] + '">&#9642; ' + ui_msg.window_text + ' ' + (ind + 1) + '</div>';
 
-                        link_arr.forEach(function (link) {
+                        link_arr.forEach(function(link) {
                             win_html += self.linkHtmlElement(storage_name, link);
                         });
                         win_html += '</div>';
@@ -868,17 +876,17 @@ chrome.storage.local.get(function (session_items) {
                     spoiler.innerHTML = ' &#9660;';
                 },
 
-                hideGroupLinks: function (el) {
+                hideGroupLinks: function(el) {
                     var spoiler = el.getElementsByClassName('spoiler')[0];
 
                     spoiler.setAttribute('name', 'closed');
                     spoiler.innerHTML = ' &#9658;';
                     el.getElementsByClassName('links')[0].remove();
                 },
-                setHandlers: function () {
+                setHandlers: function() {
                     var self = this;
 
-                    document.getElementById('sessions').addEventListener('click', function (e) {
+                    document.getElementById('sessions').addEventListener('click', function(e) {
                         var el = e.target,
                             group_node,
                             btn,
@@ -916,7 +924,7 @@ chrome.storage.local.get(function (session_items) {
                                 // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
                                 // mouse wheel works only with no scroll
                                 btn = e.button;
-                                win_info = (function () {
+                                win_info = (function() {
                                     var win_id_start = el.id.lastIndexOf('_');
                                     return {
                                         storage_name: el.id.slice(0, win_id_start),
@@ -934,21 +942,21 @@ chrome.storage.local.get(function (session_items) {
                     }, false);
                 },
 
-                go: function () {
+                go: function() {
                     this.showGroups();
                     this.setHandlers();
                 }
             },
 
-//            mainUI = {
-//                setHandlers: function () {
-//                    document.body.onkeyup = function (e) {
-//                        if (e.keyCode === 78 && e.target.tagName !== 'input') {
-//                            alert(e.target.tagName);
-//                        }
-//                    };
-//                }
-//            },
+            //            mainUI = {
+            //                setHandlers: function () {
+            //                    document.body.onkeyup = function (e) {
+            //                        if (e.keyCode === 78 && e.target.tagName !== 'input') {
+            //                            alert(e.target.tagName);
+            //                        }
+            //                    };
+            //                }
+            //            },
 
             navigation;
 
@@ -956,8 +964,8 @@ chrome.storage.local.get(function (session_items) {
             /* window tab navigation */
             navigation = new Tabs('#main_tabs');
             navigation.toggle(storage_items.active_tab);
-            navigation.onToggle(function (tab_name) {
-                chrome.storage.sync.set({active_tab: tab_name});
+            navigation.onToggle(function(tab_name) {
+                chrome.storage.sync.set({ active_tab: tab_name });
             });
             /* popup tab END */
 
@@ -969,7 +977,7 @@ chrome.storage.local.get(function (session_items) {
                 document.querySelector('.tabs_nav').querySelector('[href="#sessions"]').parentNode.style.display = 'none';
             }
             savedUI.go();
-//          mainUI.setHandlers();
+            //          mainUI.setHandlers();
 
         } else {
             // show sync storage error
