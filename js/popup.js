@@ -964,7 +964,7 @@ chrome.storage.local.get(function (session_items) {
             navigation = new Tabs('#main_tabs');
             navigation.toggle(storage_items.active_tab);
             navigation.onToggle(function (tab_name) {
-                chrome.storage.sync.set({ active_tab: tab_name });
+                chrome.storage.sync.set({active_tab: tab_name});
             });
             /* popup tab END */
 
