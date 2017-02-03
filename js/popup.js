@@ -27,13 +27,13 @@ chrome.storage.local.get(function (session_items) {
                 }
 
                 this.popup_container.style.display = 'block';
-                if(data_container.length) {
+                if (data_container.length) {
                     data_container[0].focus();
                     data_container[0].select();
                     // submit on 'enter' for last text input
-                    if(data_container[data_container.length - 1].getAttribute('type') === 'text') {
+                    if (data_container[data_container.length - 1].getAttribute('type') === 'text') {
                         data_container[data_container.length - 1].onkeyup = function (e) {
-                            if(e.keyCode === 13) {
+                            if (e.keyCode === 13) {
                                 submitData();
                             }
                         };
@@ -41,7 +41,7 @@ chrome.storage.local.get(function (session_items) {
                 } else {
                     submit_btn.focus();
                     this.popup_container.onkeyup = function (e) {
-                        if(e.keyCode === 13) {
+                        if (e.keyCode === 13) {
                             submitData();
                         }
                     };
@@ -71,7 +71,7 @@ chrome.storage.local.get(function (session_items) {
                     obj = {};
 
                 for(item in groups_data) {
-                    if(item.indexOf('tg_') === 0) {
+                    if (item.indexOf('tg_') === 0) {
                         obj[item] = groups_data[item];
                     }
                 }
@@ -88,7 +88,7 @@ chrome.storage.local.get(function (session_items) {
                 var storage_name;
 
                 for(storage_name in this.data_local_copy) {
-                    if(this.data_local_copy[storage_name].name === name) {
+                    if (this.data_local_copy[storage_name].name === name) {
                         return storage_name;
                     }
                 }
@@ -100,7 +100,7 @@ chrome.storage.local.get(function (session_items) {
                     group;
 
                 for(group in this.data_local_copy) {
-                    if(this.data_local_copy[group].index > last_index) {
+                    if (this.data_local_copy[group].index > last_index) {
                         last_index = this.data_local_copy[group].index;
                     }
                 }
@@ -111,7 +111,7 @@ chrome.storage.local.get(function (session_items) {
                 var self = this;
 
                 this.storageArea.remove(storage_name, function () {
-                    if(!chrome.runtime.lastError) {
+                    if (!chrome.runtime.lastError) {
                         delete self.data_local_copy[storage_name];
                         callback({err: 0});
                     } else {
@@ -133,7 +133,7 @@ chrome.storage.local.get(function (session_items) {
                     tabs: group
                 };
                 this.storageArea.set(new_group, function () {
-                    if(!chrome.runtime.lastError) {
+                    if (!chrome.runtime.lastError) {
                         self.data_local_copy[storage_name] = new_group[storage_name];
                         callback({err: 0, storage_name: storage_name, new_group: new_group[storage_name]});
                     } else {
@@ -148,7 +148,7 @@ chrome.storage.local.get(function (session_items) {
 
                 obj[storage_name] = value;
                 this.storageArea.set(obj, function () {
-                    if(!chrome.runtime.lastError) {
+                    if (!chrome.runtime.lastError) {
                         self.data_local_copy[storage_name] = value;
                         callback({err: 0, storage_name: storage_name, new_group: obj[storage_name]});
                     } else {
@@ -168,9 +168,9 @@ chrome.storage.local.get(function (session_items) {
                 sibling_obj[sibling_storage_name] = this.data_local_copy[sibling_storage_name];
                 sibling_obj[sibling_storage_name].index = i;
                 this.storageArea.set(obj, function () {
-                    if(!chrome.runtime.lastError) {
+                    if (!chrome.runtime.lastError) {
                         self.storageArea.set(sibling_obj, function () {
-                            if(!chrome.runtime.lastError) {
+                            if (!chrome.runtime.lastError) {
                                 self.data_local_copy[storage_name] = obj[storage_name];
                                 self.data_local_copy[sibling_storage_name] = sibling_obj[sibling_storage_name];
                                 callback({err: 0});
@@ -200,7 +200,7 @@ chrome.storage.local.get(function (session_items) {
                     max = tabs.length;
 
                 for(i = 0; i < max; i++) {
-                    if(tabs[i].id === parseInt(link_id, 10)) {
+                    if (tabs[i].id === parseInt(link_id, 10)) {
                         return i;
                     }
                 }
@@ -213,7 +213,7 @@ chrome.storage.local.get(function (session_items) {
 
                 tabs.forEach(function (el) {
                     var window_index = windows.indexOf(el.windowId);
-                    if(window_index === -1) {
+                    if (window_index === -1) {
                         windows.push(el.windowId);
                         grouped_by_windows.push([]);
                         grouped_by_windows[windows.length - 1].push(el);
@@ -229,7 +229,7 @@ chrome.storage.local.get(function (session_items) {
                     last_index = 0;
 
                 tabs.forEach(function (el) {
-                    if(el.id > last_index) {
+                    if (el.id > last_index) {
                         last_index = el.id;
                     }
                 });
@@ -296,7 +296,7 @@ chrome.storage.local.get(function (session_items) {
                 tabsFilter: function () {
                     var obj = {};
 
-                    if(storage_items.cur_win) {
+                    if (storage_items.cur_win) {
                         obj.currentWindow = true
                     }
                     return obj;
@@ -309,11 +309,11 @@ chrome.storage.local.get(function (session_items) {
                         tabs.forEach(function (tab, index) {
                             var link = {};
 
-                            if(!tab.pinned || storage_items.pinned === 1) {
+                            if (!tab.pinned || storage_items.pinned === 1) {
                                 link.url = tab.url;
                                 link.title = tab.title.length > TAB_TITLE_LENGTH ? tab.title.slice(0, TAB_TITLE_LENGTH + 1) : tab.title;
                                 link.id = index;
-                                if(tab.pinned) {
+                                if (tab.pinned) {
                                     link.pinned = tab.pinned;
                                 }
                                 links.push(link);
@@ -351,7 +351,7 @@ chrome.storage.local.get(function (session_items) {
                 groupHtmlElement: function (storage_name, group) {
                     var title = group.name;
 
-                    if(group.name === '') {
+                    if (group.name === '') {
                         title = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), storage_items.date_format);
                     }
                     return '<div id="' + storage_name + '" class="group">' +
@@ -375,7 +375,7 @@ chrome.storage.local.get(function (session_items) {
                         pin_icon = link.pinned ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
                         favicon_src = localStorage.browser === 'chrome' ? 'chrome://favicon/' + link.url : 'opera://favicon/' + link.url;
 
-                    if(link.title.length >= TAB_TITLE_LENGTH) {
+                    if (link.title.length >= TAB_TITLE_LENGTH) {
                         a_text = link.title.slice(0, TAB_TITLE_LENGTH) + '...';
                         a_title = 'title="' + link.title + '"';
                     }
@@ -393,7 +393,7 @@ chrome.storage.local.get(function (session_items) {
                     // mouse_button = 0  - cur window, 1 - new
                     var tabs = (groupModel.getGroups())[storage_name].tabs;
 
-                    if(mouse_button === 1) {
+                    if (mouse_button === 1) {
                         openLinksInNewWindow(tabs);
                     } else {
                         openLinksInCurrentWindow(tabs);
@@ -428,7 +428,7 @@ chrome.storage.local.get(function (session_items) {
 
                     tabsGrabber.collectTabs(function (tabs) {
                         // check if group name already exist
-                        if(storage_name !== false && name !== '') {
+                        if (storage_name !== false && name !== '') {
                             // group with the same name already exist
                             // show Popup with dialog
                             popup = new Popup('overwrite_group', function (data) {
@@ -436,7 +436,7 @@ chrome.storage.local.get(function (session_items) {
                                 stored_group = groupModel.getGroups()[storage_name];
                                 stored_group.tabs = tabs;
                                 groupModel.upd(storage_name, stored_group, function (answ) {
-                                    if(answ.err === 0) {
+                                    if (answ.err === 0) {
                                         self.showSyncStorageUsage();
                                     } else {
                                         self.showErrorMsg(answ.msg);
@@ -450,7 +450,7 @@ chrome.storage.local.get(function (session_items) {
                                 var el,
                                     groups_el;
 
-                                if(answ.err === 0) {
+                                if (answ.err === 0) {
                                     self.showSyncStorageUsage();
                                     el = document.createElement("div");
                                     groups_el = document.getElementById('saved');
@@ -475,10 +475,10 @@ chrome.storage.local.get(function (session_items) {
                     document.getElementById('popup-new_group_name').value = group.name;
                     popup = new Popup('edit_group_name', function (data) {
                         new_name = data['popup-new_group_name'];
-                        if(new_name !== undefined || new_name !== '') {
+                        if (new_name !== undefined || new_name !== '') {
                             group.name = new_name;
                             groupModel.upd(storage_name, group, function (answ) {
-                                if(answ.err === 0) {
+                                if (answ.err === 0) {
                                     el.getElementsByClassName('open_group')[0].innerText = new_name;
                                     self.showSyncStorageUsage();
                                 } else {
@@ -494,7 +494,7 @@ chrome.storage.local.get(function (session_items) {
                     var self = this;
 
                     groupModel.del(storage_name, function (answ) {
-                        if(answ.err === 0) {
+                        if (answ.err === 0) {
                             el.remove();
                             self.showSyncStorageUsage();
                         } else {
@@ -507,7 +507,7 @@ chrome.storage.local.get(function (session_items) {
                     var self = this;
 
                     groupModel.move(storage_name, sibling_storage_name, function (answ) {
-                        if(answ.err === 0) {
+                        if (answ.err === 0) {
                             self.showGroups();
                         } else {
                             self.showErrorMsg(answ.msg);
@@ -541,7 +541,7 @@ chrome.storage.local.get(function (session_items) {
 
                 delLink: function (storage_name, link_id, el) {
                     linkModel.del(storage_name, link_id, function (answ) {
-                        if(answ.err === 0) {
+                        if (answ.err === 0) {
                             el.remove();
                         }
                     });
@@ -556,9 +556,9 @@ chrome.storage.local.get(function (session_items) {
                                 url: utils.correctUrl(data['popup-add_link_link'])
                             };
                             linkModel.add(storage_name, obj, function (answ) {
-                                if(answ.err === 0) {
+                                if (answ.err === 0) {
                                     var links_div = el.getElementsByClassName('links');
-                                    if(links_div.length) {
+                                    if (links_div.length) {
                                         self.hideGroupLinks(el);
                                     }
                                     self.showGroupLinks(storage_name, el);
@@ -584,7 +584,7 @@ chrome.storage.local.get(function (session_items) {
                         link_data.title = data['popup-edit_link_name'];
                         link_data.url = utils.correctUrl(data['popup-edit_link_url']);
                         linkModel.upd(storage_name, link_index, link_data, function (answ) {
-                            if(answ.err === 0) {
+                            if (answ.err === 0) {
                                 self.hideGroupLinks(group_node);
                                 self.showGroupLinks(storage_name, group_node);
                                 self.showSyncStorageUsage();
@@ -634,7 +634,7 @@ chrome.storage.local.get(function (session_items) {
                     }, false);
 
                     document.getElementById('new_group_name').addEventListener('keyup', function (e) {
-                        if(e.keyCode === 13) {
+                        if (e.keyCode === 13) {
                             self.addGroup();
                         }
                     }, false);
@@ -660,7 +660,7 @@ chrome.storage.local.get(function (session_items) {
                                 // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
                                 // mouse wheel works only with no scroll
                                 btn = e.button;
-                                if(btn === 0 && e.ctrlKey === true) {
+                                if (btn === 0 && e.ctrlKey === true) {
                                     self.openGroup(el.parentNode.id, 1);
                                 } else {
                                     self.openGroup(el.parentNode.id, e.button);
@@ -673,14 +673,14 @@ chrome.storage.local.get(function (session_items) {
                             case 'up':
                                 group_node = el.parentNode.parentNode;
                                 sibling = group_node.previousSibling;
-                                if(sibling && sibling.className === 'group') {
+                                if (sibling && sibling.className === 'group') {
                                     self.moveGroup(group_node.id, sibling.id);
                                 }
                                 break;
                             case 'down':
                                 group_node = el.parentNode.parentNode;
                                 sibling = group_node.nextSibling;
-                                if(sibling && sibling.className === 'group') {
+                                if (sibling && sibling.className === 'group') {
                                     self.moveGroup(group_node.id, sibling.id);
                                 }
                                 break;
@@ -703,7 +703,7 @@ chrome.storage.local.get(function (session_items) {
                                 break;
                             case 'spoiler':
                                 group_node = el.parentNode;
-                                if(el.getAttribute('name') === 'closed') {
+                                if (el.getAttribute('name') === 'closed') {
                                     self.showGroupLinks(group_node.id, group_node);
                                 } else {
                                     self.hideGroupLinks(group_node);
@@ -743,10 +743,10 @@ chrome.storage.local.get(function (session_items) {
                             };
                         }());
 
-                    if(group.name === '') {
+                    if (group.name === '') {
                         title = date;
                     }
-                    if(storage_name === localStorage.session_id) {
+                    if (storage_name === localStorage.session_id) {
                         title = ui_msg.current_session + ' (' + date + ')';
                     }
                     return '<div id="' + storage_name + '" class="group">' +
@@ -768,7 +768,7 @@ chrome.storage.local.get(function (session_items) {
                         pin_icon = link.pinned === true ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
                         favicon_src = localStorage.browser === 'chrome' ? 'chrome://favicon/' + link.url : 'opera://favicon/' + link.url;
 
-                    if(link.title.length > text_length) {
+                    if (link.title.length > text_length) {
                         a_text = link.title.slice(0, text_length) + '...';
                         a_title = 'title="' + link.title + '"';
                     }
@@ -786,7 +786,7 @@ chrome.storage.local.get(function (session_items) {
                     var grouped,
                         links = [];
 
-                    if(mouse_button === 1) {
+                    if (mouse_button === 1) {
                         grouped = sessionLinkModel.groupLinksByWindowId(storage_name);
                         grouped.windowId_arr.forEach(function (el, index) {
                             links = [];
@@ -808,9 +808,9 @@ chrome.storage.local.get(function (session_items) {
                     var tabs = (sessionModel.getGroups())[storage_name].tabs,
                         links = [];
 
-                    if(mouse_button === 1) {
+                    if (mouse_button === 1) {
                         tabs.forEach(function (el) {
-                            if(el.windowId === parseInt(window_id, 10)) {
+                            if (el.windowId === parseInt(window_id, 10)) {
                                 links.push(el);
                             }
                         });
@@ -843,7 +843,7 @@ chrome.storage.local.get(function (session_items) {
                     var self = this;
 
                     sessionModel.del(storage_name, function (answ) {
-                        if(answ.err === 0) {
+                        if (answ.err === 0) {
                             el.remove();
                         } else {
                             self.showErrorMsg(answ.msg);
@@ -899,7 +899,7 @@ chrome.storage.local.get(function (session_items) {
                                 break;
                             case 'spoiler':
                                 group_node = el.parentNode;
-                                if(el.getAttribute('name') === 'closed') {
+                                if (el.getAttribute('name') === 'closed') {
                                     self.showGroupLinks(group_node.id, group_node);
                                 } else {
                                     self.hideGroupLinks(group_node);
@@ -909,7 +909,7 @@ chrome.storage.local.get(function (session_items) {
                                 // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
                                 // mouse wheel works only with no scroll
                                 btn = e.button;
-                                if(btn === 0 && e.ctrlKey === true) {
+                                if (btn === 0 && e.ctrlKey === true) {
                                     self.openGroup(el.parentNode.id, 1);
                                 } else {
                                     self.openGroup(el.parentNode.id, e.button);
@@ -930,7 +930,7 @@ chrome.storage.local.get(function (session_items) {
                                         window_id: el.id.slice(win_id_start + 1)
                                     };
                                 }());
-                                if(btn === 0 && e.ctrlKey === true) {
+                                if (btn === 0 && e.ctrlKey === true) {
                                     self.openWindow(win_info.storage_name, win_info.window_id, 1);
                                 } else {
                                     self.openWindow(win_info.storage_name, win_info.window_id, 0);
@@ -959,7 +959,7 @@ chrome.storage.local.get(function (session_items) {
 
             navigation;
 
-        if(!chrome.runtime.lastError) {
+        if (!chrome.runtime.lastError) {
             /* window tab navigation */
             navigation = new Tabs('#main_tabs');
             navigation.toggle(storage_items.active_tab);
@@ -968,7 +968,7 @@ chrome.storage.local.get(function (session_items) {
             });
             /* popup tab END */
 
-            if(storage_items.session_watcher) {
+            if (storage_items.session_watcher) {
                 sessionsUI.go();
             } else {
                 navigation.toggle('#saved');
