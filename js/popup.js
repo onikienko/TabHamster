@@ -221,7 +221,7 @@ chrome.storage.local.get(function (session_items) {
                         grouped_by_windows[window_index].push(el);
                     }
                 });
-                return { grouped_by_windowId: grouped_by_windows, windowId_arr: windows };
+                return {grouped_by_windowId: grouped_by_windows, windowId_arr: windows};
             },
 
             nextIndex: function (storage_name) {
@@ -976,7 +976,7 @@ chrome.storage.local.get(function (session_items) {
                 document.querySelector('.tabs_nav').querySelector('[href="#sessions"]').parentNode.style.display = 'none';
             }
             savedUI.go();
-            //          mainUI.setHandlers();
+//          mainUI.setHandlers();
 
         } else {
             // show sync storage error
