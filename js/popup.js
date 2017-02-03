@@ -600,7 +600,7 @@ chrome.storage.local.get(function (session_items) {
                         text = ui_msg.quota_default_item;
 
                     el.style.display = 'block';
-                    switch(msg) {
+                    switch (msg) {
                         case 'QUOTA_BYTES_PER_ITEM quota exceeded':
                             text = ui_msg.quota_bytes_per_item;
                             break;
@@ -655,7 +655,7 @@ chrome.storage.local.get(function (session_items) {
                         }
 
                         e.stopPropagation();
-                        switch(el.className) {
+                        switch (el.className) {
                             case 'open_group':
                                 // e.button - 0 - left mouse click (cur win), 1 - mouse wheel click (new win)
                                 // mouse wheel works only with no scroll
@@ -892,7 +892,7 @@ chrome.storage.local.get(function (session_items) {
                             win_info;
 
                         e.stopPropagation();
-                        switch(el.className) {
+                        switch (el.className) {
                             case 'del_group':
                                 group_node = el.parentNode.parentNode;
                                 self.delGroup(group_node.id, group_node);
