@@ -272,7 +272,7 @@ chrome.storage.local.get(function(session_items) {
             ui_msg = {
                 title_del_group: chrome.i18n.getMessage('p_delGroup_btn_title'),
                 title_edit_group_name: chrome.i18n.getMessage('p_editGroupName_btn_title'),
-                title_p_syncLink_btn_title: chrome.i18n.getMessage('p_syncLink_btn_title'),
+                title_rewrite_btn_title: chrome.i18n.getMessage('title_rewrite_btn_title'),
                 title_add_link_to_group: chrome.i18n.getMessage('p_addLinkToGroup_btn_title'),
                 title_group_in_new_window: chrome.i18n.getMessage('p_groupInNewWindow_btn_title'),
                 title_edit_link: chrome.i18n.getMessage('p_editLink_btn_title'),
@@ -359,7 +359,7 @@ chrome.storage.local.get(function(session_items) {
                         '<span class="open_group">' + title + '</span>' +
                         '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                         '<span class="group_action">' +
-                        '<span class="refresh" title="' + ui_msg.title_p_syncLink_btn_title + '">&#10227;</span>' +
+                        '<span class="rewrite" title="' + ui_msg.title_rewrite_btn_title + '">&#10227;</span>' +
                         '<span class="add_link" title="' + ui_msg.title_add_link_to_group + '">&#10010;</span>' +
                         '<span class="up" title="' + ui_msg.title_up_link + '">&#9650;</span>' +
                         '<span class="down" title="' + ui_msg.title_down_link + '">&#9660;</span>' +
@@ -692,11 +692,10 @@ chrome.storage.local.get(function(session_items) {
                                 group_node = el.parentNode.parentNode;
                                 self.editGroupName(group_node.id, group_node);
                                 break;
-                            case 'refresh':
+                            case 'rewrite':
                                 group_node = el.parentNode.parentNode;
-                                self.delGroup(group_node.id, group_node);
-                                var nn = el.parentNode.parentNode.childNodes[1].innerHTML;
-                                self.addGroup(nn);
+                                var name = group_node.childNodes[1].innerHTML;
+                                self.addGroup(name);
                                 break;
                             case 'add_link':
                                 group_node = el.parentNode.parentNode;
