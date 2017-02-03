@@ -774,7 +774,7 @@ chrome.storage.local.get(function (session_items) {
                     }
                     return '<div class="link">' +
                         '<span class="link_action">' +
-                        //                        '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
+//                        '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
                         '<a href="' + link.url + '" target="_blank" ' + a_title + '>' +
                         '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + pin_icon + a_text + '</a>' +
                         '</span>' +
@@ -947,15 +947,15 @@ chrome.storage.local.get(function (session_items) {
                 }
             },
 
-            //            mainUI = {
-            //                setHandlers: function () {
-            //                    document.body.onkeyup = function (e) {
-            //                        if (e.keyCode === 78 && e.target.tagName !== 'input') {
-            //                            alert(e.target.tagName);
-            //                        }
-            //                    };
-            //                }
-            //            },
+//            mainUI = {
+//                setHandlers: function () {
+//                    document.body.onkeyup = function (e) {
+//                        if (e.keyCode === 78 && e.target.tagName !== 'input') {
+//                            alert(e.target.tagName);
+//                        }
+//                    };
+//                }
+//            },
 
             navigation;
 
