@@ -70,7 +70,7 @@ chrome.storage.local.get(function (session_items) {
                     }()),
                     obj = {};
 
-                for(item in groups_data) {
+                for (item in groups_data) {
                     if (item.indexOf('tg_') === 0) {
                         obj[item] = groups_data[item];
                     }
@@ -87,7 +87,7 @@ chrome.storage.local.get(function (session_items) {
             getStorageNameByName: function (name) {
                 var storage_name;
 
-                for(storage_name in this.data_local_copy) {
+                for (storage_name in this.data_local_copy) {
                     if (this.data_local_copy[storage_name].name === name) {
                         return storage_name;
                     }
@@ -99,7 +99,7 @@ chrome.storage.local.get(function (session_items) {
                 var last_index = 0,
                     group;
 
-                for(group in this.data_local_copy) {
+                for (group in this.data_local_copy) {
                     if (this.data_local_copy[group].index > last_index) {
                         last_index = this.data_local_copy[group].index;
                     }
@@ -199,7 +199,7 @@ chrome.storage.local.get(function (session_items) {
                     tabs = (this.model.getGroups())[storage_name].tabs,
                     max = tabs.length;
 
-                for(i = 0; i < max; i++) {
+                for (i = 0; i < max; i++) {
                     if (tabs[i].id === parseInt(link_id, 10)) {
                         return i;
                     }
