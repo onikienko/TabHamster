@@ -1,6 +1,8 @@
 Chrome and Opera Extension
 ==========================
 
+### Russian invaders must die. Glory to Ukraine.
+
 Session manager and tabs saver. With sync.
 ------------------------------------------
 
