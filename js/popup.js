@@ -739,7 +739,7 @@ chrome.storage.local.get(function (session_items) {
                     if (group.name === '') {
                         title = date;
                     }
-                    if (storage_name === localStorage.session_id) {
+                    if (storage_name === session_items.session_id) {
                         title = ui_msg.current_session + ' (' + date + ')';
                     }
                     return '<div id="' + storage_name + '" class="group">' +

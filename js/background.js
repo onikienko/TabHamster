@@ -86,7 +86,7 @@ storage.area.get('session_watcher', function (from_storage) {
                 },
                 session_id = config.prefix + (new Date()).getTime(); //current session id
 
-            localStorage.session_id = session_id;
+            chrome.storage.local.set({session_id});
 
             // remove old sessions from chrome.storage.local (if sessions numbers >= config.session_numbers)
             chrome.storage.local.get(function (items) {
