@@ -123,11 +123,14 @@ ul.tabs_nav {
     cursor: pointer;
 }
 
-.favi > img {
-    width: 16px;
-    height: 16px;
-    vertical-align: middle;
+.favi {
+    display: inline-flex;
     margin: 0 8px;
+    border-radius: 8px;
+    background-color: lightgray;
+    height: 16px;
+    width: 16px;
+    vertical-align: text-bottom;
 }
 
 .pinned_icon {
