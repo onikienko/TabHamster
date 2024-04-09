@@ -1,3 +1,10 @@
+function faviconURL(u) {
+    const url = new URL(chrome.runtime.getURL("/_favicon/"));
+    url.searchParams.set("pageUrl", u);
+    url.searchParams.set("size", "32");
+    return url.toString();
+}
+
 chrome.storage.local.get(function (session_items) {
     chrome.storage.sync.get(function (storage_items) {
         /**
@@ -371,7 +378,7 @@ chrome.storage.local.get(function (session_items) {
                     var a_text = link.title,
                         a_title = '',
                         pin_icon = link.pinned ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
-                        favicon_src = 'chrome://favicon/' + link.url;
+                        favicon_src = faviconURL(link.url);
 
                     if (link.title.length >= TAB_TITLE_LENGTH) {
                         a_text = link.title.slice(0, TAB_TITLE_LENGTH) + '...';
@@ -759,7 +766,7 @@ chrome.storage.local.get(function (session_items) {
                         a_title = '',
                         text_length = 44,
                         pin_icon = link.pinned === true ? '<img class="pinned_icon" src="img/pin-26.png">' : '',
-                        favicon_src = 'chrome://favicon/' + link.url;
+                        favicon_src = faviconURL(link.url);
 
                     if (link.title.length > text_length) {
                         a_text = link.title.slice(0, text_length) + '...';

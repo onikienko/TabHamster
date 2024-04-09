@@ -2,10 +2,9 @@
     "name": "__MSG_extName__",
     "description": "__MSG_extDescr__",
     "version": "0.2.10",
-    "manifest_version": 2,
+    "manifest_version": 3,
     "author": "Mykhailo Onikiienko",
 
-    "minimum_chrome_version": "25",
     "default_locale": "en",
     "icons": {
         "16": "img/ext_icons/16.png",
@@ -13,24 +12,22 @@
         "128": "img/ext_icons/128.png"
     },
 
-    "browser_action": {
+    "action": {
         "default_icon": {
-            "19": "img/ext_icons/19.png",
-            "38": "img/ext_icons/38.png"
+            "16": "img/ext_icons/16.png",
+            "48": "img/ext_icons/48.png"
         },
-        "default_title": "__MSG_extName__",
         "default_popup": "popup.html"
     },
 
     "background": {
-        "scripts": ["js/storage.js", "js/background.js"],
-        "persistent": true
+        "service_worker": "js/background.js"
     },
     "options_page": "options.html",
 
     "permissions": [
         "storage",
         "tabs",
-        "chrome://favicon/"
+        "favicon"
     ]
 }
