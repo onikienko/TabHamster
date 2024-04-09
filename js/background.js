@@ -74,7 +74,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 });
 
 /*SESSION WATCHER*/
-storage.area.get('session_watcher', function (from_storage) {
+storage.area.get({session_watcher: storage.default_options.session_watcher}, function (from_storage) {
     if (from_storage.session_watcher) {
         (function () {
             var config = {
