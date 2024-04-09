@@ -28,10 +28,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
     }
 
     switch (details.reason) {
-        case 'install': // if ext is  first installed
-            var ua = navigator.userAgent;
-            // browser name to local storage (src="opera://favicon/http://www.google.com/" or "chrome://favicon")
-            localStorage.browser = ua.indexOf('OPR/') === -1 ? 'chrome' : 'opera';
+        case 'install': // if ext is first installed
             setDefaults(function () {
                 // show options page
                 chrome.tabs.create({'url': 'options.html#help'});
