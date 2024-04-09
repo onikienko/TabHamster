@@ -26,6 +26,6 @@ var utils = {
         var start_with = ['http://', 'https://', 'ftp://', 'opera://', 'chrome://', 'chrome-extension://', 'chrome-devtools://', 'file://'];
         return start_with.some(function (el) {
             return (url.indexOf(el) === 0);
-        }) ? url : 'http://' + url;
+        }) ? url : 'https://' + url;
     }
 };
