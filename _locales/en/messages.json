@@ -65,6 +65,9 @@
     "p_addLinkToGroup_btn_title": {
         "message": "New link to group"
     },
+    "title_rewrite_btn_title": {
+        "message": "Rewrite"
+    },
     "p_delLinkFromGroup_btn_title": {
         "message": "Delete"
     },
