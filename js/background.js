@@ -12,7 +12,7 @@ var storage = {
 };
 
 const session_config = {
-    session_numbers: 6,
+    session_numbers: 30,
     prefix: 'tg_',
 };
 
