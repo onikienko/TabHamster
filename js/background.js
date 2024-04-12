@@ -7,8 +7,13 @@ var storage = {
         pinned: 0, //do not add pinned tabs
         cur_win: 1, // save tabs from current window only
         active_tab: '#saved', //or '#sessions'
-        session_watcher: 1  //extension will watch sessions
-    }
+        session_watcher: 1,  //extension will watch sessions
+    },
+};
+
+const session_config = {
+    session_numbers: 6,
+    prefix: 'tg_',
 };
 
 chrome.runtime.onInstalled.addListener(function (details) {
@@ -87,86 +92,87 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 });
 
 /*SESSION WATCHER*/
-storage.area.get({session_watcher: storage.default_options.session_watcher}, function (from_storage) {
-    if (from_storage.session_watcher) {
-        (function () {
-            var config = {
-                    session_numbers: 30,
-                    prefix: 'tg_'
-                },
-                session_id = config.prefix + (new Date()).getTime(); //current session id
 
-            chrome.storage.local.set({session_id});
-
-            // remove old sessions from chrome.storage.local (if sessions numbers >= config.session_numbers)
-            chrome.storage.local.get(function (items) {
-                var key = (function () {
-                        var item,
-                            id;
-                        for (item in items) {
-                            if (item.indexOf(config.prefix) === 0) {
-                                id = item;
-                                break;
-                            }
-                        }
-                        return id ? id.slice(config.prefix.length) : id;
-                    }()),
-                    items_keys = Object.keys(items);
-
-                if (key && items_keys.length >= config.session_numbers) {
-                    items_keys.forEach(function (el) {
-                        var el_id = el.slice(config.prefix.length);
-                        key = el_id < key ? el_id : key;
-                    });
-                    chrome.storage.local.remove(config.prefix + key);
+// remove old sessions from chrome.storage.local (if sessions numbers >= config.session_numbers)
+function cleanupSessions() {
+    chrome.storage.local.get(function (items) {
+        var key = (function () {
+                var item,
+                    id;
+                for (item in items) {
+                    if (item.indexOf(session_config.prefix) === 0) {
+                        id = item;
+                        break;
+                    }
                 }
-            });
+                return id ? id.slice(session_config.prefix.length) : id;
+            }()),
+            items_keys = Object.keys(items);
 
-            function updateCurrentSession() {
-                chrome.tabs.query({}, function (tabs) {
-                    var session = {
-                            name: '',
-                            tabs: []
-                        },
-                        obj = {};
-                    tabs.forEach(function (tab) {
-                        var obj = {};
-                        if (tab.url.indexOf('chrome-devtools://') !== 0) {
-                            obj.pinned = tab.pinned;
-                            obj.title = tab.title;
-                            obj.url = tab.url;
-                            obj.windowId = tab.windowId;
-                            session.tabs.push(obj);
-                        }
-                    });
-                    obj[session_id] = session;
-                    chrome.storage.local.set(obj);
-                });
+        if (key && items_keys.length >= session_config.session_numbers) {
+            items_keys.forEach(function (el) {
+                var el_id = el.slice(session_config.prefix.length);
+                key = el_id < key ? el_id : key;
+            });
+            chrome.storage.local.remove(session_config.prefix + key);
+        }
+    });
+}
+
+async function updateCurrentSession() {
+    const session_storage = await chrome.storage.session.get('session_id');
+    let session_id = session_storage.session_id;
+    if (!session_id) {
+        session_id = session_config.prefix + (new Date()).getTime();
+        await chrome.storage.session.set({session_id});
+
+        cleanupSessions();
+    }
+    chrome.tabs.query({}, function (tabs) {
+        const session = {
+            name: '',
+            tabs: [],
+        };
+        const obj = {};
+        tabs.forEach(function (tab) {
+            const obj = {};
+            if (!tab.url.startsWith('chrome-devtools://')) {
+                obj.pinned = tab.pinned;
+                obj.title = tab.title;
+                obj.url = tab.url;
+                obj.windowId = tab.windowId;
+                session.tabs.push(obj);
             }
+        });
 
-            /* tabs event listeners*/
-            chrome.tabs.onUpdated.addListener(function (tab_id, change_info) {
-                if (change_info.url) {
-                    updateCurrentSession();
-                }
-            });
-            chrome.tabs.onMoved.addListener(function () {
-                updateCurrentSession();
-            });
-            chrome.tabs.onAttached.addListener(function () {
-                updateCurrentSession();
-            });
-            chrome.tabs.onRemoved.addListener(function () {
-                updateCurrentSession();
-            });
-            chrome.tabs.onReplaced.addListener(function () {
-                updateCurrentSession();
-            });
+        obj[session_id] = session;
+        chrome.storage.local.set(obj);
+    });
+}
 
+function onUpdated(tab_id, change_info) {
+    if (change_info.url) {
+        updateCurrentSession();
+    }
+}
+
+chrome.tabs.onUpdated.addListener(onUpdated);
+chrome.tabs.onMoved.addListener(updateCurrentSession);
+chrome.tabs.onAttached.addListener(updateCurrentSession);
+chrome.tabs.onRemoved.addListener(updateCurrentSession);
+chrome.tabs.onReplaced.addListener(updateCurrentSession);
+
+storage.area.get({session_watcher: storage.default_options.session_watcher}, async function (from_storage) {
+    if (!from_storage.session_watcher) {
+        chrome.tabs.onUpdated.hasListener(onUpdated) && chrome.tabs.onUpdated.removeListener(onUpdated);
+        chrome.tabs.onMoved.hasListener(updateCurrentSession) && chrome.tabs.onMoved.removeListener(updateCurrentSession);
+        chrome.tabs.onAttached.hasListener(updateCurrentSession) && chrome.tabs.onAttached.removeListener(updateCurrentSession);
+        chrome.tabs.onRemoved.hasListener(updateCurrentSession) && chrome.tabs.onRemoved.removeListener(updateCurrentSession);
+        chrome.tabs.onReplaced.hasListener(updateCurrentSession) && chrome.tabs.onReplaced.removeListener(updateCurrentSession);
+    } else {
+        const session_storage = await chrome.storage.session.get('session_id');
+        if (!session_storage.session_id) {
             updateCurrentSession();
-        }());
+        }
     }
 });
-
-
-// TODO index optimization for groups and links. (on startup)
