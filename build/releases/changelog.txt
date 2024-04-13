@@ -1,3 +1,10 @@
+0.3.0 (12.04.2024 16:01)
+    Manifest v3 support
+    Fix Session Watcher behavior on the first run
+    Fix favicon appearance if browser uses dark theme
+    Add 32px icon
+    Remove "ru" locale
+    Remove Opera support
 0.2.10 (08.12.2015 12:32)
 	Add Serbian translation (thanks to Sijera)
 	Fix Opera manifest to persistent background page
