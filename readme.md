@@ -1,8 +1,6 @@
 TabHamster Chrome Extension
 ================
 
-### Russian invaders must die. Glory to Ukraine. 🇺🇦
-
 Session manager and tabs saver. With sync.
 ------------------------------------------
 
@@ -14,4 +12,6 @@ Install for your browser:
 
 **[Chrome Market](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
 
-~~**[Opera Market](https://addons.opera.com/extensions/details/tabhamster/)**~~
+~~**[Opera Market](https://addons.opera.com/extensions/details/tabhamster/)**~~ (not available for Opera anymore)
+
+### Glory to Ukraine. 🇺🇦
