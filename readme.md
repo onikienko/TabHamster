@@ -4,8 +4,6 @@ TabHamster Chrome Extension
 Session manager and tabs saver. With sync.
 ------------------------------------------
 
-The extension was updated to manifest v3 and it will continue to work.
-
 ![](https://raw.githubusercontent.com/onikienko/TabHamster/master/img/ext_icons/128.png)  
 
 Install for your browser:
