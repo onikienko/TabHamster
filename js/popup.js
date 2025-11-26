@@ -280,6 +280,7 @@ chrome.storage.session.get(function (session_storage_items) {
                 ui_msg = {
                     title_del_group: chrome.i18n.getMessage('p_delGroup_btn_title'),
                     title_edit_group_name: chrome.i18n.getMessage('p_editGroupName_btn_title'),
+                    title_update_group: chrome.i18n.getMessage('p_updateGroup_btn_title'),
                     title_add_link_to_group: chrome.i18n.getMessage('p_addLinkToGroup_btn_title'),
                     title_group_in_new_window: chrome.i18n.getMessage('p_groupInNewWindow_btn_title'),
                     title_edit_link: chrome.i18n.getMessage('p_editLink_btn_title'),
@@ -366,6 +367,7 @@ chrome.storage.session.get(function (session_storage_items) {
                             '<span class="open_group">' + title + '</span>' +
                             '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                             '<span class="group_action">' +
+                            '<span class="update_group" title="' + ui_msg.title_update_group + '">&#8635;</span>' +
                             '<span class="add_link" title="' + ui_msg.title_add_link_to_group + '">&#10010;</span>' +
                             '<span class="up" title="' + ui_msg.title_up_link + '">&#9650;</span>' +
                             '<span class="down" title="' + ui_msg.title_down_link + '">&#9660;</span>' +
@@ -553,6 +555,27 @@ chrome.storage.session.get(function (session_storage_items) {
                         });
                     },
 
+                    updateGroup: function (storage_name, el) {
+                        var self = this;
+                        tabsGrabber.collectTabs(function (tabs) {
+                            var group = (groupModel.getGroups())[storage_name];
+                            group.tabs = tabs;
+                            groupModel.upd(storage_name, group, function (answ) {
+                                if (answ.err === 0) {
+                                    self.showSyncStorageUsage();
+                                    if(el.getElementsByClassName('links')[0]){
+                                        self.hideGroupLinks(el);
+                                        self.showGroupLinks(storage_name, el);
+                                    }
+                                } else {
+                                    self.showErrorMsg(answ.msg);
+                                }
+                            });
+                            
+                        });
+
+                    },
+
                     addLink: function (storage_name, el) {
                         var self = this,
                             popup = new Popup('add_link', function (data) {
@@ -697,6 +720,10 @@ chrome.storage.session.get(function (session_storage_items) {
                                 case 'edit_group':
                                     group_node = el.parentNode.parentNode;
                                     self.editGroupName(group_node.id, group_node);
+                                    break;
+                                case 'update_group':
+                                    group_node = el.parentNode.parentNode;
+                                    self.updateGroup(group_node.id, group_node);
                                     break;
                                 case 'add_link':
                                     group_node = el.parentNode.parentNode;

@@ -229,5 +229,8 @@
     "o_backup_restoreButton": {
         "message": "Restore options and saved groups",
         "description": ""
+    },
+    "p_updateGroup_btn_title": {
+        "message": "Update group with current tabs"
     }
 }
