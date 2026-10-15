@@ -5,7 +5,7 @@ const {makeClock, createStorageArea, createSyncArea, createSyncNetwork, MINUTE, 
 const {mulberry32, makeTabs, makeGroup, int} = require('./helpers.js');
 
 const DAY = 24 * HOUR;
-const QUOTA_ERROR = 'QUOTA_BYTES quota exceeded';
+const QUOTA_ERROR = 'Resource::kQuotaBytes quota exceeded';
 const RATE_ERROR = 'This request exceeds the MAX_WRITE_OPERATIONS_PER_MINUTE quota.';
 
 function makeDevice({clock = makeClock(), sync = createSyncArea(clock), seed = 1} = {}) {
@@ -684,7 +684,7 @@ test('fuzz: two devices end up with the same groups', async () => {
                     assert.deepEqual(remote[key] && remote[key].group, plain(list[key]), where + key);
                 } else {
                     // only a group that doesn't fit in sync may stay on one device
-                    assert.match(results[i].errors[key] || '', /QUOTA_BYTES quota exceeded/, where + key);
+                    assert.match(results[i].errors[key] || '', /kQuotaBytes quota exceeded/, where + key);
                 }
             });
             Object.keys(remote).filter(key => remote[key].status === 'ok')

@@ -1,7 +1,7 @@
 // Fake chrome.* API for trying the extension pages in a normal browser tab (test/popup_harness.html, test/options_harness.html).
 // The real js/background.js runs in the same page. Storage is kept in localStorage, so reloading the
 // page is like reopening the popup. From the console:
-//   fakeChrome.sync_error = 'QUOTA_BYTES quota exceeded'   // every sync write fails with this message
+//   fakeChrome.sync_error = 'Resource::kQuotaBytes quota exceeded'   // every sync write fails with this message
 //   fakeChrome.sync_error = null
 //   fakeChrome.reset()                                       // empty all storage and reload
 // URL parameters: ?tabs=N open tabs to save (default 8), ?lang=uk messages from _locales/uk,
@@ -116,13 +116,13 @@
                         }
                         Object.keys(copy).forEach(function (key) {
                             if (size(key, copy[key]) > limits.QUOTA_BYTES_PER_ITEM) {
-                                throw new Error('QUOTA_BYTES_PER_ITEM quota exceeded');
+                                throw new Error('Resource::kQuotaBytesPerItem quota exceeded');
                             }
                         });
                         if (Object.keys(next).reduce(function (sum, key) {
                             return sum + size(key, next[key]);
                         }, 0) > limits.QUOTA_BYTES) {
-                            throw new Error('QUOTA_BYTES quota exceeded');
+                            throw new Error('Resource::kQuotaBytes quota exceeded');
                         }
                     }
                     Object.keys(copy).forEach(function (key) {

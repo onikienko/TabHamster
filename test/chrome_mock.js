@@ -30,7 +30,7 @@ function withCallback(promise, callback) {
 
 /**
  * chrome.storage area (get, set, remove, getBytesInUse), promise or callback style.
- * With `limits` (SYNC_LIMITS) it enforces sync quotas with Chrome's error messages.
+ * With `limits` (SYNC_LIMITS) it enforces sync quotas with Chrome's error messages (as in Chrome 155).
  * Test hooks: `log` of write calls, `beforeWrite(op, keys)` that can throw to fail a write,
  * `onWrite(changes)` called after a successful write, raw*() to change data without any of that.
  */
@@ -102,14 +102,14 @@ function createStorageArea({limits = null, clock = Date.now} = {}) {
         if (limits) {
             keys.forEach(function (key) {
                 if (chromeItemSize(key, items[key]) > limits.QUOTA_BYTES_PER_ITEM) {
-                    throw new Error('QUOTA_BYTES_PER_ITEM quota exceeded');
+                    throw new Error('Resource::kQuotaBytesPerItem quota exceeded');
                 }
             });
             if (total(next) > limits.QUOTA_BYTES) {
-                throw new Error('QUOTA_BYTES quota exceeded');
+                throw new Error('Resource::kQuotaBytes quota exceeded');
             }
             if (next.size > limits.MAX_ITEMS) {
-                throw new Error('MAX_ITEMS quota exceeded');
+                throw new Error('Resource::kMaxItems quota exceeded');
             }
         }
         data = next;

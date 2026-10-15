@@ -386,13 +386,14 @@ var groupStore = (function () {
             const replaced = bytesOf(sync_items, new_keys);
             const old_bytes = bytesOf(sync_items, old);
             const final_bytes = in_use + added - replaced - old_bytes;
+            // same messages as Chrome's own errors (Chrome 155)
             if (final_bytes > sync.QUOTA_BYTES) {
-                throw new Error('QUOTA_BYTES quota exceeded');
+                throw new Error('Resource::kQuotaBytes quota exceeded');
             }
             const final_count = Object.keys(sync_items).length - old.length +
                 new_keys.filter(k => sync_items[k] === undefined).length;
             if (final_count > sync.MAX_ITEMS) {
-                throw new Error('MAX_ITEMS quota exceeded');
+                throw new Error('Resource::kMaxItems quota exceeded');
             }
 
             if (final_bytes + old_bytes <= sync.QUOTA_BYTES) {

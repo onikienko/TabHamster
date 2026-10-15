@@ -452,7 +452,9 @@ chrome.storage.session.get(function (session_storage_items) {
 
                             self.setSyncMark(storage_name, res.synced);
                             if (res.error) {
-                                note = /QUOTA_BYTES|MAX_ITEMS/.test(res.error) ? ui_msg.saved_locally_full : ui_msg.saved_locally_later;
+                                // "QUOTA_BYTES quota exceeded" (the store's own check, older Chrome) or
+                                // "Resource::kQuotaBytes quota exceeded" (Chrome 155)
+                                note = /quota_?bytes|max_?items/i.test(res.error) ? ui_msg.saved_locally_full : ui_msg.saved_locally_later;
                             }
                             copied = copied || !!res.copy;
                         });
