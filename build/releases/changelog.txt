@@ -1,3 +1,4 @@
+0.4.0 (15.10.2026 15:59)
     Save groups with hundreds of tabs: groups are compressed and split across sync storage items
     Every group is also kept on this computer: when sync storage is full, a group is still saved, marked as not synced, and synced once there is room
     Deleted groups are kept for 30 days in "Recently deleted" (Settings > Backup / Restore), also groups deleted on other computers
