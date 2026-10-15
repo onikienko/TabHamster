@@ -335,9 +335,7 @@ chrome.storage.session.get(function (session_storage_items) {
 
                     window_text: chrome.i18n.getMessage('p_window_text'),
 
-                    quota_bytes_item: chrome.i18n.getMessage('p_quotaBites_error'),
-                    quota_default_item: chrome.i18n.getMessage('p_syncStorageDefault_error'),
-                    quota_bytes_per_item: chrome.i18n.getMessage('p_quotaBitesPerItem_error'),
+                    error_default: chrome.i18n.getMessage('p_syncStorageDefault_error'),
 
                     current_session: chrome.i18n.getMessage('p_currentSession'),
 
@@ -733,20 +731,16 @@ chrome.storage.session.get(function (session_storage_items) {
                         });
                     },
 
-                    // msg: storage error message, or text: shown as is
+                    // text: shown as is. Without it, msg is an error: a general message is shown, msg goes to the console.
+                    // (Sync storage problems don't fail a save, so there is nothing more specific to say.)
                     showErrorMsg: function (msg, text) {
                         var el = document.getElementById('error_msg');
 
                         el.style.display = 'block';
                         if (!text) {
-                            text = ui_msg.quota_default_item;
-                            switch (msg) {
-                                case 'QUOTA_BYTES_PER_ITEM quota exceeded':
-                                    text = ui_msg.quota_bytes_per_item;
-                                    break;
-                                case 'QUOTA_BYTES quota exceeded':
-                                    text = ui_msg.quota_bytes_item;
-                                    break;
+                            text = ui_msg.error_default;
+                            if (msg) {
+                                console.error('TabHamster:', msg);
                             }
                         }
                         el.innerText = text;

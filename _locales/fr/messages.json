@@ -82,14 +82,8 @@
     "p_window_text": {
         "message": "Fenêtre"
     },
-    "p_quotaBitesPerItem_error": {
-        "message": "Impossible de synchroniser avec l'espace de stockage. Trop d'onglets. Essayez d'en fermer un de plus."
-    },
-    "p_quotaBites_error": {
-        "message": "L'espace de synchronisation est plein. Supprimer des groupes non utilisés."
-    },
     "p_syncStorageDefault_error": {
-        "message": "Erreur de synchronisation. Essayez plus tard."
+        "message": "Une erreur s'est produite. Réessayez."
     },
     "p_currentSession": {
         "message": "Actuel"
@@ -157,7 +151,7 @@
         "description": ""
     },
     "o_help_syncStorage_2": {
-        "message": "Il existe également une limite à la taille de données enregistrées en une fois. Approximativement 17 - 24 onglets.",
+        "message": "Les groupes sont compressés : un groupe peut donc contenir des centaines d'onglets. Chaque groupe est aussi conservé sur cet ordinateur : si l'espace de synchronisation est plein, le groupe est quand même enregistré et marqué d'un ⚠ jusqu'à ce qu'il y ait de la place.",
         "description": ""
     },
     "o_help_tipsLegend": {
@@ -190,6 +184,136 @@
     },
     "o_sessionWatcher_toggle": {
         "message": "Regarde les sessions. Décocher permet de désactiver la sauvegarde automatique de la session. Redémarrer le navigateur pour que les changements prennent effet",
+        "description": ""
+    },
+    "bg_conflictCopy": {
+        "message": "copie en conflit",
+        "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
+    },
+    "p_notSynced_title": {
+        "message": "Enregistré uniquement sur cet ordinateur, pas dans la synchronisation du navigateur",
+        "description": "Tooltip of the mark next to a saved group that is not in browser sync"
+    },
+    "p_notSyncedCount": {
+        "message": "$COUNT$ non synchronisé(s)",
+        "description": "After the sync storage usage on the Saved groups tab",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_savedLocally_full": {
+        "message": "Enregistré uniquement sur cet ordinateur : l'espace de synchronisation du navigateur est plein. Supprimez les groupes dont vous n'avez plus besoin pour le synchroniser.",
+        "description": "Shown when a group was saved but sync storage has no room"
+    },
+    "p_savedLocally_later": {
+        "message": "Enregistré sur cet ordinateur. Il sera synchronisé plus tard.",
+        "description": "Shown when a group was saved but could not reach sync storage right now"
+    },
+    "p_nothingToSave": {
+        "message": "Aucun onglet à enregistrer. Les onglets épinglés sont ignorés, sauf si vous les activez dans les paramètres.",
+        "description": "Shown when Save finds no tabs to save"
+    },
+    "p_groupDeleted_text": {
+        "message": "Groupe supprimé.",
+        "description": "Bar shown for a few seconds after a group is deleted"
+    },
+    "p_undo_btn": {
+        "message": "Annuler",
+        "description": "Button on the bar after a group is deleted"
+    },
+    "o_backup_downloadButton": {
+        "message": "Télécharger le fichier de sauvegarde",
+        "description": ""
+    },
+    "o_backup_restoreFile": {
+        "message": "Fichier de sauvegarde :",
+        "description": ""
+    },
+    "o_backup_restored": {
+        "message": "Sauvegarde restaurée.",
+        "description": ""
+    },
+    "o_backup_undone": {
+        "message": "Restauration annulée.",
+        "description": ""
+    },
+    "o_backup_undoRestoreButton": {
+        "message": "Annuler la dernière restauration",
+        "description": ""
+    },
+    "o_backup_error_notBackup": {
+        "message": "Ce n'est pas une sauvegarde TabHamster. Rien n'a été modifié.",
+        "description": ""
+    },
+    "o_backup_error_damaged": {
+        "message": "Certains groupes de cette sauvegarde sont illisibles. Rien n'a été modifié.",
+        "description": ""
+    },
+    "o_backup_error_empty": {
+        "message": "Cette sauvegarde ne contient ni groupes enregistrés ni paramètres. Rien n'a été modifié.",
+        "description": ""
+    },
+    "o_backup_error_other": {
+        "message": "La restauration a échoué. Réessayez.",
+        "description": ""
+    },
+    "o_trash_legend": {
+        "message": "Supprimés récemment",
+        "description": ""
+    },
+    "o_trash_info": {
+        "message": "Les groupes supprimés sont conservés ici pendant 30 jours, y compris ceux supprimés sur vos autres ordinateurs.",
+        "description": ""
+    },
+    "o_trash_empty": {
+        "message": "Aucun groupe supprimé récemment.",
+        "description": ""
+    },
+    "o_trash_deletedAt": {
+        "message": "supprimé le",
+        "description": ""
+    },
+    "o_trash_restoreButton": {
+        "message": "Restaurer",
+        "description": ""
+    },
+    "o_backup_backupInstruction": {
+        "message": "Cliquez sur « Télécharger le fichier de sauvegarde » pour enregistrer vos groupes et paramètres dans un fichier. Vous pouvez aussi copier le texte ci-dessous.",
+        "description": ""
+    },
+    "o_backup_restoreInstruction": {
+        "message": "Choisissez un fichier de sauvegarde ou collez le texte de la sauvegarde ci-dessous, puis cliquez sur « Restaurer les paramètres et les groupes enregistrés ».",
+        "description": ""
+    },
+    "o_backup_restoreInstructionMore": {
+        "message": "Les groupes enregistrés sont remplacés par ceux de la sauvegarde. Les groupes absents de la sauvegarde vont dans « Supprimés récemment », et vous pouvez annuler la restauration.",
+        "description": ""
+    },
+    "p_overwriteGroup_popup": {
+        "message": "Un groupe portant ce nom existe déjà. Voulez-vous le remplacer par les onglets actuels ?",
+        "description": "Modal window dialog"
+    },
+    "o_tabs_backup": {
+        "message": "Sauvegarde / Restauration",
+        "description": "Tab name"
+    },
+    "o_backup_backupLegend": {
+        "message": "Sauvegarde",
+        "description": ""
+    },
+    "o_backup_backupInstructionMore": {
+        "message": "Ces données vous permettront de restaurer vos groupes enregistrés et les paramètres de l'extension. Les sessions ne peuvent pas être restaurées.",
+        "description": ""
+    },
+    "o_backup_restoreLegend": {
+        "message": "Restauration",
+        "description": ""
+    },
+    "o_backup_restoreButton": {
+        "message": "Restaurer les paramètres et les groupes enregistrés",
         "description": ""
     }
 }

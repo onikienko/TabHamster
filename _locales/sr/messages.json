@@ -9,7 +9,7 @@
    },
    "o_backup_backupInstruction": {
       "description": "",
-      "message": "Копирајте текст са текстуалног поља испод (CTRL+A за избор целог текста и CTRL+C за копирање). Затим налепите (CTRL+V) и сачувајте текст у датотеку, на пример TabHamsterBackup.txt (користите UTF-8 кодирање)."
+      "message": "Притисните „Преузми датотеку резервне копије“ да бисте сачували групе и подешавања у датотеку. Можете и да копирате текст испод."
    },
    "o_backup_backupInstructionMore": {
       "description": "",
@@ -25,11 +25,11 @@
    },
    "o_backup_restoreInstruction": {
       "description": "",
-      "message": "Налепите претходно сачувану резервну копију у ово текстуално поље (будите сигурни да сте налепили UTF-8 кодирани текст) а затим притисните дугме 'Врати...'. Проширење ће се аутоматски поново покренути."
+      "message": "Изаберите датотеку резервне копије или налепите текст копије испод, а затим притисните „Врати опције и сачуване групе“."
    },
    "o_backup_restoreInstructionMore": {
       "description": "",
-      "message": "Пажња! Све тренутне сачуване групе и опције ће бити избрисане."
+      "message": "Сачуване групе се замењују групама из резервне копије. Групе којих нема у копији прелазе у „Недавно избрисане“, а враћање можете да опозовете."
    },
    "o_backup_restoreLegend": {
       "description": "",
@@ -93,7 +93,7 @@
    },
    "o_help_syncStorage_2": {
       "description": "",
-      "message": "Постоји и ограничење у величини снимљених података у исто време. То је око 17 - 24 картица."
+      "message": "Групе се сажимају, па група може да има стотине картица. Свака група се чува и на овом рачунару: ако је складиште синхронизације пуно, група се ипак чува и означава са ⚠ док у синхронизацији не буде места."
    },
    "o_help_tipsLegend": {
       "description": "",
@@ -191,18 +191,12 @@
       "description": "Modal window dialog",
       "message": "Група са истим именом већ постоји. Да ли желите да замените стару са тренутним картицама?"
    },
-   "p_quotaBitesPerItem_error": {
-      "message": "Не може се сачувати у складишту синхронизације. Има превише картица. Покушајте са брисањем једне или више њих."
-   },
-   "p_quotaBites_error": {
-      "message": "Скаладиште синхронизације је пуно. Избриши некоришћене групе."
-   },
    "p_synStorageUsage_title": {
       "description": "",
       "message": "Искоришћеност складишта синхронизације прегледача"
    },
    "p_syncStorageDefault_error": {
-      "message": "Грешка при синхронизовању складишта. Покушајте поново касније."
+      "message": "Нешто није у реду. Покушајте поново."
    },
    "p_tabName_Saved": {
       "description": "",
@@ -223,5 +217,99 @@
    },
    "p_windowsNumbers_text": {
       "message": "Прозора:"
-   }
+   },
+    "bg_conflictCopy": {
+        "message": "конфликтна копија",
+        "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
+    },
+    "p_notSynced_title": {
+        "message": "Сачувано само на овом рачунару, није у синхронизацији прегледача",
+        "description": "Tooltip of the mark next to a saved group that is not in browser sync"
+    },
+    "p_notSyncedCount": {
+        "message": "несинхронизовано: $COUNT$",
+        "description": "After the sync storage usage on the Saved groups tab",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_savedLocally_full": {
+        "message": "Сачувано само на овом рачунару: складиште синхронизације прегледача је пуно. Избришите групе које вам више не требају да бисте га синхронизовали.",
+        "description": "Shown when a group was saved but sync storage has no room"
+    },
+    "p_savedLocally_later": {
+        "message": "Сачувано на овом рачунару. Биће синхронизовано касније.",
+        "description": "Shown when a group was saved but could not reach sync storage right now"
+    },
+    "p_nothingToSave": {
+        "message": "Нема картица за чување. Закачене картице се прескачу осим ако их не укључите у подешавањима.",
+        "description": "Shown when Save finds no tabs to save"
+    },
+    "p_groupDeleted_text": {
+        "message": "Група је избрисана.",
+        "description": "Bar shown for a few seconds after a group is deleted"
+    },
+    "p_undo_btn": {
+        "message": "Опозови",
+        "description": "Button on the bar after a group is deleted"
+    },
+    "o_backup_downloadButton": {
+        "message": "Преузми датотеку резервне копије",
+        "description": ""
+    },
+    "o_backup_restoreFile": {
+        "message": "Датотека резервне копије:",
+        "description": ""
+    },
+    "o_backup_restored": {
+        "message": "Резервна копија је враћена.",
+        "description": ""
+    },
+    "o_backup_undone": {
+        "message": "Враћање је опозвано.",
+        "description": ""
+    },
+    "o_backup_undoRestoreButton": {
+        "message": "Опозови последње враћање",
+        "description": ""
+    },
+    "o_backup_error_notBackup": {
+        "message": "Ово није резервна копија TabHamster-а. Ништа није промењено.",
+        "description": ""
+    },
+    "o_backup_error_damaged": {
+        "message": "Неке групе у овој резервној копији не могу да се прочитају. Ништа није промењено.",
+        "description": ""
+    },
+    "o_backup_error_empty": {
+        "message": "У овој резервној копији нема сачуваних група ни подешавања. Ништа није промењено.",
+        "description": ""
+    },
+    "o_backup_error_other": {
+        "message": "Враћање није успело. Покушајте поново.",
+        "description": ""
+    },
+    "o_trash_legend": {
+        "message": "Недавно избрисане",
+        "description": ""
+    },
+    "o_trash_info": {
+        "message": "Избрисане групе се чувају овде 30 дана, укључујући групе избрисане на вашим другим рачунарима.",
+        "description": ""
+    },
+    "o_trash_empty": {
+        "message": "Нема недавно избрисаних група.",
+        "description": ""
+    },
+    "o_trash_deletedAt": {
+        "message": "избрисано",
+        "description": ""
+    },
+    "o_trash_restoreButton": {
+        "message": "Врати",
+        "description": ""
+    }
 }

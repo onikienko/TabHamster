@@ -86,14 +86,8 @@
     "p_window_text": {
         "message": "Window"
     },
-    "p_quotaBitesPerItem_error": {
-        "message": "Can't save to sync storage. Too many tabs. Try to close one more."
-    },
-    "p_quotaBites_error": {
-        "message": "Sync storage is full. Del unused groups."
-    },
     "p_syncStorageDefault_error": {
-        "message": "Sync storage error. Try again later."
+        "message": "Something went wrong. Please try again."
     },
     "p_currentSession": {
         "message": "Current"
@@ -165,7 +159,7 @@
         "description": ""
     },
     "o_help_syncStorage_2": {
-        "message": "There is also a limit on the size of the recorded data at a time. It is approximately 17 - 24 tabs.",
+        "message": "Groups are compressed, so a group can have hundreds of tabs. Every group is also kept on this computer: if sync storage is full, the group is still saved and marked with ⚠ until there is room in sync.",
         "description": ""
     },
     "o_help_tipsLegend": {

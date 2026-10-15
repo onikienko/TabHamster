@@ -1,3 +1,15 @@
+    Save groups with hundreds of tabs: groups are compressed and split across sync storage items
+    Every group is also kept on this computer: when sync storage is full, a group is still saved, marked as not synced, and synced once there is room
+    Deleted groups are kept for 30 days in "Recently deleted" (Settings > Backup / Restore), also groups deleted on other computers
+    Undo for group delete
+    Backup to a file. Restore checks the backup first, keeps replaced groups in "Recently deleted" and can be undone
+    Full tab titles are saved
+    Message instead of saving an empty group
+    Fix titles and URLs with HTML in them breaking the popup
+    Fix group list after adding a group (up/down, expand)
+    Fix renaming a group to an empty name
+    Requires Chrome 103 or newer
+    Spanish, French, Hungarian, Serbian: missing and new texts added (machine translated)
 0.3.0 (12.04.2024 16:01)
     Manifest v3 support
     Fix Session Watcher behavior on the first run

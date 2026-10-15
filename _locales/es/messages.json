@@ -82,14 +82,8 @@
     "p_window_text": {
         "message": "Ventana"
     },
-    "p_quotaBitesPerItem_error": {
-        "message": "No se puede guardar al almacenamiento de sincronización. Muchas Pestañas. Intente cerrar alguna."
-    },
-    "p_quotaBites_error": {
-        "message": "El espacio de Sincronización está lleno. Eliminar grupos en desuso."
-    },
     "p_syncStorageDefault_error": {
-        "message": "Error al almacenar sincronización. Intente nuevamente luego."
+        "message": "Algo ha salido mal. Inténtelo de nuevo."
     },
     "p_currentSession": {
         "message": "Actual"
@@ -157,7 +151,7 @@
         "description": ""
     },
     "o_help_syncStorage_2": {
-        "message": "Existe también un limite en el tamaño de la información guardada para un mismo momento. Es de aproximadamente 17 a 24 pestañas.",
+        "message": "Los grupos se comprimen, así que un grupo puede tener cientos de pestañas. Cada grupo también se guarda en este dispositivo: si el almacenamiento de sincronización está lleno, el grupo se guarda igualmente y se marca con ⚠ hasta que haya espacio en la sincronización.",
         "description": ""
     },
     "o_help_tipsLegend": {
@@ -186,6 +180,140 @@
     },
     "o_help_settings": {
         "message": "Mire las opciones de la extensión",
+        "description": ""
+    },
+    "bg_conflictCopy": {
+        "message": "copia en conflicto",
+        "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
+    },
+    "p_notSynced_title": {
+        "message": "Guardado solo en este dispositivo, no está en la sincronización del navegador",
+        "description": "Tooltip of the mark next to a saved group that is not in browser sync"
+    },
+    "p_notSyncedCount": {
+        "message": "$COUNT$ sin sincronizar",
+        "description": "After the sync storage usage on the Saved groups tab",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_savedLocally_full": {
+        "message": "Guardado solo en este dispositivo: el almacenamiento de sincronización del navegador está lleno. Elimine los grupos que ya no necesite para sincronizarlo.",
+        "description": "Shown when a group was saved but sync storage has no room"
+    },
+    "p_savedLocally_later": {
+        "message": "Guardado en este dispositivo. Se sincronizará más tarde.",
+        "description": "Shown when a group was saved but could not reach sync storage right now"
+    },
+    "p_nothingToSave": {
+        "message": "No hay pestañas para guardar. Las pestañas fijadas se omiten salvo que lo active en la configuración.",
+        "description": "Shown when Save finds no tabs to save"
+    },
+    "p_groupDeleted_text": {
+        "message": "Grupo eliminado.",
+        "description": "Bar shown for a few seconds after a group is deleted"
+    },
+    "p_undo_btn": {
+        "message": "Deshacer",
+        "description": "Button on the bar after a group is deleted"
+    },
+    "o_backup_downloadButton": {
+        "message": "Descargar archivo de copia de seguridad",
+        "description": ""
+    },
+    "o_backup_restoreFile": {
+        "message": "Archivo de copia de seguridad:",
+        "description": ""
+    },
+    "o_backup_restored": {
+        "message": "Copia de seguridad restaurada.",
+        "description": ""
+    },
+    "o_backup_undone": {
+        "message": "Restauración deshecha.",
+        "description": ""
+    },
+    "o_backup_undoRestoreButton": {
+        "message": "Deshacer la última restauración",
+        "description": ""
+    },
+    "o_backup_error_notBackup": {
+        "message": "Esto no es una copia de seguridad de TabHamster. No se ha cambiado nada.",
+        "description": ""
+    },
+    "o_backup_error_damaged": {
+        "message": "Algunos grupos de esta copia de seguridad no se pueden leer. No se ha cambiado nada.",
+        "description": ""
+    },
+    "o_backup_error_empty": {
+        "message": "Esta copia de seguridad no contiene grupos guardados ni configuración. No se ha cambiado nada.",
+        "description": ""
+    },
+    "o_backup_error_other": {
+        "message": "No se pudo restaurar. Inténtelo de nuevo.",
+        "description": ""
+    },
+    "o_trash_legend": {
+        "message": "Eliminados recientemente",
+        "description": ""
+    },
+    "o_trash_info": {
+        "message": "Los grupos eliminados se conservan aquí durante 30 días, incluidos los eliminados en sus otros dispositivos.",
+        "description": ""
+    },
+    "o_trash_empty": {
+        "message": "No hay grupos eliminados recientemente.",
+        "description": ""
+    },
+    "o_trash_deletedAt": {
+        "message": "eliminado el",
+        "description": ""
+    },
+    "o_trash_restoreButton": {
+        "message": "Restaurar",
+        "description": ""
+    },
+    "o_backup_backupInstruction": {
+        "message": "Pulse \"Descargar archivo de copia de seguridad\" para guardar sus grupos y su configuración en un archivo. También puede copiar el texto de abajo.",
+        "description": ""
+    },
+    "o_backup_restoreInstruction": {
+        "message": "Elija un archivo de copia de seguridad o pegue abajo el texto de la copia y pulse \"Restaurar configuración y grupos guardados\".",
+        "description": ""
+    },
+    "o_backup_restoreInstructionMore": {
+        "message": "Los grupos guardados se sustituyen por los de la copia de seguridad. Los grupos que no están en la copia pasan a \"Eliminados recientemente\", y puede deshacer la restauración.",
+        "description": ""
+    },
+    "p_overwriteGroup_popup": {
+        "message": "Ya existe un grupo con el mismo nombre. ¿Desea sustituirlo por las pestañas actuales?",
+        "description": "Modal window dialog"
+    },
+    "o_tabs_backup": {
+        "message": "Copia de seguridad / Restaurar",
+        "description": "Tab name"
+    },
+    "o_sessionWatcher_toggle": {
+        "message": "Vigilar sesiones. Si se desmarca, se desactiva el guardado automático de sesiones. ¡La extensión se reiniciará automáticamente!",
+        "description": ""
+    },
+    "o_backup_backupLegend": {
+        "message": "Copia de seguridad",
+        "description": ""
+    },
+    "o_backup_backupInstructionMore": {
+        "message": "Con estos datos podrá restaurar sus grupos guardados y la configuración de la extensión. Las sesiones no se pueden restaurar.",
+        "description": ""
+    },
+    "o_backup_restoreLegend": {
+        "message": "Restaurar",
+        "description": ""
+    },
+    "o_backup_restoreButton": {
+        "message": "Restaurar configuración y grupos guardados",
         "description": ""
     }
 }
