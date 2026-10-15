@@ -4,7 +4,7 @@
         "description": "do not translate extension name"
     },
     "extDescr": {
-        "message": "Session manager and tabs saver. With sync",
+        "message": "Session manager and tab saver. With sync.",
         "description": ""
     },
 
@@ -17,7 +17,7 @@
         "description": "Title for help button"
     },
     "p_GroupNameToSave": {
-        "message": "New group from opened tabs",
+        "message": "New group from open tabs",
         "description": "Placeholder in text input"
     },
     "p_groupBtn": {
@@ -50,11 +50,11 @@
         "description": "Modal window dialog"
     },
     "p_overwriteGroup_popup": {
-        "message": "The group with the same name already exists. Do you want overwrite old one with current tabs?",
+        "message": "A group with this name already exists. Replace its tabs with the current tabs?",
         "description": "Modal window dialog"
     },
     "p_delGroup_btn_title": {
-        "message": "Del group"
+        "message": "Delete group"
     },
     "p_editGroupName_btn_title": {
         "message": "Edit group name"
@@ -63,7 +63,7 @@
         "message": "Open in new window (Ctrl + click)"
     },
     "p_addLinkToGroup_btn_title": {
-        "message": "New link to group"
+        "message": "Add a link to the group"
     },
     "p_delLinkFromGroup_btn_title": {
         "message": "Delete"
@@ -119,11 +119,11 @@
         "description": "Settings saved OK"
     },
     "o_savedTabs_legend": {
-        "message": "Filter for tabs saving (not sessions)",
+        "message": "Tabs to save in groups (sessions are not affected)",
         "description": "Legend tag"
     },
     "o_savedTabs_pinned": {
-        "message": "Add pinned tabs to set",
+        "message": "Include pinned tabs",
         "description": ""
     },
     "o_savedTabs_cur_win": {
@@ -147,15 +147,15 @@
         "description": "US date format"
     },
     "o_help_syncStorage": {
-        "message": "Tab Groups are stored in the sync storage. Sign in to browser to get them on other PC.",
+        "message": "Tab groups are stored in browser sync storage. Sign in to the browser to get them on your other computers.",
         "description": ""
     },
     "o_help_syncStorage_0": {
-        "message": "Sessions are not sync.",
+        "message": "Sessions are not synced.",
         "description": ""
     },
     "o_help_syncStorage_1": {
-        "message": "Sync storage is limited in size. You can see storage usage (No.1 on the screenshot).",
+        "message": "Sync storage is limited in size. You can see how much of it is used (No. 1 on the screenshot).",
         "description": ""
     },
     "o_help_syncStorage_2": {
@@ -167,36 +167,36 @@
         "description": ""
     },
     "o_help_quickAdd": {
-        "message": "To quickly save all open tabs in a group, just open extension window and press 'ENTER'.",
+        "message": "To quickly save all open tabs as a group, just open the extension window and press Enter.",
         "description": ""
     },
     "o_help_showLinks": {
-        "message": "To view tabs in saved group click on gray triangle (No.2 on the  screenshot)",
+        "message": "To see the tabs of a saved group, click the gray triangle (No. 2 on the screenshot).",
         "description": ""
     },
     "o_help_inNewWindow": {
-        "message": "'Ctrl + click' on group name (or session) will open it in a new window. Or click on the icon next to the group name (No.3 on the  screenshot)",
+        "message": "Ctrl + click on a group (or session) name opens it in a new window. You can also click the icon next to the group name (No. 3 on the screenshot).",
         "description": ""
     },
     "o_help_editGroup": {
-        "message": "You can edit, delete, change position for every saved group  (No.4 on the  screenshot)",
+        "message": "You can edit, delete and move any saved group (No. 4 on the screenshot).",
         "description": ""
     },
     "o_help_overFavicon": {
-        "message": "Place mouse pointer over favicon to view url of tab.",
+        "message": "Hover over a tab's icon to see its URL.",
         "description": ""
     },
     "o_help_settings": {
-        "message": "Look at the extensions settings",
+        "message": "Take a look at the extension's settings.",
         "description": ""
     },
     "o_sessionWatcher_toggle": {
-        "message": "Watch sessions. Unchecked will disable the automatic session saving. Extension will reload automatically!!!",
+        "message": "Watch sessions. Uncheck to turn off automatic session saving. The extension will reload automatically.",
         "description": ""
     },
 
     "o_backup_backupLegend": {
-        "message": "Backup ",
+        "message": "Backup",
         "description": ""
     },
     "o_backup_backupInstruction": {
@@ -204,7 +204,7 @@
         "description": ""
     },
     "o_backup_backupInstructionMore": {
-        "message": "You will be able to use this data to restore your saved groups and extension options. You cannot restore sessions.",
+        "message": "You can use it to restore your saved groups and settings. Sessions are not included.",
         "description": ""
     },
 
@@ -213,7 +213,7 @@
         "description": ""
     },
     "o_backup_restoreInstruction": {
-        "message": "Choose a backup file or paste backup text below, then press \"Restore options and saved groups\".",
+        "message": "Choose a backup file or paste backup text below, then press \"Restore settings and saved groups\".",
         "description": ""
     },
     "o_backup_restoreInstructionMore": {
@@ -221,7 +221,7 @@
         "description": ""
     },
     "o_backup_restoreButton": {
-        "message": "Restore options and saved groups",
+        "message": "Restore settings and saved groups",
         "description": ""
     },
     "bg_conflictCopy": {
