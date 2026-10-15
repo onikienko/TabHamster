@@ -8,7 +8,7 @@ Session manager and tab saver. With sync.
 
 Install for your browser:
 
-**[Chrome Web Store](https://chrome.google.com/webstore/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
+**[Chrome Web Store](https://chromewebstore.google.com/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
 
 ~~**[Opera Market](https://addons.opera.com/extensions/details/tabhamster/)**~~ (not available for Opera anymore)
 
