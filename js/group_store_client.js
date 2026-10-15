@@ -45,5 +45,21 @@ var groupStoreClient = (function () {
         usage: function () {
             return call('usage', []);
         },
+        /** backup text with saved groups and options */
+        exportBackup: function () {
+            return call('exportBackup', []);
+        },
+        /** {groups, errors} or {error: 'not_backup' | 'damaged' | 'empty'} when nothing was changed */
+        importBackup: function (text) {
+            return call('importBackup', [text]);
+        },
+        /** {groups, errors} or {error: 'nothing_to_undo'} */
+        undoRestore: function () {
+            return call('undoRestore', []);
+        },
+        /** time of the restore that can be undone, or null */
+        restoreInfo: function () {
+            return call('restoreInfo', []);
+        },
     };
 }());

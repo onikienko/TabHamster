@@ -156,3 +156,120 @@ test('session rotation counts only sessions, not saved group copies', async () =
     assert.equal(keys.filter(k => k.startsWith('lg_')).length, 40);
     assert.ok(keys.includes('tg_' + (t0 + 1)), 'only the oldest session went');
 });
+
+const OPTIONS = {date_format: 'us', pinned: 1, cur_win: 0, active_tab: '#saved', session_watcher: 1};
+
+async function backgroundWithGroups(groups_by_key) {
+    const sync = createSyncArea();
+    sync.rawSet(OPTIONS);
+    const bg = startBackground({sync});
+    for (const key of Object.keys(groups_by_key)) {
+        await bg.groups('save', key, groups_by_key[key]);
+    }
+    return bg;
+}
+
+function listWithoutFlags(list) {
+    const out = {};
+    Object.keys(list).forEach(key => out[key] = {name: list[key].name, index: list[key].index, tabs: list[key].tabs});
+    return out;
+}
+
+test('backup: export is readable JSON that restores the same groups and options', async () => {
+    const groups = {tg_1700000000001: makeGroup(5, 1), tg_1700000000002: makeGroup(30, 2)};
+    const bg = await backgroundWithGroups(groups);
+    const text = (await bg.groups('exportBackup')).result;
+
+    assert.ok(text.startsWith('{'), 'fits 0.3.0, so plain JSON');
+    const data = JSON.parse(text);
+    assert.deepEqual(data.tg_1700000000002, groups.tg_1700000000002);
+    Object.keys(OPTIONS).forEach(key => assert.equal(data[key], OPTIONS[key]));
+
+    const other = startBackground();
+    assert.deepEqual(await other.groups('importBackup', text), {result: {groups: 2, errors: {}}});
+    assert.deepEqual(listWithoutFlags((await other.groups('list')).result), groups);
+    assert.equal((await other.chrome.storage.sync.get('date_format')).date_format, 'us');
+});
+
+test('backup: too big for 0.3.0 gets a first line 0.3.0 rejects, 0.4.0 skips it', async () => {
+    const groups = {};
+    for (let i = 1; i <= 4; i++) {
+        groups['tg_' + (1700000000000 + i)] = makeGroup(400, i);
+    }
+    const bg = await backgroundWithGroups(groups);
+    const text = (await bg.groups('exportBackup')).result;
+
+    assert.ok(text.startsWith('TabHamster backup. Restore it with TabHamster 0.4.0 or newer.\n'));
+    assert.throws(() => JSON.parse(text), 'what 0.3.0 does first');
+    const other = startBackground();
+    assert.equal((await other.groups('importBackup', text)).result.groups, 4);
+    assert.deepEqual(listWithoutFlags((await other.groups('list')).result), groups);
+});
+
+test('backup: restoring a 0.3.0 backup replaces groups, and can be undone', async () => {
+    const current = {tg_1700000000001: makeGroup(5, 1), tg_1700000000002: makeGroup(5, 2)};
+    const bg = await backgroundWithGroups(current);
+    const old_backup = {
+        date_format: 'eu',
+        pinned: 0,
+        tg_1600000000001: {name: 'from 0.3.0', index: 1, color: '', tabs: [
+            {url: 'https://example.com/', title: 'Example', id: 5},
+            {url: 'https://example.org/', id: 5, pinned: true},
+        ]},
+    };
+
+    assert.deepEqual(await bg.groups('importBackup', JSON.stringify(old_backup)), {result: {groups: 1, errors: {}}});
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), {tg_1600000000001: {name: 'from 0.3.0', index: 1, tabs: [
+        {url: 'https://example.com/', title: 'Example', id: 0},
+        {url: 'https://example.org/', title: 'https://example.org/', id: 1, pinned: true},
+    ]}});
+    assert.deepEqual((await bg.groups('listTrash')).result.map(g => g.key).sort(), Object.keys(current));
+    assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'eu');
+    assert.equal(typeof (await bg.groups('restoreInfo')).result, 'number');
+
+    assert.deepEqual(await bg.groups('undoRestore'), {result: {groups: 2, errors: {}}});
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
+    assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'us');
+    assert.equal((await bg.groups('restoreInfo')).result, null);
+    assert.deepEqual(await bg.groups('undoRestore'), {result: {error: 'nothing_to_undo'}});
+});
+
+test('backup: bad input changes nothing', async () => {
+    const current = {tg_1700000000001: makeGroup(5, 1)};
+    const bg = await backgroundWithGroups(current);
+    const damaged = JSON.stringify({tg_1: {v: 2, name: 'x', index: 1, h: 'abc', w: 'lzz0aaaa', n: 2}, pinned: 1});
+    const cases = [
+        ['hello', 'not_backup'],
+        ['[]', 'not_backup'],
+        ['null', 'not_backup'],
+        ['"text"', 'not_backup'],
+        ['{}', 'empty'],
+        ['{"something": 1}', 'empty'],
+        [damaged, 'damaged'],
+    ];
+    for (const [text, code] of cases) {
+        assert.deepEqual(await bg.groups('importBackup', text), {result: {error: code}}, text);
+    }
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
+    assert.deepEqual((await bg.groups('listTrash')).result, []);
+    assert.equal((await bg.groups('restoreInfo')).result, null);
+});
+
+test('backup: raw sync data with chunks can be restored', async () => {
+    const groups = {tg_1700000000001: makeGroup(400, 1), tg_1700000000002: makeGroup(3, 2)};
+    const bg = await backgroundWithGroups(groups);
+    const raw = await bg.chrome.storage.sync.get(null);
+    assert.ok(Object.keys(raw).some(k => k.startsWith('tc_')), 'has chunks');
+
+    const other = startBackground();
+    assert.equal((await other.groups('importBackup', JSON.stringify(raw))).result.groups, 2);
+    assert.deepEqual(listWithoutFlags((await other.groups('list')).result), groups);
+});
+
+test('backup: options only leave groups alone', async () => {
+    const current = {tg_1700000000001: makeGroup(5, 1)};
+    const bg = await backgroundWithGroups(current);
+    assert.deepEqual(await bg.groups('importBackup', '{"date_format": "eu"}'), {result: {groups: 0, errors: {}}});
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
+    assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'eu');
+});

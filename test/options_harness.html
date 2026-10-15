@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!--
+Try options.html in a normal browser tab, without installing the extension.
+Serve the repository root over http (e.g. `python3 -m http.server 8000`) and open
+http://localhost:8000/test/options_harness.html. Options: see test/fake_chrome.js.
+-->
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>TabHamster options harness</title>
+</head>
+<body>
+<script src="fake_chrome.js"></script>
+<script>
+    fakeChrome.loadPage('options.html');
+</script>
+</body>
+</html>

@@ -694,6 +694,35 @@ var groupStore = (function () {
             return {synced: true};
         }
 
+        // Restore from a backup: the given groups replace all current ones. Writes before it deletes, so an
+        // interruption leaves old and new groups, never neither. Replaced groups go to trash.
+        async function replaceAllNow(groups) {
+            await saveNow(groups);
+            const records = await readRecords();
+            const others = Object.keys(records).filter(function (key) {
+                return !records[key].trashed && !groups.hasOwnProperty(key);
+            });
+            for (const key of others) {
+                records[key].trashed = now();
+                records[key].removing = true;
+                await putRecord(records, key, records[key]);
+            }
+            if (others.length) {
+                try {
+                    await removeFromSync(others, await sync.get(null));
+                    for (const key of others) {
+                        delete records[key].removing;
+                        await putRecord(records, key, records[key]);
+                    }
+                } catch (e) {
+                    // removal is retried by the next reconcile
+                }
+            }
+            // backup groups that didn't fit in sync next to the old ones can go there now
+            const done = await syncKeys(await readRecords());
+            return {saved: Object.keys(groups).length, removed: others.length, errors: done.errors};
+        }
+
         async function restoreNow(key) {
             const records = await readRecords();
             const rec = records[key];
@@ -825,6 +854,8 @@ var groupStore = (function () {
             remove: (key) => exclusive(() => removeNow(key)),
             /** @returns {Promise<{synced: boolean, error?: string}>} brings a group back from trash */
             restore: (key) => exclusive(() => restoreNow(key)),
+            /** @returns {Promise<{saved: number, removed: number, errors: Object}>} groups not given go to trash */
+            replaceAll: (groups) => exclusive(() => replaceAllNow(groups)),
             /** @returns {Promise<{errors: Object, copies: Object}>} */
             reconcile: () => exclusive(reconcileNow),
             /** @returns {Promise<{converted: number}>} */

@@ -117,3 +117,28 @@ textarea {
     text-align: center;
     font-weight: bold;
 }
+
+#backup_msg.error {
+    color: #c0392b;
+}
+
+#backup_msg.ok {
+    color: #2e8b57;
+}
+
+#undo_restore {
+    display: none;
+}
+
+#trash_list {
+    padding-left: 20px;
+}
+
+#trash_list li {
+    margin-bottom: 8px;
+}
+
+#trash_list span {
+    color: #8a8a8a;
+    font-size: 13px;
+}

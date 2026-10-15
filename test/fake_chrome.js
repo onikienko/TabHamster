@@ -1,4 +1,4 @@
-// Fake chrome.* API for trying the extension pages in a normal browser tab (test/popup_harness.html).
+// Fake chrome.* API for trying the extension pages in a normal browser tab (test/popup_harness.html, test/options_harness.html).
 // The real js/background.js runs in the same page. Storage is kept in localStorage, so reloading the
 // page is like reopening the popup. From the console:
 //   fakeChrome.sync_error = 'QUOTA_BYTES quota exceeded'   // every sync write fails with this message

@@ -55,14 +55,25 @@
                     <legend>{{ o_backup_restoreLegend }}</legend>
                     <p>{{ o_backup_restoreInstruction }}</p>
                     <p><strong>{{ o_backup_restoreInstructionMore }}</strong></p>
+                    <p><label>{{ o_backup_restoreFile }} <input type="file" id="restore_file" accept=".json,.txt"></label></p>
                     <textarea id="restore_text" cols="60" rows="10"></textarea>
                     <button id="restore_btn">{{ o_backup_restoreButton }}</button>
+                    <p id="backup_msg"></p>
+                    <p id="undo_restore"><button id="undo_restore_btn">{{ o_backup_undoRestoreButton }}</button>
+                        <span id="undo_restore_time"></span></p>
                 </fieldset>
                 <fieldset>
                     <legend>{{ o_backup_backupLegend }}</legend>
                     <p> {{ o_backup_backupInstruction }}</p>
                     <p> {{ o_backup_backupInstructionMore }}</p>
-                    <textarea id="backup_text" cols="60" rows="10"></textarea>
+                    <p><button id="download_btn">{{ o_backup_downloadButton }}</button></p>
+                    <textarea id="backup_text" cols="60" rows="10" readonly></textarea>
+                </fieldset>
+                <fieldset>
+                    <legend>{{ o_trash_legend }}</legend>
+                    <p>{{ o_trash_info }}</p>
+                    <ul id="trash_list"></ul>
+                    <p id="trash_empty">{{ o_trash_empty }}</p>
                 </fieldset>
             </div>
 
@@ -119,9 +130,10 @@
 <script src="lib/jsTabs/tabs.js"></script>
 
 <script src="js/storage.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/group_store_client.js"></script>
 <script src="js/helpers/quick_options.js"></script>
 <!--<script src="lib/jquery.min.js"></script>-->
-<script src="js/backup.js"></script>
 <script src="js/options.js"></script>
 
 </body>

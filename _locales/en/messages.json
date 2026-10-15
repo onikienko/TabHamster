@@ -206,7 +206,7 @@
         "description": ""
     },
     "o_backup_backupInstruction": {
-        "message": "Copy text from text area below (CTRL+A to select whole text and CTRL+C to copy). Then past (CTRL+V) and save text in a file. For example TabHamsterBackup.txt. Use UTF-8 encoding for this file.",
+        "message": "Press \"Download backup file\" to save your groups and settings to a file. You can also copy the text below.",
         "description": ""
     },
     "o_backup_backupInstructionMore": {
@@ -219,11 +219,11 @@
         "description": ""
     },
     "o_backup_restoreInstruction": {
-        "message": "Past your previously saved backup in this text area. Make sure that you past UTF-8 encoded text. Then press 'Restore...' button. Extension will be automatically restarted.",
+        "message": "Choose a backup file or paste backup text below, then press \"Restore options and saved groups\".",
         "description": ""
     },
     "o_backup_restoreInstructionMore": {
-        "message": "Attention! All your currently saved groups and options will be erased.",
+        "message": "Saved groups are replaced by the ones from the backup. Groups that are not in the backup go to \"Recently deleted\", and you can undo the restore.",
         "description": ""
     },
     "o_backup_restoreButton": {
@@ -267,5 +267,61 @@
     "p_undo_btn": {
         "message": "Undo",
         "description": "Button on the bar after a group is deleted"
+    },
+    "o_backup_downloadButton": {
+        "message": "Download backup file",
+        "description": ""
+    },
+    "o_backup_restoreFile": {
+        "message": "Backup file:",
+        "description": ""
+    },
+    "o_backup_restored": {
+        "message": "Backup restored.",
+        "description": ""
+    },
+    "o_backup_undone": {
+        "message": "Restore undone.",
+        "description": ""
+    },
+    "o_backup_undoRestoreButton": {
+        "message": "Undo last restore",
+        "description": ""
+    },
+    "o_backup_error_notBackup": {
+        "message": "This is not a TabHamster backup. Nothing was changed.",
+        "description": ""
+    },
+    "o_backup_error_damaged": {
+        "message": "Some groups in this backup can't be read. Nothing was changed.",
+        "description": ""
+    },
+    "o_backup_error_empty": {
+        "message": "No saved groups or settings found in this backup. Nothing was changed.",
+        "description": ""
+    },
+    "o_backup_error_other": {
+        "message": "Restore failed. Try again.",
+        "description": ""
+    },
+    "o_trash_legend": {
+        "message": "Recently deleted",
+        "description": ""
+    },
+    "o_trash_info": {
+        "message": "Deleted groups are kept here for 30 days, including groups deleted on your other computers.",
+        "description": ""
+    },
+    "o_trash_empty": {
+        "message": "No recently deleted groups.",
+        "description": ""
+    },
+    "o_trash_deletedAt": {
+        "message": "deleted",
+        "description": ""
+    },
+    "o_trash_restoreButton": {
+        "message": "Restore",
+        "description": ""
     }
 }

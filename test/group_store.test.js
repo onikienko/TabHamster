@@ -455,6 +455,41 @@ test('everything removed from sync goes to trash, nothing is lost', async () => 
     Object.keys(groups).forEach(key => assert.deepEqual(remote[key].group, groups[key]));
 });
 
+test('replaceAll: backup groups replace the current ones, which go to trash', async () => {
+    const {store, sync} = makeDevice();
+    await store.save('tg_1', makeGroup(20, 1));
+    await store.save('tg_2', makeGroup(400, 2));
+    const backup = {tg_2: makeGroup(30, 22), tg_3: makeGroup(5, 3)};
+
+    assert.deepEqual(await store.replaceAll(backup), {saved: 2, removed: 1, errors: {}});
+    assert.deepEqual(plainList(await store.list()), backup);
+    assert.deepEqual((await store.listTrash()).map(g => g.key), ['tg_1']);
+    const remote = await syncGroups(sync);
+    assert.deepEqual(Object.keys(remote).sort(), ['tg_2', 'tg_3']);
+    assert.deepEqual(await chunkKeys(sync), [], 'old chunks of tg_2 are gone');
+});
+
+test('replaceAll with a nearly full sync: the backup still ends up in sync', async () => {
+    const {store, sync} = makeDevice();
+    for (let i = 1; i <= 6; i++) {
+        await store.save('tg_' + i, makeGroup(250, i));
+    }
+    const backup = {};
+    for (let i = 11; i <= 16; i++) {
+        backup['tg_' + i] = makeGroup(250, i);
+    }
+    // old and new together don't fit: the new ones are first saved on this computer only
+    assert.ok(await sync.getBytesInUse(null) > sync.QUOTA_BYTES / 2);
+
+    const res = await store.replaceAll(backup);
+    assert.equal(res.removed, 6);
+    assert.deepEqual(res.errors, {});
+    const list = await store.list();
+    assert.deepEqual(plainList(list), backup);
+    assert.ok(Object.values(list).every(g => g.synced));
+    assert.deepEqual(Object.keys(await syncGroups(sync)).sort(), Object.keys(backup).sort());
+});
+
 test('a group in a newer format is left alone', async () => {
     const {store, sync} = makeDevice();
     const group = makeGroup(20, 1);

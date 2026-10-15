@@ -1,4 +1,4 @@
-importScripts('storage.js', 'group_store.js');
+importScripts('storage.js', 'group_store.js', 'backup.js');
 
 // The only writer of saved groups. Popup and options pages go through js/group_store_client.js.
 const groups = groupStore.createGroupStore({
@@ -6,6 +6,35 @@ const groups = groupStore.createGroupStore({
     local: chrome.storage.local,
     conflict_suffix: ' (' + chrome.i18n.getMessage('bg_conflictCopy') + ')',
 });
+
+// state before the last restore from a backup, for "Undo last restore"
+const RESTORE_UNDO_KEY = 'restore_undo';
+
+function withoutSyncFlags(list) {
+    const out = {};
+    Object.keys(list).forEach(function (key) {
+        out[key] = {name: list[key].name, index: list[key].index, tabs: list[key].tabs};
+    });
+    return out;
+}
+
+// replace_groups: groups not in `data` go to trash; otherwise groups are left alone when `data` has none
+async function applyBackup(data, replace_groups) {
+    const before = await chrome.storage.sync.get(storage.default_options);
+    let result = {errors: {}};
+
+    if (replace_groups || Object.keys(data.groups).length) {
+        result = await groups.replaceAll(data.groups);
+    }
+    if (Object.keys(data.options).length) {
+        await chrome.storage.sync.set(data.options);
+    }
+    if (data.options.hasOwnProperty('session_watcher') && data.options.session_watcher !== before.session_watcher) {
+        // session watcher listeners are set up when the service worker starts
+        setTimeout(() => chrome.runtime.reload(), 500);
+    }
+    return result;
+}
 
 const group_ops = {
     list: async function () {
@@ -22,6 +51,44 @@ const group_ops = {
     remove: (key) => groups.remove(key),
     restore: (key) => groups.restore(key),
     usage: () => groups.usage(),
+
+    exportBackup: async function () {
+        const options = await chrome.storage.sync.get(storage.default_options);
+        return backup.exportText(withoutSyncFlags(await groups.list()), options, chrome.storage.sync);
+    },
+    // {groups: number, errors} or {error: 'not_backup' | 'damaged' | 'empty'} when nothing was changed
+    importBackup: async function (text) {
+        let data;
+        try {
+            data = await backup.parseText(text);
+        } catch (e) {
+            if (e.code) {
+                return {error: e.code};
+            }
+            throw e;
+        }
+        await chrome.storage.local.set({[RESTORE_UNDO_KEY]: {
+            time: Date.now(),
+            groups: withoutSyncFlags(await groups.list()),
+            options: await chrome.storage.sync.get(storage.default_options),
+        }});
+        const result = await applyBackup(data, false);
+        return {groups: Object.keys(data.groups).length, errors: result.errors};
+    },
+    undoRestore: async function () {
+        const snapshot = (await chrome.storage.local.get(RESTORE_UNDO_KEY))[RESTORE_UNDO_KEY];
+        if (!snapshot) {
+            return {error: 'nothing_to_undo'};
+        }
+        const result = await applyBackup(snapshot, true);
+        await chrome.storage.local.remove(RESTORE_UNDO_KEY);
+        return {groups: Object.keys(snapshot.groups).length, errors: result.errors};
+    },
+    // time of the restore that can be undone, or null
+    restoreInfo: async function () {
+        const snapshot = (await chrome.storage.local.get(RESTORE_UNDO_KEY))[RESTORE_UNDO_KEY];
+        return snapshot ? snapshot.time : null;
+    },
 };
 
 const session_config = {
