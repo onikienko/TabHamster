@@ -1,14 +1,27 @@
-// it's copied from ./storage.js file
-// had to copy/past here to this code works with mv3 service worker
-var storage = {
-    area: chrome.storage.sync,
-    default_options: {
-        date_format: 'eu', // or 'us'
-        pinned: 0, //do not add pinned tabs
-        cur_win: 1, // save tabs from current window only
-        active_tab: '#saved', //or '#sessions'
-        session_watcher: 1,  //extension will watch sessions
+importScripts('storage.js', 'group_store.js');
+
+// The only writer of saved groups. Popup and options pages go through js/group_store_client.js.
+const groups = groupStore.createGroupStore({
+    sync: chrome.storage.sync,
+    local: chrome.storage.local,
+    conflict_suffix: ' (' + chrome.i18n.getMessage('bg_conflictCopy') + ')',
+});
+
+const group_ops = {
+    list: async function () {
+        try {
+            await groups.reconcile();
+        } catch (e) {
+            console.error('TabHamster: reconcile failed', e);
+        }
+        return groups.list();
     },
+    listTrash: () => groups.listTrash(),
+    save: (key, group) => groups.save(key, group),
+    saveMany: (items) => groups.saveMany(items),
+    remove: (key) => groups.remove(key),
+    restore: (key) => groups.restore(key),
+    usage: () => groups.usage(),
 };
 
 const session_config = {
@@ -88,33 +101,49 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
                 }
             });
             break;
+        case 'groups':
+            if (!group_ops.hasOwnProperty(msg.op)) {
+                sendResponse({error: 'Unknown operation: ' + msg.op});
+                break;
+            }
+            group_ops[msg.op].apply(null, msg.args || []).then(function (result) {
+                sendResponse({result});
+            }, function (e) {
+                sendResponse({error: e.message});
+            });
+            return true; // answer comes later
     }
 });
 
+// another device changed saved groups
+let reconcile_timer = null;
+chrome.storage.onChanged.addListener(function (changes, area_name) {
+    if (area_name !== 'sync' || !Object.keys(changes).some(k => groupStore.isGroupKey(k) || groupStore.isChunkKey(k))) {
+        return;
+    }
+    clearTimeout(reconcile_timer);
+    reconcile_timer = setTimeout(function () {
+        groups.reconcile().catch(e => console.error('TabHamster: reconcile failed', e));
+    }, 500);
+});
+
+// every service worker start: convert 0.3.0 data (once), then catch up with sync
+groups.migrate().then(() => groups.reconcile()).catch(e => console.error('TabHamster: startup sync failed', e));
+
 /*SESSION WATCHER*/
 
-// remove old sessions from chrome.storage.local (if sessions numbers >= config.session_numbers)
+// remove the oldest session from chrome.storage.local (if sessions numbers >= config.session_numbers).
+// Only `tg_` keys are sessions: local storage also holds saved group copies (`lg_`).
 function cleanupSessions() {
     chrome.storage.local.get(function (items) {
-        var key = (function () {
-                var item,
-                    id;
-                for (item in items) {
-                    if (item.indexOf(session_config.prefix) === 0) {
-                        id = item;
-                        break;
-                    }
-                }
-                return id ? id.slice(session_config.prefix.length) : id;
-            }()),
-            items_keys = Object.keys(items);
+        const session_keys = Object.keys(items).filter(function (key) {
+            return key.indexOf(session_config.prefix) === 0;
+        });
 
-        if (key && items_keys.length >= session_config.session_numbers) {
-            items_keys.forEach(function (el) {
-                var el_id = el.slice(session_config.prefix.length);
-                key = el_id < key ? el_id : key;
-            });
-            chrome.storage.local.remove(session_config.prefix + key);
+        if (session_keys.length >= session_config.session_numbers) {
+            const time = key => parseInt(key.slice(session_config.prefix.length), 10);
+            session_keys.sort((a, b) => time(a) - time(b));
+            chrome.storage.local.remove(session_keys[0]);
         }
     });
 }

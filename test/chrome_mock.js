@@ -20,8 +20,16 @@ function clone(value) {
     return value === undefined ? undefined : structuredClone(value);
 }
 
+// Chrome APIs take an optional callback instead of using the promise
+function withCallback(promise, callback) {
+    if (typeof callback === 'function') {
+        promise.then(callback, () => callback());
+    }
+    return promise;
+}
+
 /**
- * chrome.storage area with the promise API (get, set, remove, getBytesInUse).
+ * chrome.storage area (get, set, remove, getBytesInUse), promise or callback style.
  * With `limits` (SYNC_LIMITS) it enforces sync quotas with Chrome's error messages.
  * Test hooks: `log` of write calls, `beforeWrite(op, keys)` that can throw to fail a write,
  * `onWrite(changes)` called after a successful write, raw*() to change data without any of that.
@@ -58,78 +66,102 @@ function createStorageArea({limits = null, clock = Date.now} = {}) {
         }
     }
 
+    function notify(changes) {
+        if (area.onWrite) {
+            area.onWrite(changes);
+        }
+    }
+
+    async function getNow(keys) {
+        const out = {};
+        if (keys === null || keys === undefined) {
+            data.forEach(function (value, key) {
+                out[key] = clone(value);
+            });
+            return out;
+        }
+        const defaults = typeof keys === 'object' && !Array.isArray(keys) ? keys : {};
+        const list = typeof keys === 'string' ? [keys] : Array.isArray(keys) ? keys : Object.keys(keys);
+        list.forEach(function (key) {
+            if (data.has(key)) {
+                out[key] = clone(data.get(key));
+            } else if (defaults[key] !== undefined) {
+                out[key] = clone(defaults[key]);
+            }
+        });
+        return out;
+    }
+
+    async function setNow(items) {
+        const keys = Object.keys(items);
+        startWrite('set', keys);
+        const next = new Map(data);
+        keys.forEach(function (key) {
+            next.set(key, clone(items[key]));
+        });
+        if (limits) {
+            keys.forEach(function (key) {
+                if (chromeItemSize(key, items[key]) > limits.QUOTA_BYTES_PER_ITEM) {
+                    throw new Error('QUOTA_BYTES_PER_ITEM quota exceeded');
+                }
+            });
+            if (total(next) > limits.QUOTA_BYTES) {
+                throw new Error('QUOTA_BYTES quota exceeded');
+            }
+            if (next.size > limits.MAX_ITEMS) {
+                throw new Error('MAX_ITEMS quota exceeded');
+            }
+        }
+        data = next;
+        area.log.push({op: 'set', keys});
+        const changes = {};
+        keys.forEach(key => changes[key] = clone(items[key]));
+        notify(changes);
+    }
+
+    async function removeNow(keys) {
+        const list = typeof keys === 'string' ? [keys] : keys;
+        startWrite('remove', list);
+        list.forEach(key => data.delete(key));
+        area.log.push({op: 'remove', keys: list});
+        const changes = {};
+        list.forEach(key => changes[key] = undefined);
+        notify(changes);
+    }
+
+    async function bytesNow(keys) {
+        if (keys === null || keys === undefined) {
+            return total(data);
+        }
+        const list = typeof keys === 'string' ? [keys] : keys;
+        return list.reduce((sum, key) => data.has(key) ? sum + chromeItemSize(key, data.get(key)) : sum, 0);
+    }
+
     const area = {
         log: [],
         beforeWrite: null,
         onWrite: null,
 
-        async get(keys) {
-            const out = {};
-            if (keys === null || keys === undefined) {
-                data.forEach(function (value, key) {
-                    out[key] = clone(value);
-                });
-                return out;
+        get(keys, callback) {
+            if (typeof keys === 'function') {
+                return withCallback(getNow(null), keys);
             }
-            const defaults = typeof keys === 'object' && !Array.isArray(keys) ? keys : {};
-            const list = typeof keys === 'string' ? [keys] : Array.isArray(keys) ? keys : Object.keys(keys);
-            list.forEach(function (key) {
-                if (data.has(key)) {
-                    out[key] = clone(data.get(key));
-                } else if (defaults[key] !== undefined) {
-                    out[key] = clone(defaults[key]);
-                }
-            });
-            return out;
+            return withCallback(getNow(keys), callback);
         },
 
-        async set(items) {
-            const keys = Object.keys(items);
-            startWrite('set', keys);
-            const next = new Map(data);
-            keys.forEach(function (key) {
-                next.set(key, clone(items[key]));
-            });
-            if (limits) {
-                keys.forEach(function (key) {
-                    if (chromeItemSize(key, items[key]) > limits.QUOTA_BYTES_PER_ITEM) {
-                        throw new Error('QUOTA_BYTES_PER_ITEM quota exceeded');
-                    }
-                });
-                if (total(next) > limits.QUOTA_BYTES) {
-                    throw new Error('QUOTA_BYTES quota exceeded');
-                }
-                if (next.size > limits.MAX_ITEMS) {
-                    throw new Error('MAX_ITEMS quota exceeded');
-                }
-            }
-            data = next;
-            area.log.push({op: 'set', keys});
-            if (area.onWrite) {
-                const changes = {};
-                keys.forEach(key => changes[key] = clone(items[key]));
-                area.onWrite(changes);
-            }
+        set(items, callback) {
+            return withCallback(setNow(items), callback);
         },
 
-        async remove(keys) {
-            const list = typeof keys === 'string' ? [keys] : keys;
-            startWrite('remove', list);
-            list.forEach(key => data.delete(key));
-            area.log.push({op: 'remove', keys: list});
-            if (area.onWrite) {
-                const changes = {};
-                list.forEach(key => changes[key] = undefined);
-                area.onWrite(changes);
-            }
+        remove(keys, callback) {
+            return withCallback(removeNow(keys), callback);
         },
 
-        async getBytesInUse(keys) {
-            if (keys === null || keys === undefined) {
-                return total(data);
+        getBytesInUse(keys, callback) {
+            if (typeof keys === 'function') {
+                return withCallback(bytesNow(null), keys);
             }
-            const list = typeof keys === 'string' ? [keys] : keys;
-            return list.reduce((sum, key) => data.has(key) ? sum + chromeItemSize(key, data.get(key)) : sum, 0);
+            return withCallback(bytesNow(keys), callback);
         },
 
         rawSet(items) {

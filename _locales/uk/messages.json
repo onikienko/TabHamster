@@ -229,5 +229,9 @@
     "o_backup_restoreButton": {
         "message": "Відновити налаштування і збережені групи",
         "description": ""
+    },
+    "bg_conflictCopy": {
+        "message": "конфліктна копія",
+        "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
     }
 }

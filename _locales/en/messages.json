@@ -229,5 +229,9 @@
     "o_backup_restoreButton": {
         "message": "Restore options and saved groups",
         "description": ""
+    },
+    "bg_conflictCopy": {
+        "message": "conflict copy",
+        "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
     }
 }
