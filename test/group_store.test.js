@@ -300,6 +300,21 @@ test('tabs edited on two devices: both versions are kept', async () => {
     assert.deepEqual(plainList(await a.store.list()), plainList(list));
 });
 
+test('a conflict copy of an unnamed group stays unnamed', async () => {
+    const {net, a, b} = await twoSyncedDevices(makeGroup(20, 1, ''));
+    await a.store.save('tg_1', makeGroup(20, 2, ''));
+    failWrites(b.sync, RATE_ERROR);
+    await b.store.save('tg_1', makeGroup(20, 3, ''));
+    b.sync.beforeWrite = null;
+
+    net.upload(a.dev);
+    net.download(b.dev);
+    const copy_key = (await b.store.reconcile()).copies.tg_1;
+    const list = await b.store.list();
+    assert.equal(list[copy_key].name, '');
+    assert.deepEqual(list[copy_key].tabs, makeTabs(20, 3));
+});
+
 test('rename on one device and new tabs on another are merged', async () => {
     const {net, a, b} = await twoSyncedDevices(makeGroup(20, 1));
     failWrites(a.sync, RATE_ERROR);

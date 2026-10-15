@@ -76,6 +76,24 @@ ul.tabs_nav {
     color: #0099CC;
 }
 
+#undo_bar {
+    display: none;
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 10px 12px;
+    background-color: #4a4a4a;
+    color: #ffffff;
+}
+
+#undo_bar .undo {
+    float: right;
+    color: #33B5E5;
+    font-weight: bold;
+    text-decoration: none;
+}
+
 .not_synced {
     margin-left: 5px;
     color: #E69500;

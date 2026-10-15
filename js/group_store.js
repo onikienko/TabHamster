@@ -557,7 +557,8 @@ var groupStore = (function () {
                 // tabs changed here and on another device: keep both
                 const copy_key = freeKey(records, sync_items);
                 const copy = {
-                    g: {name: rec.g.name + conflict_suffix, index: nextIndex(records), tabs: rec.g.tabs},
+                    // an unnamed group stays unnamed: the list shows the copy's own date
+                    g: {name: rec.g.name ? rec.g.name + conflict_suffix : '', index: nextIndex(records), tabs: rec.g.tabs},
                     h: rec.h,
                     synced: false,
                     base: null,

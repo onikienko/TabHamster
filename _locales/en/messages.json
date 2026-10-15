@@ -255,5 +255,17 @@
     "p_savedLocally_later": {
         "message": "Saved on this computer. It will be synced later.",
         "description": "Shown when a group was saved but could not reach sync storage right now"
+    },
+    "p_nothingToSave": {
+        "message": "No tabs to save. Pinned tabs are skipped unless you turn them on in Settings.",
+        "description": "Shown when Save finds no tabs to save"
+    },
+    "p_groupDeleted_text": {
+        "message": "Group deleted.",
+        "description": "Bar shown for a few seconds after a group is deleted"
+    },
+    "p_undo_btn": {
+        "message": "Undo",
+        "description": "Button on the bar after a group is deleted"
     }
 }

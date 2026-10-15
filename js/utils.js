@@ -22,6 +22,13 @@ var utils = {
         return res;
     },
 
+    // for text and attribute values in HTML built from strings
+    escapeHtml: function (str) {
+        return String(str).replace(/[&<>"']/g, function (ch) {
+            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch];
+        });
+    },
+
     correctUrl: function (url) {
         var start_with = ['http://', 'https://', 'ftp://', 'opera://', 'chrome://', 'chrome-extension://', 'chrome-devtools://', 'file://'];
         return start_with.some(function (el) {

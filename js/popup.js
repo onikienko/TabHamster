@@ -344,6 +344,7 @@ chrome.storage.session.get(function (session_storage_items) {
                     not_synced: chrome.i18n.getMessage('p_notSynced_title'),
                     saved_locally_full: chrome.i18n.getMessage('p_savedLocally_full'),
                     saved_locally_later: chrome.i18n.getMessage('p_savedLocally_later'),
+                    nothing_to_save: chrome.i18n.getMessage('p_nothingToSave'),
                 },
 
                 tabsGrabber = {
@@ -408,9 +409,9 @@ chrome.storage.session.get(function (session_storage_items) {
                         if (group.name === '') {
                             title = utils.formatDate(new Date(parseInt(storage_name.slice('tg_'.length), 10)), storage_items.date_format);
                         }
-                        return '<div id="' + storage_name + '" class="group">' +
+                        return '<div id="' + utils.escapeHtml(storage_name) + '" class="group">' +
                             '<span class="spoiler" name="closed"> &#9658;</span>' +
-                            '<span class="open_group">' + title + '</span>' +
+                            '<span class="open_group">' + utils.escapeHtml(title) + '</span>' +
                             (group.synced === false ? this.notSyncedHtml() : '') +
                             '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                             '<span class="group_action">' +
@@ -477,14 +478,15 @@ chrome.storage.session.get(function (session_storage_items) {
 
                         if (link.title.length >= TAB_TITLE_LENGTH) {
                             a_text = link.title.slice(0, TAB_TITLE_LENGTH) + '...';
-                            a_title = 'title="' + link.title + '"';
+                            a_title = 'title="' + utils.escapeHtml(link.title) + '"';
                         }
-                        return '<div id="' + storage_name + '_' + link.id + '" class="link">' +
+                        return '<div id="' + utils.escapeHtml(storage_name + '_' + link.id) + '" class="link">' +
                             '<span class="link_action">' +
                             '<span class="edit_link" title="' + ui_msg.title_edit_link + '">&#9776;</span>' +
                             '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
-                            '<a href="' + link.url + '" target="_blank" ' + a_title + '>' +
-                            '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + pin_icon + a_text + '</a>' +
+                            '<a href="' + utils.escapeHtml(link.url) + '" target="_blank" ' + a_title + '>' +
+                            '<span class="favi" title="' + utils.escapeHtml(link.url) + '"><img src="' + utils.escapeHtml(favicon_src) + '"></span>' +
+                            pin_icon + utils.escapeHtml(a_text) + '</a>' +
                             '</span>' +
                             '</div>';
                     },
@@ -527,6 +529,11 @@ chrome.storage.session.get(function (session_storage_items) {
                             self = this;
 
                         tabsGrabber.collectTabs(function (tabs) {
+                            if (!tabs.length) {
+                                // e.g. only pinned tabs are open and they are not saved (see settings)
+                                self.showErrorMsg(null, ui_msg.nothing_to_save);
+                                return;
+                            }
                             // check if group name already exist
                             if (storage_name !== false && name !== '') {
                                 // group with the same name already exist
@@ -536,7 +543,13 @@ chrome.storage.session.get(function (session_storage_items) {
                                     stored_group = groupModel.getGroups()[storage_name];
                                     stored_group.tabs = tabs;
                                     groupModel.upd(storage_name, stored_group, function (answ) {
+                                        var group_node = document.getElementById(storage_name);
+
                                         if (answ.err === 0) {
+                                            if (group_node && group_node.getElementsByClassName('links').length) {
+                                                self.hideGroupLinks(group_node);
+                                                self.showGroupLinks(storage_name, group_node);
+                                            }
                                             self.showSyncStorageUsage();
                                         } else {
                                             self.showErrorMsg(answ.msg);
@@ -547,16 +560,11 @@ chrome.storage.session.get(function (session_storage_items) {
                                 // new group name
                                 input_field.value = '';
                                 groupModel.add(name, tabs, function (answ) {
-                                    var el,
-                                        groups_el;
-
                                     if (answ.err === 0) {
                                         self.showSyncStorageUsage();
-                                        el = document.createElement('div');
-                                        groups_el = document.getElementById('saved');
-                                        el.innerHTML = self.groupHtmlElement(answ.storage_name, answ.new_group);
-                                        groups_el.insertBefore(el, groups_el.getElementsByTagName('div')[0]);
-                                        groups_el.innerHTML = groups_el.innerHTML.replace(/(<div>)*|(<\/div>)*/g, '');
+                                        // on top of the list, right after the message area
+                                        document.getElementById('error_msg')
+                                            .insertAdjacentHTML('afterend', self.groupHtmlElement(answ.storage_name, answ.new_group));
                                     } else {
                                         // storage Error
                                         self.showErrorMsg(answ.msg);
@@ -575,7 +583,7 @@ chrome.storage.session.get(function (session_storage_items) {
                         document.getElementById('popup-new_group_name').value = group.name;
                         popup = new Popup('edit_group_name', function (data) {
                             new_name = data['popup-new_group_name'];
-                            if (new_name !== undefined || new_name !== '') {
+                            if (new_name !== undefined && new_name !== '') {
                                 group.name = new_name;
                                 groupModel.upd(storage_name, group, function (answ) {
                                     if (answ.err === 0) {
@@ -591,16 +599,46 @@ chrome.storage.session.get(function (session_storage_items) {
                     },
 
                     delGroup: function (storage_name, el) {
-                        var self = this;
+                        var self = this,
+                            group = groupModel.getGroups()[storage_name];
 
                         groupModel.del(storage_name, function (answ) {
                             if (answ.err === 0) {
                                 el.remove();
                                 self.showSyncStorageUsage();
+                                self.showUndo(storage_name, group);
                             } else {
                                 self.showErrorMsg(answ.msg);
                             }
                         });
+                    },
+
+                    // the last deleted group can be brought back for a few seconds
+                    showUndo: function (storage_name, group) {
+                        var self = this,
+                            bar = document.getElementById('undo_bar');
+
+                        clearTimeout(this.undo_timer);
+                        bar.style.display = 'block';
+                        bar.getElementsByClassName('undo')[0].onclick = function (e) {
+                            var results = {};
+
+                            e.preventDefault();
+                            clearTimeout(self.undo_timer);
+                            bar.style.display = 'none';
+                            groupStoreClient.restore(storage_name).then(function (res) {
+                                group.synced = res.synced;
+                                groupModel.data_local_copy[storage_name] = group;
+                                self.showGroups();
+                                results[storage_name] = res;
+                                self.onSaved(results);
+                            }, function (err) {
+                                self.showErrorMsg(err.message);
+                            });
+                        };
+                        this.undo_timer = setTimeout(function () {
+                            bar.style.display = 'none';
+                        }, 6000);
                     },
 
                     moveGroup: function (storage_name, sibling_storage_name) {
@@ -850,9 +888,9 @@ chrome.storage.session.get(function (session_storage_items) {
                         if (storage_name === session_storage_items.session_id) {
                             title = ui_msg.current_session + ' (' + date + ')';
                         }
-                        return '<div id="' + storage_name + '" class="group">' +
+                        return '<div id="' + utils.escapeHtml(storage_name) + '" class="group">' +
                             '<span class="spoiler" name="closed"> &#9658;</span>' +
-                            '<span class="open_group">' + title + '</span>' +
+                            '<span class="open_group">' + utils.escapeHtml(title) + '</span>' +
                             '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                             '<span class="numbers_of_windows">' + ui_msg.windows_numbers + ' ' + group_info.numbers_of_windows + '</span>' +
                             '<span class="numbers_of_tabs">' + ui_msg.tabs_numbers + ' ' + group_info.numbers_of_tabs + '</span>' +
@@ -871,13 +909,14 @@ chrome.storage.session.get(function (session_storage_items) {
 
                         if (link.title.length > text_length) {
                             a_text = link.title.slice(0, text_length) + '...';
-                            a_title = 'title="' + link.title + '"';
+                            a_title = 'title="' + utils.escapeHtml(link.title) + '"';
                         }
                         return '<div class="link">' +
                             '<span class="link_action">' +
                             //                        '<span class="del_link" title="' + ui_msg.title_del_link + '">&#10006;</span>' +
-                            '<a href="' + link.url + '" target="_blank" ' + a_title + '>' +
-                            '<span class="favi" title="' + link.url + '"><img src="' + favicon_src + '"></span>' + pin_icon + a_text + '</a>' +
+                            '<a href="' + utils.escapeHtml(link.url) + '" target="_blank" ' + a_title + '>' +
+                            '<span class="favi" title="' + utils.escapeHtml(link.url) + '"><img src="' + utils.escapeHtml(favicon_src) + '"></span>' +
+                            pin_icon + utils.escapeHtml(a_text) + '</a>' +
                             '</span>' +
                             '</div>';
                     },
@@ -961,7 +1000,7 @@ chrome.storage.session.get(function (session_storage_items) {
 
                         grouped_links.grouped_by_windowId.forEach(function (link_arr, ind) {
                             var win_html = '<div class="win">' +
-                                '<div class="win_title" id="' + storage_name + '_' + grouped_links.windowId_arr[ind] + '">&#9642; ' + ui_msg.window_text + ' ' + (ind + 1) + '</div>';
+                                '<div class="win_title" id="' + utils.escapeHtml(storage_name + '_' + grouped_links.windowId_arr[ind]) + '">&#9642; ' + ui_msg.window_text + ' ' + (ind + 1) + '</div>';
 
                             link_arr.forEach(function (link) {
                                 win_html += self.linkHtmlElement(storage_name, link);
