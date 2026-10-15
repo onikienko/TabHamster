@@ -285,7 +285,7 @@
         "description": ""
     },
     "o_backup_restoreInstructionMore": {
-        "message": "Los grupos guardados se sustituyen por los de la copia de seguridad. Los grupos que no están en la copia pasan a \"Eliminados recientemente\", y puede deshacer la restauración.",
+        "message": "Los grupos guardados se sustituyen por los de la copia de seguridad. Los grupos que no están en la copia pasan a \"Eliminados recientemente\" (más abajo en esta página), y puede deshacer la restauración.",
         "description": ""
     },
     "p_overwriteGroup_popup": {
@@ -315,5 +315,9 @@
     "o_backup_restoreButton": {
         "message": "Restaurar configuración y grupos guardados",
         "description": ""
+    },
+    "o_help_recentlyDeleted": {
+        "message": "Los grupos eliminados se pueden restaurar durante 30 días: Opciones > Copia de seguridad / Restaurar > Eliminados recientemente.",
+        "description": "Help tab tip: where deleted groups can be restored"
     }
 }

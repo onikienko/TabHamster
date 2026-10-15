@@ -217,7 +217,7 @@
         "description": ""
     },
     "o_backup_restoreInstructionMore": {
-        "message": "Saved groups are replaced by the ones from the backup. Groups that are not in the backup go to \"Recently deleted\", and you can undo the restore.",
+        "message": "Saved groups are replaced by the ones from the backup. Groups that are not in the backup go to \"Recently deleted\" (below on this page), and you can undo the restore.",
         "description": ""
     },
     "o_backup_restoreButton": {
@@ -317,5 +317,9 @@
     "o_trash_restoreButton": {
         "message": "Restore",
         "description": ""
+    },
+    "o_help_recentlyDeleted": {
+        "message": "Deleted groups can be restored for 30 days: Settings > Backup / Restore > Recently deleted.",
+        "description": "Help tab tip: where deleted groups can be restored"
     }
 }

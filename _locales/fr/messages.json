@@ -289,7 +289,7 @@
         "description": ""
     },
     "o_backup_restoreInstructionMore": {
-        "message": "Les groupes enregistrés sont remplacés par ceux de la sauvegarde. Les groupes absents de la sauvegarde vont dans « Supprimés récemment », et vous pouvez annuler la restauration.",
+        "message": "Les groupes enregistrés sont remplacés par ceux de la sauvegarde. Les groupes absents de la sauvegarde vont dans « Supprimés récemment » (plus bas sur cette page), et vous pouvez annuler la restauration.",
         "description": ""
     },
     "p_overwriteGroup_popup": {
@@ -315,5 +315,9 @@
     "o_backup_restoreButton": {
         "message": "Restaurer les paramètres et les groupes enregistrés",
         "description": ""
+    },
+    "o_help_recentlyDeleted": {
+        "message": "Les groupes supprimés peuvent être restaurés pendant 30 jours : Paramètres > Sauvegarde / Restauration > Supprimés récemment.",
+        "description": "Help tab tip: where deleted groups can be restored"
     }
 }

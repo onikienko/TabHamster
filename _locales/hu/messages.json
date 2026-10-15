@@ -281,7 +281,7 @@
         "description": ""
     },
     "o_backup_restoreInstructionMore": {
-        "message": "A mentett csoportokat a biztonsági mentés csoportjai váltják fel. A mentésben nem szereplő csoportok a „Nemrég törölt” részbe kerülnek, és a visszaállítás visszavonható.",
+        "message": "A mentett csoportokat a biztonsági mentés csoportjai váltják fel. A mentésben nem szereplő csoportok a „Nemrég törölt” részbe kerülnek (lejjebb ezen az oldalon), és a visszaállítás visszavonható.",
         "description": ""
     },
     "p_overwriteGroup_popup": {
@@ -311,5 +311,9 @@
     "o_backup_restoreButton": {
         "message": "Beállítások és mentett csoportok visszaállítása",
         "description": ""
+    },
+    "o_help_recentlyDeleted": {
+        "message": "A törölt csoportok 30 napig visszaállíthatók: Beállítások > Biztonsági mentés / Visszaállítás > Nemrég törölt.",
+        "description": "Help tab tip: where deleted groups can be restored"
     }
 }
