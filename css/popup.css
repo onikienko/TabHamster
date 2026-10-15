@@ -76,6 +76,12 @@ ul.tabs_nav {
     color: #0099CC;
 }
 
+.not_synced {
+    margin-left: 5px;
+    color: #E69500;
+    cursor: default;
+}
+
 .group_action {
     float: right;
 }

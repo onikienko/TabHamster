@@ -233,5 +233,27 @@
     "bg_conflictCopy": {
         "message": "конфліктна копія",
         "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
+    },
+    "p_notSynced_title": {
+        "message": "Збережено лише на цьому комп'ютері, не синхронізовано",
+        "description": "Tooltip of the mark next to a saved group that is not in browser sync"
+    },
+    "p_notSyncedCount": {
+        "message": "не синхронізовано: $COUNT$",
+        "description": "After the sync storage usage on the Saved groups tab",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_savedLocally_full": {
+        "message": "Збережено лише на цьому комп'ютері: сховище синхронізації браузера заповнене. Видаліть групи, які більше не потрібні, щоб синхронізувати.",
+        "description": "Shown when a group was saved but sync storage has no room"
+    },
+    "p_savedLocally_later": {
+        "message": "Збережено на цьому комп'ютері. Буде синхронізовано пізніше.",
+        "description": "Shown when a group was saved but could not reach sync storage right now"
     }
 }

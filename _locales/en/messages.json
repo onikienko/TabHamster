@@ -233,5 +233,27 @@
     "bg_conflictCopy": {
         "message": "conflict copy",
         "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
+    },
+    "p_notSynced_title": {
+        "message": "Saved on this computer only, not in browser sync",
+        "description": "Tooltip of the mark next to a saved group that is not in browser sync"
+    },
+    "p_notSyncedCount": {
+        "message": "$COUNT$ not synced",
+        "description": "After the sync storage usage on the Saved groups tab",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_savedLocally_full": {
+        "message": "Saved on this computer only: browser sync storage is full. Delete groups you no longer need to sync it.",
+        "description": "Shown when a group was saved but sync storage has no room"
+    },
+    "p_savedLocally_later": {
+        "message": "Saved on this computer. It will be synced later.",
+        "description": "Shown when a group was saved but could not reach sync storage right now"
     }
 }

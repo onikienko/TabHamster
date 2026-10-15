@@ -5,9 +5,32 @@ function faviconURL(u) {
     return url.toString();
 }
 
+// Enter pressed before saved groups have loaded still saves the open tabs (see o_help_quickAdd)
+var enter_pressed_early = false;
+
+function onEarlyEnter(e) {
+    if (e.keyCode === 13) {
+        enter_pressed_early = true;
+    }
+}
+
+document.getElementById('new_group_name').addEventListener('keyup', onEarlyEnter, false);
+
 chrome.storage.session.get(function (session_storage_items) {
     chrome.storage.local.get(function (session_items) {
-        chrome.storage.sync.get(function (storage_items) {
+        var list_error = null;
+
+        // options come from sync storage, saved groups from the group store
+        Promise.all([
+            chrome.storage.sync.get(),
+            groupStoreClient.list().catch(function (e) {
+                list_error = e;
+                return {};
+            }),
+        ]).then(function (results) {
+            var storage_items = results[0],
+                saved_groups = results[1];
+
             /**
              * Popup window for edit operation
              * @param popup_id
@@ -66,16 +89,48 @@ chrome.storage.session.get(function (session_storage_items) {
             };
 
 
+            // Sessions live in chrome.storage.local, saved groups in the group store (background service worker).
+            // Callbacks get {err: 0|1, msg?, results?}. For saved groups err is 1 only when nothing was saved;
+            // results[storage_name] = {synced, error?, copy?} tells whether the change also reached sync storage.
+            var backends = {
+                session: {
+                    save: function (items, callback) {
+                        chrome.storage.local.set(items, function () {
+                            callback(chrome.runtime.lastError ? {err: 1, msg: chrome.runtime.lastError.message} : {err: 0});
+                        });
+                    },
+                    remove: function (storage_name, callback) {
+                        chrome.storage.local.remove(storage_name, function () {
+                            callback(chrome.runtime.lastError ? {err: 1, msg: chrome.runtime.lastError.message} : {err: 0});
+                        });
+                    },
+                },
+                saved: {
+                    save: function (items, callback) {
+                        groupStoreClient.saveMany(items).then(function (results) {
+                            callback({err: 0, results: results});
+                        }, function (e) {
+                            callback({err: 1, msg: e.message});
+                        });
+                    },
+                    remove: function (storage_name, callback) {
+                        groupStoreClient.remove(storage_name).then(function () {
+                            callback({err: 0});
+                        }, function (e) {
+                            callback({err: 1, msg: e.message});
+                        });
+                    },
+                },
+            };
+
             function GroupModel(area) {
-                this.storageArea = (function () {
-                    return area === 'session' ? chrome.storage.local : chrome.storage.sync;
-                }());
+                this.backend = backends[area];
+                // called with results after saved groups are written
+                this.onSaved = null;
                 // all saved groups as object
                 this.data_local_copy = (function () {
                     var item,
-                        groups_data = (function () {
-                            return area === 'session' ? session_items : storage_items;
-                        }()),
+                        groups_data = area === 'session' ? session_items : saved_groups,
                         obj = {};
 
                     for (item in groups_data) {
@@ -118,86 +173,74 @@ chrome.storage.session.get(function (session_storage_items) {
                 del: function (storage_name, callback) {
                     var self = this;
 
-                    this.storageArea.remove(storage_name, function () {
-                        if (!chrome.runtime.lastError) {
+                    this.backend.remove(storage_name, function (answ) {
+                        if (answ.err === 0) {
                             delete self.data_local_copy[storage_name];
-                            callback({err: 0});
-                        } else {
-                            callback({err: 1, msg: chrome.runtime.lastError.message});
                         }
+                        callback(answ);
+                    });
+                },
+
+                // write {storage_name: group, ...} and keep the local copy in step
+                save: function (items, callback) {
+                    var self = this;
+
+                    this.backend.save(items, function (answ) {
+                        if (answ.err === 0) {
+                            Object.keys(items).forEach(function (storage_name) {
+                                if (answ.results) {
+                                    items[storage_name].synced = answ.results[storage_name].synced;
+                                }
+                                self.data_local_copy[storage_name] = items[storage_name];
+                            });
+                            if (answ.results && self.onSaved) {
+                                self.onSaved(answ.results);
+                            }
+                        }
+                        callback(answ);
                     });
                 },
 
                 add: function (name, group, callback) {
-                    var now = new Date(),
-                        new_group = {},
-                        storage_name = 'tg_' + now.getTime(),
-                        self = this;
+                    var storage_name = 'tg_' + (new Date()).getTime(),
+                        items = {};
 
-                    new_group[storage_name] = {
+                    items[storage_name] = {
                         name: name === undefined || name.length === 0 ? '' : name,
                         index: this.nextIndex(),
-                        color: '', // TODO personal color for each group
                         tabs: group,
                     };
-                    this.storageArea.set(new_group, function () {
-                        if (!chrome.runtime.lastError) {
-                            self.data_local_copy[storage_name] = new_group[storage_name];
-                            callback({err: 0, storage_name: storage_name, new_group: new_group[storage_name]});
-                        } else {
-                            callback({err: 1, msg: chrome.runtime.lastError.message});
-                        }
+                    this.save(items, function (answ) {
+                        answ.storage_name = storage_name;
+                        answ.new_group = items[storage_name];
+                        callback(answ);
                     });
                 },
 
                 upd: function (storage_name, value, callback) {
-                    var obj = {},
-                        self = this;
+                    var items = {};
 
-                    obj[storage_name] = value;
-                    this.storageArea.set(obj, function () {
-                        if (!chrome.runtime.lastError) {
-                            self.data_local_copy[storage_name] = value;
-                            callback({err: 0, storage_name: storage_name, new_group: obj[storage_name]});
-                        } else {
-                            callback({err: 1, msg: chrome.runtime.lastError.message});
-                        }
+                    items[storage_name] = value;
+                    this.save(items, function (answ) {
+                        answ.storage_name = storage_name;
+                        answ.new_group = value;
+                        callback(answ);
                     });
                 },
 
                 move: function (storage_name, sibling_storage_name, callback) {
-                    var self = this,
-                        obj = {},
-                        sibling_obj = {},
-                        i = this.data_local_copy[storage_name].index;
+                    var groups = this.data_local_copy,
+                        items = {};
 
-                    obj[storage_name] = this.data_local_copy[storage_name];
-                    obj[storage_name].index = this.data_local_copy[sibling_storage_name].index;
-                    sibling_obj[sibling_storage_name] = this.data_local_copy[sibling_storage_name];
-                    sibling_obj[sibling_storage_name].index = i;
-                    this.storageArea.set(obj, function () {
-                        if (!chrome.runtime.lastError) {
-                            self.storageArea.set(sibling_obj, function () {
-                                if (!chrome.runtime.lastError) {
-                                    self.data_local_copy[storage_name] = obj[storage_name];
-                                    self.data_local_copy[sibling_storage_name] = sibling_obj[sibling_storage_name];
-                                    callback({err: 0});
-                                } else {
-                                    callback({err: 1, msg: chrome.runtime.lastError.message});
-                                }
-                            });
-                        } else {
-                            callback({err: 1, msg: chrome.runtime.lastError.message});
-                        }
-                    });
+                    // copies: the local copy changes only once the write succeeds
+                    items[storage_name] = Object.assign({}, groups[storage_name], {index: groups[sibling_storage_name].index});
+                    items[sibling_storage_name] = Object.assign({}, groups[sibling_storage_name], {index: groups[storage_name].index});
+                    this.save(items, callback);
                 },
             };
 
 
             function LinkModel(area) {
-                this.storage = (function () {
-                    return area === 'session' ? chrome.storage.local : chrome.storage.sync;
-                }());
                 this.model = area === 'session' ? sessionModel : groupModel;
             }
 
@@ -297,6 +340,10 @@ chrome.storage.session.get(function (session_storage_items) {
                     quota_bytes_per_item: chrome.i18n.getMessage('p_quotaBitesPerItem_error'),
 
                     current_session: chrome.i18n.getMessage('p_currentSession'),
+
+                    not_synced: chrome.i18n.getMessage('p_notSynced_title'),
+                    saved_locally_full: chrome.i18n.getMessage('p_savedLocally_full'),
+                    saved_locally_later: chrome.i18n.getMessage('p_savedLocally_later'),
                 },
 
                 tabsGrabber = {
@@ -318,7 +365,7 @@ chrome.storage.session.get(function (session_storage_items) {
 
                                 if (!tab.pinned || storage_items.pinned === 1) {
                                     link.url = tab.url;
-                                    link.title = tab.title.length > TAB_TITLE_LENGTH ? tab.title.slice(0, TAB_TITLE_LENGTH + 1) : tab.title;
+                                    link.title = tab.title;
                                     link.id = index;
                                     if (tab.pinned) {
                                         link.pinned = tab.pinned;
@@ -364,6 +411,7 @@ chrome.storage.session.get(function (session_storage_items) {
                         return '<div id="' + storage_name + '" class="group">' +
                             '<span class="spoiler" name="closed"> &#9658;</span>' +
                             '<span class="open_group">' + title + '</span>' +
+                            (group.synced === false ? this.notSyncedHtml() : '') +
                             '<span class="open_in_new_window" title="' + ui_msg.title_group_in_new_window + '">&#10064;</span> ' +
                             '<span class="group_action">' +
                             '<span class="add_link" title="' + ui_msg.title_add_link_to_group + '">&#10010;</span>' +
@@ -373,6 +421,52 @@ chrome.storage.session.get(function (session_storage_items) {
                             '<span class="del_group" title="' + ui_msg.title_del_group + '">&#10006;</span>' +
                             '</span>' +
                             '</div>';
+                    },
+
+                    notSyncedHtml: function () {
+                        return '<span class="not_synced" title="' + ui_msg.not_synced + '">&#9888;</span>';
+                    },
+
+                    // show or hide the "not synced" mark of a group that is on the screen
+                    setSyncMark: function (storage_name, synced) {
+                        var group_node = document.getElementById(storage_name),
+                            mark = group_node && group_node.querySelector('.not_synced');
+
+                        if (!group_node) {
+                            return;
+                        }
+                        if (synced && mark) {
+                            mark.remove();
+                        } else if (!synced && !mark) {
+                            group_node.querySelector('.open_group').insertAdjacentHTML('afterend', this.notSyncedHtml());
+                        }
+                    },
+
+                    // after saved groups are written: marks, a note when sync didn't take them, a refresh on a conflict
+                    onSaved: function (results) {
+                        var self = this,
+                            note = '',
+                            copied = false;
+
+                        Object.keys(results).forEach(function (storage_name) {
+                            var res = results[storage_name];
+
+                            self.setSyncMark(storage_name, res.synced);
+                            if (res.error) {
+                                note = /QUOTA_BYTES|MAX_ITEMS/.test(res.error) ? ui_msg.saved_locally_full : ui_msg.saved_locally_later;
+                            }
+                            copied = copied || !!res.copy;
+                        });
+                        if (note) {
+                            this.showErrorMsg(null, note);
+                        }
+                        if (copied) {
+                            // edited on another computer too: both versions are now in the list
+                            groupStoreClient.list().then(function (groups) {
+                                groupModel.data_local_copy = groups;
+                                self.showGroups();
+                            });
+                        }
                     },
 
                     linkHtmlElement: function (storage_name, link) {
@@ -601,18 +695,21 @@ chrome.storage.session.get(function (session_storage_items) {
                         });
                     },
 
-                    showErrorMsg: function (msg) {
-                        var el = document.getElementById('error_msg'),
-                            text = ui_msg.quota_default_item;
+                    // msg: storage error message, or text: shown as is
+                    showErrorMsg: function (msg, text) {
+                        var el = document.getElementById('error_msg');
 
                         el.style.display = 'block';
-                        switch (msg) {
-                            case 'QUOTA_BYTES_PER_ITEM quota exceeded':
-                                text = ui_msg.quota_bytes_per_item;
-                                break;
-                            case 'QUOTA_BYTES quota exceeded':
-                                text = ui_msg.quota_bytes_item;
-                                break;
+                        if (!text) {
+                            text = ui_msg.quota_default_item;
+                            switch (msg) {
+                                case 'QUOTA_BYTES_PER_ITEM quota exceeded':
+                                    text = ui_msg.quota_bytes_per_item;
+                                    break;
+                                case 'QUOTA_BYTES quota exceeded':
+                                    text = ui_msg.quota_bytes_item;
+                                    break;
+                            }
                         }
                         el.innerText = text;
                         setTimeout(function () {
@@ -621,12 +718,14 @@ chrome.storage.session.get(function (session_storage_items) {
                     },
 
                     showSyncStorageUsage: function () {
-                        chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
-                            var percent_in_use = (bytesInUse * 100 / chrome.storage.sync.QUOTA_BYTES).toFixed(2),
+                        groupStoreClient.usage().then(function (usage) {
+                            var percent_in_use = (usage.bytes * 100 / usage.quota).toFixed(2),
                                 el = document.querySelector('ul.tabs_nav>li a'),
-                                text = el.innerText;
+                                text = el.innerText,
+                                not_synced = usage.unsynced ?
+                                    ', ' + chrome.i18n.getMessage('p_notSyncedCount', [String(usage.unsynced)]) : '';
 
-                            el.innerText = text.slice(0, text.indexOf('|')) + '| ' + percent_in_use + '%';
+                            el.innerText = text.slice(0, text.indexOf('|')) + '| ' + percent_in_use + '%' + not_synced;
                         });
                     },
 
@@ -727,6 +826,7 @@ chrome.storage.session.get(function (session_storage_items) {
                     },
 
                     go: function () {
+                        groupModel.onSaved = this.onSaved.bind(this);
                         this.showGroups();
                         this.setHandlers();
                     },
@@ -960,30 +1060,33 @@ chrome.storage.session.get(function (session_storage_items) {
 
                 navigation;
 
-            if (!chrome.runtime.lastError) {
-                /* window tab navigation */
-                navigation = new Tabs('#main_tabs');
-                navigation.toggle(storage_items.active_tab);
-                navigation.onToggle(function (tab_name) {
-                    chrome.storage.sync.set({active_tab: tab_name});
-                });
-                /* popup tab END */
+            /* window tab navigation */
+            navigation = new Tabs('#main_tabs');
+            navigation.toggle(storage_items.active_tab);
+            navigation.onToggle(function (tab_name) {
+                chrome.storage.sync.set({active_tab: tab_name});
+            });
+            /* popup tab END */
 
-                if (storage_items.session_watcher) {
-                    sessionsUI.go();
-                } else {
-                    navigation.toggle('#saved');
-                    // hide session tab
-                    document.querySelector('.tabs_nav').querySelector('[href="#sessions"]').parentNode.style.display = 'none';
-                }
-                savedUI.go();
-//          mainUI.setHandlers();
-
+            if (storage_items.session_watcher) {
+                sessionsUI.go();
             } else {
-                // show sync storage error
-                document.getElementById('error_msg').style.display = 'block';
-                document.getElementById('error_msg').innerText = ui_msg.quota_default_item;
+                navigation.toggle('#saved');
+                // hide session tab
+                document.querySelector('.tabs_nav').querySelector('[href="#sessions"]').parentNode.style.display = 'none';
             }
+            savedUI.go();
+            if (list_error) {
+                savedUI.showErrorMsg(list_error.message);
+            }
+            document.getElementById('new_group_name').removeEventListener('keyup', onEarlyEnter, false);
+            if (enter_pressed_early) {
+                savedUI.addGroup();
+            }
+//          mainUI.setHandlers();
+        }, function () {
+            // can't read sync storage (options)
+            document.getElementById('saved').innerText = chrome.i18n.getMessage('p_syncStorageDefault_error');
         });
     });
 });

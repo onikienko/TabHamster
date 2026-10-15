@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!--
+Try popup.html in a normal browser tab, without installing the extension.
+Serve the repository root over http (e.g. `python3 -m http.server 8000`) and open
+http://localhost:8000/test/popup_harness.html. Options: see test/fake_chrome.js.
+-->
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>TabHamster popup harness</title>
+</head>
+<body>
+<script src="fake_chrome.js"></script>
+<script>
+    fakeChrome.loadPage('popup.html');
+</script>
+</body>
+</html>
