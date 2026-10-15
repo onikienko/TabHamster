@@ -1,8 +1,8 @@
 TabHamster Chrome Extension
 ===========================
 
-Session manager and tabs saver. With sync.
-------------------------------------------
+Session manager and tab saver. With sync.
+-----------------------------------------
 
 ![](https://raw.githubusercontent.com/onikienko/TabHamster/master/img/ext_icons/128.png)  
 
