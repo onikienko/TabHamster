@@ -2,6 +2,10 @@
 	✓ A fül csoportok a Chrome szinkronizációs adatbázisában tárolódnak. Ezeket a bejelentkezés után egy másik számítógépen is elérhetjük.
 	✓ Név hozzárendelése a csoportokhoz.
 	✓ Szerkesztés, új fülek hozzáadása, törlés és a csoportok mozgatása a listán.
+	✓ Akár több száz fül egy csoportban.
+	✓ Minden csoport a számítógépén is megmarad: ha a szinkronizációs tárhely megtelt, a csoport akkor is mentésre kerül.
+	✓ A törölt csoportok 30 napig visszaállíthatók.
+	✓ A csoportok és a beállítások biztonsági mentése fájlba.
 
 ► A folyamatmenedzselő gyors és kényelmes hozzáférést biztosít a Chrome folyamatokhoz.
 	✓ Hozzáférés az éppen megnyitott (és a korábbi) böngészési folyamatokhoz.

@@ -1,17 +1,21 @@
-► Save opened tabs in the group.
-	✓ Tab Groups are stored in the sync Chrome storage. Sign in to the browser to get them on other PC.
-	✓ Assign a group name.
-	✓ Edit, add new tabs, delete, move the group from the list.
+► Save open tabs as a group.
+	✓ Tab groups are stored in Chrome sync storage. Sign in to the browser to get them on your other computers.
+	✓ Hundreds of tabs per group.
+	✓ Every group is also kept on your computer: if sync storage is full, the group is still saved.
+	✓ Give groups names.
+	✓ Edit groups, add and delete tabs, delete and move groups in the list.
+	✓ Deleted groups can be restored for 30 days.
+	✓ Back up your groups and settings to a file.
 
-► Session Manager provides quick and convenient access to the latest browser sessions.
-	✓ Access to the currently open (and earlier) browser session.
-	✓ Recover any session in one click.
-	✓ !!! Sessions are not synchronized.
+► Session Manager gives quick and convenient access to your latest browser sessions.
+	✓ Access the current (and earlier) browser sessions.
+	✓ Restore any session in one click.
+	✓ !!! Sessions are not synced.
 
 
 ☀ Tips:
-	● To quickly save all open tabs in a group, open the extension window and press "ENTER." Later you can edit the name of the group.
-	● "Ctrl + click" on group name (or session) - open tabs in a new window.
+	● To quickly save all open tabs as a group, open the extension window and press Enter. You can rename the group later.
+	● Ctrl + click on a group (or session) name opens its tabs in a new window.
 
 
 Tab Hamster source code: https://github.com/onikienko/TabHamster

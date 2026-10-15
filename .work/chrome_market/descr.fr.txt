@@ -2,6 +2,10 @@
   ✓ Les groupes d'onglets sont synchronisés avec l'espace de stockage de Chrome. Connectez-vous au navigateur afin de les récupérer sur un autre PC.
   ✓ Attribuer un nom de groupe.
   ✓ Modifier, ajouter de nouveaux onglets, supprimer, déplacer le groupe de la liste.
+  ✓ Des centaines d'onglets par groupe.
+  ✓ Chaque groupe est aussi conservé sur votre ordinateur : si l'espace de synchronisation est plein, le groupe est quand même enregistré.
+  ✓ Les groupes supprimés peuvent être restaurés pendant 30 jours.
+  ✓ Sauvegarde de vos groupes et paramètres dans un fichier.
 
 ► Le Gestionnaire de Session fournit un accès rapide et pratique aux dernières sessions du navigateur.
   ✓ Accès à la session actuellement ouverte (et versions antérieures) du navigateur.

@@ -1,9 +1,13 @@
 ► Guarda pestañas abiertas como un grupo.
-	✓ Los Grupos de Pestañas se guardan el espacio de almacenamiento para sincronización. Ingrese a su cuenta en el navegador para obtenerlos en otro PC.
+	✓ Los Grupos de Pestañas se guardan en el espacio de almacenamiento para sincronización. Ingrese a su cuenta en el navegador para obtenerlos en otro PC.
 	✓ Asigne un nombre al grupo.
 	✓ Edite, agregue nuevas pestañas, elimine, mueva el grupo dentro de la lista.
+	✓ Cientos de pestañas por grupo.
+	✓ Cada grupo también se guarda en su dispositivo: si el almacenamiento de sincronización está lleno, el grupo se guarda igualmente.
+	✓ Los grupos eliminados se pueden restaurar durante 30 días.
+	✓ Copia de seguridad de sus grupos y su configuración en un archivo.
 
-► El Administrador de Sesiones brinda una rápida y conveniente forma de acceso a las ultimas sesiones de navegación.
+► El Administrador de Sesiones brinda una rápida y conveniente forma de acceso a las últimas sesiones de navegación.
 	✓ Acceda a la sesión del navegador actualmente abierta, así como a las anteriores.
 	✓ Recupere rápidamente cualquier sesión con un sólo clic.
 	✓! Las sesiones NO se sincronizan.
