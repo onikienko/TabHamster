@@ -5,6 +5,7 @@ var storage = {
         pinned: 0, //do not add pinned tabs
         cur_win: 1, // save tabs from current window only
         active_tab: '#saved', //or '#sessions'
-        session_watcher: 1  //extension will watch sessions
+        session_watcher: 1, //extension will watch sessions
+        theme: 'system' // or 'light', 'dark'
     }
 };

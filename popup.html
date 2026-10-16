@@ -1,92 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="system">
 <head>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="lib/jsTabs/tabs.css">
+    <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/popup.css">
-
+    <script src="js/ui/theme_boot.js"></script>
 </head>
 <body>
-<header>
-    <input id="new_group_name" type="text" autofocus="autofocus" placeholder="{{ p_GroupNameToSave }}"  maxlength="37"/>
-    <a id="new_group" href="" title="{{ p_groupBtn }}">+</a>
-    <span id="window_actions">
-        <a href="options.html#help" title="{{ p_helpBtn }}" target="_blank">?</a>
-        <a href="options.html" title="{{ p_optionsBtn }}" target="_blank">&#9776;</a>
-    </span>
+<header class="band">
+    <span class="band-logo" id="logo"></span>
+    <div class="field">
+        <span class="field-icon" id="field_icon"></span>
+        <label class="sr-only" for="field">{{ p_field_label }}</label>
+        <input id="field" type="text" autocomplete="off" spellcheck="false" maxlength="200" autofocus
+               placeholder="{{ p_field_placeholder }}"/>
+        <button id="save" class="save" type="button"></button>
+    </div>
 </header>
 
-<!--Popup windows-->
-<div class="popup__overlay" id="edit_group_name">
-    <div class="popup">
-        <div class="popup-form__row">
-            <label for="popup-new_group_name">{{ p_newGroupName_popup }}</label>
-            <input type="text" class="data" id="popup-new_group_name" value=""  maxlength="37"/>
-        </div>
-        <input type="button" class="submit_btn" id="save_new_name" value="Ok" />
-        <input type="button" class="cancel" value="Cancel" />
-    </div>
+<div class="tabs" role="tablist">
+    <button class="tab" id="tab_saved" role="tab" type="button" aria-controls="list" aria-selected="true">
+        {{ p_tabName_Saved }}<span class="count num" id="count_saved"></span></button>
+    <button class="tab" id="tab_sessions" role="tab" type="button" aria-controls="list" aria-selected="false">
+        {{ p_tabName_Sessions }}<span class="count num" id="count_sessions"></span></button>
 </div>
-<div class="popup__overlay" id="add_link">
-    <div class="popup">
-        <div class="popup-form__row">
-            <label for="popup-new_group_name">{{ p_addLinkTitle_popup }}</label>
-            <input type="text" class="data" id="popup-add_link_name" value="" />
-        </div>
-        <div class="popup-form__row">
-            <label for="popup-new_group_name">{{ p_addLinkLink_popup }}</label>
-            <input type="text" class="data" id="popup-add_link_link" value="" />
-        </div>
-        <input type="button" class="submit_btn" id="save_new_link" value="Ok" />
-        <input type="button" class="cancel" value="Cancel" />
-    </div>
-</div>
-<div class="popup__overlay" id="edit_link">
-    <div class="popup">
-        <div class="popup-form__row">
-            <label for="popup-new_group_name">{{ p_addLinkTitle_popup }}</label>
-            <input type="text" class="data" id="popup-edit_link_name" value="" />
-        </div>
-        <div class="popup-form__row">
-            <label for="popup-new_group_name">{{ p_addLinkLink_popup }}</label>
-            <input type="text" class="data" id="popup-edit_link_url" value="" />
-        </div>
-        <input type="button" class="submit_btn" id="save_edited_link" value="Ok" />
-        <input type="button" class="cancel" value="Cancel" />
-    </div>
-</div>
-<div class="popup__overlay" id="overwrite_group">
-    <div class="popup">
-        <div class="popup-form__row">
-            {{ p_overwriteGroup_popup }}
-        </div>
-        <input type="button" class="submit_btn" id="overwrite" value="Ok" />
-        <input type="button" class="cancel" value="Cancel" />
-    </div>
-</div>
-<!--Popup windows END-->
 
-<div id="undo_bar">{{ p_groupDeleted_text }} <a href="" class="undo">{{ p_undo_btn }}</a></div>
+<main class="list" id="list" role="tabpanel" aria-labelledby="tab_saved"></main>
 
-<section id="main_tabs">
-    <ul class="tabs_nav">
-        <li><a href="#saved" title="{{ p_synStorageUsage_title }}">{{ p_tabName_Saved }} |&nbsp;</a></li>
-        <li><a href="#sessions">{{ p_tabName_Sessions }}</a></li>
-    </ul>
+<footer class="footer" id="footer"></footer>
 
-    <div class="tabs_content">
-        <div id="saved"></div>
-        <div id="sessions"></div>
-    </div>
-</section>
-
-<script src="js/helpers/localizer.js"></script>
-<script src="lib/jsTabs/tabs.js"></script>
 <script src="js/storage.js"></script>
-<script src="js/utils.js"></script>
 <script src="js/group_store_client.js"></script>
-
-<script src="js/popup.js"></script>
-
+<script src="js/helpers/localizer.js"></script>
+<script type="module" src="js/popup/main.js"></script>
 </body>
 </html>

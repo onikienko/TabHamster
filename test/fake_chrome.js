@@ -228,6 +228,9 @@
             reload: function () {
                 location.reload();
             },
+            openOptionsPage: function () {
+                console.log('chrome.runtime.openOptionsPage');
+            },
             getURL: function (path) {
                 return root + path.replace(/^\//, '');
             },
@@ -272,7 +275,12 @@
                 }
             },
         },
-        i18n: {getMessage: getMessage},
+        i18n: {
+            getMessage: getMessage,
+            getUILanguage: function () {
+                return lang;
+            },
+        },
     };
 
     Object.defineProperty(window, 'chrome', {value: chrome, configurable: true, writable: true});

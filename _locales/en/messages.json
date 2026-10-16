@@ -321,5 +321,149 @@
     "o_help_recentlyDeleted": {
         "message": "Deleted groups can be restored for 30 days: Settings > Backup / Restore > Recently deleted.",
         "description": "Help tab tip: where deleted groups can be restored"
+    },
+    "p_field_placeholder": {
+        "message": "Search or name a group",
+        "description": "Popup field: it searches saved groups, and its text is the name of a new group"
+    },
+    "p_field_label": {
+        "message": "Search groups, or name a new one",
+        "description": "Screen reader label of the popup field"
+    },
+    "p_saveTabs_one": {
+        "message": "Save $COUNT$ tab",
+        "description": "Save button, one tab (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_saveTabs_other": {
+        "message": "Save $COUNT$ tabs",
+        "description": "Save button (plural form 'other'). Translations may add _few, _many forms",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            }
+        }
+    },
+    "p_tabsCount_one": {
+        "message": "$COUNT$ tab",
+        "description": "Number of tabs in a group (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_tabsCount_other": {
+        "message": "$COUNT$ tabs",
+        "description": "Number of tabs in a group (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "p_windowsCount_one": {
+        "message": "$COUNT$ window",
+        "description": "Number of windows in a session (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_windowsCount_other": {
+        "message": "$COUNT$ windows",
+        "description": "Number of windows in a session (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_notSyncedGroups_one": {
+        "message": "$COUNT$ group not synced",
+        "description": "Popup footer (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_notSyncedGroups_other": {
+        "message": "$COUNT$ groups not synced",
+        "description": "Popup footer (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_syncStorage": {
+        "message": "Sync storage",
+        "description": "Popup footer, before the usage meter"
+    },
+    "p_syncStorageUsed": {
+        "message": "$PERCENT$ of Chrome sync storage used",
+        "description": "Screen reader label of the usage meter",
+        "placeholders": {
+            "percent": {
+                "content": "$1",
+                "example": "13%"
+            }
+        }
+    },
+    "p_open": {
+        "message": "Open",
+        "description": "Button on a group row: open its tabs in this window"
+    },
+    "p_openNewWindow": {
+        "message": "Open in new window",
+        "description": "Icon button on a group row"
+    },
+    "p_moreActions": {
+        "message": "More actions",
+        "description": "Icon button on a group row that opens its menu"
+    },
+    "p_expandGroup": {
+        "message": "Show tabs",
+        "description": "Chevron button on a group row (screen reader label)"
+    },
+    "p_collapseGroup": {
+        "message": "Hide tabs",
+        "description": "Chevron button on an open group row (screen reader label)"
+    },
+    "p_currentSessionSince": {
+        "message": "Current session, since $TIME$",
+        "description": "Sessions tab: the session of the running browser",
+        "placeholders": {
+            "time": {
+                "content": "$1",
+                "example": "09:12"
+            }
+        }
+    },
+    "p_sessionsFooter": {
+        "message": "Last 30 sessions, kept on this computer only",
+        "description": "Popup footer on the Sessions tab"
+    },
+    "p_loadError": {
+        "message": "Saved groups could not be loaded. Close and open TabHamster again.",
+        "description": "Popup, when the background part doesn't answer"
+    },
+    "p_pinned": {
+        "message": "Pinned tab",
+        "description": "Screen reader label of the pin icon on a tab"
     }
 }
