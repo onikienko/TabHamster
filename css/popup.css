@@ -143,6 +143,11 @@ button {
     /* 600 minus band (64), tabs (47) and footer (45) */
     max-height: 444px;
     overflow-y: auto;
+}
+
+/* the bar takes 56 px above the footer */
+body.has-bar .list {
+    max-height: 388px;
     padding: 4px 6px 6px;
 }
 
@@ -399,4 +404,86 @@ button {
 .footer .ib {
     width: 32px;
     height: 32px;
+}
+
+/* first run */
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 34px 34px;
+    text-align: center;
+}
+
+.empty-logo {
+    --logo: var(--meter);
+    display: flex;
+}
+
+.empty h2 {
+    margin: 6px 0 0;
+    font-size: 17px;
+}
+
+.empty p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.empty a {
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+/* a group that was just saved */
+
+.item.fresh > .row {
+    background: var(--fresh);
+}
+
+/* bar with Undo (js/ui/bar.js) */
+
+.bar {
+    flex: none;
+    display: flex;
+    margin: 4px 12px 8px;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 6px 6px 6px 14px;
+    border-radius: 10px;
+    background: var(--snack);
+    color: var(--on-snack);
+    box-shadow: var(--shadow);
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.bar[hidden] {
+    display: none;
+}
+
+.bar-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.bar-action {
+    flex: none;
+    height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--snack-action);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.bar-action:focus-visible {
+    outline-color: var(--snack-action);
 }

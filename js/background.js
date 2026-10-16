@@ -49,6 +49,7 @@ const group_ops = {
     save: (key, group) => groups.save(key, group),
     saveMany: (items) => groups.saveMany(items),
     remove: (key) => groups.remove(key),
+    discard: (key) => groups.discard(key),
     restore: (key) => groups.restore(key),
     usage: () => groups.usage(),
 

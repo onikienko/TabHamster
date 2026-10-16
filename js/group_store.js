@@ -478,7 +478,9 @@ var groupStore = (function () {
 
             if (rec.trashed) {
                 if (rec.removing) {
-                    if (remote.status === 'missing') {
+                    if (remote.status === 'missing' && rec.discarded) {
+                        await dropRecord(records, key);
+                    } else if (remote.status === 'missing') {
                         delete rec.removing;
                         await putRecord(records, key, rec);
                     } else {
@@ -596,8 +598,12 @@ var groupStore = (function () {
                 try {
                     await removeFromSync(Array.from(todo.remove), sync_items);
                     for (const key of todo.remove) {
-                        delete records[key].removing;
-                        await putRecord(records, key, records[key]);
+                        if (records[key].discarded) {
+                            await dropRecord(records, key);
+                        } else {
+                            delete records[key].removing;
+                            await putRecord(records, key, records[key]);
+                        }
                     }
                 } catch (e) {
                     todo.remove.forEach(function (key) {
@@ -692,6 +698,27 @@ var groupStore = (function () {
                 delete rec.removing;
                 await putRecord(records, key, rec);
             }
+            return {synced: true};
+        }
+
+        // Undo of a save that created the group: gone everywhere and not kept in trash. If sync can't be
+        // changed now, the record waits (hidden) until a reconcile removes it from sync, then it is dropped.
+        async function discardNow(key) {
+            const records = await readRecords();
+            const rec = records[key];
+            if (!rec) {
+                return {synced: true};
+            }
+            rec.trashed = now();
+            rec.removing = true;
+            rec.discarded = true;
+            await putRecord(records, key, rec);
+            try {
+                await removeFromSync([key], await sync.get(null));
+            } catch (e) {
+                return {synced: false, error: e.message};
+            }
+            await dropRecord(records, key);
             return {synced: true};
         }
 
@@ -822,7 +849,7 @@ var groupStore = (function () {
         async function listTrashNow() {
             const records = await readRecords();
             return Object.keys(records).filter(function (key) {
-                return records[key].trashed;
+                return records[key].trashed && !records[key].discarded;
             }).map(function (key) {
                 const rec = records[key];
                 return {key, name: rec.g.name, index: rec.g.index, tabs: rec.g.tabs, trashed: rec.trashed};
@@ -853,6 +880,8 @@ var groupStore = (function () {
             saveMany: (groups) => exclusive(() => saveNow(groups)),
             /** @returns {Promise<{synced: boolean, error?: string}>} the group goes to trash */
             remove: (key) => exclusive(() => removeNow(key)),
+            /** @returns {Promise<{synced: boolean, error?: string}>} like remove, but not kept in trash (undo of a new save) */
+            discard: (key) => exclusive(() => discardNow(key)),
             /** @returns {Promise<{synced: boolean, error?: string}>} brings a group back from trash */
             restore: (key) => exclusive(() => restoreNow(key)),
             /** @returns {Promise<{saved: number, removed: number, errors: Object}>} groups not given go to trash */

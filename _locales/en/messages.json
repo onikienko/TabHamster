@@ -465,5 +465,105 @@
     "p_pinned": {
         "message": "Pinned tab",
         "description": "Screen reader label of the pin icon on a tab"
+    },
+    "p_saveAs": {
+        "message": "Save as “$NAME$”",
+        "description": "Save button while a new group name is typed",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaceGroup": {
+        "message": "Replace group",
+        "description": "Save button when the typed name is the name of a saved group: its tabs will be replaced by the open tabs"
+    },
+    "p_savedAs_one": {
+        "message": "Saved $COUNT$ tab as “$NAME$”",
+        "description": "Bar after saving (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_savedAs_other": {
+        "message": "Saved $COUNT$ tabs as “$NAME$”",
+        "description": "Bar after saving (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaced_one": {
+        "message": "“$NAME$” now has $COUNT$ tab",
+        "description": "Bar after replacing a group's tabs (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaced_other": {
+        "message": "“$NAME$” now has $COUNT$ tabs",
+        "description": "Bar after replacing a group's tabs (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_notSyncedYet": {
+        "message": "Saved on this computer only for now: Chrome sync storage is full.",
+        "description": "Second line of the bar when a saved group didn't fit in sync storage"
+    },
+    "p_field_placeholder_first": {
+        "message": "Name your first group",
+        "description": "Popup field before any group is saved (the name is optional)"
+    },
+    "p_empty_title": {
+        "message": "Save your first group",
+        "description": "Popup, no saved groups yet"
+    },
+    "p_empty_text": {
+        "message": "Press $KEY$ to keep the open tabs as a group. Type a name first, or leave it empty and the group is named by date and time.",
+        "description": "Popup, no saved groups yet. KEY is Enter or Return",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_empty_sync": {
+        "message": "With Chrome sync on, your groups also appear on your other computers.",
+        "description": "Popup, no saved groups yet"
+    },
+    "p_empty_restore": {
+        "message": "Restore from a backup file",
+        "description": "Link in the popup when there are no saved groups: opens the backup page of the settings"
     }
 }

@@ -218,6 +218,35 @@ test('remove goes to trash, restore brings the group back', async () => {
     assert.deepEqual(await store.listTrash(), []);
 });
 
+test('discard: gone everywhere, not in trash', async () => {
+    const {store, sync} = makeDevice();
+    await store.save('tg_1', makeGroup(400, 1));
+    await store.save('tg_2', makeGroup(20, 2));
+
+    assert.deepEqual(await store.discard('tg_1'), {synced: true});
+    assert.deepEqual(Object.keys(await store.list()), ['tg_2']);
+    assert.deepEqual(await store.listTrash(), []);
+    assert.deepEqual(Object.keys(await syncGroups(sync)), ['tg_2'], 'header and chunks are gone');
+    assert.deepEqual(await store.discard('tg_404'), {synced: true}, 'unknown key: nothing to do');
+});
+
+test('a discard that cannot reach sync finishes on a later reconcile', async () => {
+    const {store, sync, local} = makeDevice();
+    await store.save('tg_1', makeGroup(20, 1));
+    failWrites(sync, RATE_ERROR, 'remove');
+
+    assert.deepEqual(await store.discard('tg_1'), {synced: false, error: RATE_ERROR});
+    assert.deepEqual(await store.list(), {});
+    assert.deepEqual(await store.listTrash(), [], 'hidden while waiting');
+    await store.reconcile();
+    assert.deepEqual(await store.list(), {}, 'still in sync, but stays discarded');
+
+    sync.beforeWrite = null;
+    await store.reconcile();
+    assert.deepEqual(await sync.get(null), {});
+    assert.deepEqual(Object.keys(await local.get(null)).filter(k => k.startsWith('lg_')), [], 'record dropped');
+});
+
 test('a failed sync removal is retried, not undone', async () => {
     const {store, sync} = makeDevice();
     await store.save('tg_1', makeGroup(20, 1));

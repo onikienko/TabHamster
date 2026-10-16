@@ -5,8 +5,10 @@
 import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
-import {wantsNewWindow} from '../ui/platform.js';
+import {wantsNewWindow, keyLabel} from '../ui/platform.js';
 import {keyTime, numericDate, shortDate, shortTime, hostOf, faviconUrl} from '../ui/format.js';
+import {showBar} from '../ui/bar.js';
+import {normalizeName, findByName} from '../names.js';
 
 const lang = uiLanguage();
 
@@ -20,6 +22,12 @@ const state = {
     openTabs: 0,
     view: 'saved',
     expanded: new Set(),
+    ready: false,
+    // Enter pressed before the data has loaded still saves (once it has)
+    pendingSave: false,
+    saving: false,
+    // key of the group just saved, highlighted for a moment
+    fresh: null,
 };
 
 const el = {
@@ -111,6 +119,104 @@ function restoreSession(session) {
     window.close();
 }
 
+/* ---------- saving ---------- */
+
+/**
+ * What Save (and Enter) would do with the text in the field:
+ * {kind: 'new', name} ('' = named by date), or {kind: 'replace', key, name} when a group already has that name
+ */
+function saveIntent() {
+    const name = normalizeName(el.field.value);
+    if (!name) {
+        return {kind: 'new', name: ''};
+    }
+    const key = findByName(state.groups, name);
+    return key ? {kind: 'replace', key, name: state.groups[key].name} : {kind: 'new', name};
+}
+
+function nextIndex() {
+    return Object.values(state.groups).reduce((max, g) => Math.max(max, g.index || 0), 0) + 1;
+}
+
+/** second sentence of the bar when the group stayed on this computer */
+function notSyncedNote(res) {
+    if (res.synced) {
+        return '';
+    }
+    return ' ' + t(/quota/i.test(res.error || '') ? 'p_notSyncedYet' : 'p_savedLocally_later');
+}
+
+async function afterChange(freshKey) {
+    await Promise.all([loadGroups(), loadUsage()]);
+    state.fresh = freshKey || null;
+    render();
+    if (freshKey) {
+        setTimeout(() => {
+            if (state.fresh === freshKey) {
+                state.fresh = null;
+                renderList();
+            }
+        }, 2500);
+    }
+}
+
+async function save() {
+    if (!state.ready) {
+        state.pendingSave = true;
+        return;
+    }
+    if (state.saving) {
+        return;
+    }
+    state.saving = true;
+    try {
+        const tabs = (await queryTabsToSave()).map((tab) => (tab.pinned ?
+            {url: tab.url, title: tab.title, pinned: true} : {url: tab.url, title: tab.title}));
+        if (!tabs.length) {
+            showBar(t('p_nothingToSave'));
+            return;
+        }
+        const intent = saveIntent();
+        let key;
+        let text;
+        let undo;
+        if (intent.kind === 'replace') {
+            key = intent.key;
+            const before = state.groups[key];
+            const res = await groupStoreClient.save(key, {name: before.name, index: before.index, tabs});
+            text = plural('p_replaced', tabs.length, [before.name]) + notSyncedNote(res);
+            undo = () => groupStoreClient.save(key, {name: before.name, index: before.index, tabs: before.tabs});
+        } else {
+            key = 'tg_' + Date.now();
+            const res = await groupStoreClient.save(key, {name: intent.name, index: nextIndex(), tabs});
+            text = plural('p_savedAs', tabs.length, [intent.name || numericDate(keyTime(key), state.options.date_format)]) +
+                notSyncedNote(res);
+            undo = () => groupStoreClient.discard(key);
+        }
+        el.field.value = '';
+        state.view = 'saved';
+        state.expanded.delete('saved:' + key);
+        await afterChange(key);
+        showBar(text, {
+            label: t('p_undo_btn'),
+            run: async () => {
+                try {
+                    await undo();
+                } catch (e) {
+                    console.error('TabHamster: undo failed', e);
+                    showBar(t('p_syncStorageDefault_error'));
+                }
+                await afterChange(null);
+            },
+        });
+    } catch (e) {
+        console.error('TabHamster: save failed', e);
+        showBar(t('p_syncStorageDefault_error'));
+    } finally {
+        state.saving = false;
+    }
+}
+
 /* ---------- rendering ---------- */
 
 function sortedGroupKeys() {
@@ -170,7 +276,7 @@ function groupItem(key) {
     const group = state.groups[key];
     const name = groupName(key, group);
     const open = (e) => (wantsNewWindow(e) ? openInNewWindow(group.tabs) : openInThisWindow(group.tabs));
-    const item = h('div', {class: 'item', dataset: {key}},
+    const item = h('div', {class: ['item', state.fresh === key && 'fresh'], dataset: {key}},
         h('div', {class: 'row'},
             chevron('saved:' + key),
             h('button', {
@@ -218,6 +324,15 @@ function sessionItem(key) {
     return item;
 }
 
+function emptyState() {
+    return h('div', {class: 'empty'},
+        h('span', {class: 'empty-logo'}, logo(118)),
+        h('h2', null, t('p_empty_title')),
+        h('p', null, t('p_empty_text', keyLabel('enter'))),
+        h('p', null, t('p_empty_sync')),
+        h('a', {href: chrome.runtime.getURL('options.html#backup'), target: '_blank'}, t('p_empty_restore')));
+}
+
 function renderTabs() {
     const sessionsOn = !!state.options.session_watcher;
     el.tabs.hidden = !sessionsOn;
@@ -239,7 +354,12 @@ function renderList() {
         el.list.append(h('p', {class: 'message'}, t('p_loadError')));
         return;
     }
-    el.list.append(...sortedGroupKeys().map(groupItem));
+    const keys = sortedGroupKeys();
+    if (!keys.length) {
+        el.list.append(emptyState());
+        return;
+    }
+    el.list.append(...keys.map(groupItem));
 }
 
 function settingsButton() {
@@ -278,8 +398,14 @@ function renderFooter() {
 }
 
 function renderSave() {
+    const intent = saveIntent();
+    const label = intent.kind === 'replace' ? t('p_replaceGroup') :
+        intent.name ? t('p_saveAs', intent.name) : plural('p_saveTabs', state.openTabs);
     clear(el.save);
-    el.save.append(h('span', {class: 'ellipsis'}, plural('p_saveTabs', state.openTabs)), icon('enter', 14));
+    el.save.title = label;
+    el.save.append(h('span', {class: 'ellipsis'}, label), icon('enter', 14));
+    el.field.placeholder = t(Object.keys(state.groups).length || state.groupsError ?
+        'p_field_placeholder' : 'p_field_placeholder_first');
 }
 
 function render() {
@@ -307,6 +433,20 @@ function switchView(view) {
     render();
 }
 
+// listen at once: Enter typed while the data is still loading must not be lost
+el.field.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        save();
+    }
+});
+el.field.addEventListener('input', () => {
+    if (state.ready) {
+        renderSave();
+    }
+});
+el.save.addEventListener('click', () => save());
+
 async function start() {
     document.documentElement.lang = lang;
     document.getElementById('logo').append(logo(46, 'TabHamster'));
@@ -319,6 +459,11 @@ async function start() {
     const [tabs] = await Promise.all([queryTabsToSave(), loadGroups(), loadSessions(), loadUsage()]);
     state.openTabs = tabs.length;
     render();
+    state.ready = true;
+    if (state.pendingSave) {
+        state.pendingSave = false;
+        save();
+    }
 
     el.tabSaved.addEventListener('click', () => switchView('saved'));
     el.tabSessions.addEventListener('click', () => switchView('sessions'));

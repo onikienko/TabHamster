@@ -18,9 +18,10 @@ let rules = null;
 
 /**
  * plural('p_tabsCount', 5) → message `p_tabsCount_<form>` for the UI language's plural form
- * (one, few, many, other: Intl.PluralRules), falling back to `p_tabsCount_other`. The count is $1.
+ * (one, few, many, other: Intl.PluralRules), falling back to `p_tabsCount_other`. The count is $1,
+ * more substitutions follow as $2, $3...
  */
-export function plural(key, count) {
+export function plural(key, count, more) {
     if (!rules) {
         try {
             rules = new Intl.PluralRules(uiLanguage());
@@ -28,7 +29,7 @@ export function plural(key, count) {
             rules = new Intl.PluralRules('en');
         }
     }
-    const args = subs([count]);
+    const args = subs([count].concat(more || []));
     return chrome.i18n.getMessage(key + '_' + rules.select(count), args) ||
         chrome.i18n.getMessage(key + '_other', args) || key;
 }

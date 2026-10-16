@@ -37,6 +37,10 @@ var groupStoreClient = (function () {
         remove: function (key) {
             return call('remove', [key]);
         },
+        /** {synced, error?}; like remove, but the group is not kept in Recently deleted (undo of a new save) */
+        discard: function (key) {
+            return call('discard', [key]);
+        },
         /** {synced, error?} */
         restore: function (key) {
             return call('restore', [key]);
