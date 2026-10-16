@@ -1,0 +1,183 @@
+/* Colours, font and base styles shared by the popup and the settings page.
+   Palette: work-docs/design/boards/Palette.dc.html. <html data-theme="system|light|dark"> picks the theme. */
+
+:root {
+    --band: #00B6E8;
+    --logo: #FFFFFF;
+    --field: #FFFFFF;
+    --field-text: #0E2633;
+    --field-ph: #5B6B78;
+    --field-line: transparent;
+    --save: #0079AC;
+    --on-save: #FFFFFF;
+    --bg: #F6F9FB;
+    --surface: #FFFFFF;
+    --raised: #FFFFFF;
+    --text: #0E2633;
+    --muted: #51636F;
+    --line: #DCE5EC;
+    --guide: #CBD9E3;
+    --tonal: #D3EFFA;
+    --on-tonal: #00577D;
+    --seg: #E6EEF3;
+    --hover: #EBF1F5;
+    --link: #0079AC;
+    --link-hover: #005F87;
+    --focus: #0079AC;
+    --warn: #8A4B00;
+    --warn-bg: #FFF4E0;
+    --warn-line: #F2D6A6;
+    --danger: #B3261E;
+    --hit: #CDEFFB;
+    --fresh: #E3F5FC;
+    --meter: #00B6E8;
+    --meter-warn: #E08A00;
+    --meter-full: #D93025;
+    --snack: #0E2633;
+    --on-snack: #FFFFFF;
+    --snack-action: #7FD8F5;
+    --switch-off: #B9C6CF;
+    --shadow: 0 8px 24px rgba(14, 38, 51, .18), 0 1px 3px rgba(14, 38, 51, .12);
+
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+    --band: #0F2C3A;
+    --logo: #33C4EE;
+    --field: #0A2230;
+    --field-text: #E6F4FA;
+    --field-ph: #89A9B8;
+    --field-line: #244656;
+    --save: #00B6E8;
+    --on-save: #00222F;
+    --bg: #10181D;
+    --surface: #18242C;
+    --raised: #1D2B34;
+    --text: #E4EDF2;
+    --muted: #94A6B2;
+    --line: #24333D;
+    --guide: #2C3D48;
+    --tonal: #123D50;
+    --on-tonal: #8FDDF7;
+    --seg: #1A2730;
+    --hover: #1A2630;
+    --link: #5CCDF2;
+    --link-hover: #8FDDF7;
+    --focus: #5CCDF2;
+    --warn: #FFB869;
+    --warn-bg: #2B2216;
+    --warn-line: #5A4320;
+    --danger: #F2B8B5;
+    --hit: #1E4A5E;
+    --fresh: #143444;
+    --meter: #00B6E8;
+    --meter-warn: #F0A030;
+    --meter-full: #F06A5E;
+    --snack: #E4EDF2;
+    --on-snack: #0E2633;
+    --snack-action: #00658F;
+    --switch-off: #3A4A55;
+    --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="system"] {
+        --band: #0F2C3A;
+        --logo: #33C4EE;
+        --field: #0A2230;
+        --field-text: #E6F4FA;
+        --field-ph: #89A9B8;
+        --field-line: #244656;
+        --save: #00B6E8;
+        --on-save: #00222F;
+        --bg: #10181D;
+        --surface: #18242C;
+        --raised: #1D2B34;
+        --text: #E4EDF2;
+        --muted: #94A6B2;
+        --line: #24333D;
+        --guide: #2C3D48;
+        --tonal: #123D50;
+        --on-tonal: #8FDDF7;
+        --seg: #1A2730;
+        --hover: #1A2630;
+        --link: #5CCDF2;
+        --link-hover: #8FDDF7;
+        --focus: #5CCDF2;
+        --warn: #FFB869;
+        --warn-bg: #2B2216;
+        --warn-line: #5A4320;
+        --danger: #F2B8B5;
+        --hit: #1E4A5E;
+        --fresh: #143444;
+        --meter: #00B6E8;
+        --meter-warn: #F0A030;
+        --meter-full: #F06A5E;
+        --snack: #E4EDF2;
+        --on-snack: #0E2633;
+        --snack-action: #00658F;
+        --switch-off: #3A4A55;
+        --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
+        color-scheme: dark;
+    }
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+}
+
+a {
+    color: var(--link);
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+button, input, select, textarea {
+    font: inherit;
+    color: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.ellipsis {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.num {
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0s !important;
+        transition-duration: 0s !important;
+    }
+}

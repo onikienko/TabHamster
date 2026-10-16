@@ -2,7 +2,7 @@
     "exclude": [".*", "readme.md", "build", "test", "work-docs"],
     "reminder": "",
     "minify": {
-        "dirs": ["../js", "../lib/jsTabs"],
+        "dirs": [],
         "exclude": ["*.min.js"]
     },
     "changelog": {
