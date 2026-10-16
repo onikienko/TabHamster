@@ -565,5 +565,151 @@
     "p_empty_restore": {
         "message": "Restore from a backup file",
         "description": "Link in the popup when there are no saved groups: opens the backup page of the settings"
+    },
+    "p_clearSearch": {
+        "message": "Clear",
+        "description": "Screen reader label of the button that clears the popup field"
+    },
+    "p_tabsMatching_one": {
+        "message": "$MATCHES$ of $COUNT$ tab",
+        "description": "Searching: a group found through its tabs, how many of its tabs match (plural form 'one', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "matches": {
+                "content": "$2",
+                "example": "1"
+            }
+        }
+    },
+    "p_tabsMatching_other": {
+        "message": "$MATCHES$ of $COUNT$ tabs",
+        "description": "Searching: a group found through its tabs, how many of its tabs match (plural form 'other', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "41"
+            },
+            "matches": {
+                "content": "$2",
+                "example": "2"
+            }
+        }
+    },
+    "p_noGroupsMatch": {
+        "message": "No groups match “$QUERY$”",
+        "description": "Popup search found no saved groups",
+        "placeholders": {
+            "query": {
+                "content": "$1",
+                "example": "winter tires"
+            }
+        }
+    },
+    "p_noSessionsMatch": {
+        "message": "No sessions match “$QUERY$”",
+        "description": "Popup search found no sessions",
+        "placeholders": {
+            "query": {
+                "content": "$1",
+                "example": "winter tires"
+            }
+        }
+    },
+    "p_noMatch_text_one": {
+        "message": "Press $KEY$ to save the $COUNT$ open tab as a new group with this name.",
+        "description": "Under 'No groups match'. KEY is Enter or Return (plural form 'one', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_noMatch_text_other": {
+        "message": "Press $KEY$ to save the $COUNT$ open tabs as a new group with this name.",
+        "description": "Under 'No groups match'. KEY is Enter or Return (plural form 'other', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_replaceNote_one": {
+        "message": "“$NAME$” already exists with $COUNT$ tab.",
+        "description": "Note above the list when the typed name is the name of a saved group (plural form 'one', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaceNote_other": {
+        "message": "“$NAME$” already exists with $COUNT$ tabs.",
+        "description": "Note above the list when the typed name is the name of a saved group (plural form 'other', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaceNote_text_one": {
+        "message": "$KEY$ replaces its tabs with the $COUNT$ open tab. You can undo it after saving.",
+        "description": "Second line of the note. KEY is Enter or Return (plural form 'one', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_replaceNote_text_other": {
+        "message": "$KEY$ replaces its tabs with the $COUNT$ open tabs. You can undo it after saving.",
+        "description": "Second line of the note. KEY is Enter or Return (plural form 'other', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_sameNameGroups_other": {
+        "message": "$COUNT$ groups have this name: the one saved last is replaced.",
+        "description": "Added to the note when older groups already share the typed name (always 2 or more; plural form 'other', add _few, _many if needed)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
     }
 }

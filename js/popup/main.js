@@ -8,7 +8,8 @@ import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel} from '../ui/platform.js';
 import {keyTime, numericDate, shortDate, shortTime, hostOf, faviconUrl} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
-import {normalizeName, findByName} from '../names.js';
+import {normalizeName, findByName, countByName} from '../names.js';
+import {parseQuery, segments, search} from '../search.js';
 
 const lang = uiLanguage();
 
@@ -22,6 +23,11 @@ const state = {
     openTabs: 0,
     view: 'saved',
     expanded: new Set(),
+    // words typed in the field and what they found ({saved, sessions}: results of search())
+    words: [],
+    results: {saved: [], sessions: []},
+    // groups found through their tabs open by themselves while searching; these were closed by hand
+    searchClosed: new Set(),
     ready: false,
     // Enter pressed before the data has loaded still saves (once it has)
     pendingSave: false,
@@ -33,6 +39,7 @@ const state = {
 const el = {
     field: document.getElementById('field'),
     save: document.getElementById('save'),
+    clear: document.getElementById('clear'),
     tabs: document.querySelector('.tabs'),
     tabSaved: document.getElementById('tab_saved'),
     tabSessions: document.getElementById('tab_sessions'),
@@ -217,6 +224,48 @@ async function save() {
     }
 }
 
+/* ---------- search ---------- */
+
+function runSearch() {
+    const query = el.field.value;
+    state.words = parseQuery(query);
+    state.results.saved = search(sortedGroupKeys().map((key) => ({
+        key, name: groupName(key, state.groups[key]), tabs: state.groups[key].tabs,
+    })), query);
+    state.results.sessions = search(sortedSessionKeys().map((key) => ({
+        key, name: sessionName(key), tabs: state.sessions[key].tabs,
+    })), query);
+}
+
+function clearSearch() {
+    el.field.value = '';
+    el.field.focus();
+    onQuery();
+}
+
+function onQuery() {
+    if (!parseQuery(el.field.value).length) {
+        state.searchClosed.clear();
+    }
+    if (!state.ready) {
+        return;
+    }
+    el.list.scrollTop = 0;
+    render();
+}
+
+/** text with the searched words in <mark> */
+function marked(text) {
+    return state.words.length ?
+        segments(text, state.words).map((part) => (part.hit ? h('mark', {class: 'hit'}, part.text) : part.text)) :
+        text;
+}
+
+/** group names and tab rows in the list, in order: ↑ ↓ move between them */
+function listStops() {
+    return Array.from(el.list.querySelectorAll('.name, .tab-row'));
+}
+
 /* ---------- rendering ---------- */
 
 function sortedGroupKeys() {
@@ -251,40 +300,53 @@ function tabRow(tab) {
     return h('a', {class: 'tab-row', href: tab.url, target: '_blank', title: tab.url},
         favicon(tab.url),
         tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
-        h('span', {class: 'tab-title ellipsis'}, tab.title || tab.url),
-        h('span', {class: 'domain ellipsis'}, hostOf(tab.url)));
+        h('span', {class: 'tab-title ellipsis'}, marked(tab.title || tab.url)),
+        h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url))));
 }
 
-// saved groups and sessions both use tg_<ms> keys, so an id includes the view
-function chevron(id) {
-    const open = state.expanded.has(id);
+// saved groups and sessions both use tg_<ms> keys, so an id includes the view.
+// `auto`: found through its tabs while searching, so open unless closed by hand
+function isExpanded(id, auto) {
+    return auto ? !state.searchClosed.has(id) : state.expanded.has(id);
+}
+
+function chevron(id, auto) {
+    const open = isExpanded(id, auto);
     return h('button', {
         class: 'chev', type: 'button', 'aria-expanded': String(open),
         'aria-label': t(open ? 'p_collapseGroup' : 'p_expandGroup'),
         onClick: () => {
-            if (open) {
-                state.expanded.delete(id);
+            const set = auto ? state.searchClosed : state.expanded;
+            if (set.has(id)) {
+                set.delete(id);
             } else {
-                state.expanded.add(id);
+                set.add(id);
             }
             renderList();
         },
     }, icon(open ? 'chevronDown' : 'chevronRight', 14));
 }
 
-function groupItem(key) {
+/** "9 tabs", or "2 of 9 tabs" for an item found through its tabs */
+function tabCount(total, result, partial) {
+    return partial ? plural('p_tabsMatching', total, [result.tabIndexes.length]) : plural('p_tabsCount', total);
+}
+
+function groupItem(result, target) {
+    const key = result.key;
     const group = state.groups[key];
     const name = groupName(key, group);
+    const partial = state.words.length > 0 && !result.byName;
     const open = (e) => (wantsNewWindow(e) ? openInNewWindow(group.tabs) : openInThisWindow(group.tabs));
-    const item = h('div', {class: ['item', state.fresh === key && 'fresh'], dataset: {key}},
+    const item = h('div', {class: ['item', state.fresh === key && 'fresh', target && 'target'], dataset: {key}},
         h('div', {class: 'row'},
-            chevron('saved:' + key),
+            chevron('saved:' + key, partial),
             h('button', {
                 class: 'name ellipsis', type: 'button', title: name, onClick: open,
                 onAuxclick: (e) => e.button === 1 && openInNewWindow(group.tabs),
-            }, name),
+            }, marked(name)),
             group.synced === false ? h('span', {class: 'local'}, icon('notSynced', 14, t('p_notSynced_title'))) : null,
-            h('span', {class: 'meta num'}, plural('p_tabsCount', group.tabs.length)),
+            h('span', {class: ['meta', 'num', partial && 'partial']}, tabCount(group.tabs.length, result, partial)),
             h('span', {class: 'meta date num'}, shortDate(keyTime(key), lang)),
             h('div', {class: 'actions'},
                 h('button', {class: 'open', type: 'button', onClick: () => openInThisWindow(group.tabs)}, t('p_open')),
@@ -292,34 +354,42 @@ function groupItem(key) {
                     class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'), title: t('p_openNewWindow'),
                     onClick: () => openInNewWindow(group.tabs),
                 }, icon('newWindow', 16)))));
-    if (state.expanded.has('saved:' + key)) {
-        item.append(h('div', {class: 'tab-list'}, group.tabs.map(tabRow)));
+    if (isExpanded('saved:' + key, partial)) {
+        const tabs = partial ? result.tabIndexes.map((i) => group.tabs[i]) : group.tabs;
+        item.append(h('div', {class: 'tab-list'}, tabs.map(tabRow)));
     }
     return item;
 }
 
-function sessionItem(key) {
+function sessionItem(result) {
+    const key = result.key;
     const session = state.sessions[key];
     const current = key === state.currentSession;
+    const partial = state.words.length > 0 && !result.byName;
     const windows = sessionWindows(session);
     const name = sessionName(key);
     const item = h('div', {class: 'item', dataset: {key}},
         h('div', {class: 'row'},
-            current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron('sessions:' + key),
+            current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron('sessions:' + key, partial),
             h('button', {
                 class: 'name ellipsis', type: 'button', title: name,
                 onClick: () => (current ? null : restoreSession(session)),
-            }, name),
+            }, marked(name)),
             h('span', {class: 'meta num'}, plural('p_windowsCount', windows.length)),
-            h('span', {class: 'meta date num'}, plural('p_tabsCount', session.tabs.length)),
+            h('span', {class: ['meta', 'date', 'num', partial && 'partial']},
+                tabCount(session.tabs.length, result, partial)),
             current ? null : h('div', {class: 'actions'},
                 h('button', {class: 'open', type: 'button', onClick: () => restoreSession(session)}, t('p_open')))));
-    if (!current && state.expanded.has('sessions:' + key)) {
-        item.append(h('div', {class: 'tab-list'}, windows.map((tabs, i) => [
-            h('div', {class: 'win-title'}, icon('window', 14),
-                t('p_window_text') + ' ' + (i + 1) + ', ' + plural('p_tabsCount', tabs.length)),
-            tabs.map(tabRow),
-        ])));
+    if (!current && isExpanded('sessions:' + key, partial)) {
+        const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
+        item.append(h('div', {class: 'tab-list'}, windows.map((tabs, i) => {
+            const shown = found ? tabs.filter((tab) => found.has(tab)) : tabs;
+            return shown.length ? [
+                h('div', {class: 'win-title'}, icon('window', 14),
+                    t('p_window_text') + ' ' + (i + 1) + ', ' + plural('p_tabsCount', tabs.length)),
+                shown.map(tabRow),
+            ] : null;
+        })));
     }
     return item;
 }
@@ -333,6 +403,30 @@ function emptyState() {
         h('a', {href: chrome.runtime.getURL('options.html#backup'), target: '_blank'}, t('p_empty_restore')));
 }
 
+function noMatches(sessions) {
+    const query = normalizeName(el.field.value);
+    return h('div', {class: 'no-match'},
+        icon('searchOff', 34),
+        h('h2', null, t(sessions ? 'p_noSessionsMatch' : 'p_noGroupsMatch', query)),
+        h('p', null, plural('p_noMatch_text', state.openTabs, [keyLabel('enter')])));
+}
+
+/** what Enter will do to a group with the typed name, above the list */
+function replaceNote(key) {
+    const group = state.groups[key];
+    // the name goes in bold: put a marker in its place, then split on it
+    const MARK = '\uE000';
+    const first = plural('p_replaceNote', group.tabs.length, [MARK]).split(MARK);
+    const second = [plural('p_replaceNote_text', state.openTabs, [keyLabel('enter')])];
+    const same = countByName(state.groups, group.name);
+    if (same > 1) {
+        second.push(' ' + plural('p_sameNameGroups', same));
+    }
+    return h('div', {class: 'note', role: 'status'},
+        h('p', null, first[0], h('b', null, group.name), first.slice(1).join('')),
+        h('p', null, second));
+}
+
 function renderTabs() {
     const sessionsOn = !!state.options.session_watcher;
     el.tabs.hidden = !sessionsOn;
@@ -340,26 +434,38 @@ function renderTabs() {
     el.tabSaved.setAttribute('aria-selected', String(saved));
     el.tabSessions.setAttribute('aria-selected', String(!saved));
     el.list.setAttribute('aria-labelledby', saved ? 'tab_saved' : 'tab_sessions');
-    el.countSaved.textContent = String(Object.keys(state.groups).length);
-    el.countSessions.textContent = String(Object.keys(state.sessions).length);
+    el.countSaved.textContent = String(state.results.saved.length);
+    el.countSessions.textContent = String(state.results.sessions.length);
 }
 
 function renderList() {
     clear(el.list);
     if (state.view === 'sessions' && state.options.session_watcher) {
-        el.list.append(...sortedSessionKeys().map(sessionItem));
+        const results = state.results.sessions;
+        el.list.append(...(results.length || !state.words.length ? results.map(sessionItem) : [noMatches(true)]));
         return;
     }
     if (state.groupsError) {
         el.list.append(h('p', {class: 'message'}, t('p_loadError')));
         return;
     }
-    const keys = sortedGroupKeys();
-    if (!keys.length) {
+    if (!Object.keys(state.groups).length) {
         el.list.append(emptyState());
         return;
     }
-    el.list.append(...keys.map(groupItem));
+    const results = state.results.saved;
+    if (!results.length) {
+        el.list.append(noMatches(false));
+        return;
+    }
+    // a group with the typed name: Enter replaces it, so it comes first, under a note that says so
+    const intent = saveIntent();
+    const target = intent.kind === 'replace' ? intent.key : null;
+    if (target) {
+        el.list.append(replaceNote(target));
+    }
+    el.list.append(...results.filter((r) => r.key === target).concat(results.filter((r) => r.key !== target))
+        .map((r) => groupItem(r, r.key === target)));
 }
 
 function settingsButton() {
@@ -401,6 +507,7 @@ function renderSave() {
     const intent = saveIntent();
     const label = intent.kind === 'replace' ? t('p_replaceGroup') :
         intent.name ? t('p_saveAs', intent.name) : plural('p_saveTabs', state.openTabs);
+    el.clear.hidden = !el.field.value;
     clear(el.save);
     el.save.title = label;
     el.save.append(h('span', {class: 'ellipsis'}, label), icon('enter', 14));
@@ -409,6 +516,7 @@ function renderSave() {
 }
 
 function render() {
+    runSearch();
     renderTabs();
     renderList();
     renderFooter();
@@ -435,22 +543,52 @@ function switchView(view) {
 
 // listen at once: Enter typed while the data is still loading must not be lost
 el.field.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.isComposing) {
+    if (e.isComposing) {
+        return;
+    }
+    if (e.key === 'Enter') {
         e.preventDefault();
         save();
+    } else if (e.key === 'ArrowDown' && !e.altKey) {
+        const first = listStops()[0];
+        if (first) {
+            e.preventDefault();
+            first.focus();
+        }
+    } else if (e.key === 'Escape' && el.field.value) {
+        // handled here, so Chrome doesn't close the popup; with an empty field Esc still closes it
+        e.preventDefault();
+        clearSearch();
     }
 });
-el.field.addEventListener('input', () => {
-    if (state.ready) {
-        renderSave();
-    }
-});
+el.field.addEventListener('input', () => onQuery());
 el.save.addEventListener('click', () => save());
+el.clear.addEventListener('click', () => clearSearch());
+
+// ↑ ↓ between group names and tabs (Enter opens the focused one), ↑ from the first goes back to the field
+el.list.addEventListener('keydown', (e) => {
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !e.altKey) {
+        const stops = listStops();
+        const i = stops.indexOf(document.activeElement);
+        if (i === -1) {
+            return;
+        }
+        e.preventDefault();
+        const next = stops[i + (e.key === 'ArrowDown' ? 1 : -1)];
+        (next || (e.key === 'ArrowUp' ? el.field : stops[i])).focus();
+    } else if (e.key === 'Escape' && el.field.value) {
+        e.preventDefault();
+        clearSearch();
+    }
+});
 
 async function start() {
     document.documentElement.lang = lang;
     document.getElementById('logo').append(logo(46, 'TabHamster'));
     document.getElementById('field_icon').append(icon('search', 16));
+    el.clear.setAttribute('aria-label', t('p_clearSearch'));
+    el.clear.title = t('p_clearSearch');
+    el.clear.append(icon('close', 15));
 
     state.options = await loadOptions();
     applyTheme(state.options.theme);

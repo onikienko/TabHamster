@@ -24,6 +24,8 @@ export function logo(width, label) {
 // 24 x 24 line icons: [tag, attrs] lists
 const ICONS = {
     search: [['circle', {cx: 11, cy: 11, r: 7}], ['path', {d: 'm20 20-3.5-3.5'}]],
+    searchOff: [['circle', {cx: 11, cy: 11, r: 7}], ['path', {d: 'm20 20-3.5-3.5'}], ['path', {d: 'M8.5 8.5l5 5'}],
+        ['path', {d: 'M13.5 8.5l-5 5'}]],
     chevronRight: [['path', {d: 'm9 18 6-6-6-6'}]],
     chevronDown: [['path', {d: 'm6 9 6 6 6-6'}]],
     newWindow: [['path', {d: 'M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6'}], ['path', {d: 'm21 3-9 9'}],
