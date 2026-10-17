@@ -565,3 +565,144 @@ body.has-bar .list {
     font-size: 13px;
     line-height: 19px;
 }
+
+/* group menu (js/ui/menu.js) */
+
+.row.menu-open {
+    background: var(--hover);
+}
+
+.row.menu-open .actions {
+    display: flex;
+}
+
+.row.menu-open .meta {
+    display: none;
+}
+
+.ib[aria-expanded="true"] {
+    background: var(--seg);
+    color: var(--text);
+}
+
+.menu {
+    position: fixed;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 252px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--raised);
+    box-shadow: var(--shadow);
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    text-align: left;
+}
+
+.menu-item:hover,
+.menu-item:focus {
+    background: var(--menu-hover);
+}
+
+.menu-item:focus-visible {
+    outline-offset: -2px;
+}
+
+.menu-item .icon {
+    flex: none;
+    color: var(--muted);
+}
+
+.menu-item.danger,
+.menu-item.danger .icon {
+    color: var(--danger);
+}
+
+.menu-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.menu-sub {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.menu-sep {
+    height: 1px;
+    margin: 4px 6px;
+    background: var(--line);
+}
+
+/* renaming a group in its row */
+
+.rename {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 6px 6px 4px;
+    border-radius: 8px;
+    background: var(--hover);
+}
+
+.rename-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chev-space {
+    flex: none;
+    width: 24px;
+}
+
+.rename-input {
+    flex: 1;
+    min-width: 0;
+    height: 30px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 6px;
+    outline: none;
+    background: var(--surface);
+    box-shadow: 0 0 0 2px var(--focus);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rename-input[aria-invalid="true"] {
+    box-shadow: 0 0 0 2px var(--danger);
+}
+
+.rename .ib:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
+.rename-error {
+    padding-left: 30px;
+    color: var(--danger);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.rename-error[hidden] {
+    display: none;
+}

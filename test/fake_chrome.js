@@ -255,10 +255,17 @@
         },
         tabs: {
             query: function (filter, callback) {
-                return finish(Promise.resolve(fakeTabs()), callback);
+                var tabs = fakeTabs();
+                // the active tab is the last one
+                return finish(Promise.resolve(filter && filter.active ? tabs.slice(-1) : tabs), callback);
             },
             create: function (props) {
                 console.log('chrome.tabs.create', props);
+                return Promise.resolve({id: 200, windowId: props.windowId});
+            },
+            update: function (id, props) {
+                console.log('chrome.tabs.update', id, props);
+                return Promise.resolve({id: id});
             },
             remove: function () {},
             onUpdated: event(),
@@ -270,9 +277,10 @@
         windows: {
             create: function (props, callback) {
                 console.log('chrome.windows.create', props);
-                if (callback) {
-                    callback({id: 2, tabs: [{id: 100}]});
-                }
+                return finish(Promise.resolve({id: 2, tabs: [{id: 100}]}), callback);
+            },
+            getCurrent: function (callback) {
+                return finish(Promise.resolve({id: 1}), callback);
             },
         },
         i18n: {

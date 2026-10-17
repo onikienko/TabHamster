@@ -711,5 +711,159 @@
                 "example": "2"
             }
         }
+    },
+    "p_replaceWithOpen": {
+        "message": "Replace with open tabs",
+        "description": "Group menu: the group's tabs become the tabs that Save would take"
+    },
+    "p_tabsInWindow_one": {
+        "message": "$COUNT$ tab in this window",
+        "description": "Under 'Replace with open tabs' (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_tabsInWindow_other": {
+        "message": "$COUNT$ tabs in this window",
+        "description": "Under 'Replace with open tabs' (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            }
+        }
+    },
+    "p_openTabsCount_one": {
+        "message": "$COUNT$ open tab",
+        "description": "Under 'Replace with open tabs' when Save takes the tabs of all windows (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_openTabsCount_other": {
+        "message": "$COUNT$ open tabs",
+        "description": "Under 'Replace with open tabs' when Save takes the tabs of all windows (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "30"
+            }
+        }
+    },
+    "p_addCurrentTab": {
+        "message": "Add current tab",
+        "description": "Group menu: adds the tab you are looking at to the group (its title is shown under it)"
+    },
+    "p_rename": {
+        "message": "Rename",
+        "description": "Group menu"
+    },
+    "p_openIncognito": {
+        "message": "Open in incognito window",
+        "description": "Group menu"
+    },
+    "p_copyLinks": {
+        "message": "Copy links",
+        "description": "Group menu: copies the addresses of the group's tabs, one per line"
+    },
+    "p_delete": {
+        "message": "Delete",
+        "description": "Group menu"
+    },
+    "p_groupName_label": {
+        "message": "Group name",
+        "description": "Screen reader label of the field for renaming a group"
+    },
+    "p_saveName": {
+        "message": "Save name",
+        "description": "Button next to the rename field"
+    },
+    "p_cancelRename": {
+        "message": "Cancel rename",
+        "description": "Button next to the rename field"
+    },
+    "p_nameTaken": {
+        "message": "Another group is already named “$NAME$”.",
+        "description": "Under the rename field when the typed name belongs to another group",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Reading list"
+            }
+        }
+    },
+    "p_deleted": {
+        "message": "“$NAME$” deleted",
+        "description": "Bar after deleting a group, with Undo",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
+    "p_tabAdded": {
+        "message": "Added “$TITLE$” to “$NAME$”",
+        "description": "Bar after 'Add current tab', with Undo",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Pricing | Kelviq"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Extensions dev"
+            }
+        }
+    },
+    "p_alreadyInGroup": {
+        "message": "This tab is already in “$NAME$”.",
+        "description": "Bar when 'Add current tab' finds the tab's address in the group already",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
+    "p_linksCopied_one": {
+        "message": "Copied $COUNT$ link",
+        "description": "Bar after 'Copy links' (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_linksCopied_other": {
+        "message": "Copied $COUNT$ links",
+        "description": "Bar after 'Copy links' (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "5"
+            }
+        }
+    },
+    "p_copyFailed": {
+        "message": "Couldn't copy the links.",
+        "description": "Bar when copying to the clipboard failed"
+    },
+    "p_openFailed": {
+        "message": "Couldn't open the tabs: $ERROR$",
+        "description": "Bar when Chrome refused to open a window (for example incognito is turned off by an administrator). ERROR is Chrome's message, in English",
+        "placeholders": {
+            "error": {
+                "content": "$1",
+                "example": "Incognito mode is disabled."
+            }
+        }
     }
 }

@@ -21,6 +21,7 @@
     --on-tonal: #00577D;
     --seg: #E6EEF3;
     --hover: #EBF1F5;
+    --menu-hover: #EBF1F5;
     --link: #0079AC;
     --link-hover: #005F87;
     --focus: #0079AC;
@@ -63,6 +64,7 @@
     --on-tonal: #8FDDF7;
     --seg: #1A2730;
     --hover: #1A2630;
+    --menu-hover: #22323D;
     --link: #5CCDF2;
     --link-hover: #8FDDF7;
     --focus: #5CCDF2;
@@ -104,6 +106,7 @@
         --on-tonal: #8FDDF7;
         --seg: #1A2730;
         --hover: #1A2630;
+        --menu-hover: #22323D;
         --link: #5CCDF2;
         --link-hover: #8FDDF7;
         --focus: #5CCDF2;

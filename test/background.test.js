@@ -20,13 +20,46 @@ function event() {
     };
 }
 
-function startBackground({sync = createSyncArea(), local = createStorageArea()} = {}) {
+// windows and tabs that record what the background does with them. `active`: the active tab of window 1
+function fakeBrowser(active) {
+    const calls = [];
+    // copies: objects from the sandbox have their own prototypes
+    const record = (...call) => calls.push(JSON.parse(JSON.stringify(call)));
+    let next_id = 100;
+    return {
+        calls,
+        tabs: {
+            query: (filter, callback) => (callback ? callback([]) : Promise.resolve(active ? [active] : [])),
+            create: async function (props) {
+                record('create', props);
+                if (/^bad:/.test(props.url)) {
+                    throw new Error('Cannot open ' + props.url);
+                }
+                return {id: next_id++, windowId: props.windowId};
+            },
+            update: async function (id, props) {
+                record('update', id, props);
+                return {id};
+            },
+        },
+        windows: {
+            create: async function (props) {
+                record('window', props);
+                const urls = [].concat(props.url || []);
+                return {id: 7, tabs: urls.map(() => ({id: next_id++, windowId: 7}))};
+            },
+        },
+    };
+}
+
+function startBackground({sync = createSyncArea(), local = createStorageArea(), browser = fakeBrowser()} = {}) {
     const chrome = {
         storage: {sync, local, session: createStorageArea(), onChanged: event()},
         runtime: {onInstalled: event(), onMessage: event(), onUpdateAvailable: event(), reload() {}},
         tabs: {
-            query: (filter, callback) => callback([]),
-            create() {},
+            query: browser.tabs.query,
+            create: browser.tabs.create,
+            update: browser.tabs.update,
             remove() {},
             onUpdated: event(),
             onMoved: event(),
@@ -34,7 +67,7 @@ function startBackground({sync = createSyncArea(), local = createStorageArea()} 
             onRemoved: event(),
             onReplaced: event(),
         },
-        windows: {create() {}},
+        windows: browser.windows,
         i18n: {getMessage: key => EN[key] ? EN[key].message : ''},
     };
     const context = vm.createContext({
@@ -118,6 +151,57 @@ test('message API: save, remove, restore, usage', async () => {
 test('message API: unknown operation', async () => {
     const bg = startBackground();
     assert.deepEqual(await bg.groups('drop_everything'), {error: 'Unknown operation: drop_everything'});
+});
+
+const TABS = [
+    {url: 'https://a.example/', pinned: true},
+    {url: 'https://b.example/'},
+    {url: 'https://c.example/'},
+];
+
+test('open in the current window: new tabs in order, the first one active', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'});
+    const bg = startBackground({browser});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1}), {result: {failed: 0}});
+    assert.deepEqual(browser.calls, [
+        ['create', {windowId: 1, url: 'https://a.example/', pinned: true, active: true}],
+        ['create', {windowId: 1, url: 'https://b.example/', pinned: false, active: false}],
+        ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false}],
+    ]);
+});
+
+test('open in the current window: a blank new tab takes the first tab', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'});
+    const bg = startBackground({browser});
+    await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
+    assert.deepEqual(browser.calls, [
+        ['update', 1, {url: 'https://a.example/', pinned: true}],
+        ['create', {windowId: 1, url: 'https://b.example/', pinned: false, active: false}],
+        ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false}],
+    ]);
+});
+
+test('open in a new window: the window opens with the first tab, the rest follow; bad ones are skipped', async () => {
+    const browser = fakeBrowser();
+    const bg = startBackground({browser});
+    const tabs = TABS.concat({url: 'bad:x'}, {url: 'https://d.example/'});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'window', tabs}), {result: {failed: 1}});
+    assert.deepEqual(browser.calls.map(c => c[0] === 'window' ? c[1].url : c[0] === 'update' ? 'pin' : c[1].url), [
+        'https://a.example/', 'pin', 'https://b.example/', 'https://c.example/', 'bad:x', 'https://d.example/']);
+    assert.ok(browser.calls.filter(c => c[0] === 'create').every(c => c[1].windowId === 7 && !c[1].active));
+});
+
+test('open in incognito: one window with all tabs', async () => {
+    const browser = fakeBrowser();
+    const bg = startBackground({browser});
+    await bg.send({msg: 'open', how: 'incognito', tabs: TABS});
+    assert.deepEqual(browser.calls, [['window', {incognito: true, focused: true, url: TABS.map(t => t.url)}]]);
+});
+
+test('open: nothing to open, unknown way', async () => {
+    const bg = startBackground();
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: []}), {error: 'Nothing to open'});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'elsewhere', tabs: TABS}), {error: 'Nothing to open'});
 });
 
 test('a sync change from another device reaches the local copy', async () => {

@@ -92,6 +92,57 @@ const group_ops = {
     },
 };
 
+// Opening saved groups and sessions. Done here, not in the popup: a new window takes the focus and closes the popup,
+// and the opening has to finish anyway. tabs: [{url, pinned?}]. Answers {failed: number of tabs that didn't open}.
+
+// a new tab page that can take the first opened tab instead of staying empty next to them
+function isBlankTab(tab) {
+    return !!tab && /^(chrome:\/\/(newtab|new-tab-page)\/?|about:blank)$/.test(tab.pendingUrl || tab.url || '');
+}
+
+// one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others
+async function createTabs(windowId, tabs, activeFirst) {
+    let failed = 0;
+    for (let i = 0; i < tabs.length; i++) {
+        try {
+            await chrome.tabs.create({windowId, url: tabs[i].url, pinned: !!tabs[i].pinned, active: activeFirst && i === 0});
+        } catch (e) {
+            failed++;
+        }
+    }
+    return failed;
+}
+
+const open_ops = {
+    // into the popup's window; a blank new tab there takes the first tab
+    current: async function (tabs, windowId) {
+        const [active] = await chrome.tabs.query(windowId ? {active: true, windowId} : {active: true, lastFocusedWindow: true});
+        let rest = tabs;
+        if (isBlankTab(active)) {
+            try {
+                await chrome.tabs.update(active.id, {url: tabs[0].url, pinned: !!tabs[0].pinned});
+                rest = tabs.slice(1);
+            } catch (e) {
+                // open it as a new tab like the others
+            }
+        }
+        const failed = await createTabs(active ? active.windowId : windowId, rest, rest === tabs);
+        return {failed};
+    },
+    window: async function (tabs) {
+        const win = await chrome.windows.create({focused: true, url: tabs[0].url});
+        if (tabs[0].pinned) {
+            await chrome.tabs.update(win.tabs[0].id, {pinned: true});
+        }
+        return {failed: await createTabs(win.id, tabs.slice(1), false)};
+    },
+    // without "Allow in Incognito" the extension can open the window but can't add tabs to it later: all at once
+    incognito: async function (tabs) {
+        await chrome.windows.create({incognito: true, focused: true, url: tabs.map(tab => tab.url)});
+        return {failed: 0};
+    },
+};
+
 const session_config = {
     session_numbers: 30,
     prefix: 'tg_',
@@ -169,6 +220,17 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
                 }
             });
             break;
+        case 'open':
+            if (!open_ops.hasOwnProperty(msg.how) || !Array.isArray(msg.tabs) || !msg.tabs.length) {
+                sendResponse({error: 'Nothing to open'});
+                break;
+            }
+            open_ops[msg.how](msg.tabs, msg.windowId).then(function (result) {
+                sendResponse({result});
+            }, function (e) {
+                sendResponse({error: e.message});
+            });
+            return true;
         case 'groups':
             if (!group_ops.hasOwnProperty(msg.op)) {
                 sendResponse({error: 'Unknown operation: ' + msg.op});

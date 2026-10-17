@@ -8,6 +8,7 @@ import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel} from '../ui/platform.js';
 import {keyTime, numericDate, shortDate, shortTime, hostOf, faviconUrl} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
+import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName} from '../names.js';
 import {parseQuery, segments, search} from '../search.js';
 
@@ -34,6 +35,10 @@ const state = {
     saving: false,
     // key of the group just saved, highlighted for a moment
     fresh: null,
+    // key of the group whose name is being edited in its row
+    renaming: null,
+    // the popup's window: "open in this window" goes there
+    windowId: undefined,
 };
 
 const el = {
@@ -97,13 +102,34 @@ async function queryTabsToSave() {
 
 /* ---------- opening ---------- */
 
+// the background opens them (open_ops in js/background.js): a new window closes the popup mid-way
+async function openTabs(how, tabs) {
+    let res;
+    try {
+        res = await chrome.runtime.sendMessage({msg: 'open', how, tabs, windowId: state.windowId});
+    } catch (e) {
+        res = {error: e.message};
+    }
+    if (!res || res.error) {
+        showBar(t('p_openFailed', (res && res.error) || ''));
+        return false;
+    }
+    return true;
+}
+
 function openInThisWindow(tabs) {
-    chrome.runtime.sendMessage({msg: 'openLinksInCurrentWindow', links: tabs});
+    openTabs('current', tabs);
+}
+
+/** in a new window ('window') or an incognito one ('incognito'); the popup closes unless that failed */
+async function openElsewhere(how, tabs) {
+    if (await openTabs(how, tabs)) {
+        window.close();
+    }
 }
 
 function openInNewWindow(tabs) {
-    chrome.runtime.sendMessage({msg: 'openLinksInNewWindow', links: tabs});
-    window.close();
+    openElsewhere('window', tabs);
 }
 
 /** tabs of a session, one list per window, in their order */
@@ -119,11 +145,11 @@ function sessionWindows(session) {
     return Array.from(windows.values());
 }
 
-function restoreSession(session) {
-    for (const tabs of sessionWindows(session)) {
-        chrome.runtime.sendMessage({msg: 'openLinksInNewWindow', links: tabs});
+async function restoreSession(session) {
+    const done = await Promise.all(sessionWindows(session).map((tabs) => openTabs('window', tabs)));
+    if (done.every(Boolean)) {
+        window.close();
     }
-    window.close();
 }
 
 /* ---------- saving ---------- */
@@ -139,6 +165,11 @@ function saveIntent() {
     }
     const key = findByName(state.groups, name);
     return key ? {kind: 'replace', key, name: state.groups[key].name} : {kind: 'new', name};
+}
+
+/** a tab as a saved group keeps it */
+function savedTab(tab) {
+    return tab.pinned ? {url: tab.url, title: tab.title, pinned: true} : {url: tab.url, title: tab.title};
 }
 
 function nextIndex() {
@@ -161,10 +192,29 @@ async function afterChange(freshKey) {
         setTimeout(() => {
             if (state.fresh === freshKey) {
                 state.fresh = null;
-                renderList();
+                // not a new render: it would close a menu or a rename opened meanwhile
+                for (const item of el.list.querySelectorAll('.item.fresh')) {
+                    item.classList.remove('fresh');
+                }
             }
         }, 2500);
     }
+}
+
+/** Undo button for the bar: runs `undo`, then shows the groups as they are */
+function undoAction(undo) {
+    return {
+        label: t('p_undo_btn'),
+        run: async () => {
+            try {
+                await undo();
+            } catch (e) {
+                console.error('TabHamster: undo failed', e);
+                showBar(t('p_syncStorageDefault_error'));
+            }
+            await afterChange(null);
+        },
+    };
 }
 
 async function save() {
@@ -177,8 +227,7 @@ async function save() {
     }
     state.saving = true;
     try {
-        const tabs = (await queryTabsToSave()).map((tab) => (tab.pinned ?
-            {url: tab.url, title: tab.title, pinned: true} : {url: tab.url, title: tab.title}));
+        const tabs = (await queryTabsToSave()).map(savedTab);
         if (!tabs.length) {
             showBar(t('p_nothingToSave'));
             return;
@@ -191,7 +240,7 @@ async function save() {
             key = intent.key;
             const before = state.groups[key];
             const res = await groupStoreClient.save(key, {name: before.name, index: before.index, tabs});
-            text = plural('p_replaced', tabs.length, [before.name]) + notSyncedNote(res);
+            text = plural('p_replaced', tabs.length, [groupName(key, before)]) + notSyncedNote(res);
             undo = () => groupStoreClient.save(key, {name: before.name, index: before.index, tabs: before.tabs});
         } else {
             key = 'tg_' + Date.now();
@@ -204,24 +253,212 @@ async function save() {
         state.view = 'saved';
         state.expanded.delete('saved:' + key);
         await afterChange(key);
-        showBar(text, {
-            label: t('p_undo_btn'),
-            run: async () => {
-                try {
-                    await undo();
-                } catch (e) {
-                    console.error('TabHamster: undo failed', e);
-                    showBar(t('p_syncStorageDefault_error'));
-                }
-                await afterChange(null);
-            },
-        });
+        showBar(text, undoAction(undo));
     } catch (e) {
         console.error('TabHamster: save failed', e);
         showBar(t('p_syncStorageDefault_error'));
     } finally {
         state.saving = false;
     }
+}
+
+/* ---------- group actions (⋯ menu, rename) ---------- */
+
+/** wraps an action: a failure shows a message instead of disappearing */
+function act(fn) {
+    return async () => {
+        try {
+            await fn();
+        } catch (e) {
+            console.error('TabHamster: action failed', e);
+            showBar(t('p_syncStorageDefault_error'));
+        }
+    };
+}
+
+/** the group keeps its key, name and place, only its tabs change; the bar says `text` and can undo it */
+async function setTabs(key, tabs, text) {
+    const before = state.groups[key];
+    const res = await groupStoreClient.save(key, {name: before.name, index: before.index, tabs});
+    await afterChange(key);
+    showBar(text + notSyncedNote(res),
+        undoAction(() => groupStoreClient.save(key, {name: before.name, index: before.index, tabs: before.tabs})));
+}
+
+async function replaceWithOpenTabs(key) {
+    const tabs = (await queryTabsToSave()).map(savedTab);
+    if (!tabs.length) {
+        showBar(t('p_nothingToSave'));
+        return;
+    }
+    await setTabs(key, tabs, plural('p_replaced', tabs.length, [groupName(key, state.groups[key])]));
+}
+
+async function addTab(key, tab) {
+    const group = state.groups[key];
+    const name = groupName(key, group);
+    if (group.tabs.some((saved) => saved.url === tab.url)) {
+        showBar(t('p_alreadyInGroup', name));
+        return;
+    }
+    await setTabs(key, group.tabs.concat(savedTab(tab)), t('p_tabAdded', [tab.title || tab.url, name]));
+}
+
+async function copyLinks(group) {
+    try {
+        await navigator.clipboard.writeText(group.tabs.map((tab) => tab.url).join('\n'));
+        showBar(plural('p_linksCopied', group.tabs.length));
+    } catch (e) {
+        console.error('TabHamster: copy failed', e);
+        showBar(t('p_copyFailed'));
+    }
+}
+
+async function deleteGroup(key) {
+    const name = groupName(key, state.groups[key]);
+    await groupStoreClient.remove(key);
+    state.expanded.delete('saved:' + key);
+    await afterChange(null);
+    // its row (and the focus with it) is gone
+    if (document.activeElement === document.body) {
+        el.field.focus();
+    }
+    showBar(t('p_deleted', name), undoAction(() => groupStoreClient.restore(key)));
+}
+
+async function groupMenu(key, button) {
+    if (isMenuOpen(button)) {
+        closeMenu(true);
+        return;
+    }
+    const [toSave, [current]] = await Promise.all([
+        queryTabsToSave(),
+        chrome.tabs.query({active: true, currentWindow: true}),
+    ]);
+    const group = state.groups[key];
+    if (!group || !button.isConnected) {
+        return;
+    }
+    const row = button.closest('.row');
+    row.classList.add('menu-open');
+    openMenu(button, [
+        {
+            icon: 'replace', label: t('p_replaceWithOpen'),
+            sub: plural(state.options.cur_win ? 'p_tabsInWindow' : 'p_openTabsCount', toSave.length),
+            run: act(() => replaceWithOpenTabs(key)),
+        },
+        current ? {
+            icon: 'plus', label: t('p_addCurrentTab'), sub: current.title || current.url,
+            run: act(() => addTab(key, current)),
+        } : null,
+        {icon: 'pencil', label: t('p_rename'), run: () => startRename(key)},
+        '-',
+        {icon: 'incognito', label: t('p_openIncognito'), run: () => openElsewhere('incognito', group.tabs)},
+        {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(group)},
+        '-',
+        {icon: 'trash', label: t('p_delete'), danger: true, run: act(() => deleteGroup(key))},
+    ].filter(Boolean), {label: groupName(key, group), onClose: () => row.classList.remove('menu-open')});
+}
+
+function focusName(key) {
+    const name = el.list.querySelector('.item[data-key="' + CSS.escape(key) + '"] .name');
+    if (name) {
+        name.focus();
+    }
+}
+
+function startRename(key) {
+    state.renaming = key;
+    renderList();
+    const input = el.list.querySelector('.rename-input');
+    if (input) {
+        input.focus();
+        input.select();
+    }
+}
+
+/**
+ * The row of a group being renamed. Enter or ✓ saves, Esc or × cancels. Clicking elsewhere saves a name
+ * that can be used and cancels one that belongs to another group. Empty: the group is named by its date again.
+ */
+function renameRow(key) {
+    const group = state.groups[key];
+    const input = h('input', {
+        class: 'rename-input', type: 'text', value: group.name, maxlength: 200, autocomplete: 'off',
+        spellcheck: 'false', 'aria-label': t('p_groupName_label'),
+    });
+    const error = h('div', {class: 'rename-error', id: 'rename_error', hidden: true});
+    const ok = h('button', {class: 'ib', type: 'button', 'aria-label': t('p_saveName'), title: t('p_saveName')},
+        icon('check', 16));
+    const cancel = h('button', {class: 'ib', type: 'button', 'aria-label': t('p_cancelRename'), title: t('p_cancelRename')},
+        icon('close', 15));
+    const row = h('div', {class: 'rename'}, h('div', {class: 'rename-line'}, h('span', {class: 'chev-space'}), input, ok, cancel),
+        error);
+
+    // true if the typed name can be used (changing only the capitals of its own name can)
+    const check = () => {
+        const name = normalizeName(input.value);
+        const other = name ? findByName(state.groups, name, key) : null;
+        input.setAttribute('aria-invalid', String(!!other));
+        if (other) {
+            input.setAttribute('aria-describedby', 'rename_error');
+        } else {
+            input.removeAttribute('aria-describedby');
+        }
+        error.textContent = other ? t('p_nameTaken', state.groups[other].name) : '';
+        error.hidden = !other;
+        ok.disabled = !!other;
+        return !other;
+    };
+    let done = false;
+    const finish = async (commit, refocus) => {
+        if (done) {
+            return;
+        }
+        done = true;
+        state.renaming = null;
+        const name = normalizeName(input.value);
+        if (commit && name !== group.name) {
+            try {
+                await groupStoreClient.save(key, {name, index: group.index, tabs: group.tabs});
+            } catch (e) {
+                console.error('TabHamster: rename failed', e);
+                showBar(t('p_syncStorageDefault_error'));
+            }
+            await afterChange(null);
+        } else {
+            render();
+        }
+        if (refocus) {
+            focusName(key);
+        }
+    };
+
+    input.addEventListener('input', check);
+    input.addEventListener('keydown', (e) => {
+        if (e.isComposing) {
+            return;
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (check()) {
+                finish(true, true);
+            }
+        } else if (e.key === 'Escape') {
+            // not to the list (it would clear the search) or to Chrome (it would close the popup)
+            e.preventDefault();
+            e.stopPropagation();
+            finish(false, true);
+        }
+    });
+    ok.addEventListener('click', () => finish(true, true));
+    cancel.addEventListener('click', () => finish(false, true));
+    row.addEventListener('focusout', (e) => {
+        if (!row.contains(e.relatedTarget)) {
+            finish(check(), false);
+        }
+    });
+    return row;
 }
 
 /* ---------- search ---------- */
@@ -339,7 +576,7 @@ function groupItem(result, target) {
     const partial = state.words.length > 0 && !result.byName;
     const open = (e) => (wantsNewWindow(e) ? openInNewWindow(group.tabs) : openInThisWindow(group.tabs));
     const item = h('div', {class: ['item', state.fresh === key && 'fresh', target && 'target'], dataset: {key}},
-        h('div', {class: 'row'},
+        state.renaming === key ? renameRow(key) : h('div', {class: 'row'},
             chevron('saved:' + key, partial),
             h('button', {
                 class: 'name ellipsis', type: 'button', title: name, onClick: open,
@@ -349,11 +586,19 @@ function groupItem(result, target) {
             h('span', {class: ['meta', 'num', partial && 'partial']}, tabCount(group.tabs.length, result, partial)),
             h('span', {class: 'meta date num'}, shortDate(keyTime(key), lang)),
             h('div', {class: 'actions'},
-                h('button', {class: 'open', type: 'button', onClick: () => openInThisWindow(group.tabs)}, t('p_open')),
+                h('button', {
+                    class: 'open', type: 'button', onClick: open,
+                    onAuxclick: (e) => e.button === 1 && openInNewWindow(group.tabs),
+                }, t('p_open')),
                 h('button', {
                     class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'), title: t('p_openNewWindow'),
                     onClick: () => openInNewWindow(group.tabs),
-                }, icon('newWindow', 16)))));
+                }, icon('newWindow', 16)),
+                h('button', {
+                    class: 'ib more', type: 'button', 'aria-label': t('p_moreActions'), title: t('p_moreActions'),
+                    'aria-haspopup': 'menu', 'aria-expanded': 'false',
+                    onClick: (e) => groupMenu(key, e.currentTarget),
+                }, icon('more', 16)))));
     if (isExpanded('saved:' + key, partial)) {
         const tabs = partial ? result.tabIndexes.map((i) => group.tabs[i]) : group.tabs;
         item.append(h('div', {class: 'tab-list'}, tabs.map(tabRow)));
@@ -439,6 +684,7 @@ function renderTabs() {
 }
 
 function renderList() {
+    closeMenu(false);
     clear(el.list);
     if (state.view === 'sessions' && state.options.session_watcher) {
         const results = state.results.sessions;
@@ -594,8 +840,10 @@ async function start() {
     applyTheme(state.options.theme);
     state.view = state.options.active_tab === '#sessions' ? 'sessions' : 'saved';
 
-    const [tabs] = await Promise.all([queryTabsToSave(), loadGroups(), loadSessions(), loadUsage()]);
+    const [tabs, win] = await Promise.all([
+        queryTabsToSave(), chrome.windows.getCurrent(), loadGroups(), loadSessions(), loadUsage()]);
     state.openTabs = tabs.length;
+    state.windowId = win.id;
     render();
     state.ready = true;
     if (state.pendingSave) {
