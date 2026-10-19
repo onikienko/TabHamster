@@ -11,6 +11,8 @@ import {showBar} from '../ui/bar.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName} from '../names.js';
 import {parseQuery, segments, search} from '../search.js';
+import {moveTo} from '../order.js';
+import {enableDrag} from './drag.js';
 
 const lang = uiLanguage();
 
@@ -360,6 +362,34 @@ async function groupMenu(key, button) {
     ].filter(Boolean), {label: groupName(key, group), onClose: () => row.classList.remove('menu-open')});
 }
 
+/* ---------- order ---------- */
+
+// moves show at once and are written one after another; the groups are read back after the last one
+let moving = Promise.resolve();
+let movesLeft = 0;
+
+/** puts a group at `pos` among the others (0 = top); usually only its own index changes (js/order.js) */
+function moveGroup(key, pos) {
+    const changes = moveTo(sortedGroupKeys(), state.groups, key, pos);
+    const items = {};
+    for (const [k, index] of Object.entries(changes)) {
+        const group = state.groups[k];
+        state.groups[k] = Object.assign({}, group, {index});
+        items[k] = {name: group.name, index, tabs: group.tabs};
+    }
+    render();
+    movesLeft++;
+    moving = moving.then(() => groupStoreClient.saveMany(items)).catch((e) => {
+        console.error('TabHamster: move failed', e);
+        showBar(t('p_syncStorageDefault_error'));
+    }).then(() => (--movesLeft === 0 ? afterChange(null) : null));
+}
+
+/** the saved groups are shown (not sessions) and not filtered: only then can they be reordered */
+function canReorder() {
+    return (state.view === 'saved' || !state.options.session_watcher) && !state.words.length && !state.renaming;
+}
+
 function focusName(key) {
     const name = el.list.querySelector('.item[data-key="' + CSS.escape(key) + '"] .name');
     if (name) {
@@ -685,6 +715,16 @@ function renderTabs() {
 
 function renderList() {
     closeMenu(false);
+    // the focused group name gets the focus back after the list is drawn again (Alt+↑ ↓ moves, reloads)
+    const focused = document.activeElement && document.activeElement.classList.contains('name') &&
+        el.list.contains(document.activeElement) ? document.activeElement.closest('.item').dataset.key : null;
+    drawList();
+    if (focused) {
+        focusName(focused);
+    }
+}
+
+function drawList() {
     clear(el.list);
     if (state.view === 'sessions' && state.options.session_watcher) {
         const results = state.results.sessions;
@@ -811,9 +851,21 @@ el.field.addEventListener('input', () => onQuery());
 el.save.addEventListener('click', () => save());
 el.clear.addEventListener('click', () => clearSearch());
 
-// ↑ ↓ between group names and tabs (Enter opens the focused one), ↑ from the first goes back to the field
+// ↑ ↓ between group names and tabs (Enter opens the focused one), ↑ from the first goes back to the field.
+// Alt (Option) + ↑ ↓ moves the focused group.
 el.list.addEventListener('keydown', (e) => {
-    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !e.altKey) {
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.altKey) {
+        const item = e.target.closest && e.target.closest('.item');
+        if (!item || !canReorder() || !item.querySelector(':scope > .row')) {
+            return;
+        }
+        e.preventDefault();
+        const keys = sortedGroupKeys();
+        const pos = keys.indexOf(item.dataset.key) + (e.key === 'ArrowUp' ? -1 : 1);
+        if (pos >= 0 && pos < keys.length) {
+            moveGroup(item.dataset.key, pos);
+        }
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         const stops = listStops();
         const i = stops.indexOf(document.activeElement);
         if (i === -1) {
@@ -851,6 +903,18 @@ async function start() {
         save();
     }
 
+    enableDrag(el.list, {
+        enabled: canReorder,
+        ghost: (item) => {
+            const group = state.groups[item.dataset.key];
+            return [
+                icon('grip', 16),
+                h('span', {class: 'ellipsis'}, groupName(item.dataset.key, group)),
+                h('span', {class: 'num'}, plural('p_tabsCount', group.tabs.length)),
+            ];
+        },
+        drop: moveGroup,
+    });
     el.tabSaved.addEventListener('click', () => switchView('saved'));
     el.tabSessions.addEventListener('click', () => switchView('sessions'));
 }
