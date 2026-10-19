@@ -219,6 +219,20 @@ test('a sync change from another device reaches the local copy', async () => {
     assert.equal(rec.synced, true);
 });
 
+test('the current session is written with the time it last changed', async () => {
+    const local = createStorageArea();
+    const before = Date.now();
+    startBackground({local});
+    let session;
+    await waitFor(async function () {
+        const items = await local.get(null);
+        session = Object.keys(items).filter(k => k.startsWith('tg_')).map(k => items[k])[0];
+        return !!session;
+    });
+    assert.ok(session.updated >= before && session.updated <= Date.now());
+    assert.deepEqual(session.tabs, []);
+});
+
 test('session rotation counts only sessions, not saved group copies', async () => {
     const local = createStorageArea();
     const t0 = 1700000000000;

@@ -288,8 +288,10 @@ async function updateCurrentSession() {
         cleanupSessions();
     }
     chrome.tabs.query({}, function (tabs) {
+        // updated: when the session last changed, so the popup can show "14:02–23:05" (sessions from 0.4.0 don't have it)
         const session = {
             name: '',
+            updated: Date.now(),
             tabs: [],
         };
         const obj = {};

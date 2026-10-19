@@ -305,6 +305,23 @@ body.has-bar .list {
     font-weight: 700;
 }
 
+.win-title .link {
+    flex: none;
+    height: 24px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--link);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.win-title .link:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
 .tab-row {
     display: flex;
     align-items: center;

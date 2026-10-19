@@ -36,6 +36,36 @@ export function shortTime(ms, lang) {
     return new Intl.DateTimeFormat(lang, {hour: 'numeric', minute: '2-digit'}).format(new Date(ms));
 }
 
+function startOfDay(ms) {
+    return new Date(ms).setHours(0, 0, 0, 0);
+}
+
+/**
+ * "Today", "Yesterday" (in the language, from Intl), otherwise like shortDate.
+ * relative false: always the date (for text that stays, like a group name).
+ */
+export function dayName(ms, lang, now, relative = true) {
+    const today = now === undefined ? Date.now() : now;
+    // rounded: a day with a clock change is 23 or 25 hours
+    const days = Math.round((startOfDay(today) - startOfDay(ms)) / 864e5);
+    if (relative && (days === 0 || days === 1)) {
+        const word = new Intl.RelativeTimeFormat(lang, {numeric: 'auto'}).format(-days, 'day');
+        return word.charAt(0).toLocaleUpperCase(lang) + word.slice(1);
+    }
+    return shortDate(ms, lang, today);
+}
+
+/** "Yesterday, 14:02" */
+export function dayTime(ms, lang, now, relative = true) {
+    return dayName(ms, lang, now, relative) + ', ' + shortTime(ms, lang);
+}
+
+/** when a session ran: "Yesterday, 14:02–23:05", across days "Oct 11, 10:02–Oct 12, 01:51" */
+export function interval(start, end, lang, now, relative = true) {
+    const to = startOfDay(start) === startOfDay(end) ? shortTime(end, lang) : dayTime(end, lang, now, relative);
+    return dayTime(start, lang, now, relative) + '–' + to;
+}
+
 /** "github.com" for "https://www.github.com/x"; the address itself when it has no host (about:blank, data:) */
 export function hostOf(url) {
     try {

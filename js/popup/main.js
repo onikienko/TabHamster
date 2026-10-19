@@ -6,7 +6,7 @@ import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel} from '../ui/platform.js';
-import {keyTime, numericDate, shortDate, shortTime, hostOf, faviconUrl} from '../ui/format.js';
+import {keyTime, numericDate, shortDate, shortTime, dayTime, interval, hostOf, faviconUrl} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName} from '../names.js';
@@ -390,6 +390,70 @@ function canReorder() {
     return (state.view === 'saved' || !state.options.session_watcher) && !state.words.length && !state.renaming;
 }
 
+/* ---------- session actions ---------- */
+
+/** the name, or "name (2)", "name (3)"... if a group already has it */
+function freeName(name) {
+    let free = name;
+    for (let n = 2; findByName(state.groups, free); n++) {
+        free = name + ' (' + n + ')';
+    }
+    return free;
+}
+
+async function saveSessionAsGroup(key) {
+    const session = state.sessions[key];
+    const start = keyTime(key);
+    // the session's dates, not "Yesterday": the name stays
+    const name = freeName(session.updated ? interval(start, session.updated, lang, undefined, false) :
+        dayTime(start, lang, undefined, false));
+    const tabs = session.tabs.map(savedTab);
+    const groupKey = 'tg_' + Date.now();
+    const res = await groupStoreClient.save(groupKey, {name, index: nextIndex(), tabs});
+    await afterChange(null);
+    showBar(plural('p_savedAs', tabs.length, [name]) + notSyncedNote(res),
+        undoAction(() => groupStoreClient.discard(groupKey)));
+}
+
+async function deleteSession(key) {
+    const session = state.sessions[key];
+    await chrome.storage.local.remove(key);
+    delete state.sessions[key];
+    state.expanded.delete('sessions:' + key);
+    render();
+    if (document.activeElement === document.body) {
+        el.field.focus();
+    }
+    showBar(t('p_sessionDeleted'), {
+        label: t('p_undo_btn'),
+        run: async () => {
+            await chrome.storage.local.set({[key]: session});
+            state.sessions[key] = session;
+            render();
+        },
+    });
+}
+
+function sessionMenu(key, button) {
+    if (isMenuOpen(button)) {
+        closeMenu(true);
+        return;
+    }
+    const session = state.sessions[key];
+    const row = button.closest('.row');
+    row.classList.add('menu-open');
+    openMenu(button, [
+        {icon: 'plus', label: t('p_saveAsGroup'), sub: t('p_saveAsGroup_sub'), run: act(() => saveSessionAsGroup(key))},
+        {
+            icon: 'window', label: t('p_openInThisWindow'), sub: plural('p_allTabsOneWindow', session.tabs.length),
+            run: () => openInThisWindow(session.tabs),
+        },
+        {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(session)},
+        '-',
+        {icon: 'trash', label: t('p_delete'), danger: true, run: act(() => deleteSession(key))},
+    ], {label: sessionName(key), onClose: () => row.classList.remove('menu-open')});
+}
+
 function focusName(key) {
     const name = el.list.querySelector('.item[data-key="' + CSS.escape(key) + '"] .name');
     if (name) {
@@ -547,12 +611,18 @@ function groupName(key, group) {
     return group.name || numericDate(keyTime(key), state.options.date_format);
 }
 
+/**
+ * "Current session, since 09:12", "Yesterday, 14:02–23:05", "Oct 11, 10:02–Oct 12, 01:51";
+ * "Started Oct 9, 21:40" for sessions from 0.4.0, which don't know when they last changed
+ */
 function sessionName(key) {
-    const ms = keyTime(key);
+    const start = keyTime(key);
     if (key === state.currentSession) {
-        return t('p_currentSessionSince', shortTime(ms, lang));
+        const today = new Date(start).toDateString() === new Date().toDateString();
+        return t('p_currentSessionSince', today ? shortTime(start, lang) : dayTime(start, lang, undefined, false));
     }
-    return shortDate(ms, lang) + ', ' + shortTime(ms, lang);
+    const updated = state.sessions[key].updated;
+    return updated ? interval(start, updated, lang) : t('p_sessionStarted', dayTime(start, lang, undefined, false));
 }
 
 function favicon(url) {
@@ -653,15 +723,23 @@ function sessionItem(result) {
             h('span', {class: 'meta num'}, plural('p_windowsCount', windows.length)),
             h('span', {class: ['meta', 'date', 'num', partial && 'partial']},
                 tabCount(session.tabs.length, result, partial)),
+            // the live session is open right now: nothing to restore
             current ? null : h('div', {class: 'actions'},
-                h('button', {class: 'open', type: 'button', onClick: () => restoreSession(session)}, t('p_open')))));
+                h('button', {class: 'open', type: 'button', onClick: () => restoreSession(session)}, t('p_restore')),
+                h('button', {
+                    class: 'ib more', type: 'button', 'aria-label': t('p_moreActions'), title: t('p_moreActions'),
+                    'aria-haspopup': 'menu', 'aria-expanded': 'false',
+                    onClick: (e) => sessionMenu(key, e.currentTarget),
+                }, icon('more', 16)))));
     if (!current && isExpanded('sessions:' + key, partial)) {
         const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
         item.append(h('div', {class: 'tab-list'}, windows.map((tabs, i) => {
             const shown = found ? tabs.filter((tab) => found.has(tab)) : tabs;
             return shown.length ? [
                 h('div', {class: 'win-title'}, icon('window', 14),
-                    t('p_window_text') + ' ' + (i + 1) + ', ' + plural('p_tabsCount', tabs.length)),
+                    h('span', {class: 'spacer'}, plural('p_windowTitle', tabs.length, [i + 1])),
+                    h('button', {class: 'link', type: 'button', onClick: () => openElsewhere('window', tabs)},
+                        t('p_openWindow'))),
                 shown.map(tabRow),
             ] : null;
         })));
