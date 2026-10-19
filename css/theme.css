@@ -20,6 +20,7 @@
     --tonal: #D3EFFA;
     --on-tonal: #00577D;
     --seg: #E6EEF3;
+    --seg-selected: #FFFFFF;
     --hover: #EBF1F5;
     --menu-hover: #EBF1F5;
     --link: #0079AC;
@@ -45,12 +46,12 @@
 }
 
 :root[data-theme="dark"] {
-    --band: #0F2C3A;
+    --band: #00465E;
     --logo: #33C4EE;
     --field: #0A2230;
     --field-text: #E6F4FA;
     --field-ph: #89A9B8;
-    --field-line: #244656;
+    --field-line: #1F5A70;
     --save: #00B6E8;
     --on-save: #00222F;
     --bg: #10181D;
@@ -63,6 +64,7 @@
     --tonal: #123D50;
     --on-tonal: #8FDDF7;
     --seg: #1A2730;
+    --seg-selected: #2C3E4A;
     --hover: #1A2630;
     --menu-hover: #22323D;
     --link: #5CCDF2;
@@ -87,12 +89,12 @@
 
 @media (prefers-color-scheme: dark) {
     :root[data-theme="system"] {
-        --band: #0F2C3A;
+        --band: #00465E;
         --logo: #33C4EE;
         --field: #0A2230;
         --field-text: #E6F4FA;
         --field-ph: #89A9B8;
-        --field-line: #244656;
+        --field-line: #1F5A70;
         --save: #00B6E8;
         --on-save: #00222F;
         --bg: #10181D;
@@ -105,6 +107,7 @@
         --tonal: #123D50;
         --on-tonal: #8FDDF7;
         --seg: #1A2730;
+    --seg-selected: #2C3E4A;
         --hover: #1A2630;
         --menu-hover: #22323D;
         --link: #5CCDF2;

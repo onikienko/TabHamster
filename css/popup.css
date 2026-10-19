@@ -86,7 +86,7 @@ button {
     background: var(--tonal);
     color: var(--on-tonal);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -118,7 +118,7 @@ button {
     background: var(--save);
     color: var(--on-save);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .save .icon {
@@ -161,14 +161,14 @@ button {
 }
 
 .tab[aria-selected="true"] {
-    background: var(--surface);
+    background: var(--seg-selected);
     color: var(--text);
     box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
 }
 
 .count {
     color: var(--muted);
-    font-weight: 500;
+    font-weight: 400;
 }
 
 /* list */
@@ -293,7 +293,7 @@ body.keyboard .row:has(> .name:focus) {
 
 .meta.size.strong {
     color: var(--text);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .actions .meta.size {
@@ -352,7 +352,7 @@ body.keyboard .row:has(:focus) .end-meta {
     background: var(--tonal);
     color: var(--on-tonal);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .ib {
@@ -389,7 +389,7 @@ body.keyboard .row:has(:focus) .end-meta {
     margin-top: 2px;
     color: var(--muted);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .win-title .link {
@@ -548,6 +548,7 @@ body.keyboard .row:has(:focus) .end-meta {
 .empty h2 {
     margin: 6px 0 0;
     font-size: 17px;
+    font-weight: 600;
 }
 
 .empty p {
@@ -604,7 +605,7 @@ body.keyboard .row:has(:focus) .end-meta {
     background: transparent;
     color: var(--snack-action);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .bar-action:focus-visible {
@@ -618,7 +619,7 @@ body.keyboard .row:has(:focus) .end-meta {
     border-radius: 3px;
     background: var(--hit);
     color: inherit;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 /* the group that Enter would replace */
@@ -632,8 +633,8 @@ body.keyboard .row:has(:focus) .end-meta {
     border: 1px solid var(--line);
     border-radius: 10px;
     background: var(--surface);
-    font-size: 12.5px;
-    line-height: 18px;
+    font-size: 13px;
+    line-height: 19px;
 }
 
 .note p {
@@ -646,7 +647,7 @@ body.keyboard .row:has(:focus) .end-meta {
 }
 
 .note b {
-    font-weight: 700;
+    font-weight: 600;
 }
 
 /* groups saved on this computer only: why, and how to make room */
@@ -668,7 +669,7 @@ body.keyboard .row:has(:focus) .end-meta {
 }
 
 .note .note-title {
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .note .link {
@@ -677,7 +678,7 @@ body.keyboard .row:has(:focus) .end-meta {
     background: transparent;
     color: var(--link);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     text-align: left;
 }
 
@@ -689,8 +690,8 @@ body.keyboard .row:has(:focus) .end-meta {
 .hint {
     margin: 2px 4px 6px;
     color: var(--muted);
-    font-size: 12.5px;
-    line-height: 18px;
+    font-size: 12px;
+    line-height: 17px;
 }
 
 .no-match {
@@ -709,6 +710,7 @@ body.keyboard .row:has(:focus) .end-meta {
 .no-match h2 {
     margin: 0;
     font-size: 14px;
+    font-weight: 600;
     overflow-wrap: anywhere;
 }
 
