@@ -5,6 +5,8 @@ const groups = groupStore.createGroupStore({
     sync: chrome.storage.sync,
     local: chrome.storage.local,
     conflict_suffix: ' (' + chrome.i18n.getMessage('bg_conflictCopy') + ')',
+    // an open popup shows "2 groups synced"; with no page open there is nobody to answer, that's fine
+    on_synced: keys => chrome.runtime.sendMessage({msg: 'groupsSynced', keys}).catch(() => {}),
 });
 
 // state before the last restore from a backup, for "Undo last restore"
@@ -52,6 +54,7 @@ const group_ops = {
     discard: (key) => groups.discard(key),
     restore: (key) => groups.restore(key),
     usage: () => groups.usage(),
+    sizes: () => groups.sizes(),
 
     exportBackup: async function () {
         const options = await chrome.storage.sync.get(storage.default_options);

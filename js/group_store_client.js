@@ -1,6 +1,7 @@
 // Saved groups for the popup and options pages. The store itself runs in the background service worker
 // (js/background.js), so all writes go through one place even if the page closes mid-save.
 // Every method returns a Promise with the store's result (see createGroupStore in js/group_store.js).
+// The background also sends {msg: 'groupsSynced', keys} to open pages when groups that waited for sync got there.
 var groupStoreClient = (function () {
     'use strict';
 
@@ -48,6 +49,10 @@ var groupStoreClient = (function () {
         /** {bytes, quota, unsynced} */
         usage: function () {
             return call('usage', []);
+        },
+        /** {key: {bytes, synced}}: space each group takes in sync (or needs there, null if it can't fit) */
+        sizes: function () {
+            return call('sizes', []);
         },
         /** backup text with saved groups and options */
         exportBackup: function () {

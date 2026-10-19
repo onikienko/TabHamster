@@ -6,7 +6,7 @@ import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel} from '../ui/platform.js';
-import {keyTime, numericDate, shortDate, shortTime, dayTime, interval, hostOf, faviconUrl} from '../ui/format.js';
+import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, faviconUrl, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName} from '../names.js';
@@ -15,6 +15,7 @@ import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
 
 const lang = uiLanguage();
+const numbers = new Intl.NumberFormat(lang);
 
 const state = {
     options: null,
@@ -25,6 +26,12 @@ const state = {
     usage: null,
     openTabs: 0,
     view: 'saved',
+    // saved groups shown: all (null), only those not in sync ('unsynced'), or by space in sync ('biggest')
+    filter: null,
+    // {key: {bytes, synced}} from the store while a filter is on
+    sizes: null,
+    // reloads in progress: a "groups synced" message from the background meanwhile is about one of ours
+    busy: 0,
     expanded: new Set(),
     // words typed in the field and what they found ({saved, sessions}: results of search())
     words: [],
@@ -47,6 +54,10 @@ const el = {
     field: document.getElementById('field'),
     save: document.getElementById('save'),
     clear: document.getElementById('clear'),
+    fieldIcon: document.getElementById('field_icon'),
+    chip: document.getElementById('chip'),
+    chipText: document.getElementById('chip_text'),
+    chipClear: document.getElementById('chip_clear'),
     tabs: document.querySelector('.tabs'),
     tabSaved: document.getElementById('tab_saved'),
     tabSessions: document.getElementById('tab_sessions'),
@@ -94,6 +105,31 @@ async function loadUsage() {
     } catch (e) {
         state.usage = null;
     }
+}
+
+async function loadSizes() {
+    try {
+        state.sizes = state.filter ? await groupStoreClient.sizes() : null;
+    } catch (e) {
+        state.sizes = null;
+    }
+}
+
+/** groups saved on this computer only, waiting for room in sync */
+function waitingKeys() {
+    return Object.keys(state.groups).filter((key) => state.groups[key].synced === false);
+}
+
+/** reads the groups again; returns how many of those that waited for sync (except `except`) are in it now */
+async function reload(except) {
+    const waiting = waitingKeys().filter((key) => key !== except);
+    state.busy++;
+    try {
+        await Promise.all([loadGroups(), loadUsage(), loadSizes()]);
+    } finally {
+        state.busy--;
+    }
+    return waiting.filter((key) => state.groups[key] && state.groups[key].synced).length;
 }
 
 /** tabs that Save would take: this window (or all, see Settings), pinned ones only if turned on */
@@ -186,8 +222,9 @@ function notSyncedNote(res) {
     return ' ' + t(/quota/i.test(res.error || '') ? 'p_notSyncedYet' : 'p_savedLocally_later');
 }
 
+/** shows the groups as they are after a change; returns how many waiting groups got into sync meanwhile */
 async function afterChange(freshKey) {
-    await Promise.all([loadGroups(), loadUsage()]);
+    const synced = await reload(freshKey);
     state.fresh = freshKey || null;
     render();
     if (freshKey) {
@@ -201,6 +238,7 @@ async function afterChange(freshKey) {
             }
         }, 2500);
     }
+    return synced;
 }
 
 /** Undo button for the bar: runs `undo`, then shows the groups as they are */
@@ -213,8 +251,13 @@ function undoAction(undo) {
             } catch (e) {
                 console.error('TabHamster: undo failed', e);
                 showBar(t('p_syncStorageDefault_error'));
+                await afterChange(null);
+                return;
             }
-            await afterChange(null);
+            const synced = await afterChange(null);
+            if (synced) {
+                showBar(plural('p_groupsSynced', synced));
+            }
         },
     };
 }
@@ -320,12 +363,14 @@ async function deleteGroup(key) {
     const name = groupName(key, state.groups[key]);
     await groupStoreClient.remove(key);
     state.expanded.delete('saved:' + key);
-    await afterChange(null);
+    // the space it took may let groups that waited get into sync ("Make room")
+    const synced = await afterChange(null);
     // its row (and the focus with it) is gone
     if (document.activeElement === document.body) {
         el.field.focus();
     }
-    showBar(t('p_deleted', name), undoAction(() => groupStoreClient.restore(key)));
+    showBar(synced ? plural('p_deletedSynced', synced, [name]) : t('p_deleted', name),
+        undoAction(() => groupStoreClient.restore(key)));
 }
 
 async function groupMenu(key, button) {
@@ -387,7 +432,69 @@ function moveGroup(key, pos) {
 
 /** the saved groups are shown (not sessions) and not filtered: only then can they be reordered */
 function canReorder() {
-    return (state.view === 'saved' || !state.options.session_watcher) && !state.words.length && !state.renaming;
+    return (state.view === 'saved' || !state.options.session_watcher) && !state.words.length && !state.renaming &&
+        !state.filter;
+}
+
+/* ---------- not synced ---------- */
+
+/** 'unsynced', 'biggest' or null (all groups); only on the Saved groups tab (switching tabs removes it) */
+async function setFilter(filter) {
+    state.filter = filter;
+    el.list.scrollTop = 0;
+    await loadSizes();
+    render();
+}
+
+/** sync storage has no room for a group that waits for it */
+function syncIsFull() {
+    if (!state.usage || !state.sizes) {
+        return false;
+    }
+    const free = state.usage.quota - state.usage.bytes;
+    return waitingKeys().some((key) => state.sizes[key] && state.sizes[key].bytes > free);
+}
+
+/** "97", "100": KB used and the quota */
+function usageKB() {
+    return [kilobytes(state.usage.bytes, lang, 0), kilobytes(state.usage.quota, lang, 0)];
+}
+
+/** above the groups that are not synced: why, that they are safe, and a way to make room */
+function unsyncedNote() {
+    const count = waitingKeys().length;
+    const full = syncIsFull();
+    return h('div', {class: 'note warn'},
+        h('p', {class: 'note-title'}, plural('p_unsyncedNote_title', count)),
+        h('p', null, full ? plural('p_unsyncedNote_full', count, usageKB()) : plural('p_unsyncedNote_later', count)),
+        full ? h('button', {class: 'link', type: 'button', onClick: () => setFilter('biggest')}, t('p_makeRoom')) : null);
+}
+
+/** space the group takes in sync storage; for "Biggest first" */
+function sizeOf(key) {
+    const size = state.sizes && state.sizes[key];
+    return size && size.synced && state.groups[key].synced !== false ? size.bytes : null;
+}
+
+function sizeMeta(key) {
+    const bytes = sizeOf(key);
+    return h('span', {class: ['meta', 'size', 'num', bytes !== null && 'strong']},
+        bytes !== null ? t('p_kb', kilobytes(bytes, lang)) : t('p_notInSync'));
+}
+
+// the background says groups that waited for sync got there (on_synced in js/background.js)
+async function onGroupsSynced() {
+    const synced = await reload();
+    if (!synced) {
+        return;
+    }
+    // drawing the list again would end a rename, a menu or a drag
+    if (state.renaming || document.querySelector('.menu') || document.body.classList.contains('dragging')) {
+        renderFooter();
+    } else {
+        render();
+    }
+    showBar(plural('p_groupsSynced', synced));
 }
 
 /* ---------- session actions ---------- */
@@ -560,7 +667,7 @@ function renameRow(key) {
 function runSearch() {
     const query = el.field.value;
     state.words = parseQuery(query);
-    state.results.saved = search(sortedGroupKeys().map((key) => ({
+    state.results.saved = search(shownGroupKeys().map((key) => ({
         key, name: groupName(key, state.groups[key]), tabs: state.groups[key].tabs,
     })), query);
     state.results.sessions = search(sortedSessionKeys().map((key) => ({
@@ -594,13 +701,29 @@ function marked(text) {
 
 /** group names and tab rows in the list, in order: ↑ ↓ move between them */
 function listStops() {
-    return Array.from(el.list.querySelectorAll('.name, .tab-row'));
+    return Array.from(el.list.querySelectorAll('button.name, .tab-row'));
 }
 
 /* ---------- rendering ---------- */
 
 function sortedGroupKeys() {
     return Object.keys(state.groups).sort((a, b) => state.groups[b].index - state.groups[a].index);
+}
+
+/** saved groups for the list: all, only those not in sync, or by space in sync (biggest first, not synced last) */
+function shownGroupKeys() {
+    const keys = sortedGroupKeys();
+    if (state.filter === 'unsynced') {
+        return keys.filter((key) => state.groups[key].synced === false);
+    }
+    if (state.filter === 'biggest') {
+        const bytes = (key) => {
+            const size = sizeOf(key);
+            return size === null ? -1 : size;
+        };
+        return keys.sort((a, b) => bytes(b) - bytes(a));
+    }
+    return keys;
 }
 
 function sortedSessionKeys() {
@@ -647,26 +770,88 @@ function isExpanded(id, auto) {
     return auto ? !state.searchClosed.has(id) : state.expanded.has(id);
 }
 
+function toggleItem(id, auto) {
+    const set = auto ? state.searchClosed : state.expanded;
+    if (set.has(id)) {
+        set.delete(id);
+    } else {
+        set.add(id);
+    }
+    renderList();
+}
+
+// for the mouse: the name does the same and is the one keyboard stop (→ ← Space)
 function chevron(id, auto) {
     const open = isExpanded(id, auto);
     return h('button', {
-        class: 'chev', type: 'button', 'aria-expanded': String(open),
-        'aria-label': t(open ? 'p_collapseGroup' : 'p_expandGroup'),
-        onClick: () => {
-            const set = auto ? state.searchClosed : state.expanded;
-            if (set.has(id)) {
-                set.delete(id);
-            } else {
-                set.add(id);
-            }
-            renderList();
-        },
+        class: 'chev', type: 'button', tabindex: -1, 'aria-hidden': 'true',
+        onClick: () => toggleItem(id, auto),
     }, icon(open ? 'chevronDown' : 'chevronRight', 14));
+}
+
+/**
+ * The name of a group or session: a click (or Space) shows its tabs, Enter opens it (`open(event)`).
+ * `newWindow`: Shift, Ctrl / ⌘ or middle click open it in a new window (nobody does that by accident).
+ * dataset.toggle lets → ← in the list expand and collapse it.
+ */
+function nameButton(id, auto, label, title, open, newWindow) {
+    return h('button', {
+        class: 'name ellipsis', type: 'button', title, 'aria-expanded': String(isExpanded(id, auto)),
+        dataset: {toggle: id, auto: auto ? '1' : ''},
+        onClick: (e) => (newWindow && wantsNewWindow(e) ? newWindow() : toggleItem(id, auto)),
+        onAuxclick: (e) => newWindow && e.button === 1 && newWindow(),
+        onKeydown: (e) => {
+            if (e.key === 'Enter' && !e.isComposing) {
+                // not the button's own click
+                e.preventDefault();
+                open(e);
+            }
+        },
+    }, marked(label));
 }
 
 /** "9 tabs", or "2 of 9 tabs" for an item found through its tabs */
 function tabCount(total, result, partial) {
     return partial ? plural('p_tabsMatching', total, [result.tabIndexes.length]) : plural('p_tabsCount', total);
+}
+
+/** a number in a column of the list ("9", "2/9" while searching); screen readers get the words */
+function countMeta(column, shown, words, before) {
+    return h('span', {class: ['meta', 'num', column]},
+        before || null, h('span', {'aria-hidden': 'true'}, shown), h('span', {class: 'sr-only'}, words));
+}
+
+function tabsMeta(total, result, partial) {
+    return countMeta('count', partial ? numbers.format(result.tabIndexes.length) + '/' + numbers.format(total) :
+        numbers.format(total), tabCount(total, result, partial));
+}
+
+/**
+ * The row's details, and its buttons: on hover they cover the end of the row, so nothing moves.
+ * Each details column is as wide as its widest entry in the list (fitColumns).
+ */
+function rowEnd(details, actions) {
+    return [h('div', {class: 'end-meta'}, details), actions];
+}
+
+// columns of the row details; fitColumns sets --w-<column> on the list
+const COLUMNS = ['count', 'date', 'size', 'wins'];
+
+function fitColumns() {
+    for (const column of COLUMNS) {
+        el.list.style.removeProperty('--w-' + column);
+    }
+    // all reads after the writes above: one layout
+    const widths = {};
+    for (const meta of el.list.querySelectorAll('.end-meta > .meta')) {
+        const column = COLUMNS.find((c) => meta.classList.contains(c));
+        if (column) {
+            widths[column] = Math.max(widths[column] || 0, meta.getBoundingClientRect().width);
+        }
+    }
+    for (const [column, width] of Object.entries(widths)) {
+        el.list.style.setProperty('--w-' + column, Math.ceil(width) + 'px');
+    }
 }
 
 function groupItem(result, target) {
@@ -678,14 +863,17 @@ function groupItem(result, target) {
     const item = h('div', {class: ['item', state.fresh === key && 'fresh', target && 'target'], dataset: {key}},
         state.renaming === key ? renameRow(key) : h('div', {class: 'row'},
             chevron('saved:' + key, partial),
-            h('button', {
-                class: 'name ellipsis', type: 'button', title: name, onClick: open,
-                onAuxclick: (e) => e.button === 1 && openInNewWindow(group.tabs),
-            }, marked(name)),
+            // the row shows only the number and a short date: the tooltip has the rest
+            nameButton('saved:' + key, partial, name,
+                name + '\n' + plural('p_tabsCount', group.tabs.length) + ' · ' + fullDate(keyTime(key), lang), open,
+                () => openInNewWindow(group.tabs)),
             group.synced === false ? h('span', {class: 'local'}, icon('notSynced', 14, t('p_notSynced_title'))) : null,
-            h('span', {class: ['meta', 'num', partial && 'partial']}, tabCount(group.tabs.length, result, partial)),
-            h('span', {class: 'meta date num'}, shortDate(keyTime(key), lang)),
-            h('div', {class: 'actions'},
+            rowEnd([
+                tabsMeta(group.tabs.length, result, partial),
+                state.filter === 'biggest' ? sizeMeta(key) : h('span', {class: 'meta date num'}, listDate(keyTime(key), lang)),
+            ], h('div', {class: 'actions'},
+                // the size is what "Biggest first" is about: it stays next to the buttons
+                state.filter === 'biggest' ? sizeMeta(key) : null,
                 h('button', {
                     class: 'open', type: 'button', onClick: open,
                     onAuxclick: (e) => e.button === 1 && openInNewWindow(group.tabs),
@@ -698,7 +886,7 @@ function groupItem(result, target) {
                     class: 'ib more', type: 'button', 'aria-label': t('p_moreActions'), title: t('p_moreActions'),
                     'aria-haspopup': 'menu', 'aria-expanded': 'false',
                     onClick: (e) => groupMenu(key, e.currentTarget),
-                }, icon('more', 16)))));
+                }, icon('more', 16))))));
     if (isExpanded('saved:' + key, partial)) {
         const tabs = partial ? result.tabIndexes.map((i) => group.tabs[i]) : group.tabs;
         item.append(h('div', {class: 'tab-list'}, tabs.map(tabRow)));
@@ -716,21 +904,23 @@ function sessionItem(result) {
     const item = h('div', {class: 'item', dataset: {key}},
         h('div', {class: 'row'},
             current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron('sessions:' + key, partial),
-            h('button', {
-                class: 'name ellipsis', type: 'button', title: name,
-                onClick: () => (current ? null : restoreSession(session)),
-            }, marked(name)),
-            h('span', {class: 'meta num'}, plural('p_windowsCount', windows.length)),
-            h('span', {class: ['meta', 'date', 'num', partial && 'partial']},
-                tabCount(session.tabs.length, result, partial)),
+            current ? h('span', {class: 'name ellipsis', title: name}, marked(name)) :
+                nameButton('sessions:' + key, partial, name,
+                    name + '\n' + (windows.length > 1 ? plural('p_windowsCount', windows.length) + ' · ' : '') +
+                    plural('p_tabsCount', session.tabs.length), () => restoreSession(session)),
+            rowEnd([
+                // one window is the usual case: only the tabs then
+                windows.length > 1 ? countMeta('wins', numbers.format(windows.length),
+                    plural('p_windowsCount', windows.length), icon('window', 13)) : null,
+                tabsMeta(session.tabs.length, result, partial),
             // the live session is open right now: nothing to restore
-            current ? null : h('div', {class: 'actions'},
+            ], current ? null : h('div', {class: 'actions'},
                 h('button', {class: 'open', type: 'button', onClick: () => restoreSession(session)}, t('p_restore')),
                 h('button', {
                     class: 'ib more', type: 'button', 'aria-label': t('p_moreActions'), title: t('p_moreActions'),
                     'aria-haspopup': 'menu', 'aria-expanded': 'false',
                     onClick: (e) => sessionMenu(key, e.currentTarget),
-                }, icon('more', 16)))));
+                }, icon('more', 16))))));
     if (!current && isExpanded('sessions:' + key, partial)) {
         const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
         item.append(h('div', {class: 'tab-list'}, windows.map((tabs, i) => {
@@ -797,6 +987,7 @@ function renderList() {
     const focused = document.activeElement && document.activeElement.classList.contains('name') &&
         el.list.contains(document.activeElement) ? document.activeElement.closest('.item').dataset.key : null;
     drawList();
+    fitColumns();
     if (focused) {
         focusName(focused);
     }
@@ -816,6 +1007,11 @@ function drawList() {
     if (!Object.keys(state.groups).length) {
         el.list.append(emptyState());
         return;
+    }
+    if (state.filter === 'unsynced') {
+        el.list.append(unsyncedNote());
+    } else if (state.filter === 'biggest' && state.usage) {
+        el.list.append(h('p', {class: 'hint'}, t('p_biggestHint', usageKB())));
     }
     const results = state.results.saved;
     if (!results.length) {
@@ -859,10 +1055,13 @@ function renderFooter() {
             h('span', {class: 'num'}, percent));
     }
     el.footer.append(h('span', {class: 'spacer'}));
-    const unsynced = Object.values(state.groups).filter((g) => g.synced === false).length;
+    const unsynced = waitingKeys().length;
     if (unsynced) {
-        el.footer.append(h('button', {class: 'not-synced', type: 'button'},
-            icon('notSynced', 14), plural('p_notSyncedGroups', unsynced)));
+        const pressed = state.filter === 'unsynced';
+        el.footer.append(h('button', {
+            class: 'not-synced', type: 'button', 'aria-pressed': String(pressed), title: t('p_showNotSynced'),
+            onClick: () => setFilter(pressed ? null : 'unsynced'),
+        }, icon('notSynced', 14), plural('p_notSyncedGroups', unsynced)));
     }
     el.footer.append(settingsButton());
 }
@@ -875,11 +1074,23 @@ function renderSave() {
     clear(el.save);
     el.save.title = label;
     el.save.append(h('span', {class: 'ellipsis'}, label), icon('enter', 14));
-    el.field.placeholder = t(Object.keys(state.groups).length || state.groupsError ?
-        'p_field_placeholder' : 'p_field_placeholder_first');
+    el.field.placeholder = t(state.filter ? 'p_field_placeholder_' + state.filter :
+        Object.keys(state.groups).length || state.groupsError ? 'p_field_placeholder' : 'p_field_placeholder_first');
+}
+
+function renderFilter() {
+    el.chip.hidden = !state.filter;
+    el.fieldIcon.hidden = !!state.filter;
+    el.chipText.textContent = state.filter ? t(state.filter === 'unsynced' ? 'p_filterUnsynced' : 'p_filterBiggest') : '';
 }
 
 function render() {
+    // nothing waits for sync any more: back to all groups
+    if (state.filter && !waitingKeys().length) {
+        state.filter = null;
+        state.sizes = null;
+    }
+    renderFilter();
     runSearch();
     renderTabs();
     renderList();
@@ -901,6 +1112,9 @@ function applyTheme(theme) {
 
 function switchView(view) {
     state.view = view;
+    if (view === 'sessions') {
+        state.filter = null;
+    }
     chrome.storage.sync.set({active_tab: view === 'sessions' ? '#sessions' : '#saved'});
     render();
 }
@@ -923,13 +1137,18 @@ el.field.addEventListener('keydown', (e) => {
         // handled here, so Chrome doesn't close the popup; with an empty field Esc still closes it
         e.preventDefault();
         clearSearch();
+    } else if ((e.key === 'Escape' || e.key === 'Backspace') && !el.field.value && state.filter) {
+        // an empty field: Esc or Backspace removes the chip first
+        e.preventDefault();
+        setFilter(null);
     }
 });
 el.field.addEventListener('input', () => onQuery());
 el.save.addEventListener('click', () => save());
 el.clear.addEventListener('click', () => clearSearch());
 
-// ↑ ↓ between group names and tabs (Enter opens the focused one), ↑ from the first goes back to the field.
+// ↑ ↓ between group names and tabs (Enter opens the focused one), ↑ from the first goes back to the field;
+// → ← show and hide a group's tabs.
 // Alt (Option) + ↑ ↓ moves the focused group.
 el.list.addEventListener('keydown', (e) => {
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.altKey) {
@@ -952,11 +1171,41 @@ el.list.addEventListener('keydown', (e) => {
         e.preventDefault();
         const next = stops[i + (e.key === 'ArrowDown' ? 1 : -1)];
         (next || (e.key === 'ArrowUp' ? el.field : stops[i])).focus();
+    } else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.altKey) {
+        // as in a tree: → shows a group's tabs, ← hides them; ← on a tab goes back to its group
+        const target = document.activeElement;
+        if (target.dataset && target.dataset.toggle) {
+            e.preventDefault();
+            const auto = !!target.dataset.auto;
+            if (isExpanded(target.dataset.toggle, auto) !== (e.key === 'ArrowRight')) {
+                toggleItem(target.dataset.toggle, auto);
+            }
+        } else if (e.key === 'ArrowLeft' && target.classList.contains('tab-row')) {
+            const name = target.closest('.item').querySelector('button.name');
+            if (name) {
+                e.preventDefault();
+                name.focus();
+            }
+        }
     } else if (e.key === 'Escape' && el.field.value) {
         e.preventDefault();
         clearSearch();
+    } else if (e.key === 'Escape' && state.filter) {
+        e.preventDefault();
+        setFilter(null);
+        el.field.focus();
     }
 });
+
+// Keys in use: the focused row looks selected, not the one under a resting pointer; moving the pointer takes over.
+// Not :focus-visible: Chrome doesn't count focus that came from a click (Alt+↓ on a group just clicked).
+document.addEventListener('keydown', (e) => {
+    if (/^(Arrow|Tab$|Home$|End$)/.test(e.key)) {
+        document.body.classList.add('keyboard');
+    }
+}, true);
+document.addEventListener('pointermove', () => document.body.classList.remove('keyboard'), true);
+document.addEventListener('pointerdown', () => document.body.classList.remove('keyboard'), true);
 
 async function start() {
     document.documentElement.lang = lang;
@@ -965,6 +1214,13 @@ async function start() {
     el.clear.setAttribute('aria-label', t('p_clearSearch'));
     el.clear.title = t('p_clearSearch');
     el.clear.append(icon('close', 15));
+    el.chipClear.setAttribute('aria-label', t('p_removeFilter'));
+    el.chipClear.title = t('p_removeFilter');
+    el.chipClear.append(icon('close', 12));
+    el.chipClear.addEventListener('click', () => {
+        el.field.focus();
+        setFilter(null);
+    });
 
     state.options = await loadOptions();
     applyTheme(state.options.theme);
@@ -992,6 +1248,11 @@ async function start() {
             ];
         },
         drop: moveGroup,
+    });
+    chrome.runtime.onMessage.addListener((msg) => {
+        if (msg && msg.msg === 'groupsSynced' && !state.busy) {
+            onGroupsSynced();
+        }
     });
     el.tabSaved.addEventListener('click', () => switchView('saved'));
     el.tabSessions.addEventListener('click', () => switchView('sessions'));

@@ -8,9 +8,9 @@ const DAY = 24 * HOUR;
 const QUOTA_ERROR = 'Resource::kQuotaBytes quota exceeded';
 const RATE_ERROR = 'This request exceeds the MAX_WRITE_OPERATIONS_PER_MINUTE quota.';
 
-function makeDevice({clock = makeClock(), sync = createSyncArea(clock), seed = 1} = {}) {
+function makeDevice({clock = makeClock(), sync = createSyncArea(clock), seed = 1, on_synced} = {}) {
     const local = createStorageArea({clock});
-    const store = gs.createGroupStore({sync, local, now: clock, random: mulberry32(seed)});
+    const store = gs.createGroupStore({sync, local, now: clock, random: mulberry32(seed), on_synced});
     return {clock, sync, local, store};
 }
 
@@ -646,6 +646,54 @@ test('usage', async () => {
         quota: sync.QUOTA_BYTES,
         unsynced: 1,
     });
+});
+
+test('sizes: the space each group takes in sync, or needs there', async () => {
+    const {store, sync} = makeDevice();
+    await store.save('tg_1', makeGroup(20, 1));
+    await store.save('tg_2', makeGroup(600, 2));
+    await store.save('tg_3', makeGroup(400, 3, 'n'.repeat(9000)));
+    await store.save('tg_4', makeGroup(5, 4));
+    await store.remove('tg_4');
+    failWrites(sync, RATE_ERROR);
+    await store.save('tg_5', makeGroup(20, 5));
+
+    const sizes = await store.sizes();
+    const items = await sync.get(null);
+    assert.deepEqual(Object.keys(sizes).sort(), ['tg_1', 'tg_2', 'tg_3', 'tg_5'], 'deleted groups are left out');
+    assert.deepEqual(sizes.tg_1, {bytes: gs.itemBytes('tg_1', items.tg_1), synced: true});
+    assert.ok((await chunkKeys(sync)).length > 1, 'tg_2 is chunked');
+    assert.equal(sizes.tg_1.bytes + sizes.tg_2.bytes, await sync.getBytesInUse(null), 'item and chunks counted');
+    assert.deepEqual(sizes.tg_3, {bytes: null, synced: false}, 'can never fit');
+    assert.equal(sizes.tg_5.synced, false);
+
+    sync.beforeWrite = null;
+    await store.reconcile();
+    assert.equal(await sync.getBytesInUse(null), sizes.tg_1.bytes + sizes.tg_2.bytes + sizes.tg_5.bytes,
+        'what a group needs is what it takes once synced');
+    assert.deepEqual((await store.sizes()).tg_5, {bytes: sizes.tg_5.bytes, synced: true});
+});
+
+test('on_synced: groups that waited for sync and got there', async () => {
+    const calls = [];
+    const {store, sync} = makeDevice({on_synced: keys => calls.push(keys)});
+    await store.save('tg_1', makeGroup(400, 1));
+    await fill(sync, 102000);
+    assert.equal((await store.save('tg_2', makeGroup(100, 2))).synced, false);
+    assert.equal((await store.save('tg_3', makeGroup(20, 3))).synced, false);
+    assert.deepEqual(calls, []);
+
+    // the call's own groups are not news: their result says it
+    sync.rawRemove(['filler_0']);
+    assert.deepEqual(await store.save('tg_3', makeGroup(21, 3)), {synced: true});
+    assert.deepEqual(calls, []);
+
+    await store.remove('tg_1');
+    assert.deepEqual(calls, [], 'remove alone pushes nothing');
+    await store.reconcile();
+    assert.deepEqual(calls, [['tg_2']]);
+    await store.reconcile();
+    assert.deepEqual(calls, [['tg_2']], 'once');
 });
 
 test('fuzz: two devices end up with the same groups', async () => {

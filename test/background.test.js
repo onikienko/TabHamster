@@ -53,9 +53,17 @@ function fakeBrowser(active) {
 }
 
 function startBackground({sync = createSyncArea(), local = createStorageArea(), browser = fakeBrowser()} = {}) {
+    // messages the background sends to open pages; like Chrome, it fails when no page listens
+    const sent = [];
     const chrome = {
         storage: {sync, local, session: createStorageArea(), onChanged: event()},
-        runtime: {onInstalled: event(), onMessage: event(), onUpdateAvailable: event(), reload() {}},
+        runtime: {
+            onInstalled: event(), onMessage: event(), onUpdateAvailable: event(), reload() {},
+            sendMessage(msg) {
+                sent.push(JSON.parse(JSON.stringify(msg)));
+                return Promise.reject(new Error('Could not establish connection. Receiving end does not exist.'));
+            },
+        },
         tabs: {
             query: browser.tabs.query,
             create: browser.tabs.create,
@@ -92,7 +100,7 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
         return send({msg: 'groups', op, args});
     }
 
-    return {chrome, send, groups};
+    return {chrome, send, groups, sent};
 }
 
 async function waitFor(check, ms = 3000) {
@@ -146,6 +154,25 @@ test('message API: save, remove, restore, usage', async () => {
     assert.equal(usage.quota, 102400);
     assert.equal(usage.unsynced, 0);
     assert.ok(usage.bytes > 0);
+});
+
+test('message API: sizes; open pages hear when waiting groups get to sync', async () => {
+    const sync = createSyncArea();
+    const bg = startBackground({sync});
+    await bg.groups('save', 'tg_1', makeGroup(400, 1));
+    sync.rawSet({filler: 'x'.repeat(102400 - await sync.getBytesInUse(null) - 600)});
+    assert.equal((await bg.groups('save', 'tg_2', makeGroup(50, 2))).result.synced, false);
+
+    const sizes = (await bg.groups('sizes')).result;
+    assert.equal(sizes.tg_1.synced, true);
+    assert.ok(sizes.tg_1.bytes > 1000);
+    assert.equal(sizes.tg_2.synced, false);
+    assert.ok(sizes.tg_2.bytes > 600, 'needs more than is free');
+    assert.deepEqual(bg.sent, []);
+
+    await bg.groups('remove', 'tg_1');
+    assert.equal((await bg.groups('list')).result.tg_2.synced, true, 'the list catches up with sync first');
+    assert.deepEqual(bg.sent, [{msg: 'groupsSynced', keys: ['tg_2']}]);
 });
 
 test('message API: unknown operation', async () => {

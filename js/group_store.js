@@ -260,6 +260,8 @@ var groupStore = (function () {
      * @param {function(): number} [options.now]
      * @param {function(): number} [options.random]
      * @param {string} [options.conflict_suffix] added to the name of a group copy made on an edit conflict
+     * @param {function(Array<string>)} [options.on_synced] called with the keys of groups that waited for sync
+     *   (saved on this computer only) and are in sync now, e.g. after other groups were deleted
      */
     function createGroupStore(options) {
         const sync = options.sync;
@@ -267,6 +269,7 @@ var groupStore = (function () {
         const now = options.now || Date.now;
         const random = options.random || Math.random;
         const conflict_suffix = options.conflict_suffix || ' (conflict)';
+        const on_synced = options.on_synced || null;
 
         let queue = Promise.resolve();
 
@@ -274,6 +277,31 @@ var groupStore = (function () {
             const run = queue.then(fn);
             queue = run.catch(function () {});
             return run;
+        }
+
+        function waitingKeys(records) {
+            return Object.keys(records).filter(key => !records[key].trashed && !records[key].synced);
+        }
+
+        // A call that can change groups: tells on_synced about groups that waited for sync before it and are
+        // in sync after it. `own`: the groups the call itself saves, their result already says it.
+        function change(fn, own = []) {
+            return exclusive(async function () {
+                const waiting = on_synced ? waitingKeys(await readRecords()).filter(key => !own.includes(key)) : [];
+                const res = await fn();
+                if (waiting.length) {
+                    const records = await readRecords();
+                    const synced = waiting.filter(key => records[key] && !records[key].trashed && records[key].synced);
+                    if (synced.length) {
+                        try {
+                            on_synced(synced);
+                        } catch (e) {
+                            console.error('TabHamster: on_synced failed', e);
+                        }
+                    }
+                }
+                return res;
+            });
         }
 
         function localKey(key) {
@@ -860,10 +888,34 @@ var groupStore = (function () {
 
         async function usageNow() {
             const records = await readRecords();
-            const unsynced = Object.keys(records).filter(function (key) {
-                return !records[key].trashed && !records[key].synced;
-            }).length;
-            return {bytes: await sync.getBytesInUse(null), quota: sync.QUOTA_BYTES, unsynced};
+            return {bytes: await sync.getBytesInUse(null), quota: sync.QUOTA_BYTES, unsynced: waitingKeys(records).length};
+        }
+
+        // Space each group takes in sync: its item and chunks, so what deleting it frees. A group that is not
+        // in sync gets the space it needs to get there (bytes null if it can't fit in sync at all).
+        async function sizesNow() {
+            const records = await readRecords();
+            const sync_items = await sync.get(null);
+            const out = {};
+            for (const key of Object.keys(records)) {
+                const rec = records[key];
+                if (rec.trashed) {
+                    continue;
+                }
+                if (rec.synced) {
+                    out[key] = {bytes: bytesOf(sync_items, [key].concat(chunkKeysOf(key, sync_items))), synced: true};
+                    continue;
+                }
+                let bytes = null;
+                try {
+                    const enc = await encodeGroup(key, rec.g, sync.QUOTA_BYTES_PER_ITEM, now(), random);
+                    bytes = bytesOf(enc.items, Object.keys(enc.items));
+                } catch (e) {
+                    // too big for one sync item: stays on this computer
+                }
+                out[key] = {bytes, synced: false};
+            }
+            return out;
         }
 
         return {
@@ -875,23 +927,28 @@ var groupStore = (function () {
              * @returns {Promise<{synced: boolean, error?: string, copy?: string}>} saved locally even when sync
              *   fails; `copy` is set when the group was edited on another device too and this version became a copy
              */
-            save: (key, group) => exclusive(() => saveNow({[key]: group})).then(res => res[key]),
+            save: (key, group) => change(() => saveNow({[key]: group}), [key]).then(res => res[key]),
             /** @returns {Promise<Object>} {key: {synced, error?}}; one sync write for small groups (reorder) */
-            saveMany: (groups) => exclusive(() => saveNow(groups)),
+            saveMany: (groups) => change(() => saveNow(groups), Object.keys(groups)),
             /** @returns {Promise<{synced: boolean, error?: string}>} the group goes to trash */
-            remove: (key) => exclusive(() => removeNow(key)),
+            remove: (key) => change(() => removeNow(key)),
             /** @returns {Promise<{synced: boolean, error?: string}>} like remove, but not kept in trash (undo of a new save) */
-            discard: (key) => exclusive(() => discardNow(key)),
+            discard: (key) => change(() => discardNow(key)),
             /** @returns {Promise<{synced: boolean, error?: string}>} brings a group back from trash */
-            restore: (key) => exclusive(() => restoreNow(key)),
+            restore: (key) => change(() => restoreNow(key), [key]),
             /** @returns {Promise<{saved: number, removed: number, errors: Object}>} groups not given go to trash */
-            replaceAll: (groups) => exclusive(() => replaceAllNow(groups)),
+            replaceAll: (groups) => change(() => replaceAllNow(groups), Object.keys(groups)),
             /** @returns {Promise<{errors: Object, copies: Object}>} */
-            reconcile: () => exclusive(reconcileNow),
+            reconcile: () => change(reconcileNow),
             /** @returns {Promise<{converted: number}>} */
-            migrate: () => exclusive(migrateNow),
+            migrate: () => change(migrateNow),
             /** @returns {Promise<{bytes: number, quota: number, unsynced: number}>} */
             usage: () => exclusive(usageNow),
+            /**
+             * @returns {Promise<Object>} {key: {bytes, synced}} for groups that aren't deleted: bytes the group takes
+             *   in sync, or (not synced) the bytes it needs there, null if it can't fit
+             */
+            sizes: () => exclusive(sizesNow),
         };
     }
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {keyTime, numericDate, shortDate, shortTime, dayName, dayTime, interval, hostOf} from '../js/ui/format.js';
+import {keyTime, numericDate, shortDate, shortTime, dayName, dayTime, interval, hostOf, kilobytes, listDate, fullDate} from '../js/ui/format.js';
 
 test('keyTime reads tg_<ms> keys', () => {
     assert.equal(keyTime('tg_1760000000000'), 1760000000000);
@@ -47,4 +47,22 @@ test('interval: one day, across days, relative or not', () => {
         'Yesterday, ' + time(t(18, 22, 0)) + '–Today, ' + time(t(19, 1, 0)));
     assert.equal(interval(t(18, 14, 2), t(18, 23, 5), 'en-US', now, false), 'Oct 18, ' + time(t(18, 14, 2)) + '–' + time(t(18, 23, 5)));
     assert.equal(dayTime(t(9, 21, 40), 'en-US', now), 'Oct 9, ' + time(t(9, 21, 40)));
+});
+
+test('kilobytes: 1024 bytes, rounded down, never 0.0 for something', () => {
+    assert.equal(kilobytes(26010, 'en'), '25.4');
+    assert.equal(kilobytes(26010, 'uk'), '25,4');
+    assert.equal(kilobytes(2048, 'en'), '2.0');
+    assert.equal(kilobytes(40, 'en'), '0.1');
+    assert.equal(kilobytes(0, 'en'), '0.0');
+    assert.equal(kilobytes(102399, 'en', 0), '99');
+    assert.equal(kilobytes(102400, 'en', 0), '100');
+});
+
+test('listDate: day and month this year, only the year for another one', () => {
+    const now = new Date(2026, 9, 19, 12, 0).getTime();
+    assert.equal(listDate(new Date(2026, 9, 15).getTime(), 'en', now), 'Oct 15');
+    assert.equal(listDate(new Date(2026, 0, 2).getTime(), 'uk', now), new Intl.DateTimeFormat('uk', {month: 'short', day: 'numeric'}).format(new Date(2026, 0, 2)));
+    assert.equal(listDate(new Date(2025, 8, 28).getTime(), 'uk', now), '2025');
+    assert.match(fullDate(new Date(2025, 8, 28, 21, 52).getTime(), 'en'), /^September 28, 2025.*9:52/);
 });

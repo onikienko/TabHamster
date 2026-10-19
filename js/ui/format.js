@@ -31,6 +31,19 @@ export function shortDate(ms, lang, now) {
         {month: 'short', day: 'numeric', year: 'numeric'}).format(d);
 }
 
+/** date column of the list: "Oct 15" this year, only "2025" for another year (fullDate has the rest) */
+export function listDate(ms, lang, now) {
+    const d = new Date(ms);
+    const year = new Date(now === undefined ? Date.now() : now).getFullYear();
+    return d.getFullYear() === year ? new Intl.DateTimeFormat(lang, {month: 'short', day: 'numeric'}).format(d) :
+        String(d.getFullYear());
+}
+
+/** "September 28, 2025 at 9:52 PM", "28 вересня 2025 р. о 21:52" */
+export function fullDate(ms, lang) {
+    return new Intl.DateTimeFormat(lang, {dateStyle: 'long', timeStyle: 'short'}).format(new Date(ms));
+}
+
 /** "21:52" or "9:52 PM", as the language writes it */
 export function shortTime(ms, lang) {
     return new Intl.DateTimeFormat(lang, {hour: 'numeric', minute: '2-digit'}).format(new Date(ms));
@@ -64,6 +77,19 @@ export function dayTime(ms, lang, now, relative = true) {
 export function interval(start, end, lang, now, relative = true) {
     const to = startOfDay(start) === startOfDay(end) ? shortTime(end, lang) : dayTime(end, lang, now, relative);
     return dayTime(start, lang, now, relative) + '–' + to;
+}
+
+/**
+ * Bytes as KB (1024 bytes, like Chrome's sync quota of 100 KB) with `digits` decimals, as the language writes
+ * numbers: "25.4", "25,4". Rounded down, so nearly full doesn't read as full; anything above 0 shows at least 0.1.
+ */
+export function kilobytes(bytes, lang, digits = 1) {
+    const step = 10 ** digits;
+    let kb = Math.floor(bytes / 1024 * step) / step;
+    if (digits && bytes > 0) {
+        kb = Math.max(kb, 1 / step);
+    }
+    return new Intl.NumberFormat(lang, {minimumFractionDigits: digits, maximumFractionDigits: digits}).format(kb);
 }
 
 /** "github.com" for "https://www.github.com/x"; the address itself when it has no host (about:blank, data:) */
