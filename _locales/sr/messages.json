@@ -865,6 +865,16 @@
             }
         }
     },
+    "p_tabGone": {
+        "message": "Ова картица више није у групи „$NAME$“.",
+        "description": "Bar when a tab being removed or edited is not in the group any more (removed on another computer or a moment before)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
     "p_linksCopied_one": {
         "message": "Копиран је $COUNT$ линк",
         "description": "Bar after 'Copy links' (plural form 'one')",

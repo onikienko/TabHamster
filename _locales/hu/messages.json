@@ -681,6 +681,16 @@
             }
         }
     },
+    "p_tabGone": {
+        "message": "Ez a fül már nincs benne ebben: „$NAME$”.",
+        "description": "Bar when a tab being removed or edited is not in the group any more (removed on another computer or a moment before)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
     "p_linksCopied_one": {
         "message": "$COUNT$ link másolva",
         "description": "Bar after 'Copy links' (plural form 'one')",

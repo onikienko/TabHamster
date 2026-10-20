@@ -163,6 +163,24 @@ var groupStore = (function () {
         };
     }
 
+    /**
+     * Where a tab the caller saw is in `tabs` now: the one with the same id and address (its title may have been
+     * changed elsewhere), at `index` if more tabs match. -1 if it isn't there any more.
+     */
+    function findTab(tabs, seen, index) {
+        const same = tab => tab && tab.url === seen.url && tab.id === seen.id;
+        return same(tabs[index]) ? index : tabs.findIndex(same);
+    }
+
+    /** `id` for a tab added to a group: one more than the biggest (0.4.0 stores the id of an edited tab as text) */
+    function nextTabId(tabs) {
+        return tabs.reduce(function (max, tab) {
+            const id = tab && (typeof tab.id === 'number' || typeof tab.id === 'string' && /^\d+$/.test(tab.id)) ?
+                Number(tab.id) : NaN;
+            return Number.isInteger(id) ? Math.max(max, id) : max;
+        }, -1) + 1;
+    }
+
     // same name and tabs: addresses, titles, pinned (not the place, not tab ids: a backup restore renumbers them)
     function sameContent(a, b) {
         const x = normalizeGroup(a);
@@ -828,6 +846,23 @@ var groupStore = (function () {
             return Object.assign(res, {h: now_rec.h}, kept ? {kept} : {});
         }
 
+        // A tab change made to the group's tabs as they are now: fn(tabs) -> new tabs, or null when there is nothing
+        // to do. The answer is like setTabs's, with `before` (the tabs it changed, for an undo), or {unchanged: true}.
+        async function changeTabsNow(key, fn) {
+            const records = await readRecords();
+            const rec = records[key];
+            if (!rec || rec.discarded) {
+                return {synced: false, error: NOT_FOUND};
+            }
+            const tabs = fn(rec.g.tabs);
+            if (!tabs) {
+                return {synced: rec.synced, h: rec.h, unchanged: true};
+            }
+            const res = (await saveNow({[key]: {name: rec.g.name, index: rec.g.index, tabs}}))[key];
+            const now_rec = (await local.get(localKey(key)))[localKey(key)];
+            return Object.assign(res, {h: now_rec.h, before: rec.g.tabs});
+        }
+
         async function removeNow(key) {
             const records = await readRecords();
             const rec = records[key];
@@ -1086,6 +1121,27 @@ var groupStore = (function () {
              *   keep_old: the replaced version goes to trash, `kept` is its key
              */
             setTabs: (key, tabs, seen_h, keep_old) => change(() => setTabsNow(key, tabs, seen_h, keep_old), [key]),
+            /**
+             * Tab changes made to the tabs as they are now, so changes made meanwhile (by an earlier call or on
+             * another device) stay. `seen`: the tab as the caller saw it, `index`: where it was (see findTab).
+             * @returns {Promise<{synced: boolean, error?: string, copy?: string, h: string, before?: Array,
+             *   unchanged?: boolean}>} like setTabs, `before`: the tabs it changed (an undo puts them back with
+             *   setTabs); `unchanged`: the tab isn't in the group any more, nothing was done
+             */
+            removeTab: (key, seen, index) => change(() => changeTabsNow(key, function (tabs) {
+                const i = findTab(tabs, seen, index);
+                return i === -1 ? null : tabs.filter((tab, j) => j !== i);
+            }), [key]),
+            /** like removeTab; `edit`: {url, title}, the tab's other fields (id, pinned) stay */
+            editTab: (key, seen, index, edit) => change(() => changeTabsNow(key, function (tabs) {
+                const i = findTab(tabs, seen, index);
+                return i === -1 ? null : tabs.map((tab, j) => (j === i ? Object.assign({}, tab, edit) : tab));
+            }), [key]),
+            /** a new last tab {url, title, pinned?}, with an id of its own; `unchanged`: the group has that address */
+            addTab: (key, tab) => change(() => changeTabsNow(key, function (tabs) {
+                return tabs.some(saved => saved && saved.url === tab.url) ? null :
+                    tabs.concat(Object.assign({}, tab, {id: nextTabId(tabs)}));
+            }), [key]),
             /** @returns {Promise<{synced: boolean, error?: string}>} new name, tabs and place stay */
             rename: (key, name) => change(() => editNow({[key]: g => ({name, index: g.index, tabs: g.tabs})}), [key])
                 .then(res => res[key]),
@@ -1138,6 +1194,8 @@ var groupStore = (function () {
         writeId,
         writeIdTime,
         normalizeGroup,
+        findTab,
+        nextTabId,
         sameContent,
         chunkedHeader,
         encodeGroup,

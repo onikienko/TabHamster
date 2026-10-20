@@ -31,7 +31,7 @@ const state = {
     groupsError: null,
     sessions: {},
     currentSession: null,
-    // the saved tab being edited: {key, index}, index null for a new link at the end
+    // the saved tab being edited: {key, index, tab} (see tabIndexIn), tab and index null for a new link at the end
     editingTab: null,
     usage: null,
     openTabs: 0,
@@ -89,11 +89,34 @@ async function loadOptions() {
 async function loadGroups() {
     try {
         state.groups = await groupStoreClient.list();
+        pendingTabChanges.forEach(applyTabChange);
         state.groupsError = null;
     } catch (e) {
         state.groups = {};
         state.groupsError = e;
     }
+}
+
+// tab changes shown before the background has made them: {key, change(tabs) -> tabs} (showTabChange)
+const pendingTabChanges = new Set();
+
+function applyTabChange(entry) {
+    const group = state.groups[entry.key];
+    if (group) {
+        state.groups[entry.key] = Object.assign({}, group, {tabs: entry.change(group.tabs)});
+    }
+}
+
+/**
+ * Shows a tab change at once, so a click or key right after it is about the tabs as they will be. Until the
+ * background answers, groups read meanwhile (an earlier change's reload) get it too. Returns a function to call
+ * once it has answered.
+ */
+function showTabChange(key, change) {
+    const entry = {key, change};
+    pendingTabChanges.add(entry);
+    applyTabChange(entry);
+    return () => pendingTabChanges.delete(entry);
 }
 
 /** local storage also holds copies of saved groups (lg_) and store records; sessions are tg_ keys */
@@ -244,9 +267,18 @@ function savedTab(tab, id) {
     return tab.pinned ? {url: tab.url, title: tab.title, id, pinned: true} : {url: tab.url, title: tab.title, id};
 }
 
-/** `id` for a tab added to saved tabs */
-function nextTabId(tabs) {
-    return tabs.reduce((max, tab) => (Number.isInteger(tab.id) ? Math.max(max, tab.id) : max), -1) + 1;
+/**
+ * Where a saved tab a row showed (`at`: {index, tab}) is in `tabs` now: the one with the same id and address, at
+ * `index` if more match; -1 if it is gone. The same test as the store's findTab, which does the change.
+ */
+function tabIndexIn(tabs, at) {
+    const same = (tab) => sameTab(tab, at.tab);
+    return same(tabs[at.index]) ? at.index : tabs.findIndex(same);
+}
+
+/** the same saved tab: id and address (the title may have been edited) */
+function sameTab(a, b) {
+    return !!a && !!b && a.url === b.url && a.id === b.id;
 }
 
 function nextIndex() {
@@ -268,6 +300,13 @@ function undoTabs(key, before, res) {
             await groupStoreClient.discard(res.kept);
         }
     };
+}
+
+/** the hash of a group's tabs from a change's answer: a Replace sent before the groups are read again needs it */
+function keepHash(key, res) {
+    if (state.groups[key] && res.h) {
+        state.groups[key] = Object.assign({}, state.groups[key], {h: res.h});
+    }
 }
 
 /** second sentence of the bar when the group stayed on this computer */
@@ -398,6 +437,7 @@ function act(fn) {
 async function setTabs(key, tabs, text, keepOld = false) {
     const before = state.groups[key];
     const res = await groupStoreClient.setTabs(key, tabs, before.h, keepOld);
+    keepHash(key, res);
     await afterChange(res.copy || key);
     showBar((res.copy ? t('p_savedAsCopy', groupName(key, before)) : text) + notSyncedNote(res),
         undoAction(undoTabs(key, before, res), res.copy || key));
@@ -412,14 +452,31 @@ async function replaceWithOpenTabs(key) {
     await setTabs(key, tabs, plural('p_replaced', tabs.length, [groupName(key, state.groups[key])]), true);
 }
 
-async function addTab(key, tab) {
-    const group = state.groups[key];
-    const name = groupName(key, group);
-    if (group.tabs.some((saved) => saved.url === tab.url)) {
-        showBar(t('p_alreadyInGroup', name));
+/**
+ * After a tab change the background made to the tabs as they were then (removeTab, editTab, addTab): the bar says
+ * `text` (or that the change became a copy) and can undo it; `unchanged`, nothing was done, it says `nothing`.
+ */
+async function tabChanged(key, name, res, text, nothing) {
+    if (!res.h) {
+        // the group is gone (deleted on another computer)
+        await afterChange(null);
+        throw new Error(res.error);
+    }
+    keepHash(key, res);
+    await afterChange(res.unchanged ? null : res.copy || key);
+    if (res.unchanged) {
+        showBar(nothing);
         return;
     }
-    await setTabs(key, group.tabs.concat(savedTab(tab, nextTabId(group.tabs))), t('p_tabAdded', [tab.title || tab.url, name]));
+    showBar((res.copy ? t('p_savedAsCopy', name) : text) + notSyncedNote(res),
+        undoAction(undoTabs(key, {tabs: res.before}, res), res.copy || key));
+}
+
+async function addTab(key, tab) {
+    const name = groupName(key, state.groups[key]);
+    // its id comes from the store
+    const res = await groupStoreClient.addTab(key, savedTab(tab));
+    await tabChanged(key, name, res, t('p_tabAdded', [tab.title || tab.url, name]), t('p_alreadyInGroup', name));
 }
 
 async function copyLinks(group) {
@@ -456,7 +513,11 @@ async function groupMenu(key, button) {
         chrome.tabs.query({active: true, currentWindow: true}),
     ]);
     const group = state.groups[key];
-    if (!group || !button.isConnected) {
+    if (!button.isConnected) {
+        // the row was drawn again meanwhile (after the click that ended a rename or a tab edit)
+        button = el.list.querySelector('.item[data-key="' + CSS.escape(key) + '"] > .row .more');
+    }
+    if (!group || !button) {
         return;
     }
     const row = button.closest('.row');
@@ -478,7 +539,7 @@ async function groupMenu(key, button) {
         {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(group)},
         '-',
         {icon: 'trash', label: t('p_delete'), danger: true, run: act(() => deleteGroup(key))},
-    ].filter(Boolean), {label: groupName(key, group), onClose: () => row.classList.remove('menu-open')});
+    ].filter(Boolean), {label: groupName(key, group), onClose: () => menuClosed(row)});
 }
 
 /* ---------- order ---------- */
@@ -561,12 +622,8 @@ async function onGroupsSynced() {
     if (!synced) {
         return;
     }
-    // drawing the list again would end a rename or a menu (during a drag render() waits for its end)
-    if (state.renaming || state.editingTab || document.querySelector('.menu')) {
-        renderFooter();
-    } else {
-        render();
-    }
+    // waits while a menu, a rename or a tab edit is open (render)
+    render();
     showBar(plural('p_groupsSynced', synced));
 }
 
@@ -632,7 +689,13 @@ function sessionMenu(key, button) {
         {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(session)},
         '-',
         {icon: 'trash', label: t('p_delete'), danger: true, run: act(() => deleteSession(key))},
-    ], {label: sessionName(key), onClose: () => row.classList.remove('menu-open')});
+    ], {label: sessionName(key), onClose: () => menuClosed(row)});
+}
+
+/** a ⋯ menu closed: the list is drawn if it waited for that (render), after what was chosen has started */
+function menuClosed(row) {
+    row.classList.remove('menu-open');
+    setTimeout(renderIfWaiting);
 }
 
 function focusName(key) {
@@ -698,10 +761,13 @@ function renameRow(key) {
             hideBarAbout(key);
             state.groups[key] = Object.assign({}, state.groups[key], {name});
         }
-        // ended by a click elsewhere (the focus leaves on mousedown): only this row is drawn again, so the click
-        // still lands on what was pressed
-        if (!refocus) {
-            redrawItem(key);
+        if (refocus) {
+            render();
+            focusName(key);
+        } else {
+            // ended by a click elsewhere (the focus leaves on mousedown) or by Tab: drawn again once the focus has
+            // moved, and after the click (render waits while the button is down), so the click still lands
+            setTimeout(render);
         }
         if (changed) {
             try {
@@ -710,17 +776,7 @@ function renameRow(key) {
                 console.error('TabHamster: rename failed', e);
                 showBar(t('p_syncStorageDefault_error'));
             }
-            if (refocus) {
-                await afterChange(null);
-            } else {
-                await reload();
-                redrawItem(key);
-            }
-        } else if (refocus) {
-            render();
-        }
-        if (refocus) {
-            focusName(key);
+            await afterChange(null);
         }
     };
 
@@ -753,27 +809,50 @@ function renameRow(key) {
 
 /* ---------- tab actions (saved groups only) ---------- */
 
-async function removeTab(key, index) {
-    const group = state.groups[key];
-    await setTabs(key, group.tabs.filter((tab, i) => i !== index), t('p_tabRemoved'));
+/** at: {key, index, tab}, a row's tab (tabRow) */
+async function removeTab(at) {
+    const group = state.groups[at.key];
+    const i = group ? tabIndexIn(group.tabs, at) : -1;
+    if (i === -1) {
+        return;
+    }
+    // gone from the list at once: a click or Delete right after it is about the next tab. The background removes
+    // it from the tabs as they are by then (an earlier change may still be saving)
+    const saved = showTabChange(at.key, (tabs) => {
+        const j = tabIndexIn(tabs, at);
+        return j === -1 ? tabs : tabs.filter((tab, k) => k !== j);
+    });
+    redrawItem(at.key);
+    const name = groupName(at.key, group);
+    let res;
+    try {
+        res = await groupStoreClient.removeTab(at.key, at.tab, at.index);
+    } finally {
+        saved();
+    }
+    await tabChanged(at.key, name, res, t('p_tabRemoved'), t('p_tabGone', name));
 }
 
-/** the editor in place of a tab (index), or a new last row for a link (index null) */
-function startTabEdit(key, index) {
+/** the editor in place of a row's tab (at: {index, tab}), or a new last row for a link (at null) */
+function startTabEdit(key, at) {
     closeMenu(false);
     state.renaming = null;
-    state.editingTab = {key, index};
+    state.editingTab = {key, index: at ? at.index : null, tab: at ? at.tab : null};
     renderList();
     const input = el.list.querySelector('.tab-editor .tab-input');
     if (input) {
         input.focus();
         input.select();
+    } else {
+        // the tab is gone (removed on another computer): nothing to edit
+        state.editingTab = null;
+        render();
     }
 }
 
 /** an address typed without a scheme ("example.com/x") is a web address */
 function withScheme(url) {
-    return /^[a-z][a-z0-9+.-]*:\/\//i.test(url) || /^(about|data|mailto|file|view-source|chrome|javascript):/i.test(url) ?
+    return /^[a-z][a-z0-9+.-]*:\/\//i.test(url) || /^(about|data|mailto|file|view-source|chrome):/i.test(url) ?
         url : 'https://' + url;
 }
 
@@ -787,11 +866,11 @@ function focusTab(key, index) {
 }
 
 /**
- * Title and address of a saved tab, or of a new link (index null). Enter or ✓ saves, Esc or × cancels; clicking
- * elsewhere saves an address that isn't empty and cancels otherwise. An empty title is fine: the address shows.
+ * Title and address of a saved tab, or of a new link (editing.tab null). Enter or ✓ saves, Esc or × cancels; clicking
+ * elsewhere saves an address that can be used and cancels otherwise. An empty title is fine: the address shows.
  */
-function tabEditor(key, index) {
-    const tab = index === null ? null : state.groups[key].tabs[index];
+function tabEditor(key, editing) {
+    const tab = editing.tab;
     const title = h('input', {
         class: 'tab-input', type: 'text', value: tab ? tab.title || '' : '', maxlength: 1000, autocomplete: 'off',
         spellcheck: 'false', dir: 'auto', 'aria-label': t('p_tabTitle_label'), placeholder: t('p_tabTitle_placeholder'),
@@ -808,8 +887,9 @@ function tabEditor(key, index) {
         h('div', {class: 'tab-editor-line'}, title, ok, cancel),
         h('div', {class: 'tab-editor-line'}, url));
 
+    // not empty, and not a javascript: address (Chrome doesn't open them, a backup import drops them)
     const check = () => {
-        const usable = url.value.trim() !== '';
+        const usable = url.value.trim() !== '' && !/^\s*javascript:/i.test(url.value);
         ok.disabled = !usable;
         return usable;
     };
@@ -823,43 +903,48 @@ function tabEditor(key, index) {
         }
         done = true;
         state.editingTab = null;
-        const before = state.groups[key];
-        const newUrl = url.value.trim() ? withScheme(url.value.trim()) : '';
-        const newTitle = title.value.trim();
-        const changed = commit && newUrl && (!tab || newUrl !== tab.url || newTitle !== (tab.title || ''));
-        const name = groupName(key, before);
-        if (changed && index === null && before.tabs.some((saved) => saved.url === newUrl)) {
-            showBar(t('p_alreadyInGroup', name));
-        }
-        if (!changed || (index === null && before.tabs.some((saved) => saved.url === newUrl))) {
-            if (refocus) {
-                render();
-                focusTab(key, index === null ? before.tabs.length - 1 : index);
-            } else {
-                redrawItem(key);
-            }
+        const group = state.groups[key];
+        if (!group) {
+            // deleted on another computer meanwhile
+            setTimeout(render);
             return;
         }
-        const tabs = index === null ?
-            before.tabs.concat({url: newUrl, title: newTitle, id: nextTabId(before.tabs)}) :
-            before.tabs.map((saved, i) => (i === index ? Object.assign({}, saved, {url: newUrl, title: newTitle}) : saved));
-        const text = index === null ? t('p_tabAdded', [newTitle || newUrl, name]) : t('p_tabChanged');
-        if (!refocus) {
-            // ended by a click elsewhere: only this group is drawn again, so the click still lands
-            state.groups[key] = Object.assign({}, before, {tabs});
-            redrawItem(key);
+        const newUrl = url.value.trim() ? withScheme(url.value.trim()) : '';
+        const newTitle = title.value.trim();
+        const name = groupName(key, group);
+        // where the tab is now (an earlier change may have been shown since the editor opened)
+        const at = tab ? tabIndexIn(group.tabs, editing) : -1;
+        const exists = !tab && group.tabs.some((saved) => saved.url === newUrl);
+        if (commit && newUrl && exists) {
+            showBar(t('p_alreadyInGroup', name));
+        }
+        const changed = commit && newUrl && !exists && (!tab || newUrl !== tab.url || newTitle !== (tab.title || ''));
+        // shown at once; the background makes the change to the tabs as they are by then. A new link's id comes
+        // from the store
+        const saved = changed ? showTabChange(key, (tabs) => {
+            if (!tab) {
+                return tabs.some((other) => other.url === newUrl) ? tabs : tabs.concat({url: newUrl, title: newTitle});
+            }
+            const i = tabIndexIn(tabs, editing);
+            return i === -1 ? tabs :
+                tabs.map((other, j) => (j === i ? Object.assign({}, other, {url: newUrl, title: newTitle}) : other));
+        }) : null;
+        if (refocus) {
+            render();
+            focusTab(key, tab ? (at === -1 ? editing.index : at) : state.groups[key].tabs.length - 1);
+        } else {
+            // ended by a click elsewhere (the focus leaves on mousedown) or by Tab: drawn again once the focus has
+            // moved, and after the click (render waits while the button is down), so the click still lands
+            setTimeout(render);
+        }
+        if (!changed) {
+            return;
         }
         try {
-            const res = await groupStoreClient.setTabs(key, tabs, before.h);
-            if (refocus) {
-                await afterChange(res.copy || key);
-                focusTab(key, index === null ? tabs.length - 1 : index);
-            } else {
-                await reload();
-                redrawItem(key);
-            }
-            showBar((res.copy ? t('p_savedAsCopy', name) : text) + notSyncedNote(res),
-                undoAction(undoTabs(key, before, res), res.copy || key));
+            const res = await (tab ? groupStoreClient.editTab(key, tab, editing.index, {url: newUrl, title: newTitle}) :
+                groupStoreClient.addTab(key, {url: newUrl, title: newTitle})).finally(saved);
+            await tabChanged(key, name, res, tab ? t('p_tabChanged') : t('p_tabAdded', [newTitle || newUrl, name]),
+                t(tab ? 'p_tabGone' : 'p_alreadyInGroup', name));
         } catch (e) {
             console.error('TabHamster: tab edit failed', e);
             showBar(t('p_syncStorageDefault_error'));
@@ -1027,6 +1112,9 @@ function favicon(url) {
     return box;
 }
 
+// a saved group's tab row (its link) -> {key, index, tab}: what it showed, for Delete and F2
+const rowTabs = new WeakMap();
+
 /**
  * A tab of a group or session: a link that opens it. A saved group's tab (`at`: {key, index}) also has Edit and
  * Remove, shown over the end of the row on hover or when the row has the focus with keys (Delete, F2).
@@ -1048,15 +1136,17 @@ function tabRow(tab, at) {
     if (!at) {
         return h('div', {class: 'tab-item'}, link);
     }
+    const shown = {key: at.key, index: at.index, tab};
+    rowTabs.set(link, shown);
     // not Tab stops: the keys do the same on the focused row
     return h('div', {class: 'tab-item'}, link, h('div', {class: 'tab-actions'},
         setTip(h('button', {
             class: 'ib', type: 'button', tabindex: '-1', 'aria-label': t('p_editTab'),
-            onClick: () => startTabEdit(at.key, at.index),
+            onClick: () => startTabEdit(at.key, shown),
         }, icon('pencil', 15)), {text: t('p_editTab'), keys: ['F2']}),
         setTip(h('button', {
             class: 'ib', type: 'button', tabindex: '-1', 'aria-label': t('p_removeTab'),
-            onClick: act(() => removeTab(at.key, at.index)),
+            onClick: act(() => removeTab(shown)),
         }, icon('close', 15)), {text: t('p_removeTab'), keys: [DELETE]})));
 }
 
@@ -1207,9 +1297,11 @@ function groupItem(result, target) {
     const editing = state.editingTab && state.editingTab.key === key ? state.editingTab : null;
     if (isExpanded('saved:' + key, partial) || editing) {
         const indexes = partial ? result.tabIndexes : group.tabs.map((tab, i) => i);
-        const rows = indexes.map((i) => (editing && editing.index === i ? tabEditor(key, i) : tabRow(group.tabs[i], {key, index: i})));
-        if (editing && editing.index === null) {
-            rows.push(tabEditor(key, null));
+        // the tab may have another place than when its editor was opened (an earlier change shown meanwhile)
+        const edited = editing && editing.tab ? tabIndexIn(group.tabs, editing) : -1;
+        const rows = indexes.map((i) => (i === edited ? tabEditor(key, editing) : tabRow(group.tabs[i], {key, index: i})));
+        if (editing && !editing.tab) {
+            rows.push(tabEditor(key, editing));
         }
         item.append(h('div', {class: 'tab-list'}, rows));
     }
@@ -1307,17 +1399,44 @@ function renderTabs() {
     el.countSessions.textContent = String(state.results.sessions.length);
 }
 
+/**
+ * What has the focus in the list, to give it back after the list is drawn again: {key} (a group or session: its name,
+ * a button, a session's tab) or {key, shown, pos} (a saved tab's row: rowTabs, its place among the group's rows)
+ */
+function listFocus() {
+    const node = document.activeElement;
+    const item = el.list.contains(node) && node.closest('.item');
+    if (!item) {
+        return null;
+    }
+    const shown = rowTabs.get(node);
+    return shown ? {key: item.dataset.key, shown, pos: Array.from(item.querySelectorAll('a.tab-row')).indexOf(node)} :
+        {key: item.dataset.key};
+}
+
+/** the same saved tab gets the focus again, or the one now in its place (it was removed), or the group's name */
+function restoreFocus(was) {
+    if (!was) {
+        return;
+    }
+    const item = el.list.querySelector('.item[data-key="' + CSS.escape(was.key) + '"]');
+    const rows = was.shown && item ? Array.from(item.querySelectorAll('a.tab-row')) : [];
+    const row = rows.find((node) => rowTabs.get(node) && sameTab(rowTabs.get(node).tab, was.shown.tab)) ||
+        rows[Math.min(was.pos, rows.length - 1)];
+    if (row) {
+        row.focus();
+    } else {
+        focusName(was.key);
+    }
+}
+
 function renderList() {
     closeMenu(false);
-    // focus in a group (its name, a button, a tab) comes back to its name after the list is drawn again
-    // (Alt+↑ ↓ moves, reloads)
-    const focusedItem = el.list.contains(document.activeElement) && document.activeElement.closest('.item');
-    const focused = focusedItem ? focusedItem.dataset.key : null;
+    // focus in a group comes back after the list is drawn again (Alt+↑ ↓ moves, reloads, a removed tab)
+    const focused = listFocus();
     drawList();
     fitColumns();
-    if (focused) {
-        focusName(focused);
-    }
+    restoreFocus(focused);
     const stops = listStops();
     setStop(stops.includes(document.activeElement) ? document.activeElement : stops[0]);
 }
@@ -1330,10 +1449,14 @@ function redrawItem(key) {
     if (!item || !result || !state.groups[key]) {
         return;
     }
+    const focused = listFocus();
     const stop = listStops().find((node) => node.tabIndex === 0);
     const fresh = groupItem(result, item.classList.contains('target'));
     item.replaceWith(fresh);
     setStop(stop && stop.isConnected ? stop : fresh.querySelector('button.name'));
+    if (focused && focused.key === key) {
+        restoreFocus(focused);
+    }
 }
 
 function drawList() {
@@ -1446,14 +1569,28 @@ function renderFilter() {
     el.chipText.textContent = state.filter ? t(state.filter === 'unsynced' ? 'p_filterUnsynced' : 'p_filterBiggest') : '';
 }
 
-// the list isn't drawn again during a drag (it would take the dragged row away), but once the drag ends
-let renderAfterDrag = false;
+// The list isn't drawn again while that would take away what is in use, but once that ends (renderIfWaiting): a drag
+// (the dragged row), a rename or a tab edit (its input; the focusout would end it and save what was typed so far),
+// a ⋯ menu, a mouse button held down (the click would land on nothing). The footer is drawn meanwhile, except during
+// a drag or a press.
+let renderWaits = false;
+let pointerDown = false;
 
 function render() {
-    if (document.body.classList.contains('dragging')) {
-        renderAfterDrag = true;
+    const dragging = document.body.classList.contains('dragging');
+    // an editor's state without its editor (the item went away some other way) mustn't stop the list for good
+    if ((state.renaming || state.editingTab) && !el.list.querySelector('.rename, .tab-editor')) {
+        state.renaming = null;
+        state.editingTab = null;
+    }
+    if (dragging || pointerDown || state.renaming || state.editingTab || document.querySelector('.menu')) {
+        renderWaits = true;
+        if (!dragging && !pointerDown) {
+            renderFooter();
+        }
         return;
     }
+    renderWaits = false;
     // nothing waits for sync any more: back to all groups
     if (state.filter && !waitingKeys().length) {
         state.filter = null;
@@ -1465,6 +1602,13 @@ function render() {
     renderList();
     renderFooter();
     renderSave();
+}
+
+/** draws what render() put off */
+function renderIfWaiting() {
+    if (renderWaits) {
+        render();
+    }
 }
 
 /* ---------- start ---------- */
@@ -1514,13 +1658,13 @@ el.clear.addEventListener('click', () => clearSearch());
 // Alt (Option) + ↑ ↓ moves the focused group.
 el.list.addEventListener('keydown', (e) => {
     // a saved group's tab: Delete (⌫ on a Mac) removes it, F2 edits it
-    const tabAt = e.target.matches && e.target.matches('a.tab-row[data-index]') ? e.target.dataset : null;
+    const tabAt = rowTabs.get(e.target);
     if (tabAt && (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'F2') && !e.repeat) {
         e.preventDefault();
         if (e.key === 'F2') {
-            startTabEdit(tabAt.key, Number(tabAt.index));
+            startTabEdit(tabAt.key, tabAt);
         } else {
-            act(() => removeTab(tabAt.key, Number(tabAt.index)))();
+            act(() => removeTab(tabAt))();
         }
         return;
     }
@@ -1615,6 +1759,16 @@ document.addEventListener('keydown', (e) => {
 }, true);
 document.addEventListener('pointermove', () => document.body.classList.remove('keyboard'), true);
 document.addEventListener('pointerdown', () => document.body.classList.remove('keyboard'), true);
+// render() waits while a button is down; drawn after the click (it comes right after pointerup)
+document.addEventListener('pointerdown', () => {
+    pointerDown = true;
+}, true);
+for (const type of ['pointerup', 'pointercancel']) {
+    document.addEventListener(type, () => {
+        pointerDown = false;
+        setTimeout(renderIfWaiting);
+    }, true);
+}
 
 async function start() {
     document.documentElement.lang = lang;
@@ -1666,12 +1820,7 @@ async function start() {
             return row;
         },
         drop: moveGroup,
-        ended: () => {
-            if (renderAfterDrag) {
-                renderAfterDrag = false;
-                render();
-            }
-        },
+        ended: renderIfWaiting,
     });
     chrome.runtime.onMessage.addListener((msg) => {
         if (msg && msg.msg === 'groupsSynced' && !state.busy) {

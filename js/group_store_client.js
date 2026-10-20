@@ -38,6 +38,22 @@ var groupStoreClient = (function () {
         setTabs: function (key, tabs, seen_h, keep_old) {
             return call('setTabs', [key, tabs, seen_h, keep_old]);
         },
+        /**
+         * Tab changes to the tabs as they are now (an earlier change still saving, or one from another computer,
+         * stays): {synced, error?, copy?, h, before?, unchanged?}. seen: the tab as the page showed it, index: its
+         * place there. before: the tabs it changed, for an undo (setTabs); unchanged: the tab is gone, nothing done
+         */
+        removeTab: function (key, seen, index) {
+            return call('removeTab', [key, seen, index]);
+        },
+        /** like removeTab; edit: {url, title} */
+        editTab: function (key, seen, index, edit) {
+            return call('editTab', [key, seen, index, edit]);
+        },
+        /** a new last tab {url, title, pinned?} with an id of its own; unchanged: the group already has the address */
+        addTab: function (key, tab) {
+            return call('addTab', [key, tab]);
+        },
         /** {synced, error?}: new name, tabs and place as they are now */
         rename: function (key, name) {
             return call('rename', [key, name]);

@@ -506,6 +506,67 @@ test('setTabs with keep_old: the replaced version goes to trash; an undo takes i
     assert.deepEqual(await store.listTrash(), []);
 });
 
+test('removeTab, editTab, addTab from an old view work on the tabs as they are now: no copy, nothing undone', async () => {
+    const {store} = makeDevice();
+    const t = makeTabs(5, 1).map((tab, i) => Object.assign(tab, {id: i}));
+    await store.save('tg_1', {name: 'g', index: 1, tabs: t});
+    // the popup's view, not read again between the changes
+    const seen = (await store.list()).tg_1;
+
+    const first = await store.removeTab('tg_1', seen.tabs[0], 0);
+    assert.deepEqual(first, {synced: true, h: gs.tabsHash(t.slice(1)), before: t});
+    assert.deepEqual(await store.removeTab('tg_1', seen.tabs[2], 2), {synced: true, h: gs.tabsHash([t[1], t[3], t[4]]),
+        before: t.slice(1)});
+    const edit = {url: 'https://x.example/', title: 'X'};
+    await store.editTab('tg_1', seen.tabs[3], 3, edit);
+    const now = [t[1], {url: edit.url, title: 'X', id: 3}, t[4]];
+    assert.deepEqual(plainList(await store.list()), {tg_1: {name: 'g', index: 1, tabs: now}});
+
+    // a tab that is gone: nothing to do
+    const h = gs.tabsHash(now);
+    assert.deepEqual(await store.removeTab('tg_1', seen.tabs[0], 0), {synced: true, h, unchanged: true});
+    assert.deepEqual(await store.editTab('tg_1', seen.tabs[3], 3, {title: 'Y'}), {synced: true, h, unchanged: true});
+
+    // a new tab gets an id of its own; an address the group has is not added again
+    const added = await store.addTab('tg_1', {url: 'https://new.example/', title: 'New'});
+    assert.deepEqual(added.before, now);
+    assert.deepEqual((await store.list()).tg_1.tabs.at(-1), {url: 'https://new.example/', title: 'New', id: 5});
+    assert.deepEqual(await store.addTab('tg_1', {url: t[4].url, title: 'again'}),
+        {synced: true, h: added.h, unchanged: true});
+
+    // the popup's Undo
+    await store.setTabs('tg_1', added.before, added.h);
+    assert.deepEqual(plainList(await store.list()), {tg_1: {name: 'g', index: 1, tabs: now}});
+    assert.deepEqual(await store.removeTab('tg_9', t[0], 0), {synced: false, error: 'Group not found'});
+});
+
+test('removeTab keeps a change made on another computer meanwhile', async () => {
+    const tabs = makeTabs(4, 1).map((tab, i) => Object.assign(tab, {id: i}));
+    const {net, a, b} = await twoSyncedDevices({name: 'g', index: 1, tabs});
+    const seen = (await a.store.list()).tg_1;
+    await b.store.editTab('tg_1', tabs[1], 1, {title: 'from b'});
+    net.syncAll();
+    await a.store.reconcile();
+
+    const res = await a.store.removeTab('tg_1', seen.tabs[3], 3);
+    assert.equal(res.copy, undefined);
+    assert.deepEqual(plainList(await a.store.list()),
+        {tg_1: {name: 'g', index: 1, tabs: [tabs[0], Object.assign({}, tabs[1], {title: 'from b'}), tabs[2]]}});
+});
+
+test('findTab: the same id and address, the one at the place given if more match; nextTabId', () => {
+    const tabs = [{url: 'u', id: 0}, {url: 'v', id: 1}, {url: 'u', id: 0}, {url: 'w', title: 'old'}];
+    assert.equal(gs.findTab(tabs, {url: 'u', id: 0}, 2), 2);
+    assert.equal(gs.findTab(tabs, {url: 'u', id: 0}, 1), 0);
+    assert.equal(gs.findTab(tabs, {url: 'w', title: 'edited elsewhere'}, 0), 3);
+    assert.equal(gs.findTab(tabs, {url: 'v', id: 2}, 1), -1);
+    assert.equal(gs.findTab(tabs, {url: 'x', id: 1}, 1), -1);
+
+    assert.equal(gs.nextTabId([]), 0);
+    assert.equal(gs.nextTabId([{id: 0}, {id: 1}, {id: '2'}]), 3, '0.4.0 stores an edited tab\'s id as text');
+    assert.equal(gs.nextTabId([{id: 4}, {}, {id: null}, {id: ''}, {id: 'x'}, {id: 1.5}]), 5);
+});
+
 test('edits of a group that is gone; a move leaves a deleted group alone, other edits bring it back', async () => {
     const {store} = makeDevice();
     await store.save('tg_1', makeGroup(3, 1));

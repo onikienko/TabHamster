@@ -684,6 +684,16 @@
             }
         }
     },
+    "p_tabGone": {
+        "message": "This tab is no longer in “$NAME$”.",
+        "description": "Bar when a tab being removed or edited is not in the group any more (removed on another computer or a moment before)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
     "p_linksCopied_one": {
         "message": "Copied $COUNT$ link",
         "description": "Bar after 'Copy links' (plural form 'one')",

@@ -684,6 +684,16 @@
             }
         }
     },
+    "p_tabGone": {
+        "message": "Cet onglet n’est plus dans « $NAME$ ».",
+        "description": "Bar when a tab being removed or edited is not in the group any more (removed on another computer or a moment before)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
     "p_linksCopied_one": {
         "message": "$COUNT$ lien copié",
         "description": "Bar after 'Copy links' (plural form 'one')",

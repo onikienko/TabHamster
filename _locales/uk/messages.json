@@ -869,6 +869,16 @@
             }
         }
     },
+    "p_tabGone": {
+        "message": "Цієї вкладки вже немає в «$NAME$».",
+        "description": "Bar when a tab being removed or edited is not in the group any more (removed on another computer or a moment before)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
     "p_linksCopied_one": {
         "message": "Скопійовано $COUNT$ посилання",
         "description": "Bar after 'Copy links' (plural form 'one')",
