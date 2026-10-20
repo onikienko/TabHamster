@@ -6,6 +6,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const {createStorageArea, createSyncArea} = require('./chrome_mock.js');
 const {makeGroup, makeTabs} = require('./helpers.js');
+const {hash} = require('../js/group_store.js');
 
 const ROOT = path.join(__dirname, '..');
 const EN = JSON.parse(fs.readFileSync(path.join(ROOT, '_locales/en/messages.json'), 'utf8'));
@@ -129,7 +130,8 @@ test('on start: 0.3.0 groups are migrated and listed', async () => {
     const res = await bg.groups('list');
     assert.deepEqual(Object.keys(res.result).sort(), Object.keys(old).sort());
     Object.keys(old).forEach(function (key) {
-        assert.deepEqual(res.result[key], {name: old[key].name, index: old[key].index, tabs: old[key].tabs, synced: true});
+        assert.deepEqual(res.result[key], {name: old[key].name, index: old[key].index, tabs: old[key].tabs,
+            h: hash(JSON.stringify(old[key].tabs)), synced: true});
     });
     const items = await sync.get(null);
     Object.keys(old).forEach(key => assert.equal(items[key].v, 2));
@@ -137,13 +139,21 @@ test('on start: 0.3.0 groups are migrated and listed', async () => {
     assert.equal((await bg.chrome.storage.local.get('migration_v2')).migration_v2, 'done');
 });
 
-test('message API: save, remove, restore, usage', async () => {
+test('message API: save, edits, remove, restore, usage', async () => {
     const bg = startBackground();
     const group = makeGroup(300, 1);
 
     assert.deepEqual(await bg.groups('save', 'tg_1', group), {result: {synced: true}});
-    assert.deepEqual((await bg.groups('list')).result.tg_1, Object.assign({synced: true}, group));
-    assert.deepEqual(await bg.groups('saveMany', {tg_2: makeGroup(5, 2)}), {result: {tg_2: {synced: true}}});
+    const h = (await bg.groups('list')).result.tg_1.h;
+    assert.deepEqual((await bg.groups('list')).result.tg_1, Object.assign({synced: true, h}, group));
+    assert.deepEqual(await bg.groups('save', 'tg_2', makeGroup(5, 2)), {result: {synced: true}});
+    assert.deepEqual(await bg.groups('setIndex', {tg_2: 9}), {result: {tg_2: {synced: true}}});
+    assert.deepEqual(await bg.groups('rename', 'tg_2', 'renamed'), {result: {synced: true}});
+    const tabs = makeTabs(2, 3);
+    const set = (await bg.groups('setTabs', 'tg_2', tabs, (await bg.groups('list')).result.tg_2.h)).result;
+    assert.equal(set.synced, true);
+    assert.equal(set.copy, undefined);
+    assert.deepEqual((await bg.groups('list')).result.tg_2, {name: 'renamed', index: 9, tabs, h: set.h, synced: true});
 
     assert.deepEqual(await bg.groups('remove', 'tg_1'), {result: {synced: true}});
     assert.deepEqual(Object.keys((await bg.groups('list')).result), ['tg_2']);

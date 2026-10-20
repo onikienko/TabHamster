@@ -363,6 +363,87 @@ test('rename on one device and new tabs on another are merged', async () => {
     assert.deepEqual(plainList(await b.store.list()), plainList(await a.store.list()));
 });
 
+// a popup open on a: it read tg_1, then b added a tab, which a has seen (reconciled) or not yet (only in sync)
+async function staleView(reconciled) {
+    const devices = await twoSyncedDevices(makeGroup(3, 1));
+    const {net, a, b} = devices;
+    const seen = (await a.store.list()).tg_1;
+    const tabs_b = seen.tabs.concat({url: 'https://new.example/', title: 'from b'});
+    await b.store.save('tg_1', {name: 'group 1', index: 1, tabs: tabs_b});
+    net.syncAll();
+    if (reconciled) {
+        await a.store.reconcile();
+    }
+    return Object.assign(devices, {seen, tabs_b});
+}
+
+for (const reconciled of [true, false]) {
+    const when = reconciled ? 'after' : 'before';
+
+    test('a move or rename from an old view keeps tabs added on another device (' + when + ' reconcile)', async () => {
+        const {net, a, b, tabs_b} = await staleView(reconciled);
+        assert.deepEqual(await a.store.setIndex({tg_1: 5}), {tg_1: {synced: true}});
+        assert.deepEqual(await a.store.rename('tg_1', 'renamed'), {synced: true});
+        net.syncAll();
+        await b.store.reconcile();
+        const expected = {tg_1: {name: 'renamed', index: 5, tabs: tabs_b}};
+        assert.deepEqual(plainList(await a.store.list()), expected);
+        assert.deepEqual(plainList(await b.store.list()), expected);
+    });
+
+    test('tabs changed from an old view: kept as a copy next to the other device\'s (' + when + ' reconcile)', async () => {
+        const {net, a, b, seen, tabs_b} = await staleView(reconciled);
+        const tabs_a = seen.tabs.concat({url: 'https://other.example/', title: 'from a'});
+        const res = await a.store.setTabs('tg_1', tabs_a, seen.h);
+        assert.ok(res.copy);
+        assert.equal(res.synced, true);
+        assert.equal(res.h, gs.hash(JSON.stringify(tabs_b)));
+        net.syncAll();
+        await b.store.reconcile();
+        const expected = {
+            tg_1: {name: 'group 1', index: 1, tabs: tabs_b},
+            [res.copy]: {name: 'group 1 (conflict)', index: 2, tabs: tabs_a},
+        };
+        assert.deepEqual(plainList(await a.store.list()), expected);
+        assert.deepEqual(plainList(await b.store.list()), expected);
+    });
+}
+
+test('setTabs keeps the current name and place, and answers the new hash', async () => {
+    const {net, a, b} = await twoSyncedDevices(makeGroup(3, 1));
+    const seen = (await a.store.list()).tg_1;
+    await b.store.rename('tg_1', 'renamed on b');
+    await b.store.setIndex({tg_1: 7});
+    net.syncAll();
+    await a.store.reconcile();
+
+    const tabs = makeTabs(4, 9);
+    const res = await a.store.setTabs('tg_1', tabs, seen.h);
+    assert.deepEqual(res, {synced: true, h: gs.hash(JSON.stringify(tabs))});
+    assert.deepEqual(plainList(await a.store.list()), {tg_1: {name: 'renamed on b', index: 7, tabs}});
+    // an undo with that hash puts the old tabs back
+    assert.deepEqual(await a.store.setTabs('tg_1', seen.tabs, res.h), {synced: true, h: seen.h});
+    assert.deepEqual((await a.store.list()).tg_1.tabs, seen.tabs);
+});
+
+test('edits of a group that is gone; a move leaves a deleted group alone, other edits bring it back', async () => {
+    const {store} = makeDevice();
+    await store.save('tg_1', makeGroup(3, 1));
+    await store.save('tg_2', makeGroup(3, 2));
+    await store.discard('tg_2');
+    const not_found = {synced: false, error: 'Group not found'};
+    assert.deepEqual(await store.rename('tg_2', 'x'), not_found);
+    assert.deepEqual(await store.setTabs('tg_2', makeTabs(1, 3)), not_found);
+    assert.deepEqual(await store.rename('tg_9', 'x'), not_found);
+
+    await store.remove('tg_1');
+    assert.deepEqual(await store.setIndex({tg_1: 4}), {tg_1: not_found});
+    assert.deepEqual(await store.list(), {});
+    assert.deepEqual(await store.rename('tg_1', 'back'), {synced: true});
+    assert.deepEqual(plainList(await store.list()), {tg_1: {name: 'back', index: 1, tabs: makeTabs(3, 1)}});
+    assert.deepEqual(await store.listTrash(), []);
+});
+
 test('chunks that arrive before their header are not deleted', async () => {
     const {net, a, b} = await twoSyncedDevices();
     const group = makeGroup(400, 1);

@@ -656,6 +656,16 @@
             }
         }
     },
+    "p_savedAsCopy": {
+        "message": "“$NAME$” was changed on another computer too. Your version is saved as a copy.",
+        "description": "Bar after Replace or Add current tab when the group's tabs had changed on another computer meanwhile: this version became a new group (a conflict copy), the other one stays",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
     "p_alreadyInGroup": {
         "message": "This tab is already in “$NAME$”.",
         "description": "Bar when 'Add current tab' finds the tab's address in the group already",

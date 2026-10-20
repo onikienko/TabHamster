@@ -18,7 +18,7 @@ var groupStoreClient = (function () {
     }
 
     return {
-        /** groups that aren't deleted: {key: {name, index, tabs, synced}}; catches up with sync first */
+        /** groups that aren't deleted: {key: {name, index, tabs, h, synced}}; catches up with sync first */
         list: function () {
             return call('list', []);
         },
@@ -26,13 +26,24 @@ var groupStoreClient = (function () {
         listTrash: function () {
             return call('listTrash', []);
         },
-        /** {synced, error?, copy?} */
+        /** {synced, error?, copy?}; for a new group (changes to a saved one: setTabs, rename, setIndex) */
         save: function (key, group) {
             return call('save', [key, group]);
         },
-        /** {key: {synced, error?, copy?}} */
-        saveMany: function (groups) {
-            return call('saveMany', [groups]);
+        /**
+         * {synced, error?, copy?, h}: new tabs, name and place as they are now. seen_h: `h` of the tabs that were
+         * changed; if they changed on another computer since, this version is saved as a copy (`copy` is its key)
+         */
+        setTabs: function (key, tabs, seen_h) {
+            return call('setTabs', [key, tabs, seen_h]);
+        },
+        /** {synced, error?}: new name, tabs and place as they are now */
+        rename: function (key, name) {
+            return call('rename', [key, name]);
+        },
+        /** {key: {synced, error?}} for {key: index}: tabs and name as they are now */
+        setIndex: function (indexes) {
+            return call('setIndex', [indexes]);
         },
         /** {synced, error?} */
         remove: function (key) {

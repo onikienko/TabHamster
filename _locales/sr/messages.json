@@ -837,6 +837,16 @@
             }
         }
     },
+    "p_savedAsCopy": {
+        "message": "Група „$NAME$“ је измењена и на другом рачунару. Ваша верзија је сачувана као копија.",
+        "description": "Bar after Replace or Add current tab when the group's tabs had changed on another computer meanwhile: this version became a new group (a conflict copy), the other one stays",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
     "p_alreadyInGroup": {
         "message": "Ова картица је већ у групи „$NAME$“.",
         "description": "Bar when 'Add current tab' finds the tab's address in the group already",

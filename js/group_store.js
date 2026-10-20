@@ -254,6 +254,7 @@ var groupStore = (function () {
     const TRASH_KEEP_MS = 30 * DAY;
     // chunks can arrive before their header; a header can arrive before its chunks
     const CHUNK_GRACE_MS = DAY;
+    const NOT_FOUND = 'Group not found';
 
     /**
      * @param {Object} options
@@ -378,6 +379,12 @@ var groupStore = (function () {
             return Object.keys(records).reduce(function (max, k) {
                 return records[k].trashed ? max : Math.max(max, records[k].g.index);
             }, 0) + 1;
+        }
+
+        // a group's tabs changed here and on another device: this version is kept as a copy at the top
+        function conflictCopy(records, group) {
+            // an unnamed group stays unnamed: the list shows the copy's own date
+            return {name: group.name ? group.name + conflict_suffix : '', index: nextIndex(records), tabs: group.tabs};
         }
 
         // Sync writes for one group: new chunks, then the group item, then old chunks go.
@@ -591,8 +598,7 @@ var groupStore = (function () {
                 // tabs changed here and on another device: keep both
                 const copy_key = freeKey(records, sync_items);
                 const copy = {
-                    // an unnamed group stays unnamed: the list shows the copy's own date
-                    g: {name: rec.g.name ? rec.g.name + conflict_suffix : '', index: nextIndex(records), tabs: rec.g.tabs},
+                    g: conflictCopy(records, rec.g),
                     h: rec.h,
                     synced: false,
                     base: null,
@@ -712,6 +718,45 @@ var groupStore = (function () {
             return out;
         }
 
+        // Changes made to groups as they are now, not as the caller last saw them, so a change that came from another
+        // device meanwhile stays. edits: {key: function(group) -> changed group}. A deleted group comes back,
+        // unless skip_trashed. Answers like saveNow; a group that isn't there: {synced: false, error: NOT_FOUND}.
+        async function editNow(edits, skip_trashed) {
+            const records = await readRecords();
+            const groups = {};
+            const out = {};
+            Object.keys(edits).forEach(function (key) {
+                const rec = records[key];
+                if (!rec || rec.discarded || (skip_trashed && rec.trashed)) {
+                    out[key] = {synced: false, error: NOT_FOUND};
+                } else {
+                    groups[key] = edits[key](rec.g);
+                }
+            });
+            return Object.assign(out, Object.keys(groups).length ? await saveNow(groups) : {});
+        }
+
+        // New tabs for a group; its name and place stay as they are now. seen_h: hash of the tabs the caller started
+        // from. If the group's tabs have changed since (on another device), the caller's version is saved as a copy.
+        // The answer has `h`, the hash of the group's tabs now (pass it to the next setTabs, e.g. an undo).
+        async function setTabsNow(key, tabs, seen_h) {
+            const records = await readRecords();
+            const rec = records[key];
+            if (!rec || rec.discarded) {
+                return {synced: false, error: NOT_FOUND};
+            }
+            const g = normalizeGroup({name: rec.g.name, index: rec.g.index, tabs});
+            if (seen_h !== undefined && seen_h !== rec.h && hash(JSON.stringify(g.tabs)) !== rec.h) {
+                const copy_key = freeKey(records, await sync.get(null));
+                const res = (await saveNow({[copy_key]: conflictCopy(records, g)}))[copy_key];
+                return Object.assign(res, {copy: copy_key, h: rec.h});
+            }
+            // a copy can still be made here: sync may have a newer version this computer hasn't seen yet
+            const res = (await saveNow({[key]: g}))[key];
+            const now_rec = (await local.get(localKey(key)))[localKey(key)];
+            return Object.assign(res, {h: now_rec.h});
+        }
+
         async function removeNow(key) {
             const records = await readRecords();
             const rec = records[key];
@@ -788,7 +833,7 @@ var groupStore = (function () {
             const records = await readRecords();
             const rec = records[key];
             if (!rec) {
-                return {synced: false, error: 'Group not found'};
+                return {synced: false, error: NOT_FOUND};
             }
             delete rec.trashed;
             delete rec.trashed_by;
@@ -874,7 +919,7 @@ var groupStore = (function () {
             Object.keys(records).forEach(function (key) {
                 const rec = records[key];
                 if (!rec.trashed) {
-                    out[key] = {name: rec.g.name, index: rec.g.index, tabs: rec.g.tabs, synced: rec.synced};
+                    out[key] = {name: rec.g.name, index: rec.g.index, tabs: rec.g.tabs, h: rec.h, synced: rec.synced};
                 }
             });
             return out;
@@ -926,7 +971,10 @@ var groupStore = (function () {
         }
 
         return {
-            /** @returns {Promise<Object>} {key: {name, index, tabs, synced}} for groups that aren't deleted */
+            /**
+             * @returns {Promise<Object>} {key: {name, index, tabs, h, synced}} for groups that aren't deleted;
+             *   h: hash of the tabs, for setTabs
+             */
             list: () => exclusive(listNow),
             /**
              * @returns {Promise<Array>} deleted groups kept for 30 days, newest first:
@@ -938,8 +986,23 @@ var groupStore = (function () {
              *   fails; `copy` is set when the group was edited on another device too and this version became a copy
              */
             save: (key, group) => change(() => saveNow({[key]: group}), [key]).then(res => res[key]),
-            /** @returns {Promise<Object>} {key: {synced, error?}}; one sync write for small groups (reorder) */
+            /** @returns {Promise<Object>} {key: {synced, error?}}; one sync write for small groups */
             saveMany: (groups) => change(() => saveNow(groups), Object.keys(groups)),
+            /**
+             * @returns {Promise<{synced: boolean, error?: string, copy?: string, h: string}>} new tabs, the name and
+             *   place stay; `copy` is set when the tabs changed after seen_h and this version became a copy
+             */
+            setTabs: (key, tabs, seen_h) => change(() => setTabsNow(key, tabs, seen_h), [key]),
+            /** @returns {Promise<{synced: boolean, error?: string}>} new name, tabs and place stay */
+            rename: (key, name) => change(() => editNow({[key]: g => ({name, index: g.index, tabs: g.tabs})}), [key])
+                .then(res => res[key]),
+            /**
+             * @param {Object} indexes {key: index}
+             * @returns {Promise<Object>} {key: {synced, error?}}; only the place changes (reorder), one sync write for
+             *   small groups; deleted groups are left alone
+             */
+            setIndex: (indexes) => change(() => editNow(Object.fromEntries(Object.keys(indexes).map(key =>
+                [key, g => ({name: g.name, index: indexes[key], tabs: g.tabs})])), true), Object.keys(indexes)),
             /** @returns {Promise<{synced: boolean, error?: string}>} the group goes to trash */
             remove: (key) => change(() => removeNow(key)),
             /** @returns {Promise<{synced: boolean, error?: string}>} like remove, but not kept in trash (undo of a new save) */

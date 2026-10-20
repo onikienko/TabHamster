@@ -221,6 +221,15 @@ function nextIndex() {
     return Object.values(state.groups).reduce((max, g) => Math.max(max, g.index || 0), 0) + 1;
 }
 
+/**
+ * Undo of new tabs for a saved group: the old tabs back. If the change was saved as a copy (the tabs had changed on
+ * another computer), the copy goes.
+ */
+function undoTabs(key, before, res) {
+    return () => (res.copy ? groupStoreClient.discard(res.copy) :
+        groupStoreClient.setTabs(key, before.tabs, res.h));
+}
+
 /** second sentence of the bar when the group stayed on this computer */
 function notSyncedNote(res) {
     if (res.synced) {
@@ -288,23 +297,27 @@ async function save() {
         let key;
         let text;
         let undo;
+        let fresh;
         if (intent.kind === 'replace') {
             key = intent.key;
             const before = state.groups[key];
-            const res = await groupStoreClient.save(key, {name: before.name, index: before.index, tabs});
-            text = plural('p_replaced', tabs.length, [groupName(key, before)]) + notSyncedNote(res);
-            undo = () => groupStoreClient.save(key, {name: before.name, index: before.index, tabs: before.tabs});
+            const res = await groupStoreClient.setTabs(key, tabs, before.h);
+            text = (res.copy ? t('p_savedAsCopy', groupName(key, before)) :
+                plural('p_replaced', tabs.length, [groupName(key, before)])) + notSyncedNote(res);
+            undo = undoTabs(key, before, res);
+            fresh = res.copy || key;
         } else {
             key = 'tg_' + Date.now();
             const res = await groupStoreClient.save(key, {name: intent.name, index: nextIndex(), tabs});
             text = plural('p_savedAs', tabs.length, [intent.name || numericDate(keyTime(key), state.options.date_format)]) +
                 notSyncedNote(res);
             undo = () => groupStoreClient.discard(key);
+            fresh = key;
         }
         el.field.value = '';
         state.view = 'saved';
         state.expanded.delete('saved:' + key);
-        await afterChange(key);
+        await afterChange(fresh);
         showBar(text, undoAction(undo));
     } catch (e) {
         console.error('TabHamster: save failed', e);
@@ -328,13 +341,16 @@ function act(fn) {
     };
 }
 
-/** the group keeps its key, name and place, only its tabs change; the bar says `text` and can undo it */
+/**
+ * The group keeps its key, name and place, only its tabs change; the bar says `text` (or that the change became a
+ * copy) and can undo it
+ */
 async function setTabs(key, tabs, text) {
     const before = state.groups[key];
-    const res = await groupStoreClient.save(key, {name: before.name, index: before.index, tabs});
-    await afterChange(key);
-    showBar(text + notSyncedNote(res),
-        undoAction(() => groupStoreClient.save(key, {name: before.name, index: before.index, tabs: before.tabs})));
+    const res = await groupStoreClient.setTabs(key, tabs, before.h);
+    await afterChange(res.copy || key);
+    showBar((res.copy ? t('p_savedAsCopy', groupName(key, before)) : text) + notSyncedNote(res),
+        undoAction(undoTabs(key, before, res)));
 }
 
 async function replaceWithOpenTabs(key) {
@@ -423,15 +439,12 @@ let movesLeft = 0;
 /** puts a group at `pos` among the others (0 = top); usually only its own index changes (js/order.js) */
 function moveGroup(key, pos) {
     const changes = moveTo(sortedGroupKeys(), state.groups, key, pos);
-    const items = {};
     for (const [k, index] of Object.entries(changes)) {
-        const group = state.groups[k];
-        state.groups[k] = Object.assign({}, group, {index});
-        items[k] = {name: group.name, index, tabs: group.tabs};
+        state.groups[k] = Object.assign({}, state.groups[k], {index});
     }
     render();
     movesLeft++;
-    moving = moving.then(() => groupStoreClient.saveMany(items)).catch((e) => {
+    moving = moving.then(() => groupStoreClient.setIndex(changes)).catch((e) => {
         console.error('TabHamster: move failed', e);
         showBar(t('p_syncStorageDefault_error'));
     }).then(() => (--movesLeft === 0 ? afterChange(null) : null));
@@ -628,7 +641,7 @@ function renameRow(key) {
         const name = normalizeName(input.value);
         if (commit && name !== group.name) {
             try {
-                await groupStoreClient.save(key, {name, index: group.index, tabs: group.tabs});
+                await groupStoreClient.rename(key, name);
             } catch (e) {
                 console.error('TabHamster: rename failed', e);
                 showBar(t('p_syncStorageDefault_error'));
