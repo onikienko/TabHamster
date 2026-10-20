@@ -84,8 +84,8 @@ function show(el, byKeyboard) {
     clearTimeout(timer);
     pending = null;
     const spec = tips.get(el);
-    // not over an open menu (its ⋯ button), not while dragging a row
-    if (!spec || !el.isConnected || el.getAttribute('aria-expanded') === 'true' ||
+    // not over an open menu (its ⋯ button; names use aria-expanded for their tab list, not a menu), not while dragging
+    if (!spec || !el.isConnected || (el.hasAttribute('aria-haspopup') && el.getAttribute('aria-expanded') === 'true') ||
         document.body.classList.contains('dragging') || (spec.when && !spec.when(el))) {
         return;
     }
