@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeName, sameName, findByName, countByName} from '../js/names.js';
+import {normalizeName, sameName, findByName, countByName, freeName} from '../js/names.js';
 
 test('normalizeName trims and collapses spaces', () => {
     assert.equal(normalizeName('  Trip   to\tTofino '), 'Trip to Tofino');
@@ -52,4 +52,12 @@ test('countByName', () => {
     const groups = {tg_1: {name: 'Work'}, tg_2: {name: 'work'}, tg_3: {name: 'Home'}};
     assert.equal(countByName(groups, 'WORK'), 2);
     assert.equal(countByName(groups, 'Gym'), 0);
+});
+
+test('freeName adds the first free number, matching names as Save does', () => {
+    assert.equal(freeName({}, 'Oct 18, 14:02–23:05'), 'Oct 18, 14:02–23:05');
+    const groups = {tg_1: {name: 'work'}, tg_2: {name: ' Work  (2)'}, tg_3: {name: ''}};
+    assert.equal(freeName(groups, 'Work'), 'Work (3)');
+    assert.equal(freeName(groups, 'Work (2)'), 'Work (2) (2)');
+    assert.equal(freeName(groups, 'Café'), 'Café');
 });

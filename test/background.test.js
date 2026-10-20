@@ -106,7 +106,7 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
         return send({msg: 'groups', op, args});
     }
 
-    return {chrome, send, groups, sent};
+    return {chrome, context, send, groups, sent};
 }
 
 async function waitFor(check, ms = 3000) {
@@ -193,6 +193,48 @@ test('message API: sizes; open pages hear when waiting groups get to sync', asyn
 test('message API: unknown operation', async () => {
     const bg = startBackground();
     assert.deepEqual(await bg.groups('drop_everything'), {error: 'Unknown operation: drop_everything'});
+});
+
+// js/group_store_client.js as the pages run it, its messages answered by this background
+function pageClient(bg) {
+    const context = vm.createContext({chrome: {runtime: {sendMessage: msg => bg.send(JSON.parse(JSON.stringify(msg)))}}});
+    vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/group_store_client.js'), 'utf8'), context, {filename: 'group_store_client.js'});
+    return context.groupStoreClient;
+}
+
+test('page client: one background operation for each of its calls', () => {
+    const bg = startBackground();
+    const ops = vm.runInContext('Object.keys(group_ops)', bg.context);
+    assert.deepEqual(Object.keys(pageClient(bg)).sort(), [...ops].sort());
+});
+
+test('page client: tab changes, add, discard and their arguments reach the store', async () => {
+    const bg = startBackground();
+    const client = pageClient(bg);
+    const t = makeTabs(3, 4).map((tab, i) => Object.assign(tab, {id: i}));
+    await client.save('tg_1', {name: 'g', index: 1, tabs: t});
+    const seen = (await client.list()).tg_1;
+
+    const removed = await client.removeTab('tg_1', seen.tabs[1], 1);
+    assert.deepEqual(JSON.parse(JSON.stringify(removed.before)), t);
+    await client.editTab('tg_1', seen.tabs[2], 2, {url: 'https://x.example/', title: 'X'});
+    const added = await client.addTab('tg_1', {url: 'https://new.example/', title: 'New', pinned: true});
+    assert.equal(added.synced, true);
+    assert.deepEqual(JSON.parse(JSON.stringify((await client.list()).tg_1.tabs)), [t[0],
+        {url: 'https://x.example/', title: 'X', id: 2}, {url: 'https://new.example/', title: 'New', id: 3, pinned: true}]);
+    assert.deepEqual(await client.removeTab('tg_9', t[0], 0), {synced: false, error: 'Group not found'});
+
+    // Undo of a new save: the group goes and isn't kept in Recently deleted
+    const group = {name: 'new', index: 2, tabs: makeTabs(2, 5)};
+    await client.save('tg_2', group);
+    assert.deepEqual(await client.discard('tg_2', group), {synced: true});
+    assert.deepEqual(Object.keys(await client.list()), ['tg_1']);
+    assert.deepEqual(await client.listTrash(), []);
+    // changed since that save (renamed): it goes to Recently deleted after all
+    await client.save('tg_3', group);
+    await client.rename('tg_3', 'renamed');
+    await client.discard('tg_3', group);
+    assert.deepEqual((await client.listTrash()).map(g => g.key), ['tg_3']);
 });
 
 const TABS = [

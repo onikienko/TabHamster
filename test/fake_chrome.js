@@ -5,7 +5,9 @@
 //   fakeChrome.sync_error = null
 //   fakeChrome.reset()                                       // empty all storage and reload
 // URL parameters: ?tabs=N open tabs to save (default 8), ?lang=uk messages from _locales/uk,
-// ?delay=ms slow answers from the background (a service worker that is waking up).
+// ?delay=ms slow answers from the background (a service worker that is waking up),
+// ?sessions=N past sessions on a first start or after reset() (default 2: one with two windows, one from 0.4.0).
+// window.close() (the popup closing after Open) only logs.
 (function () {
     'use strict';
 
@@ -197,6 +199,7 @@
 
     var tab_count = parseInt(params.get('tabs') || '8', 10);
     var delay = parseInt(params.get('delay') || '0', 10);
+    var past_sessions = parseInt(params.get('sessions') || '2', 10);
 
     function fakeTabs() {
         var tabs = [];
@@ -211,6 +214,22 @@
             });
         }
         return tabs;
+    }
+
+    // sessions the session watcher would have written before: {tg_<start>: {name, updated, tabs}}; the oldest has no
+    // `updated`, as sessions from 0.4.0
+    function pastSessions(n) {
+        var sessions = {};
+        var now = Date.now();
+        for (var i = 0; i < n; i++) {
+            var start = now - (i + 1) * 864e5 - 5 * 36e5;
+            var tabs = SITES.slice(0, 3 + i * 2).map(function (site, j) {
+                return {pinned: j === 0, title: site[1], url: site[0], windowId: j < 2 ? 11 + i * 2 : 12 + i * 2};
+            });
+            sessions['tg_' + start] = i === n - 1 && n > 1 ? {name: '', tabs: tabs} :
+                {name: '', updated: start + 9 * 36e5, tabs: tabs};
+        }
+        return sessions;
     }
 
     var chrome = {
@@ -296,6 +315,10 @@
 
     Object.defineProperty(window, 'chrome', {value: chrome, configurable: true, writable: true});
 
+    if (localStorage.getItem('fake_chrome_local') === null) {
+        chrome.storage.local.set(pastSessions(past_sessions));
+    }
+
     // background.js loads its helpers with importScripts, relative to js/
     window.importScripts = function () {
         [].forEach.call(arguments, function (file) {
@@ -316,6 +339,9 @@
             var html = getText(page)
                 .replace('<head>', '<head><base href="' + root + '">')
                 .replace('<script', '<script src="js/background.js"></script>\n<script');
+            window.close = function () {
+                console.log('window.close');
+            };
             document.open();
             document.write(html);
             document.close();

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {domainToASCII} from 'node:url';
-import {keyTime, numericDate, shortDate, shortTime, dayName, dayTime, interval, hostOf, kilobytes, listDate, fullDate} from '../js/ui/format.js';
+import {keyTime, numericDate, shortDate, shortTime, dayName, dayTime, interval, hostOf, withScheme, kilobytes, listDate, fullDate} from '../js/ui/format.js';
 
 test('keyTime reads tg_<ms> keys', () => {
     assert.equal(keyTime('tg_1760000000000'), 1760000000000);
@@ -103,4 +103,15 @@ test('listDate: day and month this year, only the year for another one', () => {
     assert.equal(listDate(new Date(2026, 0, 2).getTime(), 'uk', now), new Intl.DateTimeFormat('uk', {month: 'short', day: 'numeric'}).format(new Date(2026, 0, 2)));
     assert.equal(listDate(new Date(2025, 8, 28).getTime(), 'uk', now), '2025');
     assert.match(fullDate(new Date(2025, 8, 28, 21, 52).getTime(), 'en'), /^September 28, 2025.*9:52/);
+});
+
+test('withScheme: an address typed without a scheme gets https://, others stay', () => {
+    assert.equal(withScheme('example.org/edited'), 'https://example.org/edited');
+    assert.equal(withScheme('localhost:3000/x'), 'https://localhost:3000/x');
+    assert.equal(withScheme('домен.укр'), 'https://домен.укр');
+    for (const url of ['http://a.example/', 'HTTPS://A.EXAMPLE/', 'ftp://files.example/', 'chrome://settings/',
+        'chrome-extension://abc/options.html', 'file:///Users/me/a.html', 'about:blank', 'mailto:me@example.com',
+        'data:text/html,hi', 'view-source:https://a.example/']) {
+        assert.equal(withScheme(url), url);
+    }
 });
