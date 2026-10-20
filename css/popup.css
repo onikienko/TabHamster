@@ -328,7 +328,9 @@ body.keyboard .row:has(> .name:focus) {
     gap: 8px;
 }
 
-/* on hover the buttons cover the end of the row (details, not-synced mark, the end of a long name): nothing moves */
+/* on hover the buttons cover the end of the row (details, not-synced mark, the end of a long name): nothing moves.
+   Hidden with opacity, not visibility: Tab from the name must reach them (a hidden button can't take the focus)
+   and screen readers find them on every row. */
 .actions {
     position: absolute;
     top: 0;
@@ -338,7 +340,8 @@ body.keyboard .row:has(> .name:focus) {
     align-items: center;
     gap: 2px;
     background: inherit;
-    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* the name fades out under them */
@@ -354,9 +357,20 @@ body.keyboard .row:has(> .name:focus) {
     mask-image: linear-gradient(to right, transparent, #000);
 }
 
+/* above the fade (positioned, so it would cover the left of a focus ring) */
+.actions > * {
+    position: relative;
+}
+
+/* the ring stays inside the 32 px row */
+.actions button:focus-visible {
+    outline-offset: 0;
+}
+
 body:not(.keyboard) .row:hover .actions,
 body.keyboard .row:has(:focus) .actions {
-    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 body:not(.keyboard) .row:hover .end-meta,
@@ -448,6 +462,8 @@ body.keyboard .row:has(:focus) .end-meta {
 
 .tab-title {
     flex: 1;
+    /* dir="auto": a right-to-left title keeps its own direction but stays in the column */
+    text-align: left;
 }
 
 .fav {
@@ -598,6 +614,10 @@ body.keyboard .row:has(:focus) .end-meta {
 }
 
 /* bar with Undo (js/ui/bar.js) */
+
+.bar-live {
+    flex: none;
+}
 
 .bar {
     flex: none;
@@ -756,7 +776,8 @@ body.keyboard .row:has(:focus) .end-meta {
 }
 
 .row.menu-open .actions {
-    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .row.menu-open .end-meta {
@@ -907,7 +928,7 @@ body.keyboard .row:has(:focus) .end-meta {
 }
 
 .item.dragging > .row .actions {
-    visibility: hidden;
+    opacity: 0;
 }
 
 .item.dragging > .row .end-meta {

@@ -2,6 +2,7 @@
 // not while the pointer or the keyboard is on it. One bar at a time; a new message replaces the old one.
 // It is part of the layout (before #footer), not an overlay: a short popup grows instead of being covered,
 // and the page shrinks its list while it is shown (body.has-bar).
+// Screen readers read it from a live region that is always there (one made and filled at once is often missed).
 
 import {h} from './dom.js';
 
@@ -28,7 +29,7 @@ function schedule() {
 
 function ensure() {
     if (!bar) {
-        bar = h('div', {class: 'bar', role: 'status', 'aria-live': 'polite', hidden: true});
+        bar = h('div', {class: 'bar', hidden: true});
         bar.addEventListener('pointerenter', () => {
             held = true;
             clearTimeout(timer);
@@ -45,15 +46,19 @@ function ensure() {
             held = false;
             schedule();
         });
+        const live = h('div', {class: 'bar-live', role: 'status', 'aria-live': 'polite'}, bar);
         const footer = document.getElementById('footer');
         if (footer) {
-            footer.before(bar);
+            footer.before(live);
         } else {
-            document.body.append(bar);
+            document.body.append(live);
         }
     }
     return bar;
 }
+
+// module scripts run once the page is parsed: the live region is in place before the first message
+ensure();
 
 /**
  * showBar('Saved 12 tabs as "x"', {label: 'Undo', run: async () => {...}})

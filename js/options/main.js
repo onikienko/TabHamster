@@ -101,10 +101,14 @@ async function setOption(name, value) {
 
 /** label and description on the left, the control on the right; `labelFor` makes the title a <label> */
 function row(titleId, title, text, control, labelFor) {
+    if (text) {
+        // screen readers read the description with the control
+        control.setAttribute('aria-describedby', titleId + '_text');
+    }
     return h('div', {class: 'row'},
         h('div', {class: 'row-label'},
             h(labelFor ? 'label' : 'span', {class: 'row-title', id: titleId, for: labelFor}, title),
-            text ? h('p', {class: 'row-text'}, text) : null),
+            text ? h('p', {class: 'row-text', id: titleId + '_text'}, text) : null),
         control);
 }
 

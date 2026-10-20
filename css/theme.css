@@ -23,7 +23,7 @@
     --seg-selected: #FFFFFF;
     --hover: #EBF1F5;
     --menu-hover: #EBF1F5;
-    --link: #0079AC;
+    --link: #0070A0;
     --link-hover: #005F87;
     --focus: #0079AC;
     --warn: #8A4B00;
@@ -38,7 +38,7 @@
     --snack: #0E2633;
     --on-snack: #FFFFFF;
     --snack-action: #7FD8F5;
-    --switch-off: #B9C6CF;
+    --switch-off: #7F909C;
     --shadow: 0 8px 24px rgba(14, 38, 51, .18), 0 1px 3px rgba(14, 38, 51, .12);
 
     --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -58,7 +58,7 @@
     --surface: #18242C;
     --raised: #1D2B34;
     --text: #E4EDF2;
-    --muted: #94A6B2;
+    --muted: #9AACB8;
     --line: #24333D;
     --guide: #2C3D48;
     --tonal: #123D50;
@@ -82,7 +82,7 @@
     --snack: #E4EDF2;
     --on-snack: #0E2633;
     --snack-action: #00658F;
-    --switch-off: #3A4A55;
+    --switch-off: #62757F;
     --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
     color-scheme: dark;
 }
@@ -101,13 +101,13 @@
         --surface: #18242C;
         --raised: #1D2B34;
         --text: #E4EDF2;
-        --muted: #94A6B2;
+        --muted: #9AACB8;
         --line: #24333D;
         --guide: #2C3D48;
         --tonal: #123D50;
         --on-tonal: #8FDDF7;
         --seg: #1A2730;
-    --seg-selected: #2C3E4A;
+        --seg-selected: #2C3E4A;
         --hover: #1A2630;
         --menu-hover: #22323D;
         --link: #5CCDF2;
@@ -125,7 +125,7 @@
         --snack: #E4EDF2;
         --on-snack: #0E2633;
         --snack-action: #00658F;
-        --switch-off: #3A4A55;
+        --switch-off: #62757F;
         --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
         color-scheme: dark;
     }

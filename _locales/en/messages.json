@@ -636,6 +636,46 @@
             }
         }
     },
+    "p_foundGroups_one": {
+        "message": "$COUNT$ group found",
+        "description": "Read out by screen readers after typing in the popup search (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_foundGroups_other": {
+        "message": "$COUNT$ groups found",
+        "description": "Read out by screen readers after typing in the popup search (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "4"
+            }
+        }
+    },
+    "p_foundSessions_one": {
+        "message": "$COUNT$ session found",
+        "description": "Read out by screen readers after typing in the popup search on the Sessions tab (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_foundSessions_other": {
+        "message": "$COUNT$ sessions found",
+        "description": "Read out by screen readers after typing in the popup search on the Sessions tab (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "4"
+            }
+        }
+    },
     "p_noMatch_text_one": {
         "message": "Press $KEY$ to save the $COUNT$ open tab as a new group with this name.",
         "description": "Under 'No groups match'. KEY is Enter or Return (plural form 'one', by the number of open tabs)",

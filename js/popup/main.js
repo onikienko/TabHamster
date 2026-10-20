@@ -66,6 +66,8 @@ const el = {
     countSessions: document.getElementById('count_sessions'),
     list: document.getElementById('list'),
     footer: document.getElementById('footer'),
+    // screen readers hear what a search found (announceResults)
+    found: h('div', {class: 'sr-only', role: 'status', 'aria-live': 'polite'}),
 };
 
 /* ---------- data ---------- */
@@ -587,7 +589,7 @@ function renameRow(key) {
     const group = state.groups[key];
     const input = h('input', {
         class: 'rename-input', type: 'text', value: group.name, maxlength: 200, autocomplete: 'off',
-        spellcheck: 'false', 'aria-label': t('p_groupName_label'),
+        spellcheck: 'false', dir: 'auto', 'aria-label': t('p_groupName_label'),
     });
     const error = h('div', {class: 'rename-error', id: 'rename_error', hidden: true});
     const ok = h('button', {class: 'ib', type: 'button', 'aria-label': t('p_saveName'), title: t('p_saveName')},
@@ -691,6 +693,24 @@ function onQuery() {
     }
     el.list.scrollTop = 0;
     render();
+    announceResults();
+}
+
+let announceTimer = null;
+
+/** "4 groups found" once typing pauses (the list changes silently for a screen reader) */
+function announceResults() {
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(() => {
+        if (!state.words.length) {
+            el.found.textContent = '';
+            return;
+        }
+        const sessions = state.view === 'sessions' && !!state.options.session_watcher;
+        const count = state.results[sessions ? 'sessions' : 'saved'].length;
+        el.found.textContent = count ? plural(sessions ? 'p_foundSessions' : 'p_foundGroups', count) :
+            t(sessions ? 'p_noSessionsMatch' : 'p_noGroupsMatch', normalizeName(el.field.value));
+    }, 600);
 }
 
 /** text with the searched words in <mark> */
@@ -703,6 +723,20 @@ function marked(text) {
 /** group names and tab rows in the list, in order: ↑ ↓ move between them */
 function listStops() {
     return Array.from(el.list.querySelectorAll('button.name, .tab-row'));
+}
+
+// buttons of a row (Open, new window, ⋯, Restore) and "Open window" of a session's windows
+const ITEM_BUTTONS = '.row button:not(.name):not(.chev), .win-title button';
+
+/**
+ * Tab enters the list at one place: the focused group or tab, else the first one (↑ ↓ move it). From there Tab goes
+ * through that item's buttons and on out of the list, not through every row.
+ */
+function setStop(stop) {
+    const item = stop && stop.closest('.item');
+    for (const node of el.list.querySelectorAll('button.name, .tab-row, ' + ITEM_BUTTONS)) {
+        node.tabIndex = node === stop || (item && item.contains(node) && node.matches(ITEM_BUTTONS)) ? 0 : -1;
+    }
 }
 
 /* ---------- rendering ---------- */
@@ -761,7 +795,7 @@ function tabRow(tab) {
     return h('a', {class: 'tab-row', href: tab.url, target: '_blank', title: tab.url},
         favicon(tab.url),
         tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
-        h('span', {class: 'tab-title ellipsis'}, marked(tab.title || tab.url)),
+        h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url)),
         h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url))));
 }
 
@@ -793,11 +827,13 @@ function chevron(id, auto) {
 /**
  * The name of a group or session: a click (or Space) shows its tabs, Enter opens it (`open(event)`).
  * `newWindow`: Shift, Ctrl / ⌘ or middle click open it in a new window (nobody does that by accident).
- * dataset.toggle lets → ← in the list expand and collapse it.
+ * dataset.toggle lets → ← in the list expand and collapse it. `details`: what the row shows after the name, in words
+ * (screen readers).
  */
-function nameButton(id, auto, label, title, open, newWindow) {
+function nameButton(id, auto, label, title, open, newWindow, details) {
     return h('button', {
-        class: 'name ellipsis', type: 'button', title, 'aria-expanded': String(isExpanded(id, auto)),
+        class: 'name ellipsis', type: 'button', title, dir: 'auto', 'aria-expanded': String(isExpanded(id, auto)),
+        'aria-description': details.filter(Boolean).join(', '),
         dataset: {toggle: id, auto: auto ? '1' : ''},
         onClick: (e) => (newWindow && wantsNewWindow(e) ? newWindow() : toggleItem(id, auto)),
         onAuxclick: (e) => newWindow && e.button === 1 && newWindow(),
@@ -867,7 +903,11 @@ function groupItem(result, target) {
             // the row shows only the number and a short date: the tooltip has the rest
             nameButton('saved:' + key, partial, name,
                 name + '\n' + plural('p_tabsCount', group.tabs.length) + ' · ' + fullDate(keyTime(key), lang), open,
-                () => openInNewWindow(group.tabs)),
+                () => openInNewWindow(group.tabs), [
+                    group.synced === false && t('p_notSynced_title'),
+                    tabCount(group.tabs.length, result, partial),
+                    state.filter === 'biggest' ? sizeMeta(key).textContent : fullDate(keyTime(key), lang),
+                ]),
             group.synced === false ? h('span', {class: 'local'}, icon('notSynced', 16, t('p_notSynced_title'))) : null,
             rowEnd([
                 tabsMeta(group.tabs.length, result, partial),
@@ -908,7 +948,10 @@ function sessionItem(result) {
             current ? h('span', {class: 'name ellipsis', title: name}, marked(name)) :
                 nameButton('sessions:' + key, partial, name,
                     name + '\n' + (windows.length > 1 ? plural('p_windowsCount', windows.length) + ' · ' : '') +
-                    plural('p_tabsCount', session.tabs.length), () => restoreSession(session)),
+                    plural('p_tabsCount', session.tabs.length), () => restoreSession(session), null, [
+                        windows.length > 1 && plural('p_windowsCount', windows.length),
+                        tabCount(session.tabs.length, result, partial),
+                    ]),
             rowEnd([
                 // one window is the usual case: only the tabs then
                 windows.length > 1 ? countMeta('wins', numbers.format(windows.length),
@@ -977,6 +1020,9 @@ function renderTabs() {
     const saved = state.view === 'saved' || !sessionsOn;
     el.tabSaved.setAttribute('aria-selected', String(saved));
     el.tabSessions.setAttribute('aria-selected', String(!saved));
+    // one Tab stop, ← → switch (el.tabs keydown)
+    el.tabSaved.tabIndex = saved ? 0 : -1;
+    el.tabSessions.tabIndex = saved ? -1 : 0;
     el.list.setAttribute('aria-labelledby', saved ? 'tab_saved' : 'tab_sessions');
     el.countSaved.textContent = String(state.results.saved.length);
     el.countSessions.textContent = String(state.results.sessions.length);
@@ -992,6 +1038,8 @@ function renderList() {
     if (focused) {
         focusName(focused);
     }
+    const stops = listStops();
+    setStop(stops.includes(document.activeElement) ? document.activeElement : stops[0]);
 }
 
 function drawList() {
@@ -1198,6 +1246,15 @@ el.list.addEventListener('keydown', (e) => {
                 name.focus();
             }
         }
+    } else if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
+        // the menu key (Shift+F10) opens the ⋯ menu of the focused group or session
+        const row = e.target.closest && e.target.closest('.row');
+        const more = row && row.querySelector('.more');
+        if (more) {
+            e.preventDefault();
+            menuKeyAt = Date.now();
+            more.click();
+        }
     } else if (e.key === 'Escape' && el.field.value) {
         e.preventDefault();
         clearSearch();
@@ -1206,6 +1263,33 @@ el.list.addEventListener('keydown', (e) => {
         setFilter(null);
         el.field.focus();
     }
+});
+
+// Chrome's own menu would follow the menu key's ⋯ menu
+let menuKeyAt = 0;
+el.list.addEventListener('contextmenu', (e) => {
+    if (Date.now() - menuKeyAt < 1000) {
+        e.preventDefault();
+    }
+});
+el.list.addEventListener('focusin', (e) => {
+    if (e.target.matches('button.name, .tab-row')) {
+        setStop(e.target);
+    }
+});
+
+// Saved groups / Sessions: ← → (Home, End) switch, as in other tab lists
+el.tabs.addEventListener('keydown', (e) => {
+    const views = {ArrowLeft: null, ArrowRight: null, Home: 'saved', End: 'sessions'};
+    if (!(e.key in views) || !state.ready) {
+        return;
+    }
+    e.preventDefault();
+    const view = views[e.key] || (state.view === 'saved' ? 'sessions' : 'saved');
+    if (view !== state.view) {
+        switchView(view);
+    }
+    (view === 'saved' ? el.tabSaved : el.tabSessions).focus();
 });
 
 // Keys in use: the focused row looks selected, not the one under a resting pointer; moving the pointer takes over.
@@ -1220,6 +1304,7 @@ document.addEventListener('pointerdown', () => document.body.classList.remove('k
 
 async function start() {
     document.documentElement.lang = lang;
+    document.body.append(el.found);
     document.getElementById('logo').append(logo(46, 'TabHamster'));
     document.getElementById('field_icon').append(icon('search', 16));
     el.clear.setAttribute('aria-label', t('p_clearSearch'));

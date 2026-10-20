@@ -1,8 +1,19 @@
 // Texts for elements built in JS. Static markup keeps using {{ key }} (js/helpers/localizer.js).
 
+// Hebrew, Arabic, Syriac, Thaana, NKo... and their presentation forms
+const RTL = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+
+/**
+ * Right-to-left text (a group name, a tab title) inside a sentence: isolated (FSI ... PDI), so the quotes and words
+ * around it stay where they belong. The UI languages are all left-to-right, so only user text can have it.
+ */
+export function isolate(text) {
+    return RTL.test(text) ? '\u2068' + text + '\u2069' : text;
+}
+
 function subs(substitutions) {
     return substitutions === undefined ? undefined :
-        (Array.isArray(substitutions) ? substitutions : [substitutions]).map(String);
+        (Array.isArray(substitutions) ? substitutions : [substitutions]).map((value) => isolate(String(value)));
 }
 
 /** t('p_open') → message from _locales; the key itself if it is missing (easy to spot) */
