@@ -198,6 +198,11 @@ const open_ops = {
         }
         throw error;
     },
+    // a session's window: into the popup's window if all it has is a blank new tab (Chrome just started), else new
+    blankOrWindow: async function (tabs, windowId) {
+        const here = windowId ? await chrome.tabs.query({windowId}) : [];
+        return here.length === 1 && isBlankTab(here[0]) ? open_ops.current(tabs, windowId) : open_ops.window(tabs);
+    },
     // without "Allow in Incognito" the extension can open the window but can't add tabs to it later: all at once.
     // One address Chrome refuses fails the whole window: then once more without the kinds it refuses
     // (javascript:, and chrome: debug pages like chrome://crash).

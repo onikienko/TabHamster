@@ -258,6 +258,16 @@ test('open in a new window: nothing Chrome accepts is an error', async () => {
         {error: 'Cannot open bad:2'});
 });
 
+test('open a session window: into a window that is only a blank new tab, else a new window', async () => {
+    const blank = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'});
+    await startBackground({browser: blank}).send({msg: 'open', how: 'blankOrWindow', tabs: TABS, windowId: 1});
+    assert.deepEqual(blank.calls.map(c => c[0]), ['update', 'create', 'create']);
+
+    const busy = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'});
+    await startBackground({browser: busy}).send({msg: 'open', how: 'blankOrWindow', tabs: TABS, windowId: 1});
+    assert.deepEqual(busy.calls.map(c => c[0]), ['window', 'update', 'create', 'create']);
+});
+
 test('open in incognito: one window with all tabs', async () => {
     const browser = fakeBrowser();
     const bg = startBackground({browser});

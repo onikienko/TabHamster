@@ -201,7 +201,8 @@ function sessionWindows(session) {
 }
 
 async function restoreSession(session) {
-    const done = await Promise.all(sessionWindows(session).map((tabs) => openTabs('window', tabs)));
+    // the first window may go into this one, if it is only a blank new tab
+    const done = await Promise.all(sessionWindows(session).map((tabs, i) => openTabs(i === 0 ? 'blankOrWindow' : 'window', tabs)));
     if (done.every(Boolean)) {
         window.close();
     }
