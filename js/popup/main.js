@@ -318,6 +318,11 @@ async function save() {
     }
     state.saving = true;
     try {
+        // the list didn't load (no answer from the background): once more, for the name check and the place at the
+        // top; if it still fails, the tabs are saved anyway
+        if (state.groupsError) {
+            await loadGroups();
+        }
         const tabs = (await queryTabsToSave()).map(savedTab);
         if (!tabs.length) {
             showBar(t('p_nothingToSave'));
