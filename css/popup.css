@@ -668,7 +668,8 @@ body.keyboard .tab-row:focus {
     padding: 0 1px;
     border-radius: 3px;
     background: var(--hit);
-    color: inherit;
+    /* not the muted colour of a tab's address: on --hit that is below 4.5:1 in dark mode */
+    color: var(--text);
     font-weight: 600;
 }
 
