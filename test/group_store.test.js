@@ -230,6 +230,34 @@ test('discard: gone everywhere, not in trash', async () => {
     assert.deepEqual(await store.discard('tg_404'), {synced: true}, 'unknown key: nothing to do');
 });
 
+test('discard of a group changed since it was saved: it goes to trash instead', async () => {
+    const {net, a, b} = await twoSyncedDevices();
+    const saved = makeGroup(3, 1);
+    await a.store.save('tg_1', saved);
+    await a.store.save('tg_2', makeGroup(3, 2));
+    await a.store.save('tg_3', makeGroup(3, 3));
+    net.syncAll();
+    await b.store.reconcile();
+
+    await a.store.rename('tg_1', 'renamed');
+    await a.store.setIndex({tg_2: 9});
+    await b.store.setTabs('tg_3', makeTabs(1, 9));
+    net.syncAll();
+    await a.store.reconcile();
+    for (const [key, group] of [['tg_1', saved], ['tg_2', makeGroup(3, 2)], ['tg_3', makeGroup(3, 3)]]) {
+        assert.deepEqual(await a.store.discard(key, group), {synced: true});
+    }
+    const trash = await a.store.listTrash();
+    assert.deepEqual(trash.map(g => [g.key, g.name, g.by]).sort(),
+        [['tg_1', 'renamed', 'here'], ['tg_2', 'group 2', 'here'], ['tg_3', 'group 3', 'here']]);
+    assert.deepEqual(await a.store.list(), {});
+
+    // unchanged: gone for good
+    await a.store.save('tg_4', makeGroup(2, 4));
+    assert.deepEqual(await a.store.discard('tg_4', makeGroup(2, 4)), {synced: true});
+    assert.equal((await a.store.listTrash()).length, 3);
+});
+
 test('a discard that cannot reach sync finishes on a later reconcile', async () => {
     const {store, sync, local} = makeDevice();
     await store.save('tg_1', makeGroup(20, 1));

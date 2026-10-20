@@ -780,11 +780,19 @@ var groupStore = (function () {
 
         // Undo of a save that created the group: gone everywhere and not kept in trash. If sync can't be
         // changed now, the record waits (hidden) until a reconcile removes it from sync, then it is dropped.
-        async function discardNow(key) {
+        // saved: the group as that save wrote it; changed since (renamed, moved, edited on another device), it goes
+        // to trash instead, like remove.
+        async function discardNow(key, saved) {
             const records = await readRecords();
             const rec = records[key];
             if (!rec) {
                 return {synced: true};
+            }
+            if (saved) {
+                const g = normalizeGroup(saved);
+                if (!sameSig(sigOf(rec.g, rec.h), sigOf(g, hash(JSON.stringify(g.tabs))))) {
+                    return removeNow(key);
+                }
             }
             rec.trashed = now();
             rec.removing = true;
@@ -1005,8 +1013,12 @@ var groupStore = (function () {
                 [key, g => ({name: g.name, index: indexes[key], tabs: g.tabs})])), true), Object.keys(indexes)),
             /** @returns {Promise<{synced: boolean, error?: string}>} the group goes to trash */
             remove: (key) => change(() => removeNow(key)),
-            /** @returns {Promise<{synced: boolean, error?: string}>} like remove, but not kept in trash (undo of a new save) */
-            discard: (key) => change(() => discardNow(key)),
+            /**
+             * @param {string} key
+             * @param {Object} [saved] the group as the save wrote it: if it changed since, it goes to trash (remove)
+             * @returns {Promise<{synced: boolean, error?: string}>} like remove, but not kept in trash (undo of a new save)
+             */
+            discard: (key, saved) => change(() => discardNow(key, saved)),
             /** @returns {Promise<{synced: boolean, error?: string}>} brings a group back from trash */
             restore: (key) => change(() => restoreNow(key), [key]),
             /** @returns {Promise<{saved: number, removed: number, errors: Object}>} groups not given go to trash */

@@ -10,9 +10,12 @@ const SHOW_MS = 5000;
 let bar = null;
 let timer = null;
 let held = false;
+// what the bar's action is about (a group key), for hideBarAbout
+let about = null;
 
 function hide() {
     clearTimeout(timer);
+    about = null;
     if (bar) {
         bar.hidden = true;
         bar.replaceChildren();
@@ -61,11 +64,12 @@ function ensure() {
 ensure();
 
 /**
- * showBar('Saved 12 tabs as "x"', {label: 'Undo', run: async () => {...}})
- * The action runs once; the bar hides when it is pressed.
+ * showBar('Saved 12 tabs as "x"', {label: 'Undo', run: async () => {...}, about: 'tg_1'})
+ * The action runs once; the bar hides when it is pressed. `about` (optional): what the action is about, see hideBarAbout.
  */
 export function showBar(text, action) {
     const el = ensure();
+    about = (action && action.about) || null;
     el.replaceChildren(h('span', {class: 'bar-text'}, text));
     if (action) {
         let done = false;
@@ -85,6 +89,13 @@ export function showBar(text, action) {
     el.hidden = false;
     document.body.classList.add('has-bar');
     schedule();
+}
+
+/** hides the bar if its action is about `what` (an Undo that a later change to the same group would make wrong) */
+export function hideBarAbout(what) {
+    if (what && what === about) {
+        hide();
+    }
 }
 
 export {hide as hideBar};

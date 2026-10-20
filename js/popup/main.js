@@ -7,7 +7,7 @@ import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel, keyCombo, isMac} from '../ui/platform.js';
 import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, faviconUrl, kilobytes} from '../ui/format.js';
-import {showBar} from '../ui/bar.js';
+import {showBar, hideBarAbout} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
@@ -265,10 +265,14 @@ async function afterChange(freshKey) {
     return synced;
 }
 
-/** Undo button for the bar: runs `undo`, then shows the groups as they are */
-function undoAction(undo) {
+/**
+ * Undo button for the bar: runs `undo`, then shows the groups as they are. `about`: the group it changes back; a rename
+ * or move of that group hides the bar
+ */
+function undoAction(undo, about) {
     return {
         label: t('p_undo_btn'),
+        about,
         run: async () => {
             try {
                 await undo();
@@ -316,17 +320,18 @@ async function save() {
             fresh = res.copy || key;
         } else {
             key = 'tg_' + Date.now();
-            const res = await groupStoreClient.save(key, {name: intent.name, index: nextIndex(), tabs});
+            const group = {name: intent.name, index: nextIndex(), tabs};
+            const res = await groupStoreClient.save(key, group);
             text = plural('p_savedAs', tabs.length, [intent.name || numericDate(keyTime(key), state.options.date_format)]) +
                 notSyncedNote(res);
-            undo = () => groupStoreClient.discard(key);
+            undo = () => groupStoreClient.discard(key, group);
             fresh = key;
         }
         el.field.value = '';
         state.view = 'saved';
         state.expanded.delete('saved:' + key);
         await afterChange(fresh);
-        showBar(text, undoAction(undo));
+        showBar(text, undoAction(undo, fresh));
     } catch (e) {
         console.error('TabHamster: save failed', e);
         showBar(t('p_syncStorageDefault_error'));
@@ -358,7 +363,7 @@ async function setTabs(key, tabs, text) {
     const res = await groupStoreClient.setTabs(key, tabs, before.h);
     await afterChange(res.copy || key);
     showBar((res.copy ? t('p_savedAsCopy', groupName(key, before)) : text) + notSyncedNote(res),
-        undoAction(undoTabs(key, before, res)));
+        undoAction(undoTabs(key, before, res), res.copy || key));
 }
 
 async function replaceWithOpenTabs(key) {
@@ -401,7 +406,7 @@ async function deleteGroup(key) {
         el.field.focus();
     }
     showBar(synced ? plural('p_deletedSynced', synced, [name]) : t('p_deleted', name),
-        undoAction(() => groupStoreClient.restore(key)));
+        undoAction(() => groupStoreClient.restore(key), key));
 }
 
 async function groupMenu(key, button) {
@@ -447,6 +452,7 @@ let movesLeft = 0;
 /** puts a group at `pos` among the others (0 = top); usually only its own index changes (js/order.js) */
 function moveGroup(key, pos) {
     const changes = moveTo(sortedGroupKeys(), state.groups, key, pos);
+    hideBarAbout(key);
     for (const [k, index] of Object.entries(changes)) {
         state.groups[k] = Object.assign({}, state.groups[k], {index});
     }
@@ -544,10 +550,11 @@ async function saveSessionAsGroup(key) {
         dayTime(start, lang, undefined, false));
     const tabs = session.tabs.map(savedTab);
     const groupKey = 'tg_' + Date.now();
-    const res = await groupStoreClient.save(groupKey, {name, index: nextIndex(), tabs});
+    const group = {name, index: nextIndex(), tabs};
+    const res = await groupStoreClient.save(groupKey, group);
     await afterChange(null);
     showBar(plural('p_savedAs', tabs.length, [name]) + notSyncedNote(res),
-        undoAction(() => groupStoreClient.discard(groupKey)));
+        undoAction(() => groupStoreClient.discard(groupKey, group), groupKey));
 }
 
 async function deleteSession(key) {
@@ -648,6 +655,7 @@ function renameRow(key) {
         state.renaming = null;
         const name = normalizeName(input.value);
         if (commit && name !== group.name) {
+            hideBarAbout(key);
             try {
                 await groupStoreClient.rename(key, name);
             } catch (e) {
