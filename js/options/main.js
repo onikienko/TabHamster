@@ -14,6 +14,7 @@ import {backupRows, renderRestoreInfo} from './backup.js';
 
 const lang = uiLanguage();
 const GITHUB = 'https://github.com/onikienko/TabHamster';
+const DEVELOPER = ['Mykhailo Onikiienko', 'https://github.com/onikienko'];
 const PRIVACY = 'https://onikienko.github.io/browser-extensions/privacy-policy';
 // waiting groups named in the sync section; the rest are counted
 const NAMES_SHOWN = 3;
@@ -333,8 +334,11 @@ function about() {
     return [
         h('p', {class: 'about-text'}, t('s_about_free'), ' ',
             h('a', {href: GITHUB, target: '_blank', rel: 'noopener'}, t('s_about_source')), ' · ',
-            h('a', {href: PRIVACY, target: '_blank', rel: 'noopener'}, t('s_about_privacy'))),
+            h('a', {href: PRIVACY, target: '_blank', rel: 'noopener'}, t('s_about_privacy')), ' · ',
+            h('a', {href: GITHUB + '/issues', target: '_blank', rel: 'noopener'}, t('s_about_issues'))),
         h('dl', {class: 'credits'},
+            h('dt', null, t('s_about_developer')),
+            h('dd', null, person(...DEVELOPER)),
             h('dt', null, t('s_about_translations')),
             h('dd', null, TRANSLATORS.map(([code, name, url], i) =>
                 [i ? ', ' : '', languageName(code) + ': ', person(name, url)])),
