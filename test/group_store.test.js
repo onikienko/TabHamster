@@ -481,6 +481,27 @@ test('setTabs keeps the current name and place, and answers the new hash', async
     assert.deepEqual((await a.store.list()).tg_1.tabs, seen.tabs);
 });
 
+test('setTabs with an h older than the record\'s, on one device: a copy with the new tabs; the current tabs stay', async () => {
+    const {store} = makeDevice();
+    await store.save('tg_1', makeGroup(3, 1));
+    const old_h = (await store.list()).tg_1.h;
+
+    // a first change moves the record's h on; the popup has not read it back yet
+    const first = makeTabs(4, 5);
+    assert.deepEqual(await store.setTabs('tg_1', first, old_h), {synced: true, h: gs.tabsHash(first)});
+
+    const second = makeTabs(2, 9);
+    const res = await store.setTabs('tg_1', second, old_h);
+    assert.ok(res.copy);
+    assert.notEqual(res.copy, 'tg_1');
+    assert.equal(res.synced, true);
+    assert.equal(res.h, gs.tabsHash(first));
+    assert.deepEqual(plainList(await store.list()), {
+        tg_1: {name: 'group 1', index: 1, tabs: first},
+        [res.copy]: {name: 'group 1 (conflict)', index: 2, tabs: second},
+    });
+});
+
 test('setTabs with keep_old: the replaced version goes to trash; an undo takes it out again', async () => {
     const {store, sync} = makeDevice();
     const old = makeGroup(3, 1);

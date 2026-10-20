@@ -377,12 +377,22 @@ async function writeSession() {
     await chrome.storage.local.set({[session_id]: session});
 }
 
+// Tab events come in bursts (restoring 100 tabs fires hundreds), and a write reads all tabs, so one write that has
+// not started yet covers every event before it. The flag drops when the write starts: an event during a write
+// queues one more, which reads the tabs again and so sees that event's change.
+let session_write_waiting = null;
+
 function updateCurrentSession() {
-    return inSessionQueue(async function () {
+    if (session_write_waiting) {
+        return session_write_waiting;
+    }
+    session_write_waiting = inSessionQueue(async function () {
+        session_write_waiting = null;
         if (await sessionsOn()) {
             await writeSession();
         }
     });
+    return session_write_waiting;
 }
 
 function onUpdated(tab_id, change_info) {

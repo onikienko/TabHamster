@@ -30,6 +30,21 @@ test('hostOf shows xn-- names readable, except Latin mixed with another script',
     assert.equal(hostOf('https://\u0430pple.com/'), domainToASCII('\u0430pple.com'));
 });
 
+test('hostOf keeps a Latin look-alike Cyrillic or Greek label in xn-- form unless the TLD has the same script', () => {
+    // "аррӏе" (Cyrillic) looks like apple
+    assert.equal(hostOf('https://' + domainToASCII('\u0430\u0440\u0440\u04CF\u0435.com') + '/'), 'xn--80ak6aa92e.com');
+    assert.equal(hostOf('https://xn--80ak6aa92e.com/'), 'xn--80ak6aa92e.com');
+    // the same letters under a Cyrillic TLD are decoded, so are other Cyrillic labels under a Latin TLD
+    assert.equal(hostOf('https://' + domainToASCII('\u0430\u0440\u0440\u04CF\u0435.\u0443\u043A\u0440') + '/'), '\u0430\u0440\u0440\u04CF\u0435.\u0443\u043A\u0440');
+    assert.equal(hostOf('https://' + domainToASCII('\u043F\u0440\u0438\u043A\u043B\u0430\u0434.com') + '/'), '\u043F\u0440\u0438\u043A\u043B\u0430\u0434.com');
+    assert.equal(hostOf('https://' + domainToASCII('\u043F\u0440\u0438\u043A\u043B\u0430\u0434.\u0443\u043A\u0440') + '/'), '\u043F\u0440\u0438\u043A\u043B\u0430\u0434.\u0443\u043A\u0440');
+    assert.equal(hostOf('https://' + domainToASCII('\u0430\u0440\u0440\u04CF\u0435.\u0441\u0440\u0431') + '/'), '\u0430\u0440\u0440\u04CF\u0435.\u0441\u0440\u0431');
+    // Greek "ονοτα" (all look-alikes) under a Latin TLD
+    const greek = domainToASCII('\u03BF\u03BD\u03BF\u03C4\u03B1.com');
+    assert.equal(hostOf('https://' + greek + '/'), greek);
+    assert.equal(hostOf('https://' + domainToASCII('\u03BF\u03BD\u03BF\u03C4\u03B1.\u03B5\u03BB') + '/'), '\u03BF\u03BD\u03BF\u03C4\u03B1.\u03B5\u03BB');
+});
+
 test('hostOf decodes like Node for many labels', () => {
     const words = ['київ', 'україна', 'Ελλάδα', 'בדיקה', 'テスト', '中文网', 'ñandú', 'straße', 'mañana-123', 'éé', 'ăâîșț'];
     for (const word of words) {

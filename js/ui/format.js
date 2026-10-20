@@ -167,16 +167,35 @@ function punyDecode(input) {
     return out.join('');
 }
 
+// Cyrillic and Greek letters that look like Latin ones (and digits/hyphens, which every script shares)
+const LATIN_LOOKALIKES = {
+    Cyrillic: /^[\u0430\u0441\u0435\u043E\u0440\u0445\u0443\u0456\u0458\u0455\u04BB\u0501\u051B\u051D\u04CF\u0475\d-]+$/u,
+    Greek: /^[\u03B1\u03BF\u03BD\u03B9\u03C4\u03C5\u03C1\u03BA\d-]+$/u,
+};
+
+function decodedLabel(label) {
+    return /^xn--/i.test(label) ? punyDecode(label.slice(4).toLowerCase()) : label;
+}
+
 // Latin letters mixed with letters of another script ("аpple" with a Cyrillic "а") stay in xn-- form, as Chrome
-// shows them: they can pass for another address
-function readableLabel(label) {
+// shows them: they can pass for another address. So does a Cyrillic or Greek label made only of Latin look-alikes
+// ("аррӏе" for apple) unless the last label (the TLD) is in the same script: "аррӏе.com" stays, "домен.укр" is decoded
+function readableLabel(label, tld) {
     if (!/^xn--/i.test(label)) {
         return label;
     }
     try {
-        const text = punyDecode(label.slice(4).toLowerCase());
+        const text = decodedLabel(label);
         const mixed = /[a-z]/i.test(text) && /[^\p{Script=Latin}\p{Script=Common}\p{Script=Inherited}]/u.test(text);
-        return mixed ? label : text;
+        if (mixed) {
+            return label;
+        }
+        for (const script of Object.keys(LATIN_LOOKALIKES)) {
+            if (LATIN_LOOKALIKES[script].test(text) && !new RegExp('\\p{Script=' + script + '}', 'u').test(tld)) {
+                return label;
+            }
+        }
+        return text;
     } catch (e) {
         return label;
     }
@@ -189,7 +208,17 @@ function readableLabel(label) {
 export function hostOf(url) {
     try {
         const host = new URL(url).host;
-        return host ? host.replace(/^www\./, '').split('.').map(readableLabel).join('.') : String(url);
+        if (!host) {
+            return String(url);
+        }
+        const labels = host.replace(/^www\./, '').split('.');
+        let tld = labels[labels.length - 1];
+        try {
+            tld = decodedLabel(tld);
+        } catch (e) {
+            // a broken xn-- TLD is kept as it is
+        }
+        return labels.map(label => readableLabel(label, tld)).join('.');
     } catch (e) {
         return String(url || '');
     }

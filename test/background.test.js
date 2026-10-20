@@ -615,3 +615,53 @@ test('sessions switch: listeners and the current session follow the option witho
     assert.equal(tabs.onRemoved.listeners.length, 1);
     assert.equal(tabs.onUpdated.listeners.length, 1);
 });
+
+test('sessions: a burst of tab events makes a few writes, and the last one has every tab', async () => {
+    const local = createStorageArea();
+    const open = [];
+    let queries = 0;
+    let release = null;
+    // the first query after `hold` waits, so an event can come while a write is running
+    let hold = false;
+    const browser = fakeBrowser();
+    browser.tabs.query = async function () {
+        queries++;
+        const snapshot = open.map(tab => ({...tab}));
+        if (hold) {
+            hold = false;
+            await new Promise(resolve => (release = resolve));
+        }
+        return snapshot;
+    };
+    const bg = startBackground({local, browser});
+    await settle();
+    const fire = () => bg.chrome.tabs.onUpdated.listeners.forEach(fn => fn(1, {url: 'x'}));
+    const stored = async () => (await local.get(await sessionKeys(local)));
+    const lastTabs = async () => Object.values(await stored())[0].tabs;
+
+    // restoring 100 tabs: an event for each
+    const queries_before = queries;
+    for (let i = 0; i < 100; i++) {
+        open.push({url: 'https://example.com/' + i, title: 'T' + i, pinned: false, windowId: 1});
+        fire();
+    }
+    await settle();
+    assert.equal(queries - queries_before, 1, 'one write for the whole burst');
+    assert.equal((await lastTabs()).length, 100);
+
+    // an event while a write is running: one more write follows it, however many events come
+    hold = true;
+    open.push({url: 'https://example.com/running', title: 'R', pinned: false, windowId: 1});
+    fire();
+    await waitFor(() => !!release);
+    open.push({url: 'https://example.com/late', title: 'L', pinned: false, windowId: 1});
+    for (let i = 0; i < 20; i++) {
+        fire();
+    }
+    release();
+    await settle();
+    const tabs = await lastTabs();
+    assert.equal(tabs.length, 102);
+    assert.equal(tabs[101].url, 'https://example.com/late');
+    assert.equal(queries - queries_before, 3, 'the running write and one more');
+});
