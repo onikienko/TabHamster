@@ -164,17 +164,40 @@ const open_ops = {
         const failed = await createTabs(active ? active.windowId : windowId, rest, rest === tabs);
         return {failed};
     },
+    // opens with the first tab Chrome accepts (a refused one leaves no window), the rest follow
     window: async function (tabs) {
-        const win = await chrome.windows.create({focused: true, url: tabs[0].url});
-        if (tabs[0].pinned) {
-            await chrome.tabs.update(win.tabs[0].id, {pinned: true});
+        let error;
+        for (let i = 0; i < tabs.length; i++) {
+            let win;
+            try {
+                win = await chrome.windows.create({focused: true, url: tabs[i].url});
+            } catch (e) {
+                error = e;
+                continue;
+            }
+            if (tabs[i].pinned) {
+                await chrome.tabs.update(win.tabs[0].id, {pinned: true});
+            }
+            return {failed: i + await createTabs(win.id, tabs.slice(i + 1), false)};
         }
-        return {failed: await createTabs(win.id, tabs.slice(1), false)};
+        throw error;
     },
-    // without "Allow in Incognito" the extension can open the window but can't add tabs to it later: all at once
+    // without "Allow in Incognito" the extension can open the window but can't add tabs to it later: all at once.
+    // One address Chrome refuses fails the whole window: then once more without the kinds it refuses
+    // (javascript:, and chrome: debug pages like chrome://crash).
     incognito: async function (tabs) {
-        await chrome.windows.create({incognito: true, focused: true, url: tabs.map(tab => tab.url)});
-        return {failed: 0};
+        const urls = tabs.map(tab => tab.url);
+        try {
+            await chrome.windows.create({incognito: true, focused: true, url: urls});
+            return {failed: 0};
+        } catch (e) {
+            const rest = urls.filter(url => !/^\s*(javascript|chrome):/i.test(url));
+            if (!rest.length || rest.length === urls.length) {
+                throw e;
+            }
+            await chrome.windows.create({incognito: true, focused: true, url: rest});
+            return {failed: urls.length - rest.length};
+        }
     },
 };
 

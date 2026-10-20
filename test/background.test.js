@@ -47,6 +47,10 @@ function fakeBrowser(active) {
             create: async function (props) {
                 record('window', props);
                 const urls = [].concat(props.url || []);
+                const bad = urls.find(url => /^(bad|javascript):/.test(url));
+                if (bad) {
+                    throw new Error('Cannot open ' + bad);
+                }
                 return {id: 7, tabs: urls.map(() => ({id: next_id++, windowId: 7}))};
             },
         },
@@ -228,11 +232,39 @@ test('open in a new window: the window opens with the first tab, the rest follow
     assert.ok(browser.calls.filter(c => c[0] === 'create').every(c => c[1].windowId === 7 && !c[1].active));
 });
 
+test('open in a new window: a first tab Chrome refuses doesn\'t stop the others', async () => {
+    const browser = fakeBrowser();
+    const bg = startBackground({browser});
+    const tabs = [{url: 'bad:1'}, {url: 'javascript:void(0)'}].concat(TABS);
+    assert.deepEqual(await bg.send({msg: 'open', how: 'window', tabs}), {result: {failed: 2}});
+    assert.deepEqual(browser.calls.map(c => c[0] + ' ' + (c[0] === 'update' ? c[2].pinned : c[1].url)), [
+        'window bad:1', 'window javascript:void(0)', 'window https://a.example/', 'update true',
+        'create https://b.example/', 'create https://c.example/']);
+});
+
+test('open in a new window: nothing Chrome accepts is an error', async () => {
+    const bg = startBackground();
+    assert.deepEqual(await bg.send({msg: 'open', how: 'window', tabs: [{url: 'bad:1'}, {url: 'bad:2'}]}),
+        {error: 'Cannot open bad:2'});
+});
+
 test('open in incognito: one window with all tabs', async () => {
     const browser = fakeBrowser();
     const bg = startBackground({browser});
     await bg.send({msg: 'open', how: 'incognito', tabs: TABS});
     assert.deepEqual(browser.calls, [['window', {incognito: true, focused: true, url: TABS.map(t => t.url)}]]);
+});
+
+test('open in incognito: a refused address doesn\'t stop the others', async () => {
+    const browser = fakeBrowser();
+    const bg = startBackground({browser});
+    const tabs = TABS.concat({url: 'javascript:void(0)'}, {url: 'chrome://settings/'});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'incognito', tabs}), {result: {failed: 2}});
+    assert.deepEqual(browser.calls.map(c => c[1].url), [tabs.map(t => t.url), TABS.map(t => t.url)]);
+
+    const only_bad = startBackground();
+    assert.deepEqual(await only_bad.send({msg: 'open', how: 'incognito', tabs: [{url: 'bad:1'}, TABS[0]]}),
+        {error: 'Cannot open bad:1'});
 });
 
 test('open: nothing to open, unknown way', async () => {
