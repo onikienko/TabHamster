@@ -249,6 +249,10 @@
         "message": "A mentett csoportokat nem sikerült betölteni. Zárja be, majd nyissa meg újra a TabHamstert.",
         "description": "Popup, when the background part doesn't answer"
     },
+    "s_loadError": {
+        "message": "Nem sikerült betölteni a mentett csoportokat. Töltse újra ezt az oldalt.",
+        "description": "Settings page, in Sync and storage and in Recently deleted, when the background part doesn't answer"
+    },
     "p_pinned": {
         "message": "Rögzített fül",
         "description": "Screen reader label of the pin icon on a tab"

@@ -293,6 +293,10 @@
         "message": "Не вдалося завантажити збережені групи. Закрийте та знову відкрийте TabHamster.",
         "description": "Popup, when the background part doesn't answer"
     },
+    "s_loadError": {
+        "message": "Не вдалося завантажити збережені групи. Перезавантажте цю сторінку.",
+        "description": "Settings page, in Sync and storage and in Recently deleted, when the background part doesn't answer"
+    },
     "p_pinned": {
         "message": "Закріплена вкладка",
         "description": "Screen reader label of the pin icon on a tab"

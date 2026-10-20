@@ -252,6 +252,10 @@
         "message": "No se pudieron cargar los grupos guardados. Cierre TabHamster y vuelva a abrirlo.",
         "description": "Popup, when the background part doesn't answer"
     },
+    "s_loadError": {
+        "message": "No se pudieron cargar los grupos guardados. Vuelva a cargar esta página.",
+        "description": "Settings page, in Sync and storage and in Recently deleted, when the background part doesn't answer"
+    },
     "p_pinned": {
         "message": "Pestaña fijada",
         "description": "Screen reader label of the pin icon on a tab"

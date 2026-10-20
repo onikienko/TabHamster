@@ -18,12 +18,16 @@ const DEVELOPER = ['Mykhailo Onikiienko', 'https://github.com/onikienko'];
 const PRIVACY = 'https://onikienko.github.io/browser-extensions/privacy-policy';
 // waiting groups named in the sync section; the rest are counted
 const NAMES_SHOWN = 3;
+// "45%", "45 %" in French
+const percents = new Intl.NumberFormat(lang, {style: 'percent', maximumFractionDigits: 0});
 
 const state = {
     options: null,
     groups: {},
     usage: null,
+    // null: the background didn't answer (the page says so instead of showing nothing)
     trash: [],
+    groupsFailed: false,
     // the restore that can be undone: {time, restored, trashed} or null
     restore: null,
 };
@@ -48,12 +52,12 @@ async function loadOptions() {
 /** groups, sync usage, Recently deleted and the last restore, then draws what shows them */
 async function loadGroups() {
     const [groups, usage, trash, restore] = await Promise.all([
-        groupStoreClient.list().catch(() => ({})),
+        groupStoreClient.list().catch(() => null),
         groupStoreClient.usage().catch(() => null),
-        groupStoreClient.listTrash().catch(() => []),
+        groupStoreClient.listTrash().catch(() => null),
         groupStoreClient.restoreInfo().catch(() => null),
     ]);
-    Object.assign(state, {groups, usage, trash, restore});
+    Object.assign(state, {groups: groups || {}, groupsFailed: !groups, usage, trash, restore});
     renderSync();
     renderTrash();
     renderRestoreInfo(state.restore);
@@ -212,12 +216,16 @@ function nameList(keys) {
 // meter and numbers as in the popup footer, the explanation, and the groups waiting for room
 function renderSync() {
     const box = clear(el.sync);
+    if (state.groupsFailed) {
+        box.append(h('p', {class: 'error', role: 'alert'}, t('s_loadError')));
+        return;
+    }
     const usage = state.usage;
     const keys = Object.keys(state.groups);
     const tabs = keys.reduce((sum, key) => sum + state.groups[key].tabs.length, 0);
     if (usage) {
         const share = usage.quota ? usage.bytes / usage.quota : 0;
-        const percent = share > 0 && share < 0.01 ? '<1%' : Math.round(share * 100) + '%';
+        const percent = share > 0 && share < 0.01 ? '<' + percents.format(0.01) : percents.format(Math.round(share * 100) / 100);
         box.append(
             h('div', {class: 'usage'},
                 icon('cloud', 18),
@@ -286,6 +294,10 @@ function trashRow(group) {
 
 function renderTrash() {
     const box = clear(el.trash);
+    if (!state.trash) {
+        box.append(h('p', {class: 'row error', role: 'alert'}, t('s_loadError')));
+        return;
+    }
     if (!state.trash.length) {
         box.append(h('p', {class: 'row empty'}, t('o_trash_empty')));
         return;

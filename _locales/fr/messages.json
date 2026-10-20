@@ -252,6 +252,10 @@
         "message": "Impossible de charger les groupes enregistrés. Fermez TabHamster et rouvrez-le.",
         "description": "Popup, when the background part doesn't answer"
     },
+    "s_loadError": {
+        "message": "Impossible de charger les groupes enregistrés. Rechargez cette page.",
+        "description": "Settings page, in Sync and storage and in Recently deleted, when the background part doesn't answer"
+    },
     "p_pinned": {
         "message": "Onglet épinglé",
         "description": "Screen reader label of the pin icon on a tab"

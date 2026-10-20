@@ -252,6 +252,10 @@
         "message": "Saved groups could not be loaded. Close and open TabHamster again.",
         "description": "Popup, when the background part doesn't answer"
     },
+    "s_loadError": {
+        "message": "Saved groups could not be loaded. Reload this page.",
+        "description": "Settings page, in Sync and storage and in Recently deleted, when the background part doesn't answer"
+    },
     "p_pinned": {
         "message": "Pinned tab",
         "description": "Screen reader label of the pin icon on a tab"
