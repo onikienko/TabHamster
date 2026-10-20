@@ -463,8 +463,7 @@ async function groupMenu(key, button) {
 
 /* ---------- order ---------- */
 
-// moves show at once and are written one after another; the groups are read back after the last one
-let moving = Promise.resolve();
+// moves show at once; the background writes them in the order they come; the groups are read back after the last one
 let movesLeft = 0;
 
 /** puts a group at `pos` among the others (0 = top); usually only its own index changes (js/order.js) */
@@ -476,7 +475,9 @@ function moveGroup(key, pos) {
     }
     render();
     movesLeft++;
-    moving = moving.then(() => groupStoreClient.setIndex(changes)).catch((e) => {
+    // sent at once, not after the previous one: the background does them in order, and a popup closed right after
+    // a few quick moves still gets them all saved
+    groupStoreClient.setIndex(changes).catch((e) => {
         console.error('TabHamster: move failed', e);
         showBar(t('p_syncStorageDefault_error'));
     }).then(() => (--movesLeft === 0 ? afterChange(null) : null));
