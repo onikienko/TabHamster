@@ -26,6 +26,8 @@ const MARGIN = 8;
 const tips = new WeakMap();
 let box = null;
 let anchor = null;
+// shown for keyboard focus (it stays while Tab scrolls its element into view)
+let byKeys = false;
 // the element waiting for its delay
 let pending = null;
 let timer = null;
@@ -101,6 +103,7 @@ function show(el, byKeyboard) {
     box.hidden = false;
     place(el, spec);
     anchor = el;
+    byKeys = byKeyboard;
     if (byKeyboard && !el.hasAttribute('aria-describedby')) {
         el.setAttribute('aria-describedby', 'tooltip');
         el.dataset.tipDescribed = '1';
@@ -120,6 +123,24 @@ export function hideTip() {
         delete anchor.dataset.tipDescribed;
     }
     anchor = null;
+    byKeys = false;
+}
+
+// Scrolling hides a tooltip shown under the pointer. One shown for the keyboard follows its element (Tab scrolls the
+// focused element into view right after focusin) and goes only when the element leaves the view.
+function onScroll(e) {
+    if (!byKeys || !anchor) {
+        hideTip();
+        return;
+    }
+    const r = anchor.getBoundingClientRect();
+    // the part of the page that scrolled (the list), or the window
+    const view = e.target instanceof Element ? e.target.getBoundingClientRect() : {top: 0, bottom: window.innerHeight};
+    if (r.bottom <= view.top || r.top >= view.bottom) {
+        hideTip();
+    } else {
+        place(anchor, tips.get(anchor));
+    }
 }
 
 function later(el) {
@@ -175,7 +196,7 @@ document.addEventListener('focusout', (e) => {
 // a click, a key (Tab shows the next one through focusin), scrolling or leaving the window
 document.addEventListener('pointerdown', hideTip, true);
 document.addEventListener('keydown', hideTip, true);
-document.addEventListener('scroll', hideTip, true);
+document.addEventListener('scroll', onScroll, true);
 window.addEventListener('blur', hideTip);
 // the element was drawn again or removed under the pointer
 new MutationObserver(() => {
