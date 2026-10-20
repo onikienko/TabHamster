@@ -212,9 +212,17 @@ function saveIntent() {
     return key ? {kind: 'replace', key, name: state.groups[key].name} : {kind: 'new', name};
 }
 
-/** a tab as a saved group keeps it */
-function savedTab(tab) {
-    return tab.pinned ? {url: tab.url, title: tab.title, pinned: true} : {url: tab.url, title: tab.title};
+/**
+ * A tab as a saved group keeps it. `id`: a number no other tab of the group has (its place when the group is saved):
+ * 0.4.0 finds a tab by it to remove or edit it.
+ */
+function savedTab(tab, id) {
+    return tab.pinned ? {url: tab.url, title: tab.title, id, pinned: true} : {url: tab.url, title: tab.title, id};
+}
+
+/** `id` for a tab added to saved tabs */
+function nextTabId(tabs) {
+    return tabs.reduce((max, tab) => (Number.isInteger(tab.id) ? Math.max(max, tab.id) : max), -1) + 1;
 }
 
 function nextIndex() {
@@ -369,7 +377,7 @@ async function addTab(key, tab) {
         showBar(t('p_alreadyInGroup', name));
         return;
     }
-    await setTabs(key, group.tabs.concat(savedTab(tab)), t('p_tabAdded', [tab.title || tab.url, name]));
+    await setTabs(key, group.tabs.concat(savedTab(tab, nextTabId(group.tabs))), t('p_tabAdded', [tab.title || tab.url, name]));
 }
 
 async function copyLinks(group) {
