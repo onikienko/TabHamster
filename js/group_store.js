@@ -902,6 +902,7 @@ var groupStore = (function () {
             delete rec.trashed;
             delete rec.trashed_by;
             delete rec.removing;
+            delete rec.discarded;
             rec.synced = false;
             await putRecord(records, key, rec);
             let done;

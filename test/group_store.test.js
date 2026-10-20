@@ -275,6 +275,22 @@ test('a discard that cannot reach sync finishes on a later reconcile', async () 
     assert.deepEqual(Object.keys(await local.get(null)).filter(k => k.startsWith('lg_')), [], 'record dropped');
 });
 
+test('a discarded group brought back while its removal waits is an ordinary group again', async () => {
+    const {store, sync} = makeDevice();
+    await store.save('tg_1', makeGroup(3, 1));
+    failWrites(sync, RATE_ERROR, 'remove');
+    assert.equal((await store.discard('tg_1')).synced, false);
+    sync.beforeWrite = null;
+    // meanwhile gone from sync (removed on another computer), so restore pushes this record as it is
+    await sync.remove('tg_1');
+
+    assert.deepEqual(await store.restore('tg_1'), {synced: true});
+    await store.reconcile();
+    assert.deepEqual(plainList(await store.list()), {tg_1: makeGroup(3, 1)}, 'not dropped by the reconcile');
+    await store.remove('tg_1');
+    assert.deepEqual((await store.listTrash()).map(g => g.key), ['tg_1'], 'a later delete shows in trash');
+});
+
 test('a failed sync removal is retried, not undone', async () => {
     const {store, sync} = makeDevice();
     await store.save('tg_1', makeGroup(20, 1));
