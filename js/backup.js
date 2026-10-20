@@ -61,7 +61,8 @@ var backup = (function () {
 
     function cleanTabs(tabs) {
         return tabs.filter(function (tab) {
-            return tab && typeof tab === 'object' && typeof tab.url === 'string';
+            // a real tab never has a javascript: address: only a hand-made backup could bring one
+            return tab && typeof tab === 'object' && typeof tab.url === 'string' && !/^\s*javascript:/i.test(tab.url);
         }).map(function (tab, i) {
             const clean = {url: tab.url, title: typeof tab.title === 'string' ? tab.title : tab.url, id: i};
             if (tab.pinned === true) {

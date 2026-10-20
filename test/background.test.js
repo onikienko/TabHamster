@@ -486,6 +486,14 @@ test('backup: hand-edited option values come in as the extension uses them, odd 
     assert.deepEqual(options, {pinned: 1, cur_win: 1, session_watcher: 0, date_format: 'us', active_tab: '#sessions'});
 });
 
+test('backup: javascript: addresses are left out', async () => {
+    const bg = startBackground();
+    const text = JSON.stringify({tg_1600000000001: {name: 'x', index: 1, tabs: [
+        {url: ' JavaScript:alert(1)', title: 'bad'}, {url: 'https://example.com/', title: 'ok'}]}});
+    await bg.groups('importBackup', text);
+    assert.deepEqual((await bg.groups('list')).result.tg_1600000000001.tabs, [{url: 'https://example.com/', title: 'ok', id: 0}]);
+});
+
 test('backup: preview says what a restore would do and changes nothing', async () => {
     const current = {tg_1700000000001: makeGroup(5, 1), tg_1700000000002: makeGroup(5, 2), tg_1700000000003: makeGroup(5, 3)};
     const bg = await backgroundWithGroups(current);
