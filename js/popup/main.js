@@ -662,16 +662,30 @@ function renameRow(key) {
         done = true;
         state.renaming = null;
         const name = normalizeName(input.value);
-        if (commit && name !== group.name) {
+        const changed = commit && name !== group.name;
+        if (changed) {
             hideBarAbout(key);
+            state.groups[key] = Object.assign({}, state.groups[key], {name});
+        }
+        // ended by a click elsewhere (the focus leaves on mousedown): only this row is drawn again, so the click
+        // still lands on what was pressed
+        if (!refocus) {
+            redrawItem(key);
+        }
+        if (changed) {
             try {
                 await groupStoreClient.rename(key, name);
             } catch (e) {
                 console.error('TabHamster: rename failed', e);
                 showBar(t('p_syncStorageDefault_error'));
             }
-            await afterChange(null);
-        } else {
+            if (refocus) {
+                await afterChange(null);
+            } else {
+                await reload();
+                redrawItem(key);
+            }
+        } else if (refocus) {
             render();
         }
         if (refocus) {
@@ -1100,6 +1114,20 @@ function renderList() {
     }
     const stops = listStops();
     setStop(stops.includes(document.activeElement) ? document.activeElement : stops[0]);
+}
+
+/** draws one saved group's row again and leaves the rest of the list (and what the pointer is on) alone */
+function redrawItem(key) {
+    const item = el.list.querySelector('.item[data-key="' + CSS.escape(key) + '"]');
+    runSearch();
+    const result = state.results.saved.find((r) => r.key === key);
+    if (!item || !result || !state.groups[key]) {
+        return;
+    }
+    const stop = listStops().find((node) => node.tabIndex === 0);
+    const fresh = groupItem(result, item.classList.contains('target'));
+    item.replaceWith(fresh);
+    setStop(stop && stop.isConnected ? stop : fresh.querySelector('button.name'));
 }
 
 function drawList() {
