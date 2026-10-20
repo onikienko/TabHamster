@@ -477,6 +477,15 @@ test('backup: options only leave groups alone', async () => {
     assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'eu');
 });
 
+test('backup: hand-edited option values come in as the extension uses them, odd ones are left out', async () => {
+    const bg = await backgroundWithGroups({tg_1700000000001: makeGroup(5, 1)});
+    const text = JSON.stringify({pinned: 2, cur_win: true, session_watcher: 0, date_format: 'iso', theme: 'pink', active_tab: '#sessions'});
+    assert.deepEqual(await bg.groups('importBackup', text), {result: {groups: 0, errors: {}}});
+    const options = await bg.chrome.storage.sync.get(['pinned', 'cur_win', 'session_watcher', 'date_format', 'theme', 'active_tab']);
+    // date_format and theme as they were (theme never set here)
+    assert.deepEqual(options, {pinned: 1, cur_win: 1, session_watcher: 0, date_format: 'us', active_tab: '#sessions'});
+});
+
 test('backup: preview says what a restore would do and changes nothing', async () => {
     const current = {tg_1700000000001: makeGroup(5, 1), tg_1700000000002: makeGroup(5, 2), tg_1700000000003: makeGroup(5, 3)};
     const bg = await backgroundWithGroups(current);

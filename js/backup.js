@@ -39,6 +39,26 @@ var backup = (function () {
         return fits_old_version ? json : NEWER_ONLY_LINE + '\n' + json;
     }
 
+    // the choices each text option has; on/off options are 0 or 1
+    const CHOICES = {
+        date_format: ['eu', 'us'],
+        active_tab: ['#saved', '#sessions'],
+        theme: ['system', 'light', 'dark'],
+    };
+
+    // an option value as the extension uses it, or undefined (the current setting stays): a hand-edited backup can
+    // have "pinned": 2 or a theme that doesn't exist
+    function cleanOption(key, value) {
+        const fallback = storage.default_options[key];
+        if (typeof fallback === 'number') {
+            return typeof value === 'number' || typeof value === 'boolean' ? (value ? 1 : 0) : undefined;
+        }
+        if (CHOICES[key]) {
+            return CHOICES[key].includes(value) ? value : undefined;
+        }
+        return typeof value === typeof fallback ? value : undefined;
+    }
+
     function cleanTabs(tabs) {
         return tabs.filter(function (tab) {
             return tab && typeof tab === 'object' && typeof tab.url === 'string';
@@ -75,8 +95,9 @@ var backup = (function () {
 
         const options = {};
         Object.keys(storage.default_options).forEach(function (key) {
-            if (data.hasOwnProperty(key) && typeof data[key] === typeof storage.default_options[key]) {
-                options[key] = data[key];
+            const value = cleanOption(key, data[key]);
+            if (data.hasOwnProperty(key) && value !== undefined) {
+                options[key] = value;
             }
         });
 
