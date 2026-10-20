@@ -1,4 +1,8 @@
 {
+    "locale": {
+        "message": "hu",
+        "description": "Not shown: the language code of this translation (the folder name), for plural forms, dates and the page language. Do not translate."
+    },
    "extDescr": {
       "description": "",
       "message": "Böngészési munkamenetek kezelése és fülek mentése. Szinkronizációval"

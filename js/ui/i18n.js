@@ -22,8 +22,15 @@ export function t(key, substitutions) {
     return chrome.i18n.getMessage(key, subs(substitutions)) || key;
 }
 
+/**
+ * The language the texts are in, for plural forms, dates and <html lang>. Chrome's own language when the texts are in
+ * it (keeps its variant: en-GB writes dates "15 Oct"); otherwise, a language without a translation (pt, de, pl...),
+ * the language of the texts Chrome falls back to, so "0 tab" or English text with German dates don't happen.
+ */
 export function uiLanguage() {
-    return (chrome.i18n.getUILanguage && chrome.i18n.getUILanguage()) || 'en';
+    const texts = chrome.i18n.getMessage('locale') || 'en';
+    const ui = (chrome.i18n.getUILanguage && chrome.i18n.getUILanguage()) || texts;
+    return ui.split(/[-_]/)[0].toLowerCase() === texts.toLowerCase() ? ui : texts;
 }
 
 let rules = null;

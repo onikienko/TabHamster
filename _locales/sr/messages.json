@@ -1,4 +1,8 @@
 {
+    "locale": {
+        "message": "sr",
+        "description": "Not shown: the language code of this translation (the folder name), for plural forms, dates and the page language. Do not translate."
+    },
    "extDescr": {
       "description": "",
       "message": "Менаџер сесија и чувар картица"
