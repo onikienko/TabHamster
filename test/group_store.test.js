@@ -161,6 +161,17 @@ test('sync full: saved locally, pushed once there is room', async () => {
     assert.equal((await store.usage()).unsynced, 0);
 });
 
+test('groups leave 1 KB of sync for settings; a write that shrinks a group may still use it', async () => {
+    const {store, sync} = makeDevice();
+    await store.save('tg_1', makeGroup(40, 1));
+    // filled up to 600 bytes below the quota (as 0.4.0 could leave it)
+    await fill(sync, sync.QUOTA_BYTES - 600);
+    assert.deepEqual(await store.save('tg_2', makeGroup(3, 2)), {synced: false, error: QUOTA_ERROR});
+    await sync.set({theme: 'dark', date_format: 'us'});
+    // fewer tabs: smaller, so it goes to sync even inside the reserve
+    assert.equal((await store.setTabs('tg_1', makeTabs(20, 1))).synced, true);
+});
+
 test('write rate limit: saves stay local and go to sync later', async () => {
     const {store, sync, clock} = makeDevice();
     const results = [];

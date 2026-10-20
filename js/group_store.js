@@ -282,6 +282,9 @@ var groupStore = (function () {
     // chunks can arrive before their header; a header can arrive before its chunks
     const CHUNK_GRACE_MS = DAY;
     const NOT_FOUND = 'Group not found';
+    // sync space groups leave free for settings (theme, date format...: about 150 bytes), so changing one never fails
+    // because groups filled sync to the last byte
+    const OPTIONS_RESERVE = 1024;
 
     /**
      * @param {Object} options
@@ -455,7 +458,9 @@ var groupStore = (function () {
             const old_bytes = bytesOf(sync_items, old);
             const final_bytes = in_use + added - replaced - old_bytes;
             // same messages as Chrome's own errors (Chrome 155)
-            if (final_bytes > sync.QUOTA_BYTES) {
+            // into the settings' reserve only by a write that doesn't grow what is there (sync filled before 1.0.0)
+            if (final_bytes > sync.QUOTA_BYTES ||
+                (final_bytes > sync.QUOTA_BYTES - OPTIONS_RESERVE && final_bytes > in_use)) {
                 throw new Error('Resource::kQuotaBytes quota exceeded');
             }
             const final_count = Object.keys(sync_items).length - old.length +
