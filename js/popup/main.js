@@ -162,6 +162,16 @@ async function openTabs(how, tabs) {
     return true;
 }
 
+/** a click handler that ignores the second click of a double click (it would save or open twice) */
+function single(fn) {
+    return (e) => {
+        if (e.detail > 1) {
+            return;
+        }
+        fn(e);
+    };
+}
+
 function openInThisWindow(tabs) {
     openTabs('current', tabs);
 }
@@ -884,7 +894,7 @@ function chevron(id, auto) {
     const open = isExpanded(id, auto);
     return h('button', {
         class: 'chev', type: 'button', tabindex: -1, 'aria-hidden': 'true',
-        onClick: () => toggleItem(id, auto),
+        onClick: single(() => toggleItem(id, auto)),
     }, icon(open ? 'chevronDown' : 'chevronRight', 14));
 }
 
@@ -899,13 +909,16 @@ function nameButton(id, auto, label, sub, open, newWindow, details) {
         class: 'name ellipsis', type: 'button', dir: 'auto', 'aria-expanded': String(isExpanded(id, auto)),
         'aria-description': details.filter(Boolean).join(', '),
         dataset: {toggle: id, auto: auto ? '1' : ''},
-        onClick: (e) => (newWindow && wantsNewWindow(e) ? newWindow() : toggleItem(id, auto)),
-        onAuxclick: (e) => newWindow && e.button === 1 && newWindow(),
+        onClick: single((e) => (newWindow && wantsNewWindow(e) ? newWindow() : toggleItem(id, auto))),
+        onAuxclick: single((e) => newWindow && e.button === 1 && newWindow()),
         onKeydown: (e) => {
             if (e.key === 'Enter' && !e.isComposing) {
                 // not the button's own click
                 e.preventDefault();
-                open(e);
+                // a held Enter repeats: open once
+                if (!e.repeat) {
+                    open(e);
+                }
             }
         },
     }, marked(label));
@@ -996,12 +1009,12 @@ function groupItem(result, target) {
                 // the size is what "Biggest first" is about: it stays next to the buttons
                 state.filter === 'biggest' ? sizeMeta(key) : null,
                 setTip(h('button', {
-                    class: 'open', type: 'button', onClick: open,
-                    onAuxclick: (e) => e.button === 1 && openInNewWindow(group.tabs),
+                    class: 'open', type: 'button', onClick: single(open),
+                    onAuxclick: single((e) => e.button === 1 && openInNewWindow(group.tabs)),
                 }, t('p_open')), {text: t('p_openInThisWindow'), keys: [ENTER]}),
                 setTip(h('button', {
                     class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'),
-                    onClick: () => openInNewWindow(group.tabs),
+                    onClick: single(() => openInNewWindow(group.tabs)),
                 }, icon('newWindow', 16)), NEW_WINDOW_TIP),
                 moreButton((button) => groupMenu(key, button))))));
     if (isExpanded('saved:' + key, partial)) {
@@ -1036,7 +1049,7 @@ function sessionItem(result) {
                 tabsMeta(session.tabs.length, result, partial),
             // the live session is open right now: nothing to restore
             ], current ? null : h('div', {class: 'actions'},
-                setTip(h('button', {class: 'open', type: 'button', onClick: () => restoreSession(session)}, t('p_restore')),
+                setTip(h('button', {class: 'open', type: 'button', onClick: single(() => restoreSession(session))}, t('p_restore')),
                     {text: t('p_restore_tip'), keys: [ENTER]}),
                 moreButton((button) => sessionMenu(key, button))))));
     if (!current && isExpanded('sessions:' + key, partial)) {
@@ -1046,7 +1059,7 @@ function sessionItem(result) {
             return shown.length ? [
                 h('div', {class: 'win-title'}, icon('window', 14),
                     h('span', {class: 'spacer'}, plural('p_windowTitle', tabs.length, [i + 1])),
-                    h('button', {class: 'link', type: 'button', onClick: () => openElsewhere('window', tabs)},
+                    h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', tabs))},
                         t('p_openWindow'))),
                 shown.map(tabRow),
             ] : null;
@@ -1279,7 +1292,10 @@ el.field.addEventListener('keydown', (e) => {
     }
     if (e.key === 'Enter') {
         e.preventDefault();
-        save();
+        // a held Enter repeats: one save
+        if (!e.repeat) {
+            save();
+        }
     } else if (e.key === 'ArrowDown' && !e.altKey) {
         const first = listStops()[0];
         if (first) {
@@ -1297,7 +1313,7 @@ el.field.addEventListener('keydown', (e) => {
     }
 });
 el.field.addEventListener('input', () => onQuery());
-el.save.addEventListener('click', () => save());
+el.save.addEventListener('click', single(() => save()));
 el.clear.addEventListener('click', () => clearSearch());
 
 // ↑ ↓ between group names and tabs (Enter opens the focused one), ↑ from the first goes back to the field;
