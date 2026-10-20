@@ -1501,9 +1501,19 @@
         "message": "Копирано",
         "description": "Settings page. Shown for a moment instead of Copy backup text instead"
     },
-    "s_copyFailed": {
-        "message": "Копирање није успело. Покушајте поново.",
-        "description": "Settings page. Bar when copying the backup failed"
+    "s_copyByHand": {
+        "message": "Копирање није успело. Текст испод је изабран: притисните $KEYS$ да бисте га копирали.",
+        "description": "Settings page, when copying the backup text failed: the text is shown selected. KEYS is Ctrl+C (⌘ C on a Mac)",
+        "placeholders": {
+            "keys": {
+                "content": "$1",
+                "example": "Ctrl+C"
+            }
+        }
+    },
+    "s_close": {
+        "message": "Затвори",
+        "description": "Settings page. Button that closes a panel"
     },
     "s_restore": {
         "message": "Враћање из резервне копије",

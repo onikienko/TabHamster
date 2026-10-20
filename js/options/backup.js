@@ -7,6 +7,7 @@ import {icon} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {dayTime} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
+import {keyCombo} from '../ui/platform.js';
 
 const lang = uiLanguage();
 const ERRORS = {
@@ -68,12 +69,34 @@ async function copyText(button) {
         }
     } catch (e) {
         console.error('TabHamster: copy failed', e);
-        showBar(t('s_copyFailed'));
+        let value;
+        try {
+            value = await text;
+        } catch (e2) {
+            showBar(t('p_syncStorageDefault_error'));
+            return;
+        }
+        copyByHand(value, button);
         return;
     }
     button.replaceChildren(icon('check', 14), t('s_copied'));
     clearTimeout(button.timer);
     button.timer = setTimeout(() => button.replaceChildren(t('s_copyText')), COPIED_MS);
+}
+
+/** copying didn't work (no permission, another app holds the clipboard): the text, selected, for Ctrl+C */
+function copyByHand(value, button) {
+    opener = button;
+    const area = h('textarea', {class: 'paste', id: 'backup_text', readonly: true, spellcheck: 'false', 'aria-label': t('s_backupFile')});
+    area.value = value;
+    clear(el.panel).hidden = false;
+    el.panel.append(
+        h('p', {role: 'alert'}, t('s_copyByHand', keyCombo(['mod', 'C']))),
+        area,
+        h('div', {class: 'panel-buttons'},
+            h('button', {class: 'btn tonal', type: 'button', onClick: () => closePanel()}, t('s_close'))));
+    area.focus();
+    area.select();
 }
 
 /* ---------- restore ---------- */

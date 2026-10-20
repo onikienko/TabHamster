@@ -1196,9 +1196,19 @@
         "message": "Copied",
         "description": "Settings page. Shown for a moment instead of Copy backup text instead"
     },
-    "s_copyFailed": {
-        "message": "Couldn’t copy. Try again.",
-        "description": "Settings page. Bar when copying the backup failed"
+    "s_copyByHand": {
+        "message": "Copying didn’t work. The text below is selected: press $KEYS$ to copy it.",
+        "description": "Settings page, when copying the backup text failed: the text is shown selected. KEYS is Ctrl+C (⌘ C on a Mac)",
+        "placeholders": {
+            "keys": {
+                "content": "$1",
+                "example": "Ctrl+C"
+            }
+        }
+    },
+    "s_close": {
+        "message": "Close",
+        "description": "Settings page. Button that closes a panel"
     },
     "s_restore": {
         "message": "Restore from a backup",
