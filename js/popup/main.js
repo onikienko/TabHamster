@@ -91,12 +91,18 @@ async function loadGroups() {
     }
 }
 
+/** local storage also holds copies of saved groups (lg_) and store records; sessions are tg_ keys */
+async function readSessionItems() {
+    const local = chrome.storage.local;
+    // only those (getKeys: Chrome 130+)
+    return local.getKeys ? local.get((await local.getKeys()).filter((key) => key.startsWith('tg_'))) : local.get(null);
+}
+
 async function loadSessions() {
     const [local, session] = await Promise.all([
-        chrome.storage.local.get(null),
+        readSessionItems(),
         chrome.storage.session.get('session_id'),
     ]);
-    // local storage also holds copies of saved groups (lg_) and store records; sessions are tg_ keys
     state.sessions = {};
     for (const key of Object.keys(local)) {
         if (key.startsWith('tg_') && local[key] && Array.isArray(local[key].tabs)) {

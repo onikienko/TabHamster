@@ -818,6 +818,14 @@ test('migration converts one by one when a batch fails', async () => {
     Object.keys(old).forEach(key => assert.equal(items[key].v, 2));
 });
 
+test('without storage.getKeys (Chrome before 130) records are read from everything', async () => {
+    const {store, local} = makeDevice();
+    delete local.getKeys;
+    local.rawSet({tg_1: {name: '', tabs: []}, restore_undo: {groups: {}}});
+    await store.save('tg_2', makeGroup(3, 2));
+    assert.deepEqual(plainList(await store.list()), {tg_2: makeGroup(3, 2)});
+});
+
 test('calls are queued', async () => {
     const {store, sync} = makeDevice();
     const versions = [makeGroup(400, 1), makeGroup(20, 2), makeGroup(400, 3)];

@@ -170,6 +170,11 @@ function createStorageArea({limits = null, clock = Date.now} = {}) {
             return withCallback(removeNow(keys), callback);
         },
 
+        // Chrome 130+
+        getKeys(callback) {
+            return withCallback(Promise.resolve(Array.from(data.keys())), callback);
+        },
+
         getBytesInUse(keys, callback) {
             if (typeof keys === 'function') {
                 return withCallback(bytesNow(null), keys);

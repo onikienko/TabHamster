@@ -331,8 +331,10 @@ function inSessionQueue(fn) {
 // remove the oldest session from chrome.storage.local (if sessions numbers >= config.session_numbers).
 // Only `tg_` keys are sessions: local storage also holds saved group copies (`lg_`).
 async function cleanupSessions() {
-    const items = await chrome.storage.local.get(null);
-    const session_keys = Object.keys(items).filter(function (key) {
+    const local = chrome.storage.local;
+    // only the keys are needed (getKeys: Chrome 130+)
+    const keys = local.getKeys ? await local.getKeys() : Object.keys(await local.get(null));
+    const session_keys = keys.filter(function (key) {
         return key.indexOf(session_config.prefix) === 0;
     });
 

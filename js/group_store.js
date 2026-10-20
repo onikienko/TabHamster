@@ -338,8 +338,11 @@ var groupStore = (function () {
             return LOCAL_PREFIX + key.slice(GROUP_PREFIX.length);
         }
 
+        // only the lg_ items: local storage also holds sessions and the restore snapshot (getKeys: Chrome 130+)
         async function readRecords() {
-            const items = await local.get(null);
+            const items = local.getKeys ?
+                await local.get((await local.getKeys()).filter(k => k.startsWith(LOCAL_PREFIX))) :
+                await local.get(null);
             const records = {};
             Object.keys(items).forEach(function (k) {
                 if (k.startsWith(LOCAL_PREFIX)) {
