@@ -198,3 +198,12 @@ test('incompressible tab near the item limit: v1 shape stays under it', async ()
     }
     assert.ok(largest_v1 > 8000, 'v1 shape was not tested near the limit: ' + largest_v1);
 });
+
+test('decodeGroup: data that inflates past 16 MB is damaged, not read', async () => {
+    const zlib = require('node:zlib');
+    const big = JSON.stringify([{url: 'https://a.example/', title: 'x'.repeat(17 * 1024 * 1024)}]);
+    const d = zlib.deflateRawSync(Buffer.from(big)).toString('base64');
+    assert.ok(d.length < 100000, 'small when compressed');
+    const res = await gs.decodeGroup('tg_1', {tg_1: {v: 2, name: 'bomb', index: 1, h: gs.hash(big), d}});
+    assert.equal(res.status, 'corrupt');
+});

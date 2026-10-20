@@ -123,9 +123,28 @@ var groupStore = (function () {
         return bytes;
     }
 
-    async function pipe(bytes, transform) {
-        const stream = new Blob([bytes]).stream().pipeThrough(transform);
-        return new Uint8Array(await new Response(stream).arrayBuffer());
+    // inflated tabs of one group: far more than sync can hold (100 KB compressed); a crafted backup can't make more
+    const MAX_INFLATED = 16 * 1024 * 1024;
+
+    async function pipe(bytes, transform, max = Infinity) {
+        const reader = new Blob([bytes]).stream().pipeThrough(transform).getReader();
+        const parts = [];
+        let length = 0;
+        for (let read = await reader.read(); !read.done; read = await reader.read()) {
+            length += read.value.length;
+            if (length > max) {
+                await reader.cancel();
+                throw new Error('Too big');
+            }
+            parts.push(read.value);
+        }
+        const out = new Uint8Array(length);
+        let at = 0;
+        for (const part of parts) {
+            out.set(part, at);
+            at += part.length;
+        }
+        return out;
     }
 
     async function deflate(str) {
@@ -133,7 +152,7 @@ var groupStore = (function () {
     }
 
     async function inflate(b64) {
-        return decoder.decode(await pipe(base64ToBytes(b64), new DecompressionStream('deflate-raw')));
+        return decoder.decode(await pipe(base64ToBytes(b64), new DecompressionStream('deflate-raw'), MAX_INFLATED));
     }
 
     function normalizeGroup(group) {

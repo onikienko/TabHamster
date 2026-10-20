@@ -15,6 +15,8 @@ const ERRORS = {
     empty: 'o_backup_error_empty',
 };
 const COPIED_MS = 2000;
+// a backup is far smaller; the text goes to the background twice (preview, restore), each under Chrome's 64 MB limit
+const MAX_BACKUP_CHARS = 32 * 1024 * 1024;
 
 const el = {
     // under the Restore row: pasted text, the preview or an error
@@ -92,7 +94,7 @@ function errorText(code) {
 async function preview(text, source) {
     let res;
     try {
-        res = await groupStoreClient.previewBackup(text);
+        res = text.length > MAX_BACKUP_CHARS ? {error: 'not_backup'} : await groupStoreClient.previewBackup(text);
     } catch (e) {
         console.error('TabHamster: backup preview failed', e);
         res = {error: 'other'};
@@ -212,6 +214,9 @@ function fileInput() {
         }
         let text;
         try {
+            if (file.size > MAX_BACKUP_CHARS * 4) {
+                throw new Error('Too big');
+            }
             text = await file.text();
         } catch (e) {
             clear(el.panel).hidden = false;
