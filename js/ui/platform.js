@@ -7,15 +7,22 @@ export function isMac(nav) {
     return /mac/i.test(platform);
 }
 
+// a key's name in the UI language, as Chrome's menus write it (key_* in _locales: "Maj", "Entrée"); English when
+// there is none (tests)
+function keyName(id, english) {
+    const text = globalThis.chrome && chrome.i18n && chrome.i18n.getMessage('key_' + id);
+    return text || english;
+}
+
 /** label for 'enter' | 'alt' | 'mod' (the key that also opens a new window with a click) | 'shift' | 'esc' */
 export function keyLabel(key, mac) {
     const m = mac === undefined ? isMac() : mac;
     const labels = {
-        enter: m ? 'Return' : 'Enter',
-        alt: m ? '⌥ Option' : 'Alt',
-        mod: m ? '⌘' : 'Ctrl',
-        shift: '⇧ Shift',
-        esc: 'Esc',
+        enter: m ? keyName('return', 'Return') : keyName('enter', 'Enter'),
+        alt: m ? '⌥ ' + keyName('option', 'Option') : keyName('alt', 'Alt'),
+        mod: m ? '⌘' : keyName('ctrl', 'Ctrl'),
+        shift: '⇧ ' + keyName('shift', 'Shift'),
+        esc: keyName('esc', 'Esc'),
     };
     if (!(key in labels)) {
         throw new Error('Unknown key: ' + key);
@@ -29,7 +36,8 @@ export function keyLabel(key, mac) {
  */
 export function keyCombo(keys, mac) {
     const m = mac === undefined ? isMac() : mac;
-    const modifiers = m ? {shift: '⇧', alt: '⌥', mod: '⌘'} : {shift: 'Shift', alt: 'Alt', mod: 'Ctrl'};
+    const modifiers = m ? {shift: '⇧', alt: '⌥', mod: '⌘'} :
+        {shift: keyName('shift', 'Shift'), alt: keyName('alt', 'Alt'), mod: keyName('ctrl', 'Ctrl')};
     const names = keys.map((key) => modifiers[key] || (key === 'enter' || key === 'esc' ? keyLabel(key, m) : key));
     return names.join(m ? ' ' : '+');
 }

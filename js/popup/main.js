@@ -18,6 +18,8 @@ import {enableDrag} from './drag.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
+// "45%", "45 %" in French
+const percents = new Intl.NumberFormat(lang, {style: 'percent', maximumFractionDigits: 0});
 // key caps in tooltips
 const ENTER = keyCombo(['enter']);
 const ESC = keyCombo(['esc']);
@@ -162,7 +164,9 @@ async function openTabs(how, tabs) {
         res = {error: e.message};
     }
     if (!res || res.error) {
-        showBar(t('p_openFailed', (res && res.error) || ''));
+        // Chrome's reason is English and for developers: the console has it
+        console.error('TabHamster: open failed', res && res.error);
+        showBar(t('p_openFailed'));
         return false;
     }
     return true;
@@ -1208,7 +1212,7 @@ function renderFooter() {
     const usage = state.usage;
     if (usage) {
         const share = usage.quota ? usage.bytes / usage.quota : 0;
-        const percent = share > 0 && share < 0.01 ? '<1%' : Math.round(share * 100) + '%';
+        const percent = share > 0 && share < 0.01 ? '<' + percents.format(0.01) : percents.format(Math.round(share * 100) / 100);
         // a cloud instead of words: "Sync storage" took a line of its own in longer languages
         el.footer.append(setTip(h('span', {class: 'storage'},
             icon('cloud', 18),

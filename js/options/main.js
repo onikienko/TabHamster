@@ -198,7 +198,7 @@ function saving() {
 
 /** "Tax return, Trip, Work and 2 more" */
 function nameList(keys) {
-    const names = keys.slice(0, NAMES_SHOWN).map((key) => '“' + groupName(key, state.groups[key]) + '”');
+    const names = keys.slice(0, NAMES_SHOWN).map((key) => t('quotedName', groupName(key, state.groups[key])));
     if (keys.length > NAMES_SHOWN) {
         names.push(t('s_andMore', keys.length - NAMES_SHOWN));
     }
@@ -343,7 +343,7 @@ function about() {
             h('dd', null, person(...DEVELOPER)),
             h('dt', null, t('s_about_translations')),
             h('dd', null, TRANSLATORS.map(([code, name, url], i) =>
-                [i ? ', ' : '', languageName(code) + ': ', person(name, url)])),
+                [i ? ', ' : '', t('s_languageLabel', languageName(code)) + ' ', person(name, url)])),
             h('dt', null, t('s_about_thanks')),
             h('dd', null, person('Ricardo J. Barberis', 'https://github.com/richarson'))),
         h('p', {class: 'ukraine'}, h('span', {class: 'flag', 'aria-hidden': 'true'}), t('s_about_ukraine')),

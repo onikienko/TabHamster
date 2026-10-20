@@ -896,14 +896,8 @@
         "description": "Bar when copying to the clipboard failed"
     },
     "p_openFailed": {
-        "message": "Отварање картица није успело: $ERROR$",
-        "description": "Bar when Chrome refused to open a window (for example incognito is turned off by an administrator). ERROR is Chrome's message, in English",
-        "placeholders": {
-            "error": {
-                "content": "$1",
-                "example": "Incognito mode is disabled."
-            }
-        }
+        "message": "Отварање картица није успело.",
+        "description": "Bar when Chrome refused to open the tabs (for example incognito is turned off by an administrator)"
     },
     "p_restore": {
         "message": "Врати",
@@ -1886,5 +1880,53 @@
     "s_about_ukraine": {
         "message": "Слава Украјини",
         "description": "Settings page. About, next to the flag of Ukraine"
+    },
+    "key_enter": {
+        "message": "Enter",
+        "description": "Key name, as on keyboards and in Chrome's menus in this language (Windows, Linux)"
+    },
+    "key_return": {
+        "message": "Return",
+        "description": "Key name on a Mac keyboard (Return), as macOS calls it in this language"
+    },
+    "key_shift": {
+        "message": "Shift",
+        "description": "Key name (Shift), as Chrome's menus write it in this language"
+    },
+    "key_option": {
+        "message": "Option",
+        "description": "Key name on a Mac keyboard (Option), as macOS calls it in this language"
+    },
+    "key_esc": {
+        "message": "Esc",
+        "description": "Key name (Escape), as Chrome's menus write it in this language"
+    },
+    "key_alt": {
+        "message": "Alt",
+        "description": "Key name (Alt)"
+    },
+    "key_ctrl": {
+        "message": "Ctrl",
+        "description": "Key name (Control), as Chrome's menus write it in this language"
+    },
+    "quotedName": {
+        "message": "„$NAME$“",
+        "description": "A group name inside a sentence or a list, in this language's quotes",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "s_languageLabel": {
+        "message": "$LANGUAGE$:",
+        "description": "Settings page, About: before the translator's name (\"Spanish: Martin\")",
+        "placeholders": {
+            "language": {
+                "content": "$1",
+                "example": "Spanish"
+            }
+        }
     }
 }
