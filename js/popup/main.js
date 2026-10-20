@@ -1117,9 +1117,10 @@ function renderTabs() {
 
 function renderList() {
     closeMenu(false);
-    // the focused group name gets the focus back after the list is drawn again (Alt+↑ ↓ moves, reloads)
-    const focused = document.activeElement && document.activeElement.classList.contains('name') &&
-        el.list.contains(document.activeElement) ? document.activeElement.closest('.item').dataset.key : null;
+    // focus in a group (its name, a button, a tab) comes back to its name after the list is drawn again
+    // (Alt+↑ ↓ moves, reloads)
+    const focusedItem = el.list.contains(document.activeElement) && document.activeElement.closest('.item');
+    const focused = focusedItem ? focusedItem.dataset.key : null;
     drawList();
     fitColumns();
     if (focused) {
