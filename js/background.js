@@ -144,17 +144,20 @@ function isBlankTab(tab) {
     return !!tab && /^(chrome:\/\/(newtab|new-tab-page)\/?|about:blank)$/.test(tab.pendingUrl || tab.url || '');
 }
 
-// one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others
+// one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others.
+// {failed: how many didn't open, error: the last error}
 async function createTabs(windowId, tabs, activeFirst) {
     let failed = 0;
+    let error = null;
     for (let i = 0; i < tabs.length; i++) {
         try {
             await chrome.tabs.create({windowId, url: tabs[i].url, pinned: !!tabs[i].pinned, active: activeFirst && i === 0});
         } catch (e) {
             failed++;
+            error = e;
         }
     }
-    return failed;
+    return {failed, error};
 }
 
 const open_ops = {
@@ -170,8 +173,12 @@ const open_ops = {
                 // open it as a new tab like the others
             }
         }
-        const failed = await createTabs(active ? active.windowId : windowId, rest, rest === tabs);
-        return {failed};
+        const res = await createTabs(active ? active.windowId : windowId, rest, rest === tabs);
+        // nothing opened: the popup stays open (an opened tab would close it) and says why
+        if (res.failed === tabs.length) {
+            throw res.error;
+        }
+        return {failed: res.failed};
     },
     // opens with the first tab Chrome accepts (a refused one leaves no window), the rest follow
     window: async function (tabs) {
@@ -187,7 +194,7 @@ const open_ops = {
             if (tabs[i].pinned) {
                 await chrome.tabs.update(win.tabs[0].id, {pinned: true});
             }
-            return {failed: i + await createTabs(win.id, tabs.slice(i + 1), false)};
+            return {failed: i + (await createTabs(win.id, tabs.slice(i + 1), false)).failed};
         }
         throw error;
     },

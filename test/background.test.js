@@ -212,6 +212,15 @@ test('open in the current window: new tabs in order, the first one active', asyn
     ]);
 });
 
+test('open in the current window: some bad tabs are counted, all bad is an error', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'});
+    const bg = startBackground({browser});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: [{url: 'bad:1'}].concat(TABS), windowId: 1}),
+        {result: {failed: 1}});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: [{url: 'bad:1'}, {url: 'bad:2'}], windowId: 1}),
+        {error: 'Cannot open bad:2'});
+});
+
 test('open in the current window: a blank new tab takes the first tab', async () => {
     const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'});
     const bg = startBackground({browser});
