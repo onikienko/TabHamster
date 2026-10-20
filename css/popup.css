@@ -53,9 +53,10 @@ button {
     color: var(--field-ph);
 }
 
+/* room to type: the Save button gives way (js/popup/main.js renderSave), less of it next to a chip */
 #field {
-    flex: 1;
-    min-width: 0;
+    flex: 1 1 0;
+    min-width: 120px;
     height: 36px;
     padding: 0;
     border: 0;
@@ -67,6 +68,10 @@ button {
 
 #field::placeholder {
     color: var(--field-ph);
+}
+
+.field:has(> .chip:not([hidden])) #field {
+    min-width: 64px;
 }
 
 .clear {
@@ -106,11 +111,13 @@ button {
 }
 
 .save {
-    flex: none;
+    flex: 0 1 auto;
     display: flex;
     align-items: center;
     gap: 6px;
+    min-width: 0;
     max-width: 190px;
+    overflow: hidden;
     height: 32px;
     padding: 0 10px 0 12px;
     border: 0;
@@ -123,6 +130,19 @@ button {
 
 .save .icon {
     flex: none;
+}
+
+.save-text {
+    display: flex;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.save-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .save:focus-visible {
@@ -483,6 +503,13 @@ body.keyboard .row:has(:focus) .end-meta {
     flex: 1;
 }
 
+.storage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
 .meter {
     width: 56px;
     height: 6px;
@@ -518,6 +545,7 @@ body.keyboard .row:has(:focus) .end-meta {
     color: var(--warn);
     font-size: 12px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .not-synced[aria-pressed="true"] {
@@ -746,7 +774,7 @@ body.keyboard .row:has(:focus) .end-meta {
     display: flex;
     flex-direction: column;
     gap: 1px;
-    width: 252px;
+    width: 272px;
     padding: 6px;
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -792,6 +820,11 @@ body.keyboard .row:has(:focus) .end-meta {
     display: flex;
     flex-direction: column;
     min-width: 0;
+}
+
+/* a long label (other languages) takes a second line; the sub line (a tab title) is cut */
+.menu-label {
+    overflow-wrap: anywhere;
 }
 
 .menu-sub {

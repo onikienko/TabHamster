@@ -26,11 +26,11 @@
     },
     "p_tabName_Saved": {
         "message": "Saved groups",
-        "description": ""
+        "description": "Tab, half the popup width: about 20 characters."
     },
     "p_tabName_Sessions": {
         "message": "Sessions",
-        "description": ""
+        "description": "Tab, half the popup width: about 20 characters."
     },
     "p_synStorageUsage_title": {
         "message": "Browser's sync storage usage",
@@ -324,7 +324,7 @@
     },
     "p_field_placeholder": {
         "message": "Search or name a group",
-        "description": "Popup field: it searches saved groups, and its text is the name of a new group"
+        "description": "Popup field: it searches saved groups, and its text is the name of a new group. Placeholder: about 16 characters fit next to the Save button, more is cut off."
     },
     "p_field_label": {
         "message": "Search groups, or name a new one",
@@ -332,7 +332,7 @@
     },
     "p_saveTabs_one": {
         "message": "Save $COUNT$ tab",
-        "description": "Save button, one tab (plural form 'one')",
+        "description": "Save button, one tab (plural form 'one'). Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead.",
         "placeholders": {
             "count": {
                 "content": "$1",
@@ -342,7 +342,7 @@
     },
     "p_saveTabs_other": {
         "message": "Save $COUNT$ tabs",
-        "description": "Save button (plural form 'other'). Translations may add _few, _many forms",
+        "description": "Save button (plural form 'other'). Translations may add _few, _many forms. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead.",
         "placeholders": {
             "count": {
                 "content": "$1",
@@ -392,7 +392,7 @@
     },
     "p_notSyncedGroups_one": {
         "message": "$COUNT$ group not synced",
-        "description": "Popup footer (plural form 'one')",
+        "description": "Popup footer (plural form 'one'). Footer button: about 26 characters with the number.",
         "placeholders": {
             "count": {
                 "content": "$1",
@@ -402,7 +402,7 @@
     },
     "p_notSyncedGroups_other": {
         "message": "$COUNT$ groups not synced",
-        "description": "Popup footer (plural form 'other')",
+        "description": "Popup footer (plural form 'other'). Footer button: about 26 characters with the number.",
         "placeholders": {
             "count": {
                 "content": "$1",
@@ -410,9 +410,19 @@
             }
         }
     },
-    "p_syncStorage": {
-        "message": "Sync storage",
-        "description": "Popup footer, before the usage meter"
+    "p_syncStorage_title": {
+        "message": "Chrome sync storage: $USED$ of $QUOTA$ KB used. Your groups are kept there so they reach your other computers. When it is full, new groups stay on this computer until there is room.",
+        "description": "Tooltip of the sync storage meter in the popup footer",
+        "placeholders": {
+            "used": {
+                "content": "$1",
+                "example": "12.4"
+            },
+            "quota": {
+                "content": "$2",
+                "example": "100"
+            }
+        }
     },
     "p_syncStorageUsed": {
         "message": "$PERCENT$ of Chrome sync storage used",
@@ -426,7 +436,7 @@
     },
     "p_open": {
         "message": "Open",
-        "description": "Button on a group row: open its tabs in this window"
+        "description": "Button on a group row: open its tabs in this window. Small button on a row: one short word."
     },
     "p_openNewWindow": {
         "message": "Open in new window",
@@ -468,7 +478,7 @@
     },
     "p_saveAs": {
         "message": "Save as “$NAME$”",
-        "description": "Save button while a new group name is typed",
+        "description": "Save button while a new group name is typed. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead.",
         "placeholders": {
             "name": {
                 "content": "$1",
@@ -478,7 +488,15 @@
     },
     "p_replaceGroup": {
         "message": "Replace group",
-        "description": "Save button when the typed name is the name of a saved group: its tabs will be replaced by the open tabs"
+        "description": "Save button when the typed name is the name of a saved group: its tabs will be replaced by the open tabs. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead."
+    },
+    "p_saveShort": {
+        "message": "Save",
+        "description": "Save button when its full text leaves too little room to type in the field. One short word, about 10 characters."
+    },
+    "p_replaceShort": {
+        "message": "Replace",
+        "description": "Replace group button when its full text leaves too little room to type in the field. One short word, about 10 characters."
     },
     "p_savedAs_one": {
         "message": "Saved $COUNT$ tab as “$NAME$”",
@@ -542,7 +560,7 @@
     },
     "p_field_placeholder_first": {
         "message": "Name your first group",
-        "description": "Popup field before any group is saved (the name is optional)"
+        "description": "Popup field before any group is saved (the name is optional). Placeholder: about 16 characters fit next to the Save button, more is cut off."
     },
     "p_empty_title": {
         "message": "Save your first group",
@@ -868,7 +886,7 @@
     },
     "p_restore": {
         "message": "Restore",
-        "description": "Button on a session row: opens its windows as they were"
+        "description": "Button on a session row: opens its windows as they were. Small button on a row: one short word."
     },
     "p_sessionStarted": {
         "message": "Started $TIME$",
@@ -954,23 +972,23 @@
     },
     "p_filterUnsynced": {
         "message": "Not synced",
-        "description": "Chip in the popup's field while only groups that are not synced are shown"
+        "description": "Chip in the popup's field while only groups that are not synced are shown. Chip inside the field: about 16 characters."
     },
     "p_filterBiggest": {
         "message": "Biggest first",
-        "description": "Chip in the popup's field while groups are sorted by the space they take in sync storage"
+        "description": "Chip in the popup's field while groups are sorted by the space they take in sync storage. Chip inside the field: about 16 characters."
     },
     "p_removeFilter": {
         "message": "Remove filter",
         "description": "Button on the chip in the popup's field"
     },
     "p_field_placeholder_unsynced": {
-        "message": "Search these groups",
-        "description": "Placeholder of the popup's field while only groups that are not synced are shown"
+        "message": "Search",
+        "description": "Placeholder of the popup's field while only groups that are not synced are shown. Placeholder next to a chip: one short word."
     },
     "p_field_placeholder_biggest": {
-        "message": "Search groups",
-        "description": "Placeholder of the popup's field while groups are sorted by size"
+        "message": "Search",
+        "description": "Placeholder of the popup's field while groups are sorted by size. Placeholder next to a chip: one short word."
     },
     "p_unsyncedNote_title_one": {
         "message": "$COUNT$ group is saved on this computer only",
@@ -993,7 +1011,7 @@
         }
     },
     "p_unsyncedNote_full_one": {
-        "message": "Chrome sync storage for TabHamster is full ($USED$ of $QUOTA$ KB), so this group doesn’t reach your other computers. It is safe here, and it syncs on its own as soon as there is room.",
+        "message": "Chrome sync storage is full ($USED$ of $QUOTA$ KB). It is safe here and syncs on its own when there is room.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1011,7 +1029,7 @@
         }
     },
     "p_unsyncedNote_full_other": {
-        "message": "Chrome sync storage for TabHamster is full ($USED$ of $QUOTA$ KB), so these groups don’t reach your other computers. They are safe here, and they sync on their own as soon as there is room.",
+        "message": "Chrome sync storage is full ($USED$ of $QUOTA$ KB). They are safe here and sync on their own when there is room.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1029,7 +1047,7 @@
         }
     },
     "p_unsyncedNote_later_one": {
-        "message": "Chrome sync hasn’t taken it yet, so it doesn’t reach your other computers. It is safe here and syncs on its own later.",
+        "message": "Chrome sync hasn’t taken it yet. It is safe here and syncs on its own later.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1039,7 +1057,7 @@
         }
     },
     "p_unsyncedNote_later_other": {
-        "message": "Chrome sync hasn’t taken them yet, so they don’t reach your other computers. They are safe here and sync on their own later.",
+        "message": "Chrome sync hasn’t taken them yet. They are safe here and sync on their own later.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {

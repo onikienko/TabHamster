@@ -1045,14 +1045,18 @@ function renderFooter() {
     if (usage) {
         const share = usage.quota ? usage.bytes / usage.quota : 0;
         const percent = share > 0 && share < 0.01 ? '<1%' : Math.round(share * 100) + '%';
-        el.footer.append(
-            h('span', null, t('p_syncStorage')),
+        // a cloud instead of words: "Sync storage" took a line of its own in longer languages
+        el.footer.append(h('span', {
+                class: 'storage',
+                title: t('p_syncStorage_title', [kilobytes(usage.bytes, lang), kilobytes(usage.quota, lang, 0)]),
+            },
+            icon('cloud', 15),
             h('div', {
                     class: ['meter', share >= 0.95 ? 'full' : share >= 0.8 ? 'warn' : ''],
                     role: 'img', 'aria-label': t('p_syncStorageUsed', percent),
                 },
                 h('span', {style: {width: Math.min(100, share * 100) + '%'}})),
-            h('span', {class: 'num'}, percent));
+            h('span', {class: 'num'}, percent)));
     }
     el.footer.append(h('span', {class: 'spacer'}));
     const unsynced = waitingKeys().length;
@@ -1073,7 +1077,23 @@ function renderSave() {
     el.clear.hidden = !el.field.value;
     clear(el.save);
     el.save.title = label;
-    el.save.append(h('span', {class: 'ellipsis'}, label), icon('enter', 14));
+    el.save.removeAttribute('aria-label');
+    // the field keeps room to type (css/popup.css): "Save as “…”" cuts the name first (it is in the field anyway)
+    const around = intent.kind !== 'replace' && intent.name ? t('p_saveAs', '').split('') : null;
+    const text = h('span', {class: 'save-text'}, ...(around ?
+        [around[0], h('span', {class: 'save-name'}, intent.name), around[1]] : [label]));
+    el.save.append(text, icon('enter', 14));
+    const cut = (node) => node.scrollWidth > node.clientWidth;
+    const name = text.querySelector('.save-name');
+    // still too long, or the name cut to a letter or two (longer languages, a chip in the field): "Save", "Replace";
+    // if even that doesn't fit, only the ↵ icon (the full label is the tooltip)
+    if (cut(text) || name && cut(name) && name.clientWidth < 28) {
+        text.replaceChildren(t(intent.kind === 'replace' ? 'p_replaceShort' : 'p_saveShort'));
+        el.save.setAttribute('aria-label', label);
+        if (cut(text)) {
+            text.remove();
+        }
+    }
     el.field.placeholder = t(state.filter ? 'p_field_placeholder_' + state.filter :
         Object.keys(state.groups).length || state.groupsError ? 'p_field_placeholder' : 'p_field_placeholder_first');
 }

@@ -72,7 +72,7 @@ export function openMenu(anchor, items, {label, onClose} = {}) {
                 },
                 icon(item.icon, 16),
                 h('span', {class: 'menu-text'},
-                    h('span', {class: 'ellipsis'}, item.label),
+                    h('span', {class: 'menu-label'}, item.label),
                     item.sub ? h('span', {class: 'menu-sub ellipsis'}, item.sub) : null));
             buttons.push(button);
             return button;
