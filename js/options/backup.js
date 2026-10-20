@@ -152,7 +152,11 @@ async function restore(text, button) {
     if (undoButton) {
         undoButton.focus();
     }
-    showBar(res.groups ? plural('s_restored', res.groups) : t('o_backup_restored'),
+    // groups that couldn't get into sync are kept on this computer (sync full, or a write limit): the bar says so
+    const errors = Object.values(res.errors || {});
+    const note = !errors.length ? '' :
+        ' ' + t(errors.some((e) => /quota/i.test(e)) ? 'p_notSyncedYet' : 'p_savedLocally_later');
+    showBar((res.groups ? plural('s_restored', res.groups) : t('o_backup_restored')) + note,
         {label: t('p_undo_btn'), run: undoRestore});
 }
 
