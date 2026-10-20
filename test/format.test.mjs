@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {domainToASCII} from 'node:url';
 import {keyTime, numericDate, shortDate, shortTime, dayName, dayTime, interval, hostOf, kilobytes, listDate, fullDate} from '../js/ui/format.js';
 
 test('keyTime reads tg_<ms> keys', () => {
@@ -17,6 +18,25 @@ test('shortDate adds the year only for another year', () => {
     const now = new Date(2026, 9, 16).getTime();
     assert.equal(shortDate(new Date(2026, 9, 15).getTime(), 'en-US', now), 'Oct 15');
     assert.equal(shortDate(new Date(2025, 9, 15).getTime(), 'en-US', now), 'Oct 15, 2025');
+});
+
+test('hostOf shows xn-- names readable, except Latin mixed with another script', () => {
+    // new URL() gives the xn-- form, as Chrome stores tab addresses
+    assert.equal(hostOf('https://домен.укр/сторінка'), 'домен.укр');
+    assert.equal(hostOf('https://www.пример.срб/'), 'пример.срб');
+    assert.equal(hostOf('https://bücher.example/'), 'bücher.example');
+    assert.equal(hostOf('https://例え.jp/'), '例え.jp');
+    // "аpple" with a Cyrillic а
+    assert.equal(hostOf('https://\u0430pple.com/'), domainToASCII('\u0430pple.com'));
+});
+
+test('hostOf decodes like Node for many labels', () => {
+    const words = ['київ', 'україна', 'Ελλάδα', 'בדיקה', 'テスト', '中文网', 'ñandú', 'straße', 'mañana-123', 'éé', 'ăâîșț'];
+    for (const word of words) {
+        const ascii = domainToASCII(word + '.example');
+        assert.equal(hostOf('https://' + ascii + '/'), new URL('https://' + ascii).host.split('.').map((label, i) =>
+            i === 0 ? word.toLowerCase().normalize('NFC') : label).join('.'), word);
+    }
 });
 
 test('hostOf drops www and copes with addresses without a host', () => {

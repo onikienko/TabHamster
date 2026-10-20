@@ -106,11 +106,89 @@ export function kilobytes(bytes, lang, digits = 1) {
     return formatter(Intl.NumberFormat, lang, {minimumFractionDigits: digits, maximumFractionDigits: digits}).format(kb);
 }
 
-/** "github.com" for "https://www.github.com/x"; the address itself when it has no host (about:blank, data:) */
+// Punycode (RFC 3492), for host names: "xn--d1acufc" -> "домен"
+const PUNY = {base: 36, tMin: 1, tMax: 26, skew: 38, damp: 700};
+
+function adapt(delta, points, first) {
+    let k = 0;
+    delta = first ? Math.floor(delta / PUNY.damp) : delta >> 1;
+    delta += Math.floor(delta / points);
+    while (delta > ((PUNY.base - PUNY.tMin) * PUNY.tMax) >> 1) {
+        delta = Math.floor(delta / (PUNY.base - PUNY.tMin));
+        k += PUNY.base;
+    }
+    return k + Math.floor((PUNY.base - PUNY.tMin + 1) * delta / (delta + PUNY.skew));
+}
+
+function punyDigit(code) {
+    if (code >= 48 && code <= 57) {
+        return code - 22;
+    }
+    if (code >= 65 && code <= 90) {
+        return code - 65;
+    }
+    if (code >= 97 && code <= 122) {
+        return code - 97;
+    }
+    return PUNY.base;
+}
+
+/** the label after "xn--"; throws on a broken one */
+function punyDecode(input) {
+    const end = input.lastIndexOf('-');
+    const out = end > 0 ? Array.from(input.slice(0, end)) : [];
+    let pos = end > 0 ? end + 1 : 0;
+    let n = 128;
+    let i = 0;
+    let bias = 72;
+    while (pos < input.length) {
+        const old = i;
+        for (let w = 1, k = PUNY.base; ; k += PUNY.base) {
+            const digit = pos < input.length ? punyDigit(input.charCodeAt(pos++)) : PUNY.base;
+            if (digit >= PUNY.base) {
+                throw new Error('Bad punycode');
+            }
+            i += digit * w;
+            const t = k <= bias ? PUNY.tMin : k >= bias + PUNY.tMax ? PUNY.tMax : k - bias;
+            if (digit < t) {
+                break;
+            }
+            w *= PUNY.base - t;
+        }
+        bias = adapt(i - old, out.length + 1, old === 0);
+        n += Math.floor(i / (out.length + 1));
+        i %= out.length + 1;
+        if (n > 0x10FFFF) {
+            throw new Error('Bad punycode');
+        }
+        out.splice(i++, 0, String.fromCodePoint(n));
+    }
+    return out.join('');
+}
+
+// Latin letters mixed with letters of another script ("аpple" with a Cyrillic "а") stay in xn-- form, as Chrome
+// shows them: they can pass for another address
+function readableLabel(label) {
+    if (!/^xn--/i.test(label)) {
+        return label;
+    }
+    try {
+        const text = punyDecode(label.slice(4).toLowerCase());
+        const mixed = /[a-z]/i.test(text) && /[^\p{Script=Latin}\p{Script=Common}\p{Script=Inherited}]/u.test(text);
+        return mixed ? label : text;
+    } catch (e) {
+        return label;
+    }
+}
+
+/**
+ * "github.com" for "https://www.github.com/x", "домен.укр" for its xn-- form; the address itself when it has no host
+ * (about:blank, data:)
+ */
 export function hostOf(url) {
     try {
         const host = new URL(url).host;
-        return host ? host.replace(/^www\./, '') : String(url);
+        return host ? host.replace(/^www\./, '').split('.').map(readableLabel).join('.') : String(url);
     } catch (e) {
         return String(url || '');
     }
