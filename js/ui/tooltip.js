@@ -8,6 +8,9 @@
 //   keys   ['Return'] or ['⇧ Return']: key caps after the text (platform.js keyCombo)
 //   align  'center' (default) under the element, or 'start' at its left edge (names, tab rows)
 //   focus  false: not shown when the element gets keyboard focus (rows moved through with ↑ ↓)
+//   quiet  for rows of a list: only after a longer rest, never at once after another tooltip (moving the pointer
+//          over the list shows nothing)
+//   when   (element) => boolean: shown only then (e.g. only when the row cuts its text off)
 // The text is for sighted users; the element keeps its own name for screen readers (aria-label), and a tooltip
 // shown on keyboard focus is also its description while it shows.
 
@@ -15,6 +18,7 @@ import {h} from './dom.js';
 
 // hover this long before the first tooltip shows; after one was shown, the next one shows at once for a moment
 const DELAY_MS = 400;
+const QUIET_MS = 800;
 const WARM_MS = 300;
 const GAP = 6;
 const MARGIN = 8;
@@ -82,7 +86,7 @@ function show(el, byKeyboard) {
     const spec = tips.get(el);
     // not over an open menu (its ⋯ button), not while dragging a row
     if (!spec || !el.isConnected || el.getAttribute('aria-expanded') === 'true' ||
-        document.body.classList.contains('dragging')) {
+        document.body.classList.contains('dragging') || (spec.when && !spec.when(el))) {
         return;
     }
     hideTip();
@@ -122,12 +126,19 @@ function later(el) {
     if (el === pending) {
         return;
     }
+    const spec = tips.get(el);
+    if (spec.when && !spec.when(el)) {
+        hideTip();
+        return;
+    }
     clearTimeout(timer);
-    if (box && !box.hidden || Date.now() < warmUntil) {
+    if (!spec.quiet && (box && !box.hidden || Date.now() < warmUntil)) {
         show(el, false);
     } else {
+        // the one shown so far goes, the next one waits
+        hideTip();
         pending = el;
-        timer = setTimeout(() => show(el, false), DELAY_MS);
+        timer = setTimeout(() => show(el, false), spec.quiet ? QUIET_MS : DELAY_MS);
     }
 }
 

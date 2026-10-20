@@ -274,7 +274,9 @@ function trashRow(group) {
     button.addEventListener('click', () => restoreGroup(group, button));
     return h('li', {class: 'row'},
         h('div', {class: 'row-label'},
-            setTip(h('span', {class: 'row-title ellipsis', dir: 'auto'}, name), {text: name, bold: true, align: 'start'}),
+            // only for a name the row cuts off
+            setTip(h('span', {class: 'row-title ellipsis', dir: 'auto'}, name),
+                {text: name, bold: true, align: 'start', when: (node) => node.scrollWidth > node.clientWidth}),
             h('p', {class: 'row-text'}, meta.join(' · '))),
         button);
 }

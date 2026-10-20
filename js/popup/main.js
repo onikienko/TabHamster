@@ -787,6 +787,11 @@ function sessionName(key) {
     return updated ? interval(start, updated, lang) : t('p_sessionStarted', dayTime(start, lang, undefined, false));
 }
 
+/** the element cuts its text off ("…") */
+function isCut(node) {
+    return node.scrollWidth > node.clientWidth;
+}
+
 function favicon(url) {
     const box = h('span', {class: 'fav', 'aria-hidden': 'true'});
     const img = h('img', {src: faviconUrl(url), alt: '', width: 16, height: 16});
@@ -796,11 +801,15 @@ function favicon(url) {
 }
 
 function tabRow(tab) {
+    const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
+    // only for a title the row cuts off: the full title and the address
     return setTip(h('a', {class: 'tab-row', href: tab.url, target: '_blank'},
         favicon(tab.url),
         tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
-        h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url)),
-        h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url)))), {text: tab.url, align: 'start', focus: false});
+        title,
+        h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url)))),
+    {text: tab.title || tab.url, sub: tab.title ? tab.url : null, align: 'start', focus: false, quiet: true,
+        when: () => isCut(title)});
 }
 
 // saved groups and sessions both use tg_<ms> keys, so an id includes the view.
@@ -849,8 +858,8 @@ function nameButton(id, auto, label, sub, open, newWindow, details) {
             }
         },
     }, marked(label));
-    // not on keyboard focus: ↑ ↓ go through the names one after another
-    return setTip(button, {text: label, sub, bold: true, align: 'start', focus: false});
+    // only for a name the row cuts off; not on keyboard focus: ↑ ↓ go through the names one after another
+    return setTip(button, {text: label, sub, bold: true, align: 'start', focus: false, quiet: true, when: isCut});
 }
 
 /** "9 tabs", or "2 of 9 tabs" for an item found through its tabs */
@@ -961,7 +970,8 @@ function sessionItem(result) {
     const item = h('div', {class: 'item', dataset: {key}},
         h('div', {class: 'row'},
             current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron('sessions:' + key, partial),
-            current ? setTip(h('span', {class: 'name ellipsis'}, marked(name)), {text: name, align: 'start', focus: false}) :
+            current ? setTip(h('span', {class: 'name ellipsis'}, marked(name)),
+                {text: name, align: 'start', focus: false, quiet: true, when: isCut}) :
                 nameButton('sessions:' + key, partial, name,
                     (windows.length > 1 ? plural('p_windowsCount', windows.length) + ' · ' : '') +
                     plural('p_tabsCount', session.tabs.length), () => restoreSession(session), null, [
@@ -1143,16 +1153,15 @@ function renderSave() {
     const text = h('span', {class: 'save-text'}, ...(around ?
         [around[0], h('span', {class: 'save-name'}, intent.name), around[1]] : [label]));
     el.save.append(text, icon('enter', 14));
-    const cut = (node) => node.scrollWidth > node.clientWidth;
     const name = text.querySelector('.save-name');
     // still too long, or the name cut to a letter or two (longer languages, a chip in the field): "Save", "Replace";
     // if even that doesn't fit, only the ↵ icon (the full label is the tooltip)
-    if (cut(text) || name && cut(name) && name.clientWidth < 28) {
+    if (isCut(text) || name && isCut(name) && name.clientWidth < 28) {
         text.replaceChildren(t(intent.kind === 'replace' ? 'p_replaceShort' : 'p_saveShort'));
         el.save.setAttribute('aria-label', label);
         // the button says it all unless it had to be shortened
         setTip(el.save, {text: label, keys: [ENTER]});
-        if (cut(text)) {
+        if (isCut(text)) {
             text.remove();
         }
     }
