@@ -1259,13 +1259,16 @@ async function start() {
 
     enableDrag(el.list, {
         enabled: canReorder,
+        // the floating copy looks like the row (name, not-synced mark, count, date), without its buttons
         ghost: (item) => {
-            const group = state.groups[item.dataset.key];
-            return [
-                icon('grip', 16),
-                h('span', {class: 'ellipsis'}, groupName(item.dataset.key, group)),
-                h('span', {class: 'num'}, plural('p_tabsCount', group.tabs.length)),
-            ];
+            const row = item.querySelector('.row').cloneNode(true);
+            row.querySelector('.actions').remove();
+            row.querySelectorAll('[data-toggle]').forEach((node) => node.removeAttribute('data-toggle'));
+            // column widths are set on the list, the copy is outside it
+            for (const column of ['count', 'date', 'size', 'wins']) {
+                row.style.setProperty('--w-' + column, el.list.style.getPropertyValue('--w-' + column));
+            }
+            return row;
         },
         drop: moveGroup,
     });

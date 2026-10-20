@@ -922,31 +922,10 @@ body.keyboard .row:has(:focus) .end-meta {
 .drag-ghost {
     position: fixed;
     z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 34px;
-    padding: 0 12px 0 6px;
     border-radius: 8px;
     background: var(--raised);
     box-shadow: var(--shadow);
     pointer-events: none;
-}
-
-.drag-ghost .icon,
-.drag-ghost .num {
-    flex: none;
-    color: var(--muted);
-}
-
-.drag-ghost .ellipsis {
-    flex: 1;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.drag-ghost .num {
-    font-size: 12px;
 }
 
 body.dragging,

@@ -24,6 +24,23 @@ function wordRegExp(word) {
     return new RegExp(escapeRegExp(word), 'giu');
 }
 
+/** the word where a word of the text starts: at the start or after something that is not a letter, mark or digit */
+function wordStartRegExp(word) {
+    return new RegExp('(?<![\\p{L}\\p{M}\\p{N}])' + escapeRegExp(word), 'giu');
+}
+
+function ranges(s, re) {
+    const found = [];
+    let m;
+    while ((m = re.exec(s)) !== null) {
+        found.push([m.index, m.index + m[0].length]);
+        if (m[0].length === 0) {
+            re.lastIndex++;
+        }
+    }
+    return found;
+}
+
 /** true if every word is in the text */
 export function matchesAll(text, words) {
     const s = String(text || '');
@@ -32,27 +49,22 @@ export function matchesAll(text, words) {
 
 /**
  * The text split into parts for highlighting: [{text, hit}]. Overlapping matches merge.
- * Without words it is one part that is not a hit.
+ * A word found where a word of the text starts is highlighted only there ("to" lights up "Tofino", not the middle
+ * of "photos"); otherwise wherever it is found. Without words it is one part that is not a hit.
  */
 export function segments(text, words) {
     const s = String(text || '');
-    const ranges = [];
+    const hits = [];
     for (const w of words) {
-        const re = wordRegExp(w);
-        let m;
-        while ((m = re.exec(s)) !== null) {
-            ranges.push([m.index, m.index + m[0].length]);
-            if (m[0].length === 0) {
-                re.lastIndex++;
-            }
-        }
+        const starts = ranges(s, wordStartRegExp(w));
+        hits.push(...(starts.length ? starts : ranges(s, wordRegExp(w))));
     }
-    if (!ranges.length) {
+    if (!hits.length) {
         return [{text: s, hit: false}];
     }
-    ranges.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
-    const merged = [ranges[0].slice()];
-    for (const [start, end] of ranges.slice(1)) {
+    hits.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
+    const merged = [hits[0].slice()];
+    for (const [start, end] of hits.slice(1)) {
         const last = merged[merged.length - 1];
         if (start <= last[1]) {
             last[1] = Math.max(last[1], end);

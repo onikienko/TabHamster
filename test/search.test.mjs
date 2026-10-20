@@ -26,6 +26,21 @@ test('segments marks matches and merges overlaps', () => {
     assert.deepEqual(segments('abc', []), [{text: 'abc', hit: false}]);
 });
 
+test('segments: a word that starts a word is highlighted only there, else wherever it is', () => {
+    const hits = (text, query) => segments(text, parseQuery(query)).filter((p) => p.hit).map((p) => p.text);
+    assert.deepEqual(hits('Tofino trip photos', 'trip to tofino'), ['Tofino', 'trip']);
+    assert.deepEqual(hits('Trip to Tofino', 'trip to tofino'), ['Trip', 'to', 'Tofino']);
+    // only inside words: still shown, so it's clear why the group is in the list
+    assert.deepEqual(hits('Tofino trip photos', 'oto'), ['oto']);
+    // after punctuation, in addresses, in other scripts
+    assert.deepEqual(hits('developer.chrome.com', 'chrome'), ['chrome']);
+    assert.deepEqual(hits('dev.to/x', 'to'), ['to']);
+    assert.deepEqual(hits('Погода: Київ', 'киї'), ['Киї']);
+    assert.deepEqual(hits('Погода: Київ', 'од'), ['од']);
+    // no word starts in Japanese text: matched where it is
+    assert.deepEqual(hits('東京の天気', '天気'), ['天気']);
+});
+
 const items = [
     {key: 'mc', name: 'Morning coffee', tabs: [{title: 'CBC News', url: 'https://www.cbc.ca/news'}]},
     {key: 'ed', name: 'Extensions dev', tabs: [{title: 'chrome.storage', url: 'https://developer.chrome.com/docs'}]},
