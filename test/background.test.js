@@ -57,11 +57,12 @@ function fakeBrowser(active) {
     };
 }
 
-function startBackground({sync = createSyncArea(), local = createStorageArea(), browser = fakeBrowser()} = {}) {
+function startBackground({sync = createSyncArea(), local = createStorageArea(), session = createStorageArea(),
+    browser = fakeBrowser()} = {}) {
     // messages the background sends to open pages; like Chrome, it fails when no page listens
     const sent = [];
     const chrome = {
-        storage: {sync, local, session: createStorageArea(), onChanged: event()},
+        storage: {sync, local, session, onChanged: event()},
         runtime: {
             onInstalled: event(), onMessage: event(), onUpdateAvailable: event(), reload() {},
             sendMessage(msg) {
@@ -492,6 +493,54 @@ test('trash: says where a group was deleted', async () => {
     await bg.groups('restore', 'tg_2');
     await bg.groups('remove', 'tg_2');
     assert.equal((await bg.groups('listTrash')).result.find(g => g.key === 'tg_2').by, 'here');
+});
+
+// a few turns of the event loop, for the background's storage calls
+async function settle() {
+    for (let i = 0; i < 20; i++) {
+        await new Promise(resolve => setTimeout(resolve, 5));
+    }
+}
+
+async function sessionKeys(local) {
+    return Object.keys(await local.get(null)).filter(k => k.startsWith('tg_'));
+}
+
+test('sessions: a start-up and a switch at the same time start one session', async () => {
+    const local = createStorageArea();
+    const session = createStorageArea();
+    // a new session starts by setting session_id (each in its own millisecond in Chrome, so a second one is a second session)
+    let started = 0;
+    const set = session.set.bind(session);
+    session.set = items => {
+        started += items.session_id ? 1 : 0;
+        return set(items);
+    };
+    const bg = startBackground({local, session});
+    // the worker woke up because the option changed: start-up and the storage listener both see sessions on
+    bg.chrome.storage.onChanged.listeners.forEach(fn => fn({session_watcher: {newValue: 1}}, 'sync'));
+    bg.chrome.tabs.onRemoved.listeners.forEach(fn => fn(5, {}));
+    await settle();
+    assert.equal(started, 1);
+    assert.equal((await sessionKeys(local)).length, 1);
+});
+
+test('sessions: turned off while a session is being written, it stays off', async () => {
+    const sync = createSyncArea();
+    const bg = startBackground({sync});
+    await waitFor(async () => (await bg.chrome.storage.session.get('session_id')).session_id);
+    await bg.chrome.storage.session.remove('session_id');
+    // a tab event starts a new session; the switch comes before that write is done
+    bg.chrome.tabs.onRemoved.listeners.forEach(fn => fn(5, {}));
+    await sync.set({session_watcher: 0});
+    bg.chrome.storage.onChanged.listeners.forEach(fn => fn({session_watcher: {newValue: 0}}, 'sync'));
+    await settle();
+    assert.equal((await bg.chrome.storage.session.get('session_id')).session_id, undefined);
+    // and later tab events write nothing
+    const before = await sessionKeys(bg.chrome.storage.local);
+    bg.chrome.tabs.onRemoved.listeners.forEach(fn => fn(6, {}));
+    await settle();
+    assert.deepEqual(await sessionKeys(bg.chrome.storage.local), before);
 });
 
 test('sessions switch: listeners and the current session follow the option without a reload', async () => {

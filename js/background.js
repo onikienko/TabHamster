@@ -307,52 +307,64 @@ groups.migrate().then(() => groups.reconcile()).catch(e => console.error('TabHam
 
 /*SESSION WATCHER*/
 
-// remove the oldest session from chrome.storage.local (if sessions numbers >= config.session_numbers).
-// Only `tg_` keys are sessions: local storage also holds saved group copies (`lg_`).
-function cleanupSessions() {
-    chrome.storage.local.get(function (items) {
-        const session_keys = Object.keys(items).filter(function (key) {
-            return key.indexOf(session_config.prefix) === 0;
-        });
+// Session writes and switching sessions on or off run one after another: two writes at once could each start a
+// session, and a write still running when sessions are turned off could start one again after the switch.
+let session_queue = Promise.resolve();
 
-        if (session_keys.length >= session_config.session_numbers) {
-            const time = key => parseInt(key.slice(session_config.prefix.length), 10);
-            session_keys.sort((a, b) => time(a) - time(b));
-            chrome.storage.local.remove(session_keys[0]);
-        }
-    });
+function inSessionQueue(fn) {
+    session_queue = session_queue.then(fn).catch(e => console.error('TabHamster: session update failed', e));
+    return session_queue;
 }
 
-async function updateCurrentSession() {
+// remove the oldest session from chrome.storage.local (if sessions numbers >= config.session_numbers).
+// Only `tg_` keys are sessions: local storage also holds saved group copies (`lg_`).
+async function cleanupSessions() {
+    const items = await chrome.storage.local.get(null);
+    const session_keys = Object.keys(items).filter(function (key) {
+        return key.indexOf(session_config.prefix) === 0;
+    });
+
+    if (session_keys.length >= session_config.session_numbers) {
+        const time = key => parseInt(key.slice(session_config.prefix.length), 10);
+        session_keys.sort((a, b) => time(a) - time(b));
+        await chrome.storage.local.remove(session_keys[0]);
+    }
+}
+
+async function sessionsOn() {
+    const options = await storage.area.get({session_watcher: storage.default_options.session_watcher});
+    return !!options.session_watcher;
+}
+
+// writes the current session (starts one if there is none); only in the queue
+async function writeSession() {
     const session_storage = await chrome.storage.session.get('session_id');
     let session_id = session_storage.session_id;
     if (!session_id) {
         session_id = session_config.prefix + (new Date()).getTime();
         await chrome.storage.session.set({session_id});
-
-        cleanupSessions();
+        await cleanupSessions();
     }
-    chrome.tabs.query({}, function (tabs) {
-        // updated: when the session last changed, so the popup can show "14:02–23:05" (sessions from 0.4.0 don't have it)
-        const session = {
-            name: '',
-            updated: Date.now(),
-            tabs: [],
-        };
-        const obj = {};
-        tabs.forEach(function (tab) {
-            const obj = {};
-            if (!tab.url.startsWith('chrome-devtools://')) {
-                obj.pinned = tab.pinned;
-                obj.title = tab.title;
-                obj.url = tab.url;
-                obj.windowId = tab.windowId;
-                session.tabs.push(obj);
-            }
-        });
+    const tabs = await chrome.tabs.query({});
+    // updated: when the session last changed, so the popup can show "14:02–23:05" (sessions from 0.4.0 don't have it)
+    const session = {
+        name: '',
+        updated: Date.now(),
+        tabs: [],
+    };
+    tabs.forEach(function (tab) {
+        if (!tab.url.startsWith('chrome-devtools://')) {
+            session.tabs.push({pinned: tab.pinned, title: tab.title, url: tab.url, windowId: tab.windowId});
+        }
+    });
+    await chrome.storage.local.set({[session_id]: session});
+}
 
-        obj[session_id] = session;
-        chrome.storage.local.set(obj);
+function updateCurrentSession() {
+    return inSessionQueue(async function () {
+        if (await sessionsOn()) {
+            await writeSession();
+        }
     });
 }
 
@@ -372,29 +384,29 @@ const session_events = [
 
 // Listeners are added when the service worker starts (Chrome wakes it only for those), then removed if sessions
 // are turned off. The Settings switch changes it at once. Turned off, the current session ends: on again starts a new one.
-async function watchSessions(on) {
-    session_events.forEach(function ([event, listener]) {
-        if (on && !event.hasListener(listener)) {
-            event.addListener(listener);
-        } else if (!on && event.hasListener(listener)) {
-            event.removeListener(listener);
+function watchSessions(on) {
+    return inSessionQueue(async function () {
+        session_events.forEach(function ([event, listener]) {
+            if (on && !event.hasListener(listener)) {
+                event.addListener(listener);
+            } else if (!on && event.hasListener(listener)) {
+                event.removeListener(listener);
+            }
+        });
+        if (!on) {
+            await chrome.storage.session.remove('session_id');
+            return;
+        }
+        const session_storage = await chrome.storage.session.get('session_id');
+        if (!session_storage.session_id) {
+            await writeSession();
         }
     });
-    if (!on) {
-        await chrome.storage.session.remove('session_id');
-        return;
-    }
-    const session_storage = await chrome.storage.session.get('session_id');
-    if (!session_storage.session_id) {
-        await updateCurrentSession();
-    }
 }
 
 session_events.forEach(([event, listener]) => event.addListener(listener));
 
-storage.area.get({session_watcher: storage.default_options.session_watcher}, function (from_storage) {
-    watchSessions(!!from_storage.session_watcher);
-});
+sessionsOn().then(watchSessions, e => console.error('TabHamster: reading the sessions option failed', e));
 
 chrome.storage.onChanged.addListener(function (changes, area_name) {
     if (area_name === 'sync' && changes.session_watcher) {
