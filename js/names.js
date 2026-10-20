@@ -1,17 +1,22 @@
 // Group names: no two groups share a name. Names compare after trimming and collapsing spaces,
 // ignoring case but not accents ("Trip to Tofino" = "trip  to tofino", "Cafe" ≠ "Café").
+// Nothing looser: a matching name means Replace, so "かな" ≠ "カナ", "Ｗｏｒｋ" ≠ "Work", "2" ≠ "²"
+// (Intl.Collator's 'accent' sensitivity treats those as the same).
 // Groups saved without a name (shown as their date) never clash.
 
-const collator = new Intl.Collator(undefined, {sensitivity: 'accent'});
+// the same on every computer: Unicode case mapping, not the language's
+function nameKey(name) {
+    return normalizeName(name).normalize('NFC').toLowerCase();
+}
 
 export function normalizeName(name) {
     return String(name === undefined || name === null ? '' : name).trim().replace(/\s+/g, ' ');
 }
 
 export function sameName(a, b) {
-    const x = normalizeName(a);
-    const y = normalizeName(b);
-    return x !== '' && y !== '' && collator.compare(x, y) === 0;
+    const x = nameKey(a);
+    const y = nameKey(b);
+    return x !== '' && y !== '' && x === y;
 }
 
 // creation time from the `tg_<ms>` key

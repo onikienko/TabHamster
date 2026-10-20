@@ -13,6 +13,15 @@ test('sameName ignores case and extra spaces but not accents', () => {
     assert.ok(sameName('Збережені', 'збережені'));
     assert.ok(!sameName('Cafe', 'Café'));
     assert.ok(!sameName('Work', 'Work 2'));
+    assert.ok(sameName('Cafe\u0301', 'CAFÉ'), 'composed and decomposed accents are the same');
+});
+
+test('sameName: kana, full-width letters, superscripts and ordinals stay distinct', () => {
+    assert.ok(!sameName('かな', 'カナ'));
+    assert.ok(!sameName('Ｗｏｒｋ', 'Work'));
+    assert.ok(!sameName('Work 2', 'Work ²'));
+    assert.ok(!sameName('a', 'ª'));
+    assert.ok(sameName('ΟΔΟΣ', 'οδος'));
 });
 
 test('empty names never clash', () => {
