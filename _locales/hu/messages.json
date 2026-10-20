@@ -55,7 +55,7 @@
         "description": "Shown when a group was saved but could not reach sync storage right now"
     },
     "p_nothingToSave": {
-        "message": "Nincs menthető fül. A rögzített füleket a kiterjesztés kihagyja, hacsak be nem kapcsolja őket a beállításokban.",
+        "message": "Nincs menthető fül. A rögzített fülek kimaradnak, hacsak be nem kapcsolja őket a beállításokban.",
         "description": "Shown when Save finds no tabs to save"
     },
     "p_undo_btn": {

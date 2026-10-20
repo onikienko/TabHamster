@@ -14,7 +14,7 @@
 
 
 ☀ Tippek:
-	● Gyorsan el tudjuk menteni az összes megnyitott fület egy csoportba, ha a kiterjesztés ablakában megnyomjuk az "ENTER" billentyűt. A csoportot később tudjuk szerkeszteni.
-	● "Ctrl + klikk' a mentett csoport (vagy munkamenet) nevén új ablakba nyitja meg a füleket.
+	● Gyorsan el tudjuk menteni az összes megnyitott fület egy csoportba, ha a bővítmény ablakában megnyomjuk az "ENTER" billentyűt. A csoportot később tudjuk szerkeszteni.
+	● „Ctrl + klikk” a mentett csoport (vagy munkamenet) nevén új ablakba nyitja meg a füleket.
 
 Tab Hamster forráskód: https://github.com/onikienko/TabHamster

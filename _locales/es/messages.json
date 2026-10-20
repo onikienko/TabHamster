@@ -58,7 +58,7 @@
         "description": "Shown when a group was saved but could not reach sync storage right now"
     },
     "p_nothingToSave": {
-        "message": "No hay pestañas para guardar. Las pestañas fijadas se omiten salvo que lo active en la configuración.",
+        "message": "No hay pestañas para guardar. Las pestañas fijadas se omiten salvo que las active en la configuración.",
         "description": "Shown when Save finds no tabs to save"
     },
     "p_undo_btn": {
