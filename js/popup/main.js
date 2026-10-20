@@ -755,7 +755,10 @@ function runSearch() {
     state.results.saved = search(shownGroupKeys().map((key) => ({
         key, name: groupName(key, state.groups[key]), tabs: state.groups[key].tabs,
     })), query);
-    state.results.sessions = search(sortedSessionKeys().map((key) => ({
+    // the live session isn't searched: its tabs are open anyway, and a match there has nothing to show or do
+    const sessionKeys = state.words.length ? sortedSessionKeys().filter((key) => key !== state.currentSession) :
+        sortedSessionKeys();
+    state.results.sessions = search(sessionKeys.map((key) => ({
         key, name: sessionName(key), tabs: state.sessions[key].tabs,
     })), query);
 }
