@@ -455,7 +455,9 @@ body.keyboard .row:has(:focus) .end-meta {
     text-decoration: none;
 }
 
-.tab-row:hover {
+/* as group rows: hover with the mouse, focus with keys, never both */
+body:not(.keyboard) .tab-row:hover,
+body.keyboard .tab-row:focus {
     background: var(--hover);
     color: var(--text);
 }
@@ -670,9 +672,12 @@ body.keyboard .row:has(:focus) .end-meta {
     font-weight: 600;
 }
 
-/* the group that Enter would replace */
-.item.target > .row {
-    background: var(--hover);
+/* the group that Enter would replace: an accent tint (as a just-saved group), not the grey of the selected row,
+   and it keeps it under the pointer or the focus */
+.item.target > .row,
+body:not(.keyboard) .item.target > .row:hover,
+body.keyboard .item.target > .row:has(:focus) {
+    background: var(--fresh);
 }
 
 .note {
@@ -818,7 +823,7 @@ body.keyboard .row:has(:focus) .end-meta {
     text-align: left;
 }
 
-.menu-item:hover,
+/* the pointer moves the focus (js/ui/menu.js): one item looks selected */
 .menu-item:focus {
     background: var(--menu-hover);
 }

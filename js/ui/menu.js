@@ -74,6 +74,12 @@ export function openMenu(anchor, items, {label, onClose} = {}) {
                 h('span', {class: 'menu-text'},
                     h('span', {class: 'menu-label'}, item.label),
                     item.sub ? h('span', {class: 'menu-sub ellipsis'}, item.sub) : null));
+            // the item under the pointer takes the focus, so it is the one selected item (and arrows go on from it)
+            button.addEventListener('pointermove', () => {
+                if (document.activeElement !== button) {
+                    button.focus();
+                }
+            });
             buttons.push(button);
             return button;
         }));
