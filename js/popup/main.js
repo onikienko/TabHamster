@@ -5,9 +5,10 @@
 import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
-import {wantsNewWindow, keyLabel} from '../ui/platform.js';
+import {wantsNewWindow, keyLabel, keyCombo, isMac} from '../ui/platform.js';
 import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, faviconUrl, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
+import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName} from '../names.js';
@@ -17,6 +18,9 @@ import {enableDrag} from './drag.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
+// key caps in tooltips
+const ENTER = keyCombo(['enter']);
+const ESC = keyCombo(['esc']);
 
 const state = {
     options: null,
@@ -592,10 +596,10 @@ function renameRow(key) {
         spellcheck: 'false', dir: 'auto', 'aria-label': t('p_groupName_label'),
     });
     const error = h('div', {class: 'rename-error', id: 'rename_error', hidden: true});
-    const ok = h('button', {class: 'ib', type: 'button', 'aria-label': t('p_saveName'), title: t('p_saveName')},
-        icon('check', 16));
-    const cancel = h('button', {class: 'ib', type: 'button', 'aria-label': t('p_cancelRename'), title: t('p_cancelRename')},
-        icon('close', 15));
+    const ok = setTip(h('button', {class: 'ib', type: 'button', 'aria-label': t('p_saveName')}, icon('check', 16)),
+        {text: t('p_saveName'), keys: [ENTER]});
+    const cancel = setTip(h('button', {class: 'ib', type: 'button', 'aria-label': t('p_cancelRename')}, icon('close', 15)),
+        {text: t('p_cancelRename'), keys: [ESC]});
     const row = h('div', {class: 'rename'}, h('div', {class: 'rename-line'}, h('span', {class: 'chev-space'}), input, ok, cancel),
         error);
 
@@ -792,11 +796,11 @@ function favicon(url) {
 }
 
 function tabRow(tab) {
-    return h('a', {class: 'tab-row', href: tab.url, target: '_blank', title: tab.url},
+    return setTip(h('a', {class: 'tab-row', href: tab.url, target: '_blank'},
         favicon(tab.url),
         tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
         h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url)),
-        h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url))));
+        h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url)))), {text: tab.url, align: 'start', focus: false});
 }
 
 // saved groups and sessions both use tg_<ms> keys, so an id includes the view.
@@ -827,12 +831,12 @@ function chevron(id, auto) {
 /**
  * The name of a group or session: a click (or Space) shows its tabs, Enter opens it (`open(event)`).
  * `newWindow`: Shift, Ctrl / ⌘ or middle click open it in a new window (nobody does that by accident).
- * dataset.toggle lets → ← in the list expand and collapse it. `details`: what the row shows after the name, in words
- * (screen readers).
+ * dataset.toggle lets → ← in the list expand and collapse it. `sub`: the tooltip's second line (the row shows only
+ * short details); `details`: what the row shows after the name, in words (screen readers).
  */
-function nameButton(id, auto, label, title, open, newWindow, details) {
-    return h('button', {
-        class: 'name ellipsis', type: 'button', title, dir: 'auto', 'aria-expanded': String(isExpanded(id, auto)),
+function nameButton(id, auto, label, sub, open, newWindow, details) {
+    const button = h('button', {
+        class: 'name ellipsis', type: 'button', dir: 'auto', 'aria-expanded': String(isExpanded(id, auto)),
         'aria-description': details.filter(Boolean).join(', '),
         dataset: {toggle: id, auto: auto ? '1' : ''},
         onClick: (e) => (newWindow && wantsNewWindow(e) ? newWindow() : toggleItem(id, auto)),
@@ -845,6 +849,8 @@ function nameButton(id, auto, label, title, open, newWindow, details) {
             }
         },
     }, marked(label));
+    // not on keyboard focus: ↑ ↓ go through the names one after another
+    return setTip(button, {text: label, sub, bold: true, align: 'start', focus: false});
 }
 
 /** "9 tabs", or "2 of 9 tabs" for an item found through its tabs */
@@ -891,6 +897,20 @@ function fitColumns() {
     }
 }
 
+// Shift+Enter on the group's name, or Shift-click on it or on Open
+const NEW_WINDOW_TIP = {
+    text: t('p_openNewWindow'), sub: t('p_tip_shiftClick', isMac() ? '⇧' : 'Shift'), keys: [keyCombo(['shift', 'enter'])],
+};
+
+/** ⋯ of a row; the menu key / Shift+F10 opens it too (no such key on a Mac) */
+function moreButton(onOpen) {
+    return setTip(h('button', {
+        class: 'ib more', type: 'button', 'aria-label': t('p_moreActions'),
+        'aria-haspopup': 'menu', 'aria-expanded': 'false',
+        onClick: (e) => onOpen(e.currentTarget),
+    }, icon('more', 16)), {text: t('p_moreActions'), keys: isMac() ? [] : [keyCombo(['shift', 'F10'])]});
+}
+
 function groupItem(result, target) {
     const key = result.key;
     const group = state.groups[key];
@@ -902,7 +922,7 @@ function groupItem(result, target) {
             chevron('saved:' + key, partial),
             // the row shows only the number and a short date: the tooltip has the rest
             nameButton('saved:' + key, partial, name,
-                name + '\n' + plural('p_tabsCount', group.tabs.length) + ' · ' + fullDate(keyTime(key), lang), open,
+                plural('p_tabsCount', group.tabs.length) + ' · ' + fullDate(keyTime(key), lang), open,
                 () => openInNewWindow(group.tabs), [
                     group.synced === false && t('p_notSynced_title'),
                     tabCount(group.tabs.length, result, partial),
@@ -915,19 +935,15 @@ function groupItem(result, target) {
             ], h('div', {class: 'actions'},
                 // the size is what "Biggest first" is about: it stays next to the buttons
                 state.filter === 'biggest' ? sizeMeta(key) : null,
-                h('button', {
+                setTip(h('button', {
                     class: 'open', type: 'button', onClick: open,
                     onAuxclick: (e) => e.button === 1 && openInNewWindow(group.tabs),
-                }, t('p_open')),
-                h('button', {
-                    class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'), title: t('p_openNewWindow'),
+                }, t('p_open')), {text: t('p_openInThisWindow'), keys: [ENTER]}),
+                setTip(h('button', {
+                    class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'),
                     onClick: () => openInNewWindow(group.tabs),
-                }, icon('newWindow', 16)),
-                h('button', {
-                    class: 'ib more', type: 'button', 'aria-label': t('p_moreActions'), title: t('p_moreActions'),
-                    'aria-haspopup': 'menu', 'aria-expanded': 'false',
-                    onClick: (e) => groupMenu(key, e.currentTarget),
-                }, icon('more', 16))))));
+                }, icon('newWindow', 16)), NEW_WINDOW_TIP),
+                moreButton((button) => groupMenu(key, button))))));
     if (isExpanded('saved:' + key, partial)) {
         const tabs = partial ? result.tabIndexes.map((i) => group.tabs[i]) : group.tabs;
         item.append(h('div', {class: 'tab-list'}, tabs.map(tabRow)));
@@ -945,9 +961,9 @@ function sessionItem(result) {
     const item = h('div', {class: 'item', dataset: {key}},
         h('div', {class: 'row'},
             current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron('sessions:' + key, partial),
-            current ? h('span', {class: 'name ellipsis', title: name}, marked(name)) :
+            current ? setTip(h('span', {class: 'name ellipsis'}, marked(name)), {text: name, align: 'start', focus: false}) :
                 nameButton('sessions:' + key, partial, name,
-                    name + '\n' + (windows.length > 1 ? plural('p_windowsCount', windows.length) + ' · ' : '') +
+                    (windows.length > 1 ? plural('p_windowsCount', windows.length) + ' · ' : '') +
                     plural('p_tabsCount', session.tabs.length), () => restoreSession(session), null, [
                         windows.length > 1 && plural('p_windowsCount', windows.length),
                         tabCount(session.tabs.length, result, partial),
@@ -959,12 +975,9 @@ function sessionItem(result) {
                 tabsMeta(session.tabs.length, result, partial),
             // the live session is open right now: nothing to restore
             ], current ? null : h('div', {class: 'actions'},
-                h('button', {class: 'open', type: 'button', onClick: () => restoreSession(session)}, t('p_restore')),
-                h('button', {
-                    class: 'ib more', type: 'button', 'aria-label': t('p_moreActions'), title: t('p_moreActions'),
-                    'aria-haspopup': 'menu', 'aria-expanded': 'false',
-                    onClick: (e) => sessionMenu(key, e.currentTarget),
-                }, icon('more', 16))))));
+                setTip(h('button', {class: 'open', type: 'button', onClick: () => restoreSession(session)}, t('p_restore')),
+                    {text: t('p_restore_tip'), keys: [ENTER]}),
+                moreButton((button) => sessionMenu(key, button))))));
     if (!current && isExpanded('sessions:' + key, partial)) {
         const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
         item.append(h('div', {class: 'tab-list'}, windows.map((tabs, i) => {
@@ -1078,10 +1091,10 @@ function drawList() {
 }
 
 function settingsButton() {
-    return h('button', {
-        class: 'ib', type: 'button', 'aria-label': t('p_optionsBtn'), title: t('p_optionsBtn'),
+    return setTip(h('button', {
+        class: 'ib', type: 'button', 'aria-label': t('p_optionsBtn'),
         onClick: () => chrome.runtime.openOptionsPage(),
-    }, icon('settings', 17));
+    }, icon('settings', 17)), {text: t('p_optionsBtn')});
 }
 
 function renderFooter() {
@@ -1095,26 +1108,24 @@ function renderFooter() {
         const share = usage.quota ? usage.bytes / usage.quota : 0;
         const percent = share > 0 && share < 0.01 ? '<1%' : Math.round(share * 100) + '%';
         // a cloud instead of words: "Sync storage" took a line of its own in longer languages
-        el.footer.append(h('span', {
-                class: 'storage',
-                title: t('p_syncStorage_title', [kilobytes(usage.bytes, lang), kilobytes(usage.quota, lang, 0)]),
-            },
+        el.footer.append(setTip(h('span', {class: 'storage'},
             icon('cloud', 18),
             h('div', {
                     class: ['meter', share >= 0.95 ? 'full' : share >= 0.8 ? 'warn' : ''],
                     role: 'img', 'aria-label': t('p_syncStorageUsed', percent),
                 },
                 h('span', {style: {width: Math.min(100, share * 100) + '%'}})),
-            h('span', {class: 'num'}, percent)));
+            h('span', {class: 'num'}, percent)),
+        {text: t('p_syncStorage_title', [kilobytes(usage.bytes, lang), kilobytes(usage.quota, lang, 0)])}));
     }
     el.footer.append(h('span', {class: 'spacer'}));
     const unsynced = waitingKeys().length;
     if (unsynced) {
         const pressed = state.filter === 'unsynced';
-        el.footer.append(h('button', {
-            class: 'not-synced', type: 'button', 'aria-pressed': String(pressed), title: t('p_showNotSynced'),
+        el.footer.append(setTip(h('button', {
+            class: 'not-synced', type: 'button', 'aria-pressed': String(pressed),
             onClick: () => setFilter(pressed ? null : 'unsynced'),
-        }, icon('notSynced', 18), plural('p_notSyncedGroups', unsynced)));
+        }, icon('notSynced', 18), plural('p_notSyncedGroups', unsynced)), {text: t('p_showNotSynced')}));
     }
     el.footer.append(settingsButton());
 }
@@ -1125,7 +1136,7 @@ function renderSave() {
         intent.name ? t('p_saveAs', intent.name) : plural('p_saveTabs', state.openTabs);
     el.clear.hidden = !el.field.value;
     clear(el.save);
-    el.save.title = label;
+    setTip(el.save, null);
     el.save.removeAttribute('aria-label');
     // the field keeps room to type (css/popup.css): "Save as “…”" cuts the name first (it is in the field anyway)
     const around = intent.kind !== 'replace' && intent.name ? t('p_saveAs', '').split('') : null;
@@ -1139,6 +1150,8 @@ function renderSave() {
     if (cut(text) || name && cut(name) && name.clientWidth < 28) {
         text.replaceChildren(t(intent.kind === 'replace' ? 'p_replaceShort' : 'p_saveShort'));
         el.save.setAttribute('aria-label', label);
+        // the button says it all unless it had to be shortened
+        setTip(el.save, {text: label, keys: [ENTER]});
         if (cut(text)) {
             text.remove();
         }
@@ -1308,10 +1321,10 @@ async function start() {
     document.getElementById('logo').append(logo(46, 'TabHamster'));
     document.getElementById('field_icon').append(icon('search', 16));
     el.clear.setAttribute('aria-label', t('p_clearSearch'));
-    el.clear.title = t('p_clearSearch');
+    setTip(el.clear, {text: t('p_clearSearch'), keys: [ESC]});
     el.clear.append(icon('close', 15));
     el.chipClear.setAttribute('aria-label', t('p_removeFilter'));
-    el.chipClear.title = t('p_removeFilter');
+    setTip(el.chipClear, {text: t('p_removeFilter'), keys: [ESC]});
     el.chipClear.append(icon('close', 12));
     el.chipClear.addEventListener('click', () => {
         el.field.focus();

@@ -23,6 +23,17 @@ export function keyLabel(key, mac) {
     return labels[key];
 }
 
+/**
+ * A key with modifiers as the keyboard shows it: keyCombo(['shift', 'enter']) → "⇧ Return" on a Mac,
+ * "Shift+Enter" elsewhere. Names as in keyLabel; anything else (e.g. 'F10') is shown as it is.
+ */
+export function keyCombo(keys, mac) {
+    const m = mac === undefined ? isMac() : mac;
+    const modifiers = m ? {shift: '⇧', alt: '⌥', mod: '⌘'} : {shift: 'Shift', alt: 'Alt', mod: 'Ctrl'};
+    const names = keys.map((key) => modifiers[key] || (key === 'enter' || key === 'esc' ? keyLabel(key, m) : key));
+    return names.join(m ? ' ' : '+');
+}
+
 /** true for clicks that should open a new window: Shift, Ctrl (not on a Mac, where it is a right-click) or ⌘ */
 export function wantsNewWindow(event, mac) {
     const m = mac === undefined ? isMac() : mac;

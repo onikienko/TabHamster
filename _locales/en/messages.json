@@ -980,7 +980,21 @@
     },
     "p_openInThisWindow": {
         "message": "Open in this window",
-        "description": "Session menu"
+        "description": "Session menu; also the tooltip of the Open button on a group row"
+    },
+    "p_tip_shiftClick": {
+        "message": "or $KEY$-click the group",
+        "description": "Second line of the tooltip of the 'Open in new window' button: clicking the group's name or Open with this key held does the same",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Shift"
+            }
+        }
+    },
+    "p_restore_tip": {
+        "message": "Restore the windows as they were",
+        "description": "Tooltip of the Restore button on a session row"
     },
     "p_allTabsOneWindow_one": {
         "message": "$COUNT$ tab",

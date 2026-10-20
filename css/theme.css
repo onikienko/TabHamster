@@ -38,6 +38,10 @@
     --snack: #0E2633;
     --on-snack: #FFFFFF;
     --snack-action: #7FD8F5;
+    /* tooltips: dark in both themes (in dark the raised surface, as menus), not the bar's reversed colours */
+    --tip: #0E2633;
+    --on-tip: #FFFFFF;
+    --tip-line: transparent;
     --switch-off: #7F909C;
     --shadow: 0 8px 24px rgba(14, 38, 51, .18), 0 1px 3px rgba(14, 38, 51, .12);
 
@@ -82,6 +86,9 @@
     --snack: #E4EDF2;
     --on-snack: #0E2633;
     --snack-action: #00658F;
+    --tip: #1D2B34;
+    --on-tip: #E4EDF2;
+    --tip-line: #34495A;
     --switch-off: #62757F;
     --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
     color-scheme: dark;
@@ -125,6 +132,9 @@
         --snack: #E4EDF2;
         --on-snack: #0E2633;
         --snack-action: #00658F;
+        --tip: #1D2B34;
+        --on-tip: #E4EDF2;
+        --tip-line: #34495A;
         --switch-off: #62757F;
         --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
         color-scheme: dark;
@@ -179,6 +189,77 @@ button, input, select, textarea {
 
 .num {
     font-variant-numeric: tabular-nums;
+}
+
+/* tooltip (js/ui/tooltip.js) */
+
+.tip {
+    position: fixed;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 260px;
+    padding: 6px 9px;
+    border: 1px solid var(--tip-line);
+    border-radius: 7px;
+    background: var(--tip);
+    color: var(--on-tip);
+    box-shadow: var(--shadow);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+    pointer-events: none;
+    animation: tip-in 100ms ease-out;
+}
+
+.tip[hidden] {
+    display: none;
+}
+
+@keyframes tip-in {
+    from {
+        opacity: 0;
+    }
+}
+
+.tip-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tip-text,
+.tip-name,
+.tip-sub {
+    overflow-wrap: anywhere;
+}
+
+.tip-name {
+    font-weight: 600;
+}
+
+.tip-sub {
+    opacity: .72;
+}
+
+.tip-keys {
+    flex: none;
+    display: flex;
+    gap: 3px;
+    margin-left: auto;
+}
+
+.tip kbd {
+    display: inline-flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 5px;
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    border-radius: 4px;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    font: 600 11px/1 var(--font);
+    white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

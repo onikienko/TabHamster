@@ -8,6 +8,7 @@ import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {keyLabel} from '../ui/platform.js';
 import {keyTime, numericDate, dayTime, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
+import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {backupRows, renderRestoreInfo} from './backup.js';
 
@@ -273,7 +274,7 @@ function trashRow(group) {
     button.addEventListener('click', () => restoreGroup(group, button));
     return h('li', {class: 'row'},
         h('div', {class: 'row-label'},
-            h('span', {class: 'row-title ellipsis', title: name}, name),
+            setTip(h('span', {class: 'row-title ellipsis', dir: 'auto'}, name), {text: name, bold: true, align: 'start'}),
             h('p', {class: 'row-text'}, meta.join(' · '))),
         button);
 }
