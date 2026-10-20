@@ -867,7 +867,7 @@ function groupItem(result, target) {
             nameButton('saved:' + key, partial, name,
                 name + '\n' + plural('p_tabsCount', group.tabs.length) + ' · ' + fullDate(keyTime(key), lang), open,
                 () => openInNewWindow(group.tabs)),
-            group.synced === false ? h('span', {class: 'local'}, icon('notSynced', 14, t('p_notSynced_title'))) : null,
+            group.synced === false ? h('span', {class: 'local'}, icon('notSynced', 16, t('p_notSynced_title'))) : null,
             rowEnd([
                 tabsMeta(group.tabs.length, result, partial),
                 state.filter === 'biggest' ? sizeMeta(key) : h('span', {class: 'meta date num'}, listDate(keyTime(key), lang)),
@@ -1050,7 +1050,7 @@ function renderFooter() {
                 class: 'storage',
                 title: t('p_syncStorage_title', [kilobytes(usage.bytes, lang), kilobytes(usage.quota, lang, 0)]),
             },
-            icon('cloud', 15),
+            icon('cloud', 18),
             h('div', {
                     class: ['meter', share >= 0.95 ? 'full' : share >= 0.8 ? 'warn' : ''],
                     role: 'img', 'aria-label': t('p_syncStorageUsed', percent),
@@ -1065,7 +1065,7 @@ function renderFooter() {
         el.footer.append(h('button', {
             class: 'not-synced', type: 'button', 'aria-pressed': String(pressed), title: t('p_showNotSynced'),
             onClick: () => setFilter(pressed ? null : 'unsynced'),
-        }, icon('notSynced', 14), plural('p_notSyncedGroups', unsynced)));
+        }, icon('notSynced', 18), plural('p_notSyncedGroups', unsynced)));
     }
     el.footer.append(settingsButton());
 }
