@@ -26,6 +26,9 @@ const el = {
 };
 
 let ctx = null;
+// the button that opened the restore panel ("Choose file" or "Paste text instead"): the focus goes back to it
+let opener = null;
+let chooseButton = null;
 
 /* ---------- back up ---------- */
 
@@ -73,8 +76,12 @@ async function copyText(button) {
 
 /* ---------- restore ---------- */
 
-function closePanel() {
+/** focus: back to the button that opened the panel (a removed button would leave the focus nowhere) */
+function closePanel(focus = true) {
     clear(el.panel).hidden = true;
+    if (focus && opener && opener.isConnected) {
+        opener.focus();
+    }
 }
 
 function errorText(code) {
@@ -97,7 +104,7 @@ async function preview(text, source) {
             h('div', {class: 'panel-buttons'},
                 source === null ? h('button', {class: 'btn plain', type: 'button', onClick: () => pasteBox(text)},
                     t('s_editText')) : null,
-                h('button', {class: 'btn tonal', type: 'button', onClick: closePanel}, t('s_cancel'))));
+                h('button', {class: 'btn tonal', type: 'button', onClick: () => closePanel()}, t('s_cancel'))));
         return;
     }
     const contents = res.groups ?
@@ -119,7 +126,7 @@ async function preview(text, source) {
         h('p', {class: 'num'}, contents),
         effect ? h('p', {class: 'muted'}, effect) : null,
         h('div', {class: 'panel-buttons'},
-            h('button', {class: 'btn tonal', type: 'button', onClick: closePanel}, t('s_cancel')),
+            h('button', {class: 'btn tonal', type: 'button', onClick: () => closePanel()}, t('s_cancel')),
             restoreButton));
     restoreButton.focus();
 }
@@ -138,8 +145,13 @@ async function restore(text, button) {
         showBar(errorText(res.error));
         return;
     }
-    closePanel();
+    closePanel(false);
     await ctx.reloadAll();
+    // the restore can be undone from its row too: the focus goes there
+    const undoButton = el.undo.querySelector('button');
+    if (undoButton) {
+        undoButton.focus();
+    }
     showBar(res.groups ? plural('s_restored', res.groups) : t('o_backup_restored'),
         {label: t('p_undo_btn'), run: undoRestore});
 }
@@ -148,6 +160,10 @@ async function undoRestore() {
     try {
         const res = await groupStoreClient.undoRestore();
         await ctx.reloadAll();
+        // its row is gone with the focus in it
+        if (!el.undo.contains(document.activeElement) && chooseButton && document.activeElement === document.body) {
+            chooseButton.focus();
+        }
         if (!res.error) {
             showBar(t('o_backup_undone'));
         }
@@ -176,7 +192,7 @@ function pasteBox(text) {
         h('label', {class: 'panel-title', for: 'restore_text'}, t('s_pasteLabel')),
         area,
         h('div', {class: 'panel-buttons'},
-            h('button', {class: 'btn tonal', type: 'button', onClick: closePanel}, t('s_cancel')),
+            h('button', {class: 'btn tonal', type: 'button', onClick: () => closePanel()}, t('s_cancel')),
             next));
     area.focus();
 }
@@ -186,6 +202,7 @@ function fileInput() {
     input.addEventListener('change', async () => {
         const file = input.files[0];
         input.value = '';
+        opener = chooseButton;
         if (!file) {
             return;
         }
@@ -268,6 +285,10 @@ export function renderRestoreInfo(info) {
 export function backupRows(context) {
     ctx = context;
     const input = fileInput();
+    chooseButton = h('button', {class: 'btn tonal', type: 'button', onClick: () => {
+        opener = chooseButton;
+        input.click();
+    }}, t('s_chooseFile'));
     const copy = h('button', {class: 'link-btn', type: 'button', 'aria-live': 'polite'}, t('s_copyText'));
     copy.addEventListener('click', () => copyText(copy));
     return [
@@ -284,8 +305,11 @@ export function backupRows(context) {
                 h('span', {class: 'row-title'}, t('s_restore')),
                 h('p', {class: 'row-text'}, t('s_restore_text'))),
             h('div', {class: 'row-actions'},
-                h('button', {class: 'btn tonal', type: 'button', onClick: () => input.click()}, t('s_chooseFile')),
-                h('button', {class: 'link-btn', type: 'button', onClick: () => pasteBox('')}, t('s_pasteText')),
+                chooseButton,
+                h('button', {class: 'link-btn', type: 'button', onClick: (e) => {
+                    opener = e.currentTarget;
+                    pasteBox('');
+                }}, t('s_pasteText')),
                 input)),
         el.panel,
         el.undo,
