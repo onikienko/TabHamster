@@ -1422,6 +1422,11 @@ document.addEventListener('pointerdown', () => document.body.classList.remove('k
 
 async function start() {
     document.documentElement.lang = lang;
+    // static texts are set here, before anything else is drawn (group names and titles are never translated)
+    document.getElementById('field_label').textContent = t('p_field_label');
+    el.field.placeholder = t('p_field_placeholder');
+    el.tabSaved.prepend(t('p_tabName_Saved'));
+    el.tabSessions.prepend(t('p_tabName_Sessions'));
     document.body.append(el.found);
     document.getElementById('logo').append(logo(46, 'TabHamster'));
     document.getElementById('field_icon').append(icon('search', 16));

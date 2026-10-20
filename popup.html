@@ -12,19 +12,16 @@
     <div class="field">
         <span class="field-icon" id="field_icon"></span>
         <span class="chip" id="chip" hidden><span id="chip_text"></span><button class="ib" id="chip_clear" type="button"></button></span>
-        <label class="sr-only" for="field">{{ p_field_label }}</label>
-        <input id="field" type="text" autocomplete="off" spellcheck="false" maxlength="200" autofocus
-               placeholder="{{ p_field_placeholder }}"/>
+        <label class="sr-only" for="field" id="field_label"></label>
+        <input id="field" type="text" autocomplete="off" spellcheck="false" maxlength="200" autofocus/>
         <button id="clear" class="ib clear" type="button" hidden></button>
         <button id="save" class="save" type="button"></button>
     </div>
 </header>
 
 <div class="tabs" role="tablist">
-    <button class="tab" id="tab_saved" role="tab" type="button" aria-controls="list" aria-selected="true">
-        {{ p_tabName_Saved }}<span class="count num" id="count_saved"></span></button>
-    <button class="tab" id="tab_sessions" role="tab" type="button" aria-controls="list" aria-selected="false">
-        {{ p_tabName_Sessions }}<span class="count num" id="count_sessions"></span></button>
+    <button class="tab" id="tab_saved" role="tab" type="button" aria-controls="list" aria-selected="true"><span class="count num" id="count_saved"></span></button>
+    <button class="tab" id="tab_sessions" role="tab" type="button" aria-controls="list" aria-selected="false"><span class="count num" id="count_sessions"></span></button>
 </div>
 
 <main class="list" id="list" role="tabpanel" aria-labelledby="tab_saved"></main>
@@ -33,7 +30,6 @@
 
 <script src="js/storage.js"></script>
 <script src="js/group_store_client.js"></script>
-<script src="js/helpers/localizer.js"></script>
 <script type="module" src="js/popup/main.js"></script>
 </body>
 </html>

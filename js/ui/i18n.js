@@ -1,4 +1,5 @@
-// Texts for elements built in JS. Static markup keeps using {{ key }} (js/helpers/localizer.js).
+// Texts for the pages: chrome.i18n messages, plural forms, placeholders. The pages' static markup has no texts of
+// its own; js/popup/main.js and js/options/main.js set them.
 
 // Hebrew, Arabic, Syriac, Thaana, NKo... and their presentation forms
 const RTL = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
