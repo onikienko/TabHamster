@@ -108,7 +108,7 @@
     },
 
     "p_field_placeholder": {
-        "message": "Претражите или именујте групу",
+        "message": "Тражи или именуј",
         "description": "Popup field: it searches saved groups, and its text is the name of a new group. Placeholder: about 16 characters fit next to the Save button, more is cut off."
     },
     "p_field_label": {
@@ -206,7 +206,7 @@
         }
     },
     "p_notSyncedGroups_one": {
-        "message": "$COUNT$ група није синхронизована",
+        "message": "Несинхронизовано: $COUNT$",
         "description": "Popup footer (plural form 'one'). Footer button: about 26 characters with the number.",
         "placeholders": {
             "count": {
@@ -216,7 +216,7 @@
         }
     },
     "p_notSyncedGroups_few": {
-        "message": "$COUNT$ групе нису синхронизоване",
+        "message": "Несинхронизовано: $COUNT$",
         "description": "Popup footer (plural form 'few'). Footer button: about 26 characters with the number.",
         "placeholders": {
             "count": {
@@ -226,7 +226,7 @@
         }
     },
     "p_notSyncedGroups_other": {
-        "message": "$COUNT$ група није синхронизовано",
+        "message": "Несинхронизовано: $COUNT$",
         "description": "Popup footer (plural form 'other'). Footer button: about 26 characters with the number.",
         "placeholders": {
             "count": {

@@ -111,7 +111,7 @@
     },
 
     "p_field_placeholder": {
-        "message": "Buscar o nombrar un grupo",
+        "message": "Buscar o nombrar",
         "description": "Popup field: it searches saved groups, and its text is the name of a new group. Placeholder: about 16 characters fit next to the Save button, more is cut off."
     },
     "p_field_label": {

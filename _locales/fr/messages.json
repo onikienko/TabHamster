@@ -111,7 +111,7 @@
     },
 
     "p_field_placeholder": {
-        "message": "Rechercher ou nommer un groupe",
+        "message": "Chercher ou nommer",
         "description": "Popup field: it searches saved groups, and its text is the name of a new group. Placeholder: about 16 characters fit next to the Save button, more is cut off."
     },
     "p_field_label": {
@@ -179,7 +179,7 @@
         }
     },
     "p_notSyncedGroups_one": {
-        "message": "$COUNT$ groupe non synchronisé",
+        "message": "Non synchronisé : $COUNT$",
         "description": "Popup footer (plural form 'one'). Footer button: about 26 characters with the number.",
         "placeholders": {
             "count": {
@@ -189,7 +189,7 @@
         }
     },
     "p_notSyncedGroups_other": {
-        "message": "$COUNT$ groupes non synchronisés",
+        "message": "Non synchronisés : $COUNT$",
         "description": "Popup footer (plural form 'other'). Footer button: about 26 characters with the number.",
         "placeholders": {
             "count": {
@@ -343,7 +343,7 @@
         "description": "Second line of the bar when a saved group didn't fit in sync storage"
     },
     "p_field_placeholder_first": {
-        "message": "Nommez votre premier groupe",
+        "message": "Nommez un groupe",
         "description": "Popup field before any group is saved (the name is optional). Placeholder: about 16 characters fit next to the Save button, more is cut off."
     },
     "p_empty_title": {
