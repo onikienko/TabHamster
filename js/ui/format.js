@@ -6,6 +6,20 @@ export function keyTime(key) {
     return Number.isFinite(ms) ? ms : 0;
 }
 
+// Intl formatters are slow to make, and the popup draws three dates per group on every keystroke: one per kind,
+// language and options
+const formatters = new Map();
+
+function formatter(Kind, lang, options) {
+    const key = Kind.name + '|' + lang + '|' + JSON.stringify(options);
+    let made = formatters.get(key);
+    if (!made) {
+        made = new Kind(lang, options);
+        formatters.set(key, made);
+    }
+    return made;
+}
+
 function two(n) {
     return String(n).padStart(2, '0');
 }
@@ -27,7 +41,7 @@ export function numericDate(ms, format) {
 export function shortDate(ms, lang, now) {
     const d = new Date(ms);
     const sameYear = d.getFullYear() === new Date(now === undefined ? Date.now() : now).getFullYear();
-    return new Intl.DateTimeFormat(lang, sameYear ? {month: 'short', day: 'numeric'} :
+    return formatter(Intl.DateTimeFormat, lang, sameYear ? {month: 'short', day: 'numeric'} :
         {month: 'short', day: 'numeric', year: 'numeric'}).format(d);
 }
 
@@ -35,18 +49,18 @@ export function shortDate(ms, lang, now) {
 export function listDate(ms, lang, now) {
     const d = new Date(ms);
     const year = new Date(now === undefined ? Date.now() : now).getFullYear();
-    return d.getFullYear() === year ? new Intl.DateTimeFormat(lang, {month: 'short', day: 'numeric'}).format(d) :
+    return d.getFullYear() === year ? formatter(Intl.DateTimeFormat, lang, {month: 'short', day: 'numeric'}).format(d) :
         String(d.getFullYear());
 }
 
 /** "September 28, 2025 at 9:52 PM", "28 вересня 2025 р. о 21:52" */
 export function fullDate(ms, lang) {
-    return new Intl.DateTimeFormat(lang, {dateStyle: 'long', timeStyle: 'short'}).format(new Date(ms));
+    return formatter(Intl.DateTimeFormat, lang, {dateStyle: 'long', timeStyle: 'short'}).format(new Date(ms));
 }
 
 /** "21:52" or "9:52 PM", as the language writes it */
 export function shortTime(ms, lang) {
-    return new Intl.DateTimeFormat(lang, {hour: 'numeric', minute: '2-digit'}).format(new Date(ms));
+    return formatter(Intl.DateTimeFormat, lang, {hour: 'numeric', minute: '2-digit'}).format(new Date(ms));
 }
 
 function startOfDay(ms) {
@@ -62,7 +76,7 @@ export function dayName(ms, lang, now, relative = true) {
     // rounded: a day with a clock change is 23 or 25 hours
     const days = Math.round((startOfDay(today) - startOfDay(ms)) / 864e5);
     if (relative && (days === 0 || days === 1)) {
-        const word = new Intl.RelativeTimeFormat(lang, {numeric: 'auto'}).format(-days, 'day');
+        const word = formatter(Intl.RelativeTimeFormat, lang, {numeric: 'auto'}).format(-days, 'day');
         return word.charAt(0).toLocaleUpperCase(lang) + word.slice(1);
     }
     return shortDate(ms, lang, today);
@@ -89,7 +103,7 @@ export function kilobytes(bytes, lang, digits = 1) {
     if (digits && bytes > 0) {
         kb = Math.max(kb, 1 / step);
     }
-    return new Intl.NumberFormat(lang, {minimumFractionDigits: digits, maximumFractionDigits: digits}).format(kb);
+    return formatter(Intl.NumberFormat, lang, {minimumFractionDigits: digits, maximumFractionDigits: digits}).format(kb);
 }
 
 /** "github.com" for "https://www.github.com/x"; the address itself when it has no host (about:blank, data:) */
