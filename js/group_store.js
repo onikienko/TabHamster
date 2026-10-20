@@ -11,7 +11,8 @@
 //   {g: {name, index, tabs}, h, synced, base, trashed?, trashed_by?, removing?}
 //   synced: sync holds exactly this version; base: {h, name, index} of the sync version it was based on;
 //   trashed: time it was deleted (hidden, purged after 30 days); trashed_by: 'here' (deleted on this computer),
-//   'sync' (gone from sync: deleted on another computer) or 'restore' (not in a restored backup), missing before 1.0.0;
+//   'sync' (gone from sync: deleted on another computer), 'restore' (not in a restored backup, or the version a restore
+//   replaced) or 'replace' (the version a Replace replaced), missing before 1.0.0;
 //   removing: sync removal not done yet.
 // Only the background service worker writes groups (one store instance, all calls queued).
 var groupStore = (function () {
@@ -763,10 +764,22 @@ var groupStore = (function () {
             return Object.assign(out, Object.keys(groups).length ? await saveNow(groups) : {});
         }
 
+        // A version of a group that is about to be replaced, kept in trash under a key of its own next to the original's
+        // time, so an unnamed group shows about the same date (only on this computer, never in sync).
+        // taken: more keys it must not use. Returns the key.
+        async function keepInTrash(records, sync_items, key, trashed_by, taken = {}) {
+            const time = parseInt(key.slice(GROUP_PREFIX.length), 10);
+            const copy_key = freeKey(Object.assign({}, taken, records), sync_items, Number.isFinite(time) ? time + 1 : now());
+            const rec = records[key];
+            await putRecord(records, copy_key, {g: rec.g, h: rec.h, synced: false, base: null, trashed: now(), trashed_by});
+            return copy_key;
+        }
+
         // New tabs for a group; its name and place stay as they are now. seen_h: hash of the tabs the caller started
         // from. If the group's tabs have changed since (on another device), the caller's version is saved as a copy.
         // The answer has `h`, the hash of the group's tabs now (pass it to the next setTabs, e.g. an undo).
-        async function setTabsNow(key, tabs, seen_h) {
+        // keep_old: the version replaced goes to trash ('replace'); the answer's `kept` is its key.
+        async function setTabsNow(key, tabs, seen_h, keep_old) {
             const records = await readRecords();
             const rec = records[key];
             if (!rec || rec.discarded) {
@@ -778,10 +791,14 @@ var groupStore = (function () {
                 const res = (await saveNow({[copy_key]: conflictCopy(records, g)}))[copy_key];
                 return Object.assign(res, {copy: copy_key, h: rec.h});
             }
+            let kept = null;
+            if (keep_old && !rec.trashed && !sameContent(rec.g, g)) {
+                kept = await keepInTrash(records, await sync.get(null), key, 'replace');
+            }
             // a copy can still be made here: sync may have a newer version this computer hasn't seen yet
             const res = (await saveNow({[key]: g}))[key];
             const now_rec = (await local.get(localKey(key)))[localKey(key)];
-            return Object.assign(res, {h: now_rec.h});
+            return Object.assign(res, {h: now_rec.h}, kept ? {kept} : {});
         }
 
         async function removeNow(key) {
@@ -845,14 +862,8 @@ var groupStore = (function () {
             if (changed.length) {
                 const sync_items = await sync.get(null);
                 for (const key of changed) {
-                    // next to the original's time: an unnamed group keeps showing about the same date
-                    const time = parseInt(key.slice(GROUP_PREFIX.length), 10);
-                    // not a key the backup brings either
-                    const copy_key = freeKey(Object.assign({}, groups, records), sync_items,
-                        Number.isFinite(time) ? time + 1 : now());
-                    const rec = records[key];
-                    await putRecord(records, copy_key,
-                        {g: rec.g, h: rec.h, synced: false, base: null, trashed: now(), trashed_by: 'restore'});
+                    // not at a key the backup brings
+                    await keepInTrash(records, sync_items, key, 'restore', groups);
                 }
             }
             await saveNow(groups);
@@ -1031,7 +1042,7 @@ var groupStore = (function () {
             list: () => exclusive(listNow),
             /**
              * @returns {Promise<Array>} deleted groups kept for 30 days, newest first:
-             *   {key, name, index, tabs, trashed, by: 'here' | 'sync' | 'restore' | null (not known)}
+             *   {key, name, index, tabs, trashed, by: 'here' | 'sync' | 'restore' | 'replace' | null (not known)}
              */
             listTrash: () => exclusive(listTrashNow),
             /**
@@ -1042,10 +1053,11 @@ var groupStore = (function () {
             /** @returns {Promise<Object>} {key: {synced, error?}}; one sync write for small groups */
             saveMany: (groups) => change(() => saveNow(groups), Object.keys(groups)),
             /**
-             * @returns {Promise<{synced: boolean, error?: string, copy?: string, h: string}>} new tabs, the name and
-             *   place stay; `copy` is set when the tabs changed after seen_h and this version became a copy
+             * @returns {Promise<{synced: boolean, error?: string, copy?: string, kept?: string, h: string}>} new tabs,
+             *   the name and place stay; `copy` is set when the tabs changed after seen_h and this version became a copy;
+             *   keep_old: the replaced version goes to trash, `kept` is its key
              */
-            setTabs: (key, tabs, seen_h) => change(() => setTabsNow(key, tabs, seen_h), [key]),
+            setTabs: (key, tabs, seen_h, keep_old) => change(() => setTabsNow(key, tabs, seen_h, keep_old), [key]),
             /** @returns {Promise<{synced: boolean, error?: string}>} new name, tabs and place stay */
             rename: (key, name) => change(() => editNow({[key]: g => ({name, index: g.index, tabs: g.tabs})}), [key])
                 .then(res => res[key]),

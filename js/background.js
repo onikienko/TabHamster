@@ -74,7 +74,7 @@ const group_ops = {
     },
     listTrash: () => groups.listTrash(),
     save: (key, group) => groups.save(key, group),
-    setTabs: (key, tabs, seen_h) => groups.setTabs(key, tabs, seen_h),
+    setTabs: (key, tabs, seen_h, keep_old) => groups.setTabs(key, tabs, seen_h, keep_old),
     rename: (key, name) => groups.rename(key, name),
     setIndex: (indexes) => groups.setIndex(indexes),
     remove: (key) => groups.remove(key),

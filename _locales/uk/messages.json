@@ -1743,6 +1743,10 @@
         "message": "Прибрано під час відновлення",
         "description": "Settings page. Recently deleted: the group was not in a restored backup (or a restore was undone)"
     },
+    "s_deletedByReplace": {
+        "message": "Замінено іншими вкладками",
+        "description": "Settings page. Recently deleted: the old version of a group whose tabs were replaced (Replace in the popup)"
+    },
     "s_restoreGroup": {
         "message": "Відновити «$NAME$»",
         "description": "Settings page. Screen reader label of a Restore button in Recently deleted",

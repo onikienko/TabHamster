@@ -1384,6 +1384,10 @@
         "message": "Quitado por una restauración",
         "description": "Settings page. Recently deleted: the group was not in a restored backup (or a restore was undone)"
     },
+    "s_deletedByReplace": {
+        "message": "Reemplazado por otras pestañas",
+        "description": "Settings page. Recently deleted: the old version of a group whose tabs were replaced (Replace in the popup)"
+    },
     "s_restoreGroup": {
         "message": "Restaurar “$NAME$”",
         "description": "Settings page. Screen reader label of a Restore button in Recently deleted",

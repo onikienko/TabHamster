@@ -31,11 +31,12 @@ var groupStoreClient = (function () {
             return call('save', [key, group]);
         },
         /**
-         * {synced, error?, copy?, h}: new tabs, name and place as they are now. seen_h: `h` of the tabs that were
-         * changed; if they changed on another computer since, this version is saved as a copy (`copy` is its key)
+         * {synced, error?, copy?, kept?, h}: new tabs, name and place as they are now. seen_h: `h` of the tabs that were
+         * changed; if they changed on another computer since, this version is saved as a copy (`copy` is its key).
+         * keep_old: the replaced version goes to Recently deleted (`kept` is its key)
          */
-        setTabs: function (key, tabs, seen_h) {
-            return call('setTabs', [key, tabs, seen_h]);
+        setTabs: function (key, tabs, seen_h, keep_old) {
+            return call('setTabs', [key, tabs, seen_h, keep_old]);
         },
         /** {synced, error?}: new name, tabs and place as they are now */
         rename: function (key, name) {

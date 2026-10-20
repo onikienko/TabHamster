@@ -230,12 +230,20 @@ function nextIndex() {
 }
 
 /**
- * Undo of new tabs for a saved group: the old tabs back. If the change was saved as a copy (the tabs had changed on
- * another computer), the copy goes.
+ * Undo of new tabs for a saved group: the old tabs back, and their copy in Recently deleted goes (Replace keeps one).
+ * If the change was saved as a copy (the tabs had changed on another computer), the copy goes.
  */
 function undoTabs(key, before, res) {
-    return () => (res.copy ? groupStoreClient.discard(res.copy) :
-        groupStoreClient.setTabs(key, before.tabs, res.h));
+    return async () => {
+        if (res.copy) {
+            await groupStoreClient.discard(res.copy);
+            return;
+        }
+        await groupStoreClient.setTabs(key, before.tabs, res.h);
+        if (res.kept) {
+            await groupStoreClient.discard(res.kept);
+        }
+    };
 }
 
 /** second sentence of the bar when the group stayed on this computer */
@@ -313,7 +321,7 @@ async function save() {
         if (intent.kind === 'replace') {
             key = intent.key;
             const before = state.groups[key];
-            const res = await groupStoreClient.setTabs(key, tabs, before.h);
+            const res = await groupStoreClient.setTabs(key, tabs, before.h, true);
             text = (res.copy ? t('p_savedAsCopy', groupName(key, before)) :
                 plural('p_replaced', tabs.length, [groupName(key, before)])) + notSyncedNote(res);
             undo = undoTabs(key, before, res);
@@ -356,11 +364,11 @@ function act(fn) {
 
 /**
  * The group keeps its key, name and place, only its tabs change; the bar says `text` (or that the change became a
- * copy) and can undo it
+ * copy) and can undo it. keepOld: the old version goes to Recently deleted (Replace)
  */
-async function setTabs(key, tabs, text) {
+async function setTabs(key, tabs, text, keepOld = false) {
     const before = state.groups[key];
-    const res = await groupStoreClient.setTabs(key, tabs, before.h);
+    const res = await groupStoreClient.setTabs(key, tabs, before.h, keepOld);
     await afterChange(res.copy || key);
     showBar((res.copy ? t('p_savedAsCopy', groupName(key, before)) : text) + notSyncedNote(res),
         undoAction(undoTabs(key, before, res), res.copy || key));
@@ -372,7 +380,7 @@ async function replaceWithOpenTabs(key) {
         showBar(t('p_nothingToSave'));
         return;
     }
-    await setTabs(key, tabs, plural('p_replaced', tabs.length, [groupName(key, state.groups[key])]));
+    await setTabs(key, tabs, plural('p_replaced', tabs.length, [groupName(key, state.groups[key])]), true);
 }
 
 async function addTab(key, tab) {

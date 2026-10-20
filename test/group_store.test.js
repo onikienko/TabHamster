@@ -454,6 +454,31 @@ test('setTabs keeps the current name and place, and answers the new hash', async
     assert.deepEqual((await a.store.list()).tg_1.tabs, seen.tabs);
 });
 
+test('setTabs with keep_old: the replaced version goes to trash; an undo takes it out again', async () => {
+    const {store, sync} = makeDevice();
+    const old = makeGroup(3, 1);
+    await store.save('tg_1000', old);
+    const seen = (await store.list()).tg_1000;
+
+    const tabs = makeTabs(2, 5);
+    const res = await store.setTabs('tg_1000', tabs, seen.h, true);
+    assert.deepEqual(res, {synced: true, h: gs.tabsHash(tabs), kept: 'tg_1001'});
+    const trash = await store.listTrash();
+    assert.deepEqual(trash.map(g => [g.key, g.by]), [['tg_1001', 'replace']]);
+    assert.deepEqual(plain(trash[0]), old);
+    assert.deepEqual(Object.keys(await syncGroups(sync)), ['tg_1000'], 'kept on this computer only');
+
+    // the popup's Undo
+    await store.setTabs('tg_1000', old.tabs, res.h);
+    assert.deepEqual(await store.discard(res.kept), {synced: true});
+    assert.deepEqual(await store.listTrash(), []);
+    assert.deepEqual(plainList(await store.list()), {tg_1000: old});
+
+    // the same tabs again: nothing to keep
+    assert.equal((await store.setTabs('tg_1000', old.tabs, undefined, true)).kept, undefined);
+    assert.deepEqual(await store.listTrash(), []);
+});
+
 test('edits of a group that is gone; a move leaves a deleted group alone, other edits bring it back', async () => {
     const {store} = makeDevice();
     await store.save('tg_1', makeGroup(3, 1));

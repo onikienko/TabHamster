@@ -269,6 +269,8 @@ function trashRow(group) {
         meta.push(t('s_deletedElsewhere'));
     } else if (group.by === 'restore') {
         meta.push(t('s_deletedByRestore'));
+    } else if (group.by === 'replace') {
+        meta.push(t('s_deletedByReplace'));
     }
     const button = h('button', {class: 'btn tonal', type: 'button', 'aria-label': t('s_restoreGroup', name)},
         t('o_trash_restoreButton'));
