@@ -1,5 +1,6 @@
 // Popover menu for a ⋯ button. One at a time. ↑ ↓ Home End move, Enter or Space chooses, Esc closes and
-// goes back to the button, Tab or a click outside closes. It sits under the button (above it if there is no room).
+// goes back to the button, Tab or a click outside closes. Like Chrome's own menus, that click only closes it: it
+// doesn't reach what is under it. It sits under the button (above it if there is no room).
 // A popup is only as tall as its page, so when the menu doesn't fit either way the page grows for it.
 
 import {h} from './dom.js';
@@ -44,6 +45,21 @@ export function closeMenu(focus) {
     if (onClose) {
         onClose();
     }
+}
+
+// drops the click (and middle click) that ends this press, once
+function swallowClick() {
+    const stop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    document.addEventListener('click', stop, true);
+    document.addEventListener('auxclick', stop, true);
+    // the click comes right after the pointerup, in the same task
+    document.addEventListener('pointerup', () => setTimeout(() => {
+        document.removeEventListener('click', stop, true);
+        document.removeEventListener('auxclick', stop, true);
+    }, 0), {capture: true, once: true});
 }
 
 /** true if the menu of this button is open */
@@ -108,8 +124,15 @@ export function openMenu(anchor, items, {label, onClose} = {}) {
         next.focus();
     });
 
+    // a press on the menu's padding or a separator doesn't take the focus out of it (arrows and Esc keep working)
+    menu.addEventListener('pointerdown', (e) => e.preventDefault());
+
     const outside = (e) => {
         if (!menu.contains(e.target) && !anchor.contains(e.target)) {
+            // not to what is under it: no click, no focus, no drag
+            e.preventDefault();
+            e.stopPropagation();
+            swallowClick();
             closeMenu(false);
         }
     };
