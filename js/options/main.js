@@ -376,12 +376,22 @@ function build() {
     }
 }
 
-// the side menu marks the section at the top of the window
+// keys that scroll the page when nothing on it takes them
+const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
+
+// The side menu marks the section at the top of the window. A section chosen in the menu (or by the address, #help)
+// stays marked until the page is scrolled by hand: in a tall window the last ones can't reach the top.
 function watchSections() {
     const links = [...el.nav.querySelectorAll('a')];
+    const ids = links.map((link) => link.dataset.section);
+    let chosen = null;
     const mark = (id) => links.forEach((link) =>
         link.setAttribute('aria-current', String(link.dataset.section === id)));
     const update = () => {
+        if (chosen) {
+            mark(chosen);
+            return;
+        }
         const sections = [...el.main.querySelectorAll('section')];
         // at the bottom of the page the last sections can't reach the top: mark the last one
         const atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
@@ -393,9 +403,39 @@ function watchSections() {
         }
         mark(atEnd ? sections[sections.length - 1].id : current.id);
     };
+    const choose = (id) => {
+        chosen = ids.includes(id) ? id : null;
+        update();
+    };
+    const byHand = () => {
+        if (chosen) {
+            chosen = null;
+            update();
+        }
+    };
+    el.nav.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link) {
+            choose(link.dataset.section);
+        }
+    });
+    window.addEventListener('hashchange', () => choose(location.hash.slice(1)));
+    window.addEventListener('wheel', byHand, {passive: true});
+    window.addEventListener('touchmove', byHand, {passive: true});
+    window.addEventListener('keydown', (e) => {
+        if (!e.defaultPrevented && SCROLL_KEYS.has(e.key) && !e.target.closest('input, textarea, select, button, [role="radio"]')) {
+            byHand();
+        }
+    });
+    // the scroll bar
+    document.addEventListener('pointerdown', (e) => {
+        if (e.target === document.documentElement) {
+            byHand();
+        }
+    });
     window.addEventListener('scroll', update, {passive: true});
     window.addEventListener('resize', update);
-    update();
+    choose(location.hash.slice(1));
 }
 
 let groupsTimer = null;
