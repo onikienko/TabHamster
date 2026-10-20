@@ -6,12 +6,12 @@ import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel, keyCombo, isMac} from '../ui/platform.js';
-import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, faviconUrl, kilobytes} from '../ui/format.js';
+import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, withScheme, faviconUrl, kilobytes} from '../ui/format.js';
 import {showBar, hideBarAbout} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
-import {normalizeName, findByName, countByName} from '../names.js';
+import {normalizeName, findByName, countByName, freeName} from '../names.js';
 import {parseQuery, segments, search} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
@@ -629,20 +629,11 @@ async function onGroupsSynced() {
 
 /* ---------- session actions ---------- */
 
-/** the name, or "name (2)", "name (3)"... if a group already has it */
-function freeName(name) {
-    let free = name;
-    for (let n = 2; findByName(state.groups, free); n++) {
-        free = name + ' (' + n + ')';
-    }
-    return free;
-}
-
 async function saveSessionAsGroup(key) {
     const session = state.sessions[key];
     const start = keyTime(key);
     // the session's dates, not "Yesterday": the name stays
-    const name = freeName(session.updated ? interval(start, session.updated, lang, undefined, false) :
+    const name = freeName(state.groups, session.updated ? interval(start, session.updated, lang, undefined, false) :
         dayTime(start, lang, undefined, false));
     const tabs = session.tabs.map(savedTab);
     const groupKey = 'tg_' + Date.now();
@@ -848,12 +839,6 @@ function startTabEdit(key, at) {
         state.editingTab = null;
         render();
     }
-}
-
-/** an address typed without a scheme ("example.com/x") is a web address */
-function withScheme(url) {
-    return /^[a-z][a-z0-9+.-]*:\/\//i.test(url) || /^(about|data|mailto|file|view-source|chrome):/i.test(url) ?
-        url : 'https://' + url;
 }
 
 function focusTab(key, index) {

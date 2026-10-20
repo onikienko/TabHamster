@@ -42,6 +42,15 @@ export function findByName(groups, name, exceptKey) {
     return found;
 }
 
+/** the name, or "name (2)", "name (3)"... if a group already has it */
+export function freeName(groups, name) {
+    let free = name;
+    for (let n = 2; findByName(groups, free); n++) {
+        free = name + ' (' + n + ')';
+    }
+    return free;
+}
+
 /** how many groups have this name */
 export function countByName(groups, name) {
     return Object.keys(groups).filter((key) => sameName(groups[key].name, name)).length;
