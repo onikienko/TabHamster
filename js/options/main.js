@@ -317,6 +317,8 @@ function help() {
         [t('s_help_moveKey', keyLabel('alt')), t('s_help_move')],
         [keyLabel('esc'), t('s_help_esc')],
         ['⋯', t('s_help_more')],
+        [keyLabel('delete'), t('s_help_delete')],
+        ['F2', t('s_help_f2')],
         [t('s_help_sessionsKey'), t('s_help_sessions')],
     ];
     return [h('dl', {class: 'keys'}, tips.map(([key, text]) => h('div', {class: 'row'},

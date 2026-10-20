@@ -14,7 +14,10 @@ function keyName(id, english) {
     return text || english;
 }
 
-/** label for 'enter' | 'alt' | 'mod' (the key that also opens a new window with a click) | 'shift' | 'esc' */
+/**
+ * label for 'enter' | 'alt' | 'mod' (the key that also opens a new window with a click) | 'shift' | 'esc' | 'delete'
+ * (a Mac's delete key, ⌫, is Backspace to the page)
+ */
 export function keyLabel(key, mac) {
     const m = mac === undefined ? isMac() : mac;
     const labels = {
@@ -23,6 +26,7 @@ export function keyLabel(key, mac) {
         mod: m ? '⌘' : keyName('ctrl', 'Ctrl'),
         shift: '⇧ ' + keyName('shift', 'Shift'),
         esc: keyName('esc', 'Esc'),
+        delete: m ? '⌫' : keyName('delete', 'Delete'),
     };
     if (!(key in labels)) {
         throw new Error('Unknown key: ' + key);

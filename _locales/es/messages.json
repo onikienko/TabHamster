@@ -1497,7 +1497,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Menú del grupo: reemplazar sus pestañas por las abiertas, añadir la pestaña actual, cambiar el nombre, abrir en una ventana de incógnito, copiar los enlaces o eliminar. Los grupos eliminados se quedan en Eliminados recientemente durante 30 días.",
+        "message": "Menú del grupo: reemplazar sus pestañas por las abiertas, añadir la pestaña actual o un enlace, cambiar el nombre, abrir en una ventana de incógnito, copiar los enlaces o eliminar. Los grupos eliminados se quedan en Eliminados recientemente durante 30 días.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1587,5 +1587,57 @@
                 "example": "Spanish"
             }
         }
+    },
+    "p_editTab": {
+        "message": "Editar pestaña",
+        "description": "Popup, tooltip and label of the pencil button on a saved tab"
+    },
+    "p_removeTab": {
+        "message": "Quitar del grupo",
+        "description": "Popup, tooltip and label of the \u00d7 button on a saved tab"
+    },
+    "p_tabRemoved": {
+        "message": "Pestaña quitada",
+        "description": "Bar after removing a tab from a saved group, with Undo"
+    },
+    "p_tabChanged": {
+        "message": "Pestaña modificada",
+        "description": "Bar after editing a tab's title or address, with Undo"
+    },
+    "p_addLink": {
+        "message": "Añadir enlace…",
+        "description": "Group \u22ef menu: opens an empty tab editor (title and address) at the end of the group"
+    },
+    "p_tabTitle_label": {
+        "message": "Título de la pestaña",
+        "description": "Popup, tab editor: label of the title field (screen readers)"
+    },
+    "p_tabTitle_placeholder": {
+        "message": "Título (opcional)",
+        "description": "Popup, tab editor: placeholder of the title field"
+    },
+    "p_tabUrl_label": {
+        "message": "Dirección",
+        "description": "Popup, tab editor: label of the address field (screen readers)"
+    },
+    "p_saveTab": {
+        "message": "Guardar pestaña",
+        "description": "Popup, tab editor: the \u2713 button"
+    },
+    "p_cancelTabEdit": {
+        "message": "Cancelar",
+        "description": "Popup, tab editor: the \u00d7 button"
+    },
+    "key_delete": {
+        "message": "Supr",
+        "description": "Key name (Delete), as Chrome's menus write it in this language (not on a Mac, where it shows \u232b)"
+    },
+    "s_help_delete": {
+        "message": "Quita la pestaña enfocada de su grupo guardado (se puede deshacer).",
+        "description": "Settings page, Help: what Delete does on a tab of a saved group in the popup"
+    },
+    "s_help_f2": {
+        "message": "Edita el título y la dirección de la pestaña enfocada.",
+        "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
     }
 }

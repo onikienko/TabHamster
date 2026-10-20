@@ -442,11 +442,107 @@ body.keyboard .row:has(:focus) .end-meta {
     text-decoration: none;
 }
 
-/* as group rows: hover with the mouse, focus with keys, never both */
-body:not(.keyboard) .tab-row:hover,
+/* a row, not a link: no link colour under the pointer either */
+.tab-row:hover {
+    color: var(--text);
+}
+
+/* as group rows: hover with the mouse, focus with keys, never both. Hover is on the wrapper: the row stays lit while
+   the pointer is on its Edit / Remove buttons */
+body:not(.keyboard) .tab-item:hover > .tab-row,
 body.keyboard .tab-row:focus {
     background: var(--hover);
     color: var(--text);
+}
+
+/* a tab and, for a saved group, its Edit and Remove over the end of the row (the address) */
+.tab-item {
+    position: relative;
+}
+
+.tab-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 4px 0 2px;
+    border-radius: 0 6px 6px 0;
+    background: var(--hover);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* the address fades out under them */
+.tab-actions::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 100%;
+    bottom: 0;
+    width: 16px;
+    background: inherit;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000);
+    mask-image: linear-gradient(to right, transparent, #000);
+}
+
+.tab-actions .ib {
+    width: 24px;
+    height: 24px;
+}
+
+body:not(.keyboard) .tab-item:hover .tab-actions,
+body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* editing a tab (or adding a link): title and address, like a rename */
+.tab-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 2px 0;
+    padding: 4px 4px 6px;
+    border-radius: 8px;
+    background: var(--hover);
+}
+
+.tab-editor-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tab-input {
+    flex: 1;
+    min-width: 0;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    outline: none;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.tab-input:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 1px var(--focus);
+}
+
+/* under the title, without the buttons' width */
+.tab-input.url {
+    margin-right: 68px;
+    font-size: 12px;
+}
+
+.tab-editor .ib:disabled {
+    opacity: .5;
+    cursor: default;
 }
 
 .tab-title {

@@ -1494,7 +1494,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Csoportmenü: a fülei cseréje a nyitott fülekre, az aktuális fül hozzáadása, átnevezés, megnyitás inkognitóablakban, linkek másolása vagy törlés. A törölt csoportok 30 napig a Nemrég törölt között maradnak.",
+        "message": "Csoportmenü: a fülei cseréje a nyitott fülekre, az aktuális fül vagy egy link hozzáadása, átnevezés, megnyitás inkognitóablakban, linkek másolása vagy törlés. A törölt csoportok 30 napig a Nemrég törölt között maradnak.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1584,5 +1584,57 @@
                 "example": "Spanish"
             }
         }
+    },
+    "p_editTab": {
+        "message": "Fül szerkesztése",
+        "description": "Popup, tooltip and label of the pencil button on a saved tab"
+    },
+    "p_removeTab": {
+        "message": "Eltávolítás a csoportból",
+        "description": "Popup, tooltip and label of the \u00d7 button on a saved tab"
+    },
+    "p_tabRemoved": {
+        "message": "Fül eltávolítva",
+        "description": "Bar after removing a tab from a saved group, with Undo"
+    },
+    "p_tabChanged": {
+        "message": "Fül módosítva",
+        "description": "Bar after editing a tab's title or address, with Undo"
+    },
+    "p_addLink": {
+        "message": "Link hozzáadása…",
+        "description": "Group \u22ef menu: opens an empty tab editor (title and address) at the end of the group"
+    },
+    "p_tabTitle_label": {
+        "message": "Fül címe",
+        "description": "Popup, tab editor: label of the title field (screen readers)"
+    },
+    "p_tabTitle_placeholder": {
+        "message": "Cím (nem kötelező)",
+        "description": "Popup, tab editor: placeholder of the title field"
+    },
+    "p_tabUrl_label": {
+        "message": "Webcím",
+        "description": "Popup, tab editor: label of the address field (screen readers)"
+    },
+    "p_saveTab": {
+        "message": "Fül mentése",
+        "description": "Popup, tab editor: the \u2713 button"
+    },
+    "p_cancelTabEdit": {
+        "message": "Mégse",
+        "description": "Popup, tab editor: the \u00d7 button"
+    },
+    "key_delete": {
+        "message": "Delete",
+        "description": "Key name (Delete), as Chrome's menus write it in this language (not on a Mac, where it shows \u232b)"
+    },
+    "s_help_delete": {
+        "message": "Eltávolítja a kijelölt fület a mentett csoportjából (visszavonható).",
+        "description": "Settings page, Help: what Delete does on a tab of a saved group in the popup"
+    },
+    "s_help_f2": {
+        "message": "Szerkeszti a kijelölt fül címét és webcímét.",
+        "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
     }
 }

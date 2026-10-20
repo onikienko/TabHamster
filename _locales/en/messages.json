@@ -1497,7 +1497,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Group menu: replace its tabs with the open ones, add the current tab, rename, open in an incognito window, copy links, or delete. Deleted groups stay in Recently deleted for 30 days.",
+        "message": "Group menu: replace its tabs with the open ones, add the current tab or a link, rename, open in an incognito window, copy links, or delete. Deleted groups stay in Recently deleted for 30 days.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1587,5 +1587,57 @@
                 "example": "Spanish"
             }
         }
+    },
+    "p_editTab": {
+        "message": "Edit tab",
+        "description": "Popup, tooltip and label of the pencil button on a saved tab"
+    },
+    "p_removeTab": {
+        "message": "Remove from group",
+        "description": "Popup, tooltip and label of the \u00d7 button on a saved tab"
+    },
+    "p_tabRemoved": {
+        "message": "Tab removed",
+        "description": "Bar after removing a tab from a saved group, with Undo"
+    },
+    "p_tabChanged": {
+        "message": "Tab changed",
+        "description": "Bar after editing a tab's title or address, with Undo"
+    },
+    "p_addLink": {
+        "message": "Add link…",
+        "description": "Group \u22ef menu: opens an empty tab editor (title and address) at the end of the group"
+    },
+    "p_tabTitle_label": {
+        "message": "Tab title",
+        "description": "Popup, tab editor: label of the title field (screen readers)"
+    },
+    "p_tabTitle_placeholder": {
+        "message": "Title (optional)",
+        "description": "Popup, tab editor: placeholder of the title field"
+    },
+    "p_tabUrl_label": {
+        "message": "Address",
+        "description": "Popup, tab editor: label of the address field (screen readers)"
+    },
+    "p_saveTab": {
+        "message": "Save tab",
+        "description": "Popup, tab editor: the \u2713 button"
+    },
+    "p_cancelTabEdit": {
+        "message": "Cancel",
+        "description": "Popup, tab editor: the \u00d7 button"
+    },
+    "key_delete": {
+        "message": "Delete",
+        "description": "Key name (Delete), as Chrome's menus write it in this language (not on a Mac, where it shows \u232b)"
+    },
+    "s_help_delete": {
+        "message": "Removes the focused tab from its saved group (you can undo it).",
+        "description": "Settings page, Help: what Delete does on a tab of a saved group in the popup"
+    },
+    "s_help_f2": {
+        "message": "Edits the title and address of the focused tab.",
+        "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
     }
 }

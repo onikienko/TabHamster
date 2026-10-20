@@ -23,6 +23,7 @@ const percents = new Intl.NumberFormat(lang, {style: 'percent', maximumFractionD
 // key caps in tooltips
 const ENTER = keyCombo(['enter']);
 const ESC = keyCombo(['esc']);
+const DELETE = keyLabel('delete');
 
 const state = {
     options: null,
@@ -30,6 +31,8 @@ const state = {
     groupsError: null,
     sessions: {},
     currentSession: null,
+    // the saved tab being edited: {key, index}, index null for a new link at the end
+    editingTab: null,
     usage: null,
     openTabs: 0,
     view: 'saved',
@@ -468,6 +471,7 @@ async function groupMenu(key, button) {
             icon: 'plus', label: t('p_addCurrentTab'), sub: current.title || current.url,
             run: act(() => addTab(key, current)),
         } : null,
+        {icon: 'link', label: t('p_addLink'), run: () => startTabEdit(key, null)},
         {icon: 'pencil', label: t('p_rename'), run: () => startRename(key)},
         '-',
         {icon: 'incognito', label: t('p_openIncognito'), run: () => openElsewhere('incognito', group.tabs)},
@@ -501,7 +505,7 @@ function moveGroup(key, pos) {
 
 /** the saved groups are shown (not sessions) and not filtered: only then can they be reordered */
 function canReorder() {
-    return (state.view === 'saved' || !state.options.session_watcher) && !state.words.length && !state.renaming &&
+    return (state.view === 'saved' || !state.options.session_watcher) && !state.words.length && !state.renaming && !state.editingTab &&
         !state.filter;
 }
 
@@ -558,7 +562,7 @@ async function onGroupsSynced() {
         return;
     }
     // drawing the list again would end a rename or a menu (during a drag render() waits for its end)
-    if (state.renaming || document.querySelector('.menu')) {
+    if (state.renaming || state.editingTab || document.querySelector('.menu')) {
         renderFooter();
     } else {
         render();
@@ -747,6 +751,148 @@ function renameRow(key) {
     return row;
 }
 
+/* ---------- tab actions (saved groups only) ---------- */
+
+async function removeTab(key, index) {
+    const group = state.groups[key];
+    await setTabs(key, group.tabs.filter((tab, i) => i !== index), t('p_tabRemoved'));
+}
+
+/** the editor in place of a tab (index), or a new last row for a link (index null) */
+function startTabEdit(key, index) {
+    closeMenu(false);
+    state.renaming = null;
+    state.editingTab = {key, index};
+    renderList();
+    const input = el.list.querySelector('.tab-editor .tab-input');
+    if (input) {
+        input.focus();
+        input.select();
+    }
+}
+
+/** an address typed without a scheme ("example.com/x") is a web address */
+function withScheme(url) {
+    return /^[a-z][a-z0-9+.-]*:\/\//i.test(url) || /^(about|data|mailto|file|view-source|chrome|javascript):/i.test(url) ?
+        url : 'https://' + url;
+}
+
+function focusTab(key, index) {
+    const row = el.list.querySelector('a.tab-row[data-key="' + CSS.escape(key) + '"][data-index="' + index + '"]');
+    if (row) {
+        row.focus();
+    } else {
+        focusName(key);
+    }
+}
+
+/**
+ * Title and address of a saved tab, or of a new link (index null). Enter or ✓ saves, Esc or × cancels; clicking
+ * elsewhere saves an address that isn't empty and cancels otherwise. An empty title is fine: the address shows.
+ */
+function tabEditor(key, index) {
+    const tab = index === null ? null : state.groups[key].tabs[index];
+    const title = h('input', {
+        class: 'tab-input', type: 'text', value: tab ? tab.title || '' : '', maxlength: 1000, autocomplete: 'off',
+        spellcheck: 'false', dir: 'auto', 'aria-label': t('p_tabTitle_label'), placeholder: t('p_tabTitle_placeholder'),
+    });
+    const url = h('input', {
+        class: 'tab-input url', type: 'text', value: tab ? tab.url : '', autocomplete: 'off', spellcheck: 'false',
+        dir: 'ltr', 'aria-label': t('p_tabUrl_label'), placeholder: 'https://',
+    });
+    const ok = setTip(h('button', {class: 'ib', type: 'button', 'aria-label': t('p_saveTab')}, icon('check', 16)),
+        {text: t('p_saveTab'), keys: [ENTER]});
+    const cancel = setTip(h('button', {class: 'ib', type: 'button', 'aria-label': t('p_cancelTabEdit')}, icon('close', 15)),
+        {text: t('p_cancelTabEdit'), keys: [ESC]});
+    const box = h('div', {class: 'tab-editor'},
+        h('div', {class: 'tab-editor-line'}, title, ok, cancel),
+        h('div', {class: 'tab-editor-line'}, url));
+
+    const check = () => {
+        const usable = url.value.trim() !== '';
+        ok.disabled = !usable;
+        return usable;
+    };
+    check();
+    url.addEventListener('input', check);
+
+    let done = false;
+    const finish = async (commit, refocus) => {
+        if (done) {
+            return;
+        }
+        done = true;
+        state.editingTab = null;
+        const before = state.groups[key];
+        const newUrl = url.value.trim() ? withScheme(url.value.trim()) : '';
+        const newTitle = title.value.trim();
+        const changed = commit && newUrl && (!tab || newUrl !== tab.url || newTitle !== (tab.title || ''));
+        const name = groupName(key, before);
+        if (changed && index === null && before.tabs.some((saved) => saved.url === newUrl)) {
+            showBar(t('p_alreadyInGroup', name));
+        }
+        if (!changed || (index === null && before.tabs.some((saved) => saved.url === newUrl))) {
+            if (refocus) {
+                render();
+                focusTab(key, index === null ? before.tabs.length - 1 : index);
+            } else {
+                redrawItem(key);
+            }
+            return;
+        }
+        const tabs = index === null ?
+            before.tabs.concat({url: newUrl, title: newTitle, id: nextTabId(before.tabs)}) :
+            before.tabs.map((saved, i) => (i === index ? Object.assign({}, saved, {url: newUrl, title: newTitle}) : saved));
+        const text = index === null ? t('p_tabAdded', [newTitle || newUrl, name]) : t('p_tabChanged');
+        if (!refocus) {
+            // ended by a click elsewhere: only this group is drawn again, so the click still lands
+            state.groups[key] = Object.assign({}, before, {tabs});
+            redrawItem(key);
+        }
+        try {
+            const res = await groupStoreClient.setTabs(key, tabs, before.h);
+            if (refocus) {
+                await afterChange(res.copy || key);
+                focusTab(key, index === null ? tabs.length - 1 : index);
+            } else {
+                await reload();
+                redrawItem(key);
+            }
+            showBar((res.copy ? t('p_savedAsCopy', name) : text) + notSyncedNote(res),
+                undoAction(undoTabs(key, before, res), res.copy || key));
+        } catch (e) {
+            console.error('TabHamster: tab edit failed', e);
+            showBar(t('p_syncStorageDefault_error'));
+            await afterChange(null);
+        }
+    };
+
+    box.addEventListener('keydown', (e) => {
+        if (e.isComposing) {
+            return;
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (check()) {
+                finish(true, true);
+            }
+        } else if (e.key === 'Escape') {
+            // not to the list (it would clear the search) or to Chrome (it would close the popup)
+            e.preventDefault();
+            e.stopPropagation();
+            finish(false, true);
+        }
+    });
+    ok.addEventListener('click', () => finish(true, true));
+    cancel.addEventListener('click', () => finish(false, true));
+    box.addEventListener('focusout', (e) => {
+        if (!box.contains(e.relatedTarget)) {
+            finish(check(), false);
+        }
+    });
+    return box;
+}
+
 /* ---------- search ---------- */
 
 function runSearch() {
@@ -881,16 +1027,37 @@ function favicon(url) {
     return box;
 }
 
-function tabRow(tab) {
+/**
+ * A tab of a group or session: a link that opens it. A saved group's tab (`at`: {key, index}) also has Edit and
+ * Remove, shown over the end of the row on hover or when the row has the focus with keys (Delete, F2).
+ */
+function tabRow(tab, at) {
     const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
     // only for a title the row cuts off: the full title and the address
-    return setTip(h('a', {class: 'tab-row', href: tab.url, target: '_blank'},
-        favicon(tab.url),
-        tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
-        title,
-        h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url)))),
+    const link = setTip(h('a', {
+        class: 'tab-row', href: tab.url, target: '_blank',
+        dataset: at ? {key: at.key, index: String(at.index)} : {},
+        'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
+    },
+    favicon(tab.url),
+    tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
+    title,
+    h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url)))),
     {text: tab.title || tab.url, sub: tab.title ? tab.url : null, align: 'start', focus: false, quiet: true,
         when: () => isCut(title)});
+    if (!at) {
+        return h('div', {class: 'tab-item'}, link);
+    }
+    // not Tab stops: the keys do the same on the focused row
+    return h('div', {class: 'tab-item'}, link, h('div', {class: 'tab-actions'},
+        setTip(h('button', {
+            class: 'ib', type: 'button', tabindex: '-1', 'aria-label': t('p_editTab'),
+            onClick: () => startTabEdit(at.key, at.index),
+        }, icon('pencil', 15)), {text: t('p_editTab'), keys: ['F2']}),
+        setTip(h('button', {
+            class: 'ib', type: 'button', tabindex: '-1', 'aria-label': t('p_removeTab'),
+            onClick: act(() => removeTab(at.key, at.index)),
+        }, icon('close', 15)), {text: t('p_removeTab'), keys: [DELETE]})));
 }
 
 // saved groups and sessions both use tg_<ms> keys, so an id includes the view.
@@ -1037,9 +1204,14 @@ function groupItem(result, target) {
                     onClick: single(() => openInNewWindow(group.tabs)),
                 }, icon('newWindow', 16)), NEW_WINDOW_TIP),
                 moreButton((button) => groupMenu(key, button))))));
-    if (isExpanded('saved:' + key, partial)) {
-        const tabs = partial ? result.tabIndexes.map((i) => group.tabs[i]) : group.tabs;
-        item.append(h('div', {class: 'tab-list'}, tabs.map(tabRow)));
+    const editing = state.editingTab && state.editingTab.key === key ? state.editingTab : null;
+    if (isExpanded('saved:' + key, partial) || editing) {
+        const indexes = partial ? result.tabIndexes : group.tabs.map((tab, i) => i);
+        const rows = indexes.map((i) => (editing && editing.index === i ? tabEditor(key, i) : tabRow(group.tabs[i], {key, index: i})));
+        if (editing && editing.index === null) {
+            rows.push(tabEditor(key, null));
+        }
+        item.append(h('div', {class: 'tab-list'}, rows));
     }
     return item;
 }
@@ -1081,7 +1253,7 @@ function sessionItem(result) {
                     h('span', {class: 'spacer'}, plural('p_windowTitle', tabs.length, [i + 1])),
                     h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', tabs))},
                         t('p_openWindow'))),
-                shown.map(tabRow),
+                shown.map((tab) => tabRow(tab)),
             ] : null;
         })));
     }
@@ -1341,6 +1513,17 @@ el.clear.addEventListener('click', () => clearSearch());
 // → ← show and hide a group's tabs.
 // Alt (Option) + ↑ ↓ moves the focused group.
 el.list.addEventListener('keydown', (e) => {
+    // a saved group's tab: Delete (⌫ on a Mac) removes it, F2 edits it
+    const tabAt = e.target.matches && e.target.matches('a.tab-row[data-index]') ? e.target.dataset : null;
+    if (tabAt && (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'F2') && !e.repeat) {
+        e.preventDefault();
+        if (e.key === 'F2') {
+            startTabEdit(tabAt.key, Number(tabAt.index));
+        } else {
+            act(() => removeTab(tabAt.key, Number(tabAt.index)))();
+        }
+        return;
+    }
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.altKey) {
         const item = e.target.closest && e.target.closest('.item');
         if (!item || !canReorder() || !item.querySelector(':scope > .row')) {

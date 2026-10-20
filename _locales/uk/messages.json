@@ -1856,7 +1856,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Меню групи: замінити її вкладки відкритими, додати поточну вкладку, перейменувати, відкрити в анонімному вікні, скопіювати посилання або видалити. Видалені групи залишаються в «Нещодавно видалених» 30 днів.",
+        "message": "Меню групи: замінити її вкладки відкритими, додати поточну вкладку чи посилання, перейменувати, відкрити в анонімному вікні, скопіювати посилання або видалити. Видалені групи залишаються в «Нещодавно видалених» 30 днів.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1946,5 +1946,57 @@
                 "example": "Spanish"
             }
         }
+    },
+    "p_editTab": {
+        "message": "Редагувати вкладку",
+        "description": "Popup, tooltip and label of the pencil button on a saved tab"
+    },
+    "p_removeTab": {
+        "message": "Прибрати з групи",
+        "description": "Popup, tooltip and label of the \u00d7 button on a saved tab"
+    },
+    "p_tabRemoved": {
+        "message": "Вкладку прибрано",
+        "description": "Bar after removing a tab from a saved group, with Undo"
+    },
+    "p_tabChanged": {
+        "message": "Вкладку змінено",
+        "description": "Bar after editing a tab's title or address, with Undo"
+    },
+    "p_addLink": {
+        "message": "Додати посилання…",
+        "description": "Group \u22ef menu: opens an empty tab editor (title and address) at the end of the group"
+    },
+    "p_tabTitle_label": {
+        "message": "Назва вкладки",
+        "description": "Popup, tab editor: label of the title field (screen readers)"
+    },
+    "p_tabTitle_placeholder": {
+        "message": "Назва (необов'язково)",
+        "description": "Popup, tab editor: placeholder of the title field"
+    },
+    "p_tabUrl_label": {
+        "message": "Адреса",
+        "description": "Popup, tab editor: label of the address field (screen readers)"
+    },
+    "p_saveTab": {
+        "message": "Зберегти вкладку",
+        "description": "Popup, tab editor: the \u2713 button"
+    },
+    "p_cancelTabEdit": {
+        "message": "Скасувати",
+        "description": "Popup, tab editor: the \u00d7 button"
+    },
+    "key_delete": {
+        "message": "Delete",
+        "description": "Key name (Delete), as Chrome's menus write it in this language (not on a Mac, where it shows \u232b)"
+    },
+    "s_help_delete": {
+        "message": "Прибирає вкладку у фокусі з її збереженої групи (це можна скасувати).",
+        "description": "Settings page, Help: what Delete does on a tab of a saved group in the popup"
+    },
+    "s_help_f2": {
+        "message": "Редагує назву й адресу вкладки у фокусі.",
+        "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
     }
 }

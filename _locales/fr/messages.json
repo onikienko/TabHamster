@@ -1497,7 +1497,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Menu du groupe : remplacer ses onglets par ceux qui sont ouverts, ajouter l’onglet actuel, renommer, ouvrir dans une fenêtre de navigation privée, copier les liens ou supprimer. Les groupes supprimés restent 30 jours dans Supprimés récemment.",
+        "message": "Menu du groupe : remplacer ses onglets par ceux qui sont ouverts, ajouter l’onglet actuel ou un lien, renommer, ouvrir dans une fenêtre de navigation privée, copier les liens ou supprimer. Les groupes supprimés restent 30 jours dans Supprimés récemment.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1587,5 +1587,57 @@
                 "example": "Spanish"
             }
         }
+    },
+    "p_editTab": {
+        "message": "Modifier l’onglet",
+        "description": "Popup, tooltip and label of the pencil button on a saved tab"
+    },
+    "p_removeTab": {
+        "message": "Retirer du groupe",
+        "description": "Popup, tooltip and label of the \u00d7 button on a saved tab"
+    },
+    "p_tabRemoved": {
+        "message": "Onglet retiré",
+        "description": "Bar after removing a tab from a saved group, with Undo"
+    },
+    "p_tabChanged": {
+        "message": "Onglet modifié",
+        "description": "Bar after editing a tab's title or address, with Undo"
+    },
+    "p_addLink": {
+        "message": "Ajouter un lien…",
+        "description": "Group \u22ef menu: opens an empty tab editor (title and address) at the end of the group"
+    },
+    "p_tabTitle_label": {
+        "message": "Titre de l’onglet",
+        "description": "Popup, tab editor: label of the title field (screen readers)"
+    },
+    "p_tabTitle_placeholder": {
+        "message": "Titre (facultatif)",
+        "description": "Popup, tab editor: placeholder of the title field"
+    },
+    "p_tabUrl_label": {
+        "message": "Adresse",
+        "description": "Popup, tab editor: label of the address field (screen readers)"
+    },
+    "p_saveTab": {
+        "message": "Enregistrer l’onglet",
+        "description": "Popup, tab editor: the \u2713 button"
+    },
+    "p_cancelTabEdit": {
+        "message": "Annuler",
+        "description": "Popup, tab editor: the \u00d7 button"
+    },
+    "key_delete": {
+        "message": "Suppr",
+        "description": "Key name (Delete), as Chrome's menus write it in this language (not on a Mac, where it shows \u232b)"
+    },
+    "s_help_delete": {
+        "message": "Retire l’onglet sélectionné de son groupe enregistré (vous pouvez annuler).",
+        "description": "Settings page, Help: what Delete does on a tab of a saved group in the popup"
+    },
+    "s_help_f2": {
+        "message": "Modifie le titre et l’adresse de l’onglet sélectionné.",
+        "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
     }
 }
