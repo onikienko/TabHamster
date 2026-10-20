@@ -125,6 +125,14 @@ var groupStore = (function () {
         };
     }
 
+    // same name and tabs: addresses, titles, pinned (not the place, not tab ids: a backup restore renumbers them)
+    function sameContent(a, b) {
+        const x = normalizeGroup(a);
+        const y = normalizeGroup(b);
+        const tabs = g => JSON.stringify(g.tabs.map(tab => [tab && tab.url, tab && tab.title, !!(tab && tab.pinned)]));
+        return x.name === y.name && tabs(x) === tabs(y);
+    }
+
     function chunkedHeader(group, h, w, n) {
         return {v: 2, name: group.name, index: group.index, h, w, n};
     }
@@ -367,8 +375,9 @@ var groupStore = (function () {
             }, 0);
         }
 
-        function freeKey(records, sync_items) {
-            let t = now();
+        // a group key nothing uses, from the time `from` (ms) on
+        function freeKey(records, sync_items, from = now()) {
+            let t = from;
             while (records[GROUP_PREFIX + t] || sync_items[GROUP_PREFIX + t]) {
                 t++;
             }
@@ -808,25 +817,43 @@ var groupStore = (function () {
         }
 
         // Restore from a backup: the given groups replace all current ones. Writes before it deletes, so an
-        // interruption leaves old and new groups, never neither. Replaced groups go to trash.
+        // interruption leaves old and new groups, never neither. Replaced groups go to trash; so does the current
+        // version of a group the backup changes, under a key of its own (only on this computer, never in sync).
         async function replaceAllNow(groups) {
-            await saveNow(groups);
             const records = await readRecords();
-            const others = Object.keys(records).filter(function (key) {
-                return !records[key].trashed && !groups.hasOwnProperty(key);
+            const changed = Object.keys(groups).filter(function (key) {
+                return records[key] && !records[key].trashed && !sameContent(records[key].g, groups[key]);
+            });
+            if (changed.length) {
+                const sync_items = await sync.get(null);
+                for (const key of changed) {
+                    // next to the original's time: an unnamed group keeps showing about the same date
+                    const time = parseInt(key.slice(GROUP_PREFIX.length), 10);
+                    // not a key the backup brings either
+                    const copy_key = freeKey(Object.assign({}, groups, records), sync_items,
+                        Number.isFinite(time) ? time + 1 : now());
+                    const rec = records[key];
+                    await putRecord(records, copy_key,
+                        {g: rec.g, h: rec.h, synced: false, base: null, trashed: now(), trashed_by: 'restore'});
+                }
+            }
+            await saveNow(groups);
+            const after = await readRecords();
+            const others = Object.keys(after).filter(function (key) {
+                return !after[key].trashed && !groups.hasOwnProperty(key);
             });
             for (const key of others) {
-                records[key].trashed = now();
-                records[key].trashed_by = 'restore';
-                records[key].removing = true;
-                await putRecord(records, key, records[key]);
+                after[key].trashed = now();
+                after[key].trashed_by = 'restore';
+                after[key].removing = true;
+                await putRecord(after, key, after[key]);
             }
             if (others.length) {
                 try {
                     await removeFromSync(others, await sync.get(null));
                     for (const key of others) {
-                        delete records[key].removing;
-                        await putRecord(records, key, records[key]);
+                        delete after[key].removing;
+                        await putRecord(after, key, after[key]);
                     }
                 } catch (e) {
                     // removal is retried by the next reconcile
@@ -834,7 +861,7 @@ var groupStore = (function () {
             }
             // backup groups that didn't fit in sync next to the old ones can go there now
             const done = await syncKeys(await readRecords());
-            return {saved: Object.keys(groups).length, removed: others.length, errors: done.errors};
+            return {saved: Object.keys(groups).length, removed: others.length + changed.length, errors: done.errors};
         }
 
         async function restoreNow(key) {
@@ -1021,7 +1048,10 @@ var groupStore = (function () {
             discard: (key, saved) => change(() => discardNow(key, saved)),
             /** @returns {Promise<{synced: boolean, error?: string}>} brings a group back from trash */
             restore: (key) => change(() => restoreNow(key), [key]),
-            /** @returns {Promise<{saved: number, removed: number, errors: Object}>} groups not given go to trash */
+            /**
+             * @returns {Promise<{saved: number, removed: number, errors: Object}>} groups not given go to trash, and
+             *   the current versions of groups given with another name or tabs (removed counts both)
+             */
             replaceAll: (groups) => change(() => replaceAllNow(groups), Object.keys(groups)),
             /** @returns {Promise<{errors: Object, copies: Object}>} */
             reconcile: () => change(reconcileNow),
@@ -1049,6 +1079,7 @@ var groupStore = (function () {
         writeId,
         writeIdTime,
         normalizeGroup,
+        sameContent,
         chunkedHeader,
         encodeGroup,
         decodeGroup,

@@ -1508,7 +1508,7 @@
         "description": "Settings page. Restore row title"
     },
     "s_restore_text": {
-        "message": "Ваше сачуване групе замењују се онима из резервне копије. Групе којих у њој нема иду у Недавно избрисане, а враћање можете да опозовете.",
+        "message": "Ваше сачуване групе замењују се онима из резервне копије. Групе којих у њој нема, или су у њој другачије, иду у Недавно избрисане, а враћање можете да опозовете.",
         "description": "Settings page. Under Restore from a backup"
     },
     "s_chooseFile": {
@@ -1552,7 +1552,7 @@
         "description": "Settings page. Restore preview of a backup without groups"
     },
     "s_preview_trashed_one": {
-        "message": "Ваше сачуване групе се замењују. $COUNT$ група која није у резервној копији иде у Недавно избрисане.",
+        "message": "Ваше сачуване групе се замењују. $COUNT$ група која није у резервној копији, или је у њој другачија, иде у Недавно избрисане.",
         "description": "Settings page. Restore preview (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1562,7 +1562,7 @@
         }
     },
     "s_preview_trashed_few": {
-        "message": "Ваше сачуване групе се замењују. $COUNT$ групе које нису у резервној копији иду у Недавно избрисане.",
+        "message": "Ваше сачуване групе се замењују. $COUNT$ групе које нису у резервној копији, или су у њој другачије, иду у Недавно избрисане.",
         "description": "Settings page. Restore preview (plural form 'few')",
         "placeholders": {
             "count": {
@@ -1572,7 +1572,7 @@
         }
     },
     "s_preview_trashed_other": {
-        "message": "Ваше сачуване групе се замењују. $COUNT$ група које нису у резервној копији иду у Недавно избрисане.",
+        "message": "Ваше сачуване групе се замењују. $COUNT$ група које нису у резервној копији, или су у њој другачије, иду у Недавно избрисане.",
         "description": "Settings page. Restore preview (plural form 'other')",
         "placeholders": {
             "count": {
@@ -1660,7 +1660,7 @@
         }
     },
     "s_lastRestore_trashed_one": {
-        "message": "$COUNT$ група која није била у резервној копији је у Недавно избрисаним.",
+        "message": "$COUNT$ група која није била у резервној копији, или је у њој била другачија, је у Недавно избрисаним.",
         "description": "Settings page. Under Last restore (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1670,7 +1670,7 @@
         }
     },
     "s_lastRestore_trashed_few": {
-        "message": "$COUNT$ групе које нису биле у резервној копији су у Недавно избрисаним.",
+        "message": "$COUNT$ групе које нису биле у резервној копији, или су у њој биле другачије, су у Недавно избрисаним.",
         "description": "Settings page. Under Last restore (plural form 'few')",
         "placeholders": {
             "count": {
@@ -1680,7 +1680,7 @@
         }
     },
     "s_lastRestore_trashed_other": {
-        "message": "$COUNT$ група које нису биле у резервној копији су у Недавно избрисаним.",
+        "message": "$COUNT$ група које нису биле у резервној копији, или су у њој биле другачије, су у Недавно избрисаним.",
         "description": "Settings page. Under Last restore (plural form 'other')",
         "placeholders": {
             "count": {

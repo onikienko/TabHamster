@@ -1203,7 +1203,7 @@
         "description": "Settings page. Restore row title"
     },
     "s_restore_text": {
-        "message": "Vos groupes enregistrés sont remplacés par ceux de la sauvegarde. Les groupes qui n’y sont pas vont dans Supprimés récemment, et vous pouvez annuler la restauration.",
+        "message": "Vos groupes enregistrés sont remplacés par ceux de la sauvegarde. Les groupes qui n’y sont pas, ou qui y sont différents, vont dans Supprimés récemment, et vous pouvez annuler la restauration.",
         "description": "Settings page. Under Restore from a backup"
     },
     "s_chooseFile": {
@@ -1247,7 +1247,7 @@
         "description": "Settings page. Restore preview of a backup without groups"
     },
     "s_preview_trashed_one": {
-        "message": "Vos groupes enregistrés sont remplacés. $COUNT$ groupe absent de la sauvegarde va dans Supprimés récemment.",
+        "message": "Vos groupes enregistrés sont remplacés. $COUNT$ groupe absent de la sauvegarde, ou différent dans celle-ci, va dans Supprimés récemment.",
         "description": "Settings page. Restore preview (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1257,7 +1257,7 @@
         }
     },
     "s_preview_trashed_other": {
-        "message": "Vos groupes enregistrés sont remplacés. $COUNT$ groupes absents de la sauvegarde vont dans Supprimés récemment.",
+        "message": "Vos groupes enregistrés sont remplacés. $COUNT$ groupes absents de la sauvegarde, ou différents dans celle-ci, vont dans Supprimés récemment.",
         "description": "Settings page. Restore preview (plural form 'other')",
         "placeholders": {
             "count": {
@@ -1325,7 +1325,7 @@
         }
     },
     "s_lastRestore_trashed_one": {
-        "message": "$COUNT$ groupe absent de la sauvegarde est dans Supprimés récemment.",
+        "message": "$COUNT$ groupe absent de la sauvegarde, ou différent dans celle-ci, est dans Supprimés récemment.",
         "description": "Settings page. Under Last restore (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1335,7 +1335,7 @@
         }
     },
     "s_lastRestore_trashed_other": {
-        "message": "$COUNT$ groupes absents de la sauvegarde sont dans Supprimés récemment.",
+        "message": "$COUNT$ groupes absents de la sauvegarde, ou différents dans celle-ci, sont dans Supprimés récemment.",
         "description": "Settings page. Under Last restore (plural form 'other')",
         "placeholders": {
             "count": {

@@ -1203,7 +1203,7 @@
         "description": "Settings page. Restore row title"
     },
     "s_restore_text": {
-        "message": "Sus grupos guardados se reemplazan por los de la copia de seguridad. Los grupos que no estén en ella van a Eliminados recientemente, y puede deshacer la restauración.",
+        "message": "Sus grupos guardados se reemplazan por los de la copia de seguridad. Los grupos que no estén en ella, o que difieran de ella, van a Eliminados recientemente, y puede deshacer la restauración.",
         "description": "Settings page. Under Restore from a backup"
     },
     "s_chooseFile": {
@@ -1247,7 +1247,7 @@
         "description": "Settings page. Restore preview of a backup without groups"
     },
     "s_preview_trashed_one": {
-        "message": "Sus grupos guardados se reemplazan. $COUNT$ grupo que no está en la copia de seguridad va a Eliminados recientemente.",
+        "message": "Sus grupos guardados se reemplazan. $COUNT$ grupo que no está en la copia de seguridad, o que difiere de ella, va a Eliminados recientemente.",
         "description": "Settings page. Restore preview (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1257,7 +1257,7 @@
         }
     },
     "s_preview_trashed_other": {
-        "message": "Sus grupos guardados se reemplazan. $COUNT$ grupos que no están en la copia de seguridad van a Eliminados recientemente.",
+        "message": "Sus grupos guardados se reemplazan. $COUNT$ grupos que no están en la copia de seguridad, o que difieren de ella, van a Eliminados recientemente.",
         "description": "Settings page. Restore preview (plural form 'other')",
         "placeholders": {
             "count": {
@@ -1325,7 +1325,7 @@
         }
     },
     "s_lastRestore_trashed_one": {
-        "message": "$COUNT$ grupo que no estaba en la copia de seguridad está en Eliminados recientemente.",
+        "message": "$COUNT$ grupo que no estaba en la copia de seguridad, o que difería de ella, está en Eliminados recientemente.",
         "description": "Settings page. Under Last restore (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1335,7 +1335,7 @@
         }
     },
     "s_lastRestore_trashed_other": {
-        "message": "$COUNT$ grupos que no estaban en la copia de seguridad están en Eliminados recientemente.",
+        "message": "$COUNT$ grupos que no estaban en la copia de seguridad, o que diferían de ella, están en Eliminados recientemente.",
         "description": "Settings page. Under Last restore (plural form 'other')",
         "placeholders": {
             "count": {

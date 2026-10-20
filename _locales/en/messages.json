@@ -1203,7 +1203,7 @@
         "description": "Settings page. Restore row title"
     },
     "s_restore_text": {
-        "message": "Your saved groups are replaced by the ones in the backup. Groups that aren’t in it go to Recently deleted, and you can undo the restore.",
+        "message": "Your saved groups are replaced by the ones in the backup. Groups that aren’t in it, or differ from it, go to Recently deleted, and you can undo the restore.",
         "description": "Settings page. Under Restore from a backup"
     },
     "s_chooseFile": {
@@ -1247,7 +1247,7 @@
         "description": "Settings page. Restore preview of a backup without groups"
     },
     "s_preview_trashed_one": {
-        "message": "Your saved groups are replaced. $COUNT$ group that isn’t in the backup goes to Recently deleted.",
+        "message": "Your saved groups are replaced. $COUNT$ group that isn’t in the backup, or differs from it, goes to Recently deleted.",
         "description": "Settings page. Restore preview (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1257,7 +1257,7 @@
         }
     },
     "s_preview_trashed_other": {
-        "message": "Your saved groups are replaced. $COUNT$ groups that aren’t in the backup go to Recently deleted.",
+        "message": "Your saved groups are replaced. $COUNT$ groups that aren’t in the backup, or differ from it, go to Recently deleted.",
         "description": "Settings page. Restore preview (plural form 'other')",
         "placeholders": {
             "count": {
@@ -1325,7 +1325,7 @@
         }
     },
     "s_lastRestore_trashed_one": {
-        "message": "$COUNT$ group that wasn’t in the backup is in Recently deleted.",
+        "message": "$COUNT$ group that wasn’t in the backup, or differed from it, is in Recently deleted.",
         "description": "Settings page. Under Last restore (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1335,7 +1335,7 @@
         }
     },
     "s_lastRestore_trashed_other": {
-        "message": "$COUNT$ groups that weren’t in the backup are in Recently deleted.",
+        "message": "$COUNT$ groups that weren’t in the backup, or differed from it, are in Recently deleted.",
         "description": "Settings page. Under Last restore (plural form 'other')",
         "placeholders": {
             "count": {

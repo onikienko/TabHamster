@@ -454,9 +454,12 @@ test('backup: preview says what a restore would do and changes nothing', async (
         tg_1700000000001: makeGroup(7, 11),
         tg_1600000000001: makeGroup(3, 12),
     });
+    // 2 not in the backup, 1 changed by it; a group it has as it is doesn't count
+    const same_text = JSON.stringify({tg_1700000000001: current.tg_1700000000001, tg_1700000000002: makeGroup(5, 2)});
+    assert.equal((await bg.groups('previewBackup', same_text)).result.trashed, 1);
 
     assert.deepEqual(await bg.groups('previewBackup', backup_text),
-        {result: {groups: 2, tabs: 10, options: true, current: 3, trashed: 2}});
+        {result: {groups: 2, tabs: 10, options: true, current: 3, trashed: 3}});
     assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
     assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'us');
     assert.equal((await bg.groups('restoreInfo')).result, null);

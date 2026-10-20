@@ -1512,7 +1512,7 @@
         "description": "Settings page. Restore row title"
     },
     "s_restore_text": {
-        "message": "Ваші збережені групи буде замінено групами з резервної копії. Групи, яких у ній немає, потраплять до «Нещодавно видалених», і відновлення можна скасувати.",
+        "message": "Ваші збережені групи буде замінено групами з резервної копії. Групи, яких у ній немає або які в ній відрізняються, потраплять до «Нещодавно видалених», і відновлення можна скасувати.",
         "description": "Settings page. Under Restore from a backup"
     },
     "s_chooseFile": {
@@ -1556,7 +1556,7 @@
         "description": "Settings page. Restore preview of a backup without groups"
     },
     "s_preview_trashed_one": {
-        "message": "Ваші збережені групи буде замінено. $COUNT$ група, якої немає в резервній копії, потрапить до «Нещодавно видалених».",
+        "message": "Ваші збережені групи буде замінено. $COUNT$ група, якої немає в резервній копії або яка в ній відрізняється, потрапить до «Нещодавно видалених».",
         "description": "Settings page. Restore preview (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1566,7 +1566,7 @@
         }
     },
     "s_preview_trashed_few": {
-        "message": "Ваші збережені групи буде замінено. $COUNT$ групи, яких немає в резервній копії, потраплять до «Нещодавно видалених».",
+        "message": "Ваші збережені групи буде замінено. $COUNT$ групи, яких немає в резервній копії або які в ній відрізняються, потраплять до «Нещодавно видалених».",
         "description": "Settings page. Restore preview (plural form 'few')",
         "placeholders": {
             "count": {
@@ -1576,7 +1576,7 @@
         }
     },
     "s_preview_trashed_other": {
-        "message": "Ваші збережені групи буде замінено. $COUNT$ груп, яких немає в резервній копії, потраплять до «Нещодавно видалених».",
+        "message": "Ваші збережені групи буде замінено. $COUNT$ груп, яких немає в резервній копії або які в ній відрізняються, потраплять до «Нещодавно видалених».",
         "description": "Settings page. Restore preview (plural form 'other')",
         "placeholders": {
             "count": {
@@ -1664,7 +1664,7 @@
         }
     },
     "s_lastRestore_trashed_one": {
-        "message": "$COUNT$ група, якої не було в резервній копії, у «Нещодавно видалених».",
+        "message": "$COUNT$ група, якої не було в резервній копії або яка в ній відрізнялася, у «Нещодавно видалених».",
         "description": "Settings page. Under Last restore (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1674,7 +1674,7 @@
         }
     },
     "s_lastRestore_trashed_few": {
-        "message": "$COUNT$ групи, яких не було в резервній копії, у «Нещодавно видалених».",
+        "message": "$COUNT$ групи, яких не було в резервній копії або які в ній відрізнялися, у «Нещодавно видалених».",
         "description": "Settings page. Under Last restore (plural form 'few')",
         "placeholders": {
             "count": {
@@ -1684,7 +1684,7 @@
         }
     },
     "s_lastRestore_trashed_other": {
-        "message": "$COUNT$ груп, яких не було в резервній копії, у «Нещодавно видалених».",
+        "message": "$COUNT$ груп, яких не було в резервній копії або які в ній відрізнялися, у «Нещодавно видалених».",
         "description": "Settings page. Under Last restore (plural form 'other')",
         "placeholders": {
             "count": {

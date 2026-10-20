@@ -47,15 +47,18 @@ async function readBackup(text) {
 }
 
 // what restoring `data` does: groups and tabs in it, settings or not, and how many current groups go to trash
+// (not in the backup, or there with another name or tabs: replaceAll keeps that version in trash)
 async function restorePlan(data) {
     const keys = Object.keys(data.groups);
-    const current = Object.keys(await groups.list());
+    const list = await groups.list();
+    const current = Object.keys(list);
     return {
         groups: keys.length,
         tabs: keys.reduce((sum, key) => sum + data.groups[key].tabs.length, 0),
         options: Object.keys(data.options).length > 0,
         current: current.length,
-        trashed: keys.length ? current.filter(key => !data.groups.hasOwnProperty(key)).length : 0,
+        trashed: keys.length ? current.filter(key => !data.groups.hasOwnProperty(key) ||
+            !groupStore.sameContent(list[key], data.groups[key])).length : 0,
     };
 }
 

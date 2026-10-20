@@ -1200,7 +1200,7 @@
         "description": "Settings page. Restore row title"
     },
     "s_restore_text": {
-        "message": "A mentett csoportjai helyére a biztonsági mentésben lévők kerülnek. Azok a csoportok, amelyek nincsenek benne, a Nemrég törölt közé kerülnek, és a visszaállítás visszavonható.",
+        "message": "A mentett csoportjai helyére a biztonsági mentésben lévők kerülnek. Azok a csoportok, amelyek nincsenek benne, vagy másként szerepelnek benne, a Nemrég törölt közé kerülnek, és a visszaállítás visszavonható.",
         "description": "Settings page. Under Restore from a backup"
     },
     "s_chooseFile": {
@@ -1244,7 +1244,7 @@
         "description": "Settings page. Restore preview of a backup without groups"
     },
     "s_preview_trashed_one": {
-        "message": "A mentett csoportjai lecserélődnek. $COUNT$ csoport, amely nincs a biztonsági mentésben, a Nemrég törölt közé kerül.",
+        "message": "A mentett csoportjai lecserélődnek. $COUNT$ csoport, amely nincs a biztonsági mentésben, vagy másként szerepel benne, a Nemrég törölt közé kerül.",
         "description": "Settings page. Restore preview (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1254,7 +1254,7 @@
         }
     },
     "s_preview_trashed_other": {
-        "message": "A mentett csoportjai lecserélődnek. $COUNT$ csoport, amely nincs a biztonsági mentésben, a Nemrég törölt közé kerül.",
+        "message": "A mentett csoportjai lecserélődnek. $COUNT$ csoport, amely nincs a biztonsági mentésben, vagy másként szerepel benne, a Nemrég törölt közé kerül.",
         "description": "Settings page. Restore preview (plural form 'other')",
         "placeholders": {
             "count": {
@@ -1322,7 +1322,7 @@
         }
     },
     "s_lastRestore_trashed_one": {
-        "message": "$COUNT$ csoport, amely nem volt a biztonsági mentésben, a Nemrég törölt között van.",
+        "message": "$COUNT$ csoport, amely nem volt a biztonsági mentésben, vagy másként szerepelt benne, a Nemrég törölt között van.",
         "description": "Settings page. Under Last restore (plural form 'one')",
         "placeholders": {
             "count": {
@@ -1332,7 +1332,7 @@
         }
     },
     "s_lastRestore_trashed_other": {
-        "message": "$COUNT$ csoport, amely nem volt a biztonsági mentésben, a Nemrég törölt között van.",
+        "message": "$COUNT$ csoport, amely nem volt a biztonsági mentésben, vagy másként szerepelt benne, a Nemrég törölt között van.",
         "description": "Settings page. Under Last restore (plural form 'other')",
         "placeholders": {
             "count": {

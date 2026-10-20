@@ -599,12 +599,40 @@ test('replaceAll: backup groups replace the current ones, which go to trash', as
     await store.save('tg_2', makeGroup(400, 2));
     const backup = {tg_2: makeGroup(30, 22), tg_3: makeGroup(5, 3)};
 
-    assert.deepEqual(await store.replaceAll(backup), {saved: 2, removed: 1, errors: {}});
+    assert.deepEqual(await store.replaceAll(backup), {saved: 2, removed: 2, errors: {}});
     assert.deepEqual(plainList(await store.list()), backup);
-    assert.deepEqual((await store.listTrash()).map(g => g.key), ['tg_1']);
+    const trash = await store.listTrash();
+    // tg_3 is the backup's
+    assert.deepEqual(trash.map(g => g.key).sort(), ['tg_1', 'tg_4'], 'the version of tg_2 it replaced is kept as tg_4');
+    assert.deepEqual(trash.map(g => g.by), ['restore', 'restore']);
+    assert.deepEqual(plain(trash.find(g => g.key === 'tg_4')), makeGroup(400, 2));
     const remote = await syncGroups(sync);
     assert.deepEqual(Object.keys(remote).sort(), ['tg_2', 'tg_3']);
     assert.deepEqual(await chunkKeys(sync), [], 'old chunks of tg_2 are gone');
+});
+
+test('replaceAll: a version the backup changes is kept in trash; one it has as it is, or with other tab ids, is not', async () => {
+    const {store, sync} = makeDevice();
+    const same = makeGroup(5, 1);
+    await store.save('tg_100', same);
+    await store.save('tg_200', makeGroup(5, 2));
+    await store.save('tg_300', makeGroup(5, 3));
+    const backup = {
+        tg_100: Object.assign({}, same, {index: 9, tabs: same.tabs.map((tab, i) => Object.assign({}, tab, {id: 50 + i}))}),
+        tg_200: makeGroup(5, 2, 'renamed in the backup'),
+        tg_300: makeGroup(6, 3),
+    };
+    const res = await store.replaceAll(backup);
+    assert.equal(res.removed, 2);
+    const trash = await store.listTrash();
+    assert.deepEqual(trash.map(g => [g.key, g.name]).sort(), [['tg_201', 'group 2'], ['tg_301', 'group 3']]);
+    assert.deepEqual(trash.find(g => g.key === 'tg_301').tabs, makeTabs(5, 3));
+    assert.deepEqual(plainList(await store.list()), backup);
+    assert.deepEqual(Object.keys(await syncGroups(sync)).sort(), ['tg_100', 'tg_200', 'tg_300'], 'copies stay local');
+
+    // brought back: a group of its own, synced
+    assert.deepEqual(await store.restore('tg_301'), {synced: true});
+    assert.deepEqual(Object.keys(await syncGroups(sync)).sort(), ['tg_100', 'tg_200', 'tg_300', 'tg_301']);
 });
 
 test('replaceAll with a nearly full sync: the backup still ends up in sync', async () => {
