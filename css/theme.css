@@ -141,6 +141,11 @@
     }
 }
 
+/* hidden means hidden, whatever display a component sets (no [hidden] rule per class) */
+[hidden] {
+    display: none !important;
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -211,10 +216,6 @@ button, input, select, textarea {
     line-height: 16px;
     pointer-events: none;
     animation: tip-in 100ms ease-out;
-}
-
-.tip[hidden] {
-    display: none;
 }
 
 @keyframes tip-in {

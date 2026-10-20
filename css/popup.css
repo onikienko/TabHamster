@@ -101,15 +101,6 @@ button {
     color: var(--on-tonal);
 }
 
-.chip[hidden],
-.field-icon[hidden] {
-    display: none;
-}
-
-.clear[hidden] {
-    display: none;
-}
-
 .save {
     flex: 0 1 auto;
     display: flex;
@@ -160,10 +151,6 @@ button {
     padding: 3px;
     border-radius: 10px;
     background: var(--seg);
-}
-
-.tabs[hidden] {
-    display: none;
 }
 
 .tab {
@@ -637,10 +624,6 @@ body.keyboard .tab-row:focus {
     line-height: 18px;
 }
 
-.bar[hidden] {
-    display: none;
-}
-
 .bar-text {
     flex: 1;
     min-width: 0;
@@ -916,10 +899,6 @@ body.keyboard .item.target > .row:has(:focus) {
     color: var(--danger);
     font-size: 12px;
     line-height: 16px;
-}
-
-.rename-error[hidden] {
-    display: none;
 }
 
 /* reordering by dragging (js/popup/drag.js): the row itself moves, a floating copy follows the pointer */

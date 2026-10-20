@@ -138,10 +138,6 @@ h2 {
     border-top: 1px solid var(--line);
 }
 
-.row[hidden] {
-    display: none;
-}
-
 .row-label {
     flex: 1 1 280px;
     min-width: 0;
@@ -392,10 +388,6 @@ h2 {
     line-height: 19px;
 }
 
-.panel[hidden] {
-    display: none;
-}
-
 .panel-title {
     font-size: 14px;
     font-weight: 600;
@@ -518,10 +510,6 @@ h2 {
     font-size: 13px;
     line-height: 18px;
     transform: translateX(-50%);
-}
-
-.bar[hidden] {
-    display: none;
 }
 
 .bar-text {
