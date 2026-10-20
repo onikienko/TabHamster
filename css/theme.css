@@ -255,8 +255,11 @@ button, input, select, textarea {
     align-items: center;
     height: 18px;
     padding: 0 5px;
+    /* rgba first for Chrome before 111 (no color-mix); tooltip text is light in both themes */
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
     border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
     background: color-mix(in srgb, currentColor 10%, transparent);
     font: 600 11px/1 var(--font);
     white-space: nowrap;
