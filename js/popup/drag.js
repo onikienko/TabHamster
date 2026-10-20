@@ -20,8 +20,9 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
  * @param {function(): boolean} options.enabled checked when a press starts
  * @param {function(HTMLElement): Node[]} options.ghost content of the floating copy of an item
  * @param {function(string, number): void} options.drop key and new place among the other items (0 = top)
+ * @param {function(): void} [options.ended] a drag ended (dropped or not), after `drop`
  */
-export function enableDrag(list, {enabled, ghost, drop}) {
+export function enableDrag(list, {enabled, ghost, drop, ended}) {
     let press = null;
     let drag = null;
 
@@ -112,7 +113,13 @@ export function enableDrag(list, {enabled, ghost, drop}) {
     }
 
     function start(e) {
-        const item = press.item;
+        // the list may have been drawn again since the press (a save finishing): the same group's new row
+        const item = press.item.isConnected ? press.item :
+            items().find((other) => other.dataset.key === press.item.dataset.key);
+        if (!item) {
+            press = null;
+            return;
+        }
         const rect = item.querySelector('.row').getBoundingClientRect();
         const copy = h('div', {class: 'drag-ghost', 'aria-hidden': 'true'}, ghost(item));
         copy.style.left = Math.round(rect.left) + 'px';
@@ -154,8 +161,12 @@ export function enableDrag(list, {enabled, ghost, drop}) {
         window.addEventListener('click', swallow, true);
         setTimeout(() => window.removeEventListener('click', swallow, true), 0);
         const pos = items().indexOf(d.item);
-        if (commit && pos !== d.from) {
+        // the row is gone if the list was drawn again meanwhile: nothing to drop
+        if (commit && d.item.isConnected && pos >= 0 && pos !== d.from) {
             drop(d.key, pos);
+        }
+        if (ended) {
+            ended();
         }
     }
 
@@ -177,8 +188,15 @@ export function enableDrag(list, {enabled, ghost, drop}) {
             }
             return;
         }
-        if (press && e.pointerId === press.pointerId &&
-            Math.hypot(e.clientX - press.x, e.clientY - press.y) >= THRESHOLD) {
+        if (!press || e.pointerId !== press.pointerId) {
+            return;
+        }
+        // released outside the list (no pointerup here): the press is over
+        if (!(e.buttons & 1)) {
+            press = null;
+            return;
+        }
+        if (Math.hypot(e.clientX - press.x, e.clientY - press.y) >= THRESHOLD) {
             start(e);
         }
     });

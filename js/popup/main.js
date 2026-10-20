@@ -530,8 +530,8 @@ async function onGroupsSynced() {
     if (!synced) {
         return;
     }
-    // drawing the list again would end a rename, a menu or a drag
-    if (state.renaming || document.querySelector('.menu') || document.body.classList.contains('dragging')) {
+    // drawing the list again would end a rename or a menu (during a drag render() waits for its end)
+    if (state.renaming || document.querySelector('.menu')) {
         renderFooter();
     } else {
         render();
@@ -1212,7 +1212,14 @@ function renderFilter() {
     el.chipText.textContent = state.filter ? t(state.filter === 'unsynced' ? 'p_filterUnsynced' : 'p_filterBiggest') : '';
 }
 
+// the list isn't drawn again during a drag (it would take the dragged row away), but once the drag ends
+let renderAfterDrag = false;
+
 function render() {
+    if (document.body.classList.contains('dragging')) {
+        renderAfterDrag = true;
+        return;
+    }
     // nothing waits for sync any more: back to all groups
     if (state.filter && !waitingKeys().length) {
         state.filter = null;
@@ -1406,6 +1413,12 @@ async function start() {
             return row;
         },
         drop: moveGroup,
+        ended: () => {
+            if (renderAfterDrag) {
+                renderAfterDrag = false;
+                render();
+            }
+        },
     });
     chrome.runtime.onMessage.addListener((msg) => {
         if (msg && msg.msg === 'groupsSynced' && !state.busy) {
