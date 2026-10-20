@@ -6,7 +6,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const {createStorageArea, createSyncArea} = require('./chrome_mock.js');
 const {makeGroup, makeTabs} = require('./helpers.js');
-const {hash} = require('../js/group_store.js');
+const {tabsHash} = require('../js/group_store.js');
 
 const ROOT = path.join(__dirname, '..');
 const EN = JSON.parse(fs.readFileSync(path.join(ROOT, '_locales/en/messages.json'), 'utf8'));
@@ -135,7 +135,7 @@ test('on start: 0.3.0 groups are migrated and listed', async () => {
     assert.deepEqual(Object.keys(res.result).sort(), Object.keys(old).sort());
     Object.keys(old).forEach(function (key) {
         assert.deepEqual(res.result[key], {name: old[key].name, index: old[key].index, tabs: old[key].tabs,
-            h: hash(JSON.stringify(old[key].tabs)), synced: true});
+            h: tabsHash(old[key].tabs), synced: true});
     });
     const items = await sync.get(null);
     Object.keys(old).forEach(key => assert.equal(items[key].v, 2));

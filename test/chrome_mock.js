@@ -16,8 +16,21 @@ function makeClock(start = Date.UTC(2026, 9, 14)) {
     return clock;
 }
 
+// like Chrome: what comes back is a copy, objects with their keys sorted (storage keeps them as base::Value dicts)
+function sortKeys(value) {
+    if (Array.isArray(value)) {
+        return value.map(sortKeys);
+    }
+    if (value && typeof value === 'object') {
+        const out = {};
+        Object.keys(value).sort().forEach(key => out[key] = sortKeys(value[key]));
+        return out;
+    }
+    return value;
+}
+
 function clone(value) {
-    return value === undefined ? undefined : structuredClone(value);
+    return value === undefined ? undefined : sortKeys(structuredClone(value));
 }
 
 // Chrome APIs take an optional callback instead of using the promise

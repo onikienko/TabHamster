@@ -77,6 +77,24 @@ var groupStore = (function () {
         return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
     }
 
+    // Tabs as JSON with object keys in sorted order. chrome.storage gives objects back with their keys sorted, so a hash
+    // of tabs in the order they were made would change on the way through sync.
+    function tabsJson(tabs) {
+        return JSON.stringify(tabs, function (k, v) {
+            if (!v || typeof v !== 'object' || Array.isArray(v)) {
+                return v;
+            }
+            const out = {};
+            Object.keys(v).sort().forEach(key => out[key] = v[key]);
+            return out;
+        });
+    }
+
+    // what the store calls `h`: tells whether tabs changed
+    function tabsHash(tabs) {
+        return hash(tabsJson(tabs));
+    }
+
     // write ID: base36 time + 4 random chars, so chunk age can be told from its key
     function writeId(now, random) {
         const rnd = Math.floor(random() * 1679616).toString(36).padStart(4, '0');
@@ -155,7 +173,7 @@ var groupStore = (function () {
         }
         const item_max_bytes = quota_per_item - ITEM_MARGIN;
         const g = normalizeGroup(group);
-        const tabs_json = JSON.stringify(g.tabs);
+        const tabs_json = tabsJson(g.tabs);
         const h = hash(tabs_json);
         const v1 = {name: g.name, index: g.index, tabs: g.tabs};
         const v1_bytes = itemBytes(key, v1);
@@ -219,7 +237,7 @@ var groupStore = (function () {
         const base = normalizeGroup(item);
 
         if (Array.isArray(item.tabs)) {
-            return {status: 'ok', group: base, h: hash(JSON.stringify(item.tabs)), w: null, n: 0};
+            return {status: 'ok', group: base, h: tabsHash(item.tabs), w: null, n: 0};
         }
 
         if (typeof item.v === 'number' && item.v > 2) {
@@ -707,7 +725,7 @@ var groupStore = (function () {
                 const old = records[key];
                 await putRecord(records, key, {
                     g,
-                    h: hash(JSON.stringify(g.tabs)),
+                    h: tabsHash(g.tabs),
                     synced: false,
                     base: old ? old.base : null,
                 });
@@ -755,7 +773,7 @@ var groupStore = (function () {
                 return {synced: false, error: NOT_FOUND};
             }
             const g = normalizeGroup({name: rec.g.name, index: rec.g.index, tabs});
-            if (seen_h !== undefined && seen_h !== rec.h && hash(JSON.stringify(g.tabs)) !== rec.h) {
+            if (seen_h !== undefined && seen_h !== rec.h && tabsHash(g.tabs) !== rec.h) {
                 const copy_key = freeKey(records, await sync.get(null));
                 const res = (await saveNow({[copy_key]: conflictCopy(records, g)}))[copy_key];
                 return Object.assign(res, {copy: copy_key, h: rec.h});
@@ -799,7 +817,7 @@ var groupStore = (function () {
             }
             if (saved) {
                 const g = normalizeGroup(saved);
-                if (!sameSig(sigOf(rec.g, rec.h), sigOf(g, hash(JSON.stringify(g.tabs))))) {
+                if (!sameSig(sigOf(rec.g, rec.h), sigOf(g, tabsHash(g.tabs)))) {
                     return removeNow(key);
                 }
             }
@@ -1076,6 +1094,7 @@ var groupStore = (function () {
         parseChunkKey,
         itemBytes,
         hash,
+        tabsHash,
         writeId,
         writeIdTime,
         normalizeGroup,

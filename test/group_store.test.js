@@ -425,7 +425,7 @@ for (const reconciled of [true, false]) {
         const res = await a.store.setTabs('tg_1', tabs_a, seen.h);
         assert.ok(res.copy);
         assert.equal(res.synced, true);
-        assert.equal(res.h, gs.hash(JSON.stringify(tabs_b)));
+        assert.equal(res.h, gs.tabsHash(tabs_b));
         net.syncAll();
         await b.store.reconcile();
         const expected = {
@@ -447,7 +447,7 @@ test('setTabs keeps the current name and place, and answers the new hash', async
 
     const tabs = makeTabs(4, 9);
     const res = await a.store.setTabs('tg_1', tabs, seen.h);
-    assert.deepEqual(res, {synced: true, h: gs.hash(JSON.stringify(tabs))});
+    assert.deepEqual(res, {synced: true, h: gs.tabsHash(tabs)});
     assert.deepEqual(plainList(await a.store.list()), {tg_1: {name: 'renamed on b', index: 7, tabs}});
     // an undo with that hash puts the old tabs back
     assert.deepEqual(await a.store.setTabs('tg_1', seen.tabs, res.h), {synced: true, h: seen.h});
@@ -470,6 +470,19 @@ test('edits of a group that is gone; a move leaves a deleted group alone, other 
     assert.deepEqual(await store.rename('tg_1', 'back'), {synced: true});
     assert.deepEqual(plainList(await store.list()), {tg_1: {name: 'back', index: 1, tabs: makeTabs(3, 1)}});
     assert.deepEqual(await store.listTrash(), []);
+});
+
+test('a small group edited right after its save: its own write read back from sync is not another device\'s', async () => {
+    const {store, sync} = makeDevice();
+    // keys not in sorted order, as the popup makes them; sync gives them back sorted
+    const tabs = [{url: 'https://a.example/', title: 'A', id: 0}, {url: 'https://b.example/', title: 'B', id: 1}];
+    await store.save('tg_1', {name: 'small', index: 1, tabs});
+    assert.ok(Array.isArray((await sync.get('tg_1')).tg_1.tabs), 'stored with plain tabs');
+    assert.equal((await syncGroups(sync)).tg_1.h, (await store.list()).tg_1.h);
+
+    const edited = tabs.concat({url: 'https://c.example/', title: 'C', id: 2});
+    assert.deepEqual(await store.setTabs('tg_1', edited, (await store.list()).tg_1.h), {synced: true, h: gs.tabsHash(edited)});
+    assert.deepEqual(plainList(await store.list()), {tg_1: {name: 'small', index: 1, tabs: edited}}, 'no conflict copy');
 });
 
 test('chunks that arrive before their header are not deleted', async () => {
