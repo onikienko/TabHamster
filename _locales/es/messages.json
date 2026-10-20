@@ -9,7 +9,7 @@
     },
 
     "p_optionsBtn": {
-        "message": "Opciones",
+        "message": "Configuración",
         "description": "Prefix 'p_' - popup"
     },
     "p_tabName_Saved": {
@@ -34,7 +34,7 @@
         "description": "Pestaña con información del producto"
     },
     "o_savedTabs_pinned": {
-        "message": "Agregar pestañas Fijas al conjunto",
+        "message": "Incluir pestañas fijadas",
         "description": ""
     },
     "o_dateFormat_text": {
@@ -104,5 +104,1386 @@
     "o_trash_restoreButton": {
         "message": "Restaurar",
         "description": ""
+    },
+
+    "p_field_placeholder": {
+        "message": "Buscar o nombrar un grupo",
+        "description": "Popup field: it searches saved groups, and its text is the name of a new group. Placeholder: about 16 characters fit next to the Save button, more is cut off."
+    },
+    "p_field_label": {
+        "message": "Buscar grupos o nombrar uno nuevo",
+        "description": "Screen reader label of the popup field"
+    },
+    "p_saveTabs_one": {
+        "message": "Guardar $COUNT$ pestaña",
+        "description": "Save button, one tab (plural form 'one'). Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead.",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_saveTabs_other": {
+        "message": "Guardar $COUNT$ pestañas",
+        "description": "Save button (plural form 'other'). Translations may add _few, _many forms. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead.",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            }
+        }
+    },
+    "p_tabsCount_one": {
+        "message": "$COUNT$ pestaña",
+        "description": "Number of tabs in a group (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_tabsCount_other": {
+        "message": "$COUNT$ pestañas",
+        "description": "Number of tabs in a group (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "p_windowsCount_one": {
+        "message": "$COUNT$ ventana",
+        "description": "Number of windows in a session (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_windowsCount_other": {
+        "message": "$COUNT$ ventanas",
+        "description": "Number of windows in a session (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_notSyncedGroups_one": {
+        "message": "$COUNT$ grupo sin sincronizar",
+        "description": "Popup footer (plural form 'one'). Footer button: about 26 characters with the number.",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_notSyncedGroups_other": {
+        "message": "$COUNT$ grupos sin sincronizar",
+        "description": "Popup footer (plural form 'other'). Footer button: about 26 characters with the number.",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_syncStorage_title": {
+        "message": "Almacenamiento de sincronización de Chrome: $USED$ de $QUOTA$ KB usados. Sus grupos se guardan ahí para que lleguen a sus otros dispositivos. Cuando está lleno, los grupos nuevos se quedan en este dispositivo hasta que haya espacio.",
+        "description": "Tooltip of the sync storage meter in the popup footer",
+        "placeholders": {
+            "used": {
+                "content": "$1",
+                "example": "12.4"
+            },
+            "quota": {
+                "content": "$2",
+                "example": "100"
+            }
+        }
+    },
+    "p_syncStorageUsed": {
+        "message": "$PERCENT$ del almacenamiento de sincronización de Chrome usado",
+        "description": "Screen reader label of the usage meter",
+        "placeholders": {
+            "percent": {
+                "content": "$1",
+                "example": "13%"
+            }
+        }
+    },
+    "p_open": {
+        "message": "Abrir",
+        "description": "Button on a group row: open its tabs in this window. Small button on a row: one short word."
+    },
+    "p_openNewWindow": {
+        "message": "Abrir en una ventana nueva",
+        "description": "Icon button on a group row"
+    },
+    "p_moreActions": {
+        "message": "Más acciones",
+        "description": "Icon button on a group row that opens its menu"
+    },
+    "p_currentSessionSince": {
+        "message": "Sesión actual, desde $TIME$",
+        "description": "Sessions tab: the session of the running browser",
+        "placeholders": {
+            "time": {
+                "content": "$1",
+                "example": "09:12"
+            }
+        }
+    },
+    "p_sessionsFooter": {
+        "message": "Últimas 30 sesiones, guardadas solo en este dispositivo",
+        "description": "Popup footer on the Sessions tab"
+    },
+    "p_loadError": {
+        "message": "No se pudieron cargar los grupos guardados. Cierre TabHamster y vuelva a abrirlo.",
+        "description": "Popup, when the background part doesn't answer"
+    },
+    "p_pinned": {
+        "message": "Pestaña fijada",
+        "description": "Screen reader label of the pin icon on a tab"
+    },
+    "p_saveAs": {
+        "message": "Guardar como “$NAME$”",
+        "description": "Save button while a new group name is typed. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead.",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaceGroup": {
+        "message": "Reemplazar grupo",
+        "description": "Save button when the typed name is the name of a saved group: its tabs will be replaced by the open tabs. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead."
+    },
+    "p_saveShort": {
+        "message": "Guardar",
+        "description": "Save button when its full text leaves too little room to type in the field. One short word, about 10 characters."
+    },
+    "p_replaceShort": {
+        "message": "Reemplazar",
+        "description": "Replace group button when its full text leaves too little room to type in the field. One short word, about 10 characters."
+    },
+    "p_savedAs_one": {
+        "message": "$COUNT$ pestaña guardada como “$NAME$”",
+        "description": "Bar after saving (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_savedAs_other": {
+        "message": "$COUNT$ pestañas guardadas como “$NAME$”",
+        "description": "Bar after saving (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaced_one": {
+        "message": "“$NAME$” ahora tiene $COUNT$ pestaña",
+        "description": "Bar after replacing a group's tabs (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaced_other": {
+        "message": "“$NAME$” ahora tiene $COUNT$ pestañas",
+        "description": "Bar after replacing a group's tabs (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_notSyncedYet": {
+        "message": "Por ahora guardado solo en este dispositivo: el almacenamiento de sincronización de Chrome está lleno.",
+        "description": "Second line of the bar when a saved group didn't fit in sync storage"
+    },
+    "p_field_placeholder_first": {
+        "message": "Nombre su primer grupo",
+        "description": "Popup field before any group is saved (the name is optional). Placeholder: about 16 characters fit next to the Save button, more is cut off."
+    },
+    "p_empty_title": {
+        "message": "Guarde su primer grupo",
+        "description": "Popup, no saved groups yet"
+    },
+    "p_empty_text": {
+        "message": "Pulse $KEY$ para guardar las pestañas abiertas como un grupo. Escriba antes un nombre, o déjelo vacío y el grupo llevará la fecha y la hora como nombre.",
+        "description": "Popup, no saved groups yet. KEY is Enter or Return",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_empty_sync": {
+        "message": "Con la sincronización de Chrome activada, sus grupos también aparecen en sus otros dispositivos.",
+        "description": "Popup, no saved groups yet"
+    },
+    "p_empty_restore": {
+        "message": "Restaurar desde un archivo de copia de seguridad",
+        "description": "Link in the popup when there are no saved groups: opens the backup page of the settings"
+    },
+    "p_clearSearch": {
+        "message": "Borrar",
+        "description": "Screen reader label of the button that clears the popup field"
+    },
+    "p_tabsMatching_one": {
+        "message": "$MATCHES$ de $COUNT$ pestaña",
+        "description": "Searching: a group found through its tabs, how many of its tabs match (plural form 'one', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "matches": {
+                "content": "$2",
+                "example": "1"
+            }
+        }
+    },
+    "p_tabsMatching_other": {
+        "message": "$MATCHES$ de $COUNT$ pestañas",
+        "description": "Searching: a group found through its tabs, how many of its tabs match (plural form 'other', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "41"
+            },
+            "matches": {
+                "content": "$2",
+                "example": "2"
+            }
+        }
+    },
+    "p_noGroupsMatch": {
+        "message": "Ningún grupo coincide con “$QUERY$”",
+        "description": "Popup search found no saved groups",
+        "placeholders": {
+            "query": {
+                "content": "$1",
+                "example": "winter tires"
+            }
+        }
+    },
+    "p_noSessionsMatch": {
+        "message": "Ninguna sesión coincide con “$QUERY$”",
+        "description": "Popup search found no sessions",
+        "placeholders": {
+            "query": {
+                "content": "$1",
+                "example": "winter tires"
+            }
+        }
+    },
+    "p_foundGroups_one": {
+        "message": "$COUNT$ grupo encontrado",
+        "description": "Read out by screen readers after typing in the popup search (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_foundGroups_other": {
+        "message": "$COUNT$ grupos encontrados",
+        "description": "Read out by screen readers after typing in the popup search (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "4"
+            }
+        }
+    },
+    "p_foundSessions_one": {
+        "message": "$COUNT$ sesión encontrada",
+        "description": "Read out by screen readers after typing in the popup search on the Sessions tab (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_foundSessions_other": {
+        "message": "$COUNT$ sesiones encontradas",
+        "description": "Read out by screen readers after typing in the popup search on the Sessions tab (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "4"
+            }
+        }
+    },
+    "p_noMatch_text_one": {
+        "message": "Pulse $KEY$ para guardar $COUNT$ pestaña abierta como un grupo nuevo con este nombre.",
+        "description": "Under 'No groups match'. KEY is Enter or Return (plural form 'one', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_noMatch_text_other": {
+        "message": "Pulse $KEY$ para guardar las $COUNT$ pestañas abiertas como un grupo nuevo con este nombre.",
+        "description": "Under 'No groups match'. KEY is Enter or Return (plural form 'other', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_replaceNote_one": {
+        "message": "“$NAME$” ya existe con $COUNT$ pestaña.",
+        "description": "Note above the list when the typed name is the name of a saved group (plural form 'one', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaceNote_other": {
+        "message": "“$NAME$” ya existe con $COUNT$ pestañas.",
+        "description": "Note above the list when the typed name is the name of a saved group (plural form 'other', by the group's tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "p_replaceNote_text_one": {
+        "message": "$KEY$ reemplaza sus pestañas por $COUNT$ pestaña abierta. Puede deshacerlo después de guardar.",
+        "description": "Second line of the note. KEY is Enter or Return (plural form 'one', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_replaceNote_text_other": {
+        "message": "$KEY$ reemplaza sus pestañas por las $COUNT$ pestañas abiertas. Puede deshacerlo después de guardar.",
+        "description": "Second line of the note. KEY is Enter or Return (plural form 'other', by the number of open tabs)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            },
+            "key": {
+                "content": "$2",
+                "example": "Enter"
+            }
+        }
+    },
+    "p_sameNameGroups_other": {
+        "message": "$COUNT$ grupos tienen este nombre: se reemplaza el último guardado.",
+        "description": "Added to the note when older groups already share the typed name (always 2 or more; plural form 'other', add _few, _many if needed)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_replaceWithOpen": {
+        "message": "Reemplazar por las pestañas abiertas",
+        "description": "Group menu: the group's tabs become the tabs that Save would take"
+    },
+    "p_tabsInWindow_one": {
+        "message": "$COUNT$ pestaña en esta ventana",
+        "description": "Under 'Replace with open tabs' (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_tabsInWindow_other": {
+        "message": "$COUNT$ pestañas en esta ventana",
+        "description": "Under 'Replace with open tabs' (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            }
+        }
+    },
+    "p_openTabsCount_one": {
+        "message": "$COUNT$ pestaña abierta",
+        "description": "Under 'Replace with open tabs' when Save takes the tabs of all windows (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_openTabsCount_other": {
+        "message": "$COUNT$ pestañas abiertas",
+        "description": "Under 'Replace with open tabs' when Save takes the tabs of all windows (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "30"
+            }
+        }
+    },
+    "p_addCurrentTab": {
+        "message": "Añadir la pestaña actual",
+        "description": "Group menu: adds the tab you are looking at to the group (its title is shown under it)"
+    },
+    "p_rename": {
+        "message": "Cambiar nombre",
+        "description": "Group menu"
+    },
+    "p_openIncognito": {
+        "message": "Abrir en una ventana de incógnito",
+        "description": "Group menu"
+    },
+    "p_copyLinks": {
+        "message": "Copiar enlaces",
+        "description": "Group menu: copies the addresses of the group's tabs, one per line"
+    },
+    "p_delete": {
+        "message": "Eliminar",
+        "description": "Group menu"
+    },
+    "p_groupName_label": {
+        "message": "Nombre del grupo",
+        "description": "Screen reader label of the field for renaming a group"
+    },
+    "p_saveName": {
+        "message": "Guardar nombre",
+        "description": "Button next to the rename field"
+    },
+    "p_cancelRename": {
+        "message": "Cancelar el cambio de nombre",
+        "description": "Button next to the rename field"
+    },
+    "p_nameTaken": {
+        "message": "Ya hay otro grupo llamado “$NAME$”.",
+        "description": "Under the rename field when the typed name belongs to another group",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Reading list"
+            }
+        }
+    },
+    "p_deleted": {
+        "message": "“$NAME$” eliminado",
+        "description": "Bar after deleting a group, with Undo",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
+    "p_tabAdded": {
+        "message": "“$TITLE$” se añadió a “$NAME$”",
+        "description": "Bar after 'Add current tab', with Undo",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Pricing | Kelviq"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Extensions dev"
+            }
+        }
+    },
+    "p_alreadyInGroup": {
+        "message": "Esta pestaña ya está en “$NAME$”.",
+        "description": "Bar when 'Add current tab' finds the tab's address in the group already",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
+    "p_linksCopied_one": {
+        "message": "$COUNT$ enlace copiado",
+        "description": "Bar after 'Copy links' (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_linksCopied_other": {
+        "message": "$COUNT$ enlaces copiados",
+        "description": "Bar after 'Copy links' (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "5"
+            }
+        }
+    },
+    "p_copyFailed": {
+        "message": "No se pudieron copiar los enlaces.",
+        "description": "Bar when copying to the clipboard failed"
+    },
+    "p_openFailed": {
+        "message": "No se pudieron abrir las pestañas: $ERROR$",
+        "description": "Bar when Chrome refused to open a window (for example incognito is turned off by an administrator). ERROR is Chrome's message, in English",
+        "placeholders": {
+            "error": {
+                "content": "$1",
+                "example": "Incognito mode is disabled."
+            }
+        }
+    },
+    "p_restore": {
+        "message": "Restaurar",
+        "description": "Button on a session row: opens its windows as they were. Small button on a row: one short word."
+    },
+    "p_sessionStarted": {
+        "message": "Inicio: $TIME$",
+        "description": "Name of a session from an older version, which only knows when it started",
+        "placeholders": {
+            "time": {
+                "content": "$1",
+                "example": "Oct 9, 21:40"
+            }
+        }
+    },
+    "p_windowTitle_one": {
+        "message": "Ventana $NUMBER$, $COUNT$ pestaña",
+        "description": "A window of a session (plural form 'one', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            }
+        }
+    },
+    "p_windowTitle_other": {
+        "message": "Ventana $NUMBER$, $COUNT$ pestañas",
+        "description": "A window of a session (plural form 'other', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            },
+            "number": {
+                "content": "$2",
+                "example": "1"
+            }
+        }
+    },
+    "p_openWindow": {
+        "message": "Abrir ventana",
+        "description": "Link next to a window of a session: opens that window's tabs in a new window"
+    },
+    "p_saveAsGroup": {
+        "message": "Guardar como grupo",
+        "description": "Session menu: keeps the session's tabs as a saved group"
+    },
+    "p_saveAsGroup_sub": {
+        "message": "Se sincroniza como sus otros grupos",
+        "description": "Under 'Save as group' in the session menu"
+    },
+    "p_openInThisWindow": {
+        "message": "Abrir en esta ventana",
+        "description": "Session menu; also the tooltip of the Open button on a group row"
+    },
+    "p_tip_shiftClick": {
+        "message": "o haga clic en el grupo con $KEY$",
+        "description": "Second line of the tooltip of the 'Open in new window' button: clicking the group's name or Open with this key held does the same",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Shift"
+            }
+        }
+    },
+    "p_restore_tip": {
+        "message": "Restaurar las ventanas tal como estaban",
+        "description": "Tooltip of the Restore button on a session row"
+    },
+    "p_allTabsOneWindow_one": {
+        "message": "$COUNT$ pestaña",
+        "description": "Under 'Open in this window' in the session menu (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_allTabsOneWindow_other": {
+        "message": "Las $COUNT$ pestañas en una sola ventana",
+        "description": "Under 'Open in this window' in the session menu (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "13"
+            }
+        }
+    },
+    "p_sessionDeleted": {
+        "message": "Sesión eliminada",
+        "description": "Bar after deleting a session, with Undo"
+    },
+    "p_showNotSynced": {
+        "message": "Mostrar los grupos sin sincronizar",
+        "description": "Tooltip of 'N groups not synced' in the popup footer"
+    },
+    "p_filterUnsynced": {
+        "message": "Sin sincronizar",
+        "description": "Chip in the popup's field while only groups that are not synced are shown. Chip inside the field: about 16 characters."
+    },
+    "p_filterBiggest": {
+        "message": "Más grandes",
+        "description": "Chip in the popup's field while groups are sorted by the space they take in sync storage. Chip inside the field: about 16 characters."
+    },
+    "p_removeFilter": {
+        "message": "Quitar filtro",
+        "description": "Button on the chip in the popup's field"
+    },
+    "p_field_placeholder_unsynced": {
+        "message": "Buscar",
+        "description": "Placeholder of the popup's field while only groups that are not synced are shown. Placeholder next to a chip: one short word."
+    },
+    "p_field_placeholder_biggest": {
+        "message": "Buscar",
+        "description": "Placeholder of the popup's field while groups are sorted by size. Placeholder next to a chip: one short word."
+    },
+    "p_unsyncedNote_title_one": {
+        "message": "$COUNT$ grupo está guardado solo en este dispositivo",
+        "description": "Title of the note above groups that are not synced (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_unsyncedNote_title_other": {
+        "message": "$COUNT$ grupos están guardados solo en este dispositivo",
+        "description": "Title of the note above groups that are not synced (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_unsyncedNote_full_one": {
+        "message": "El almacenamiento de sincronización de Chrome está lleno ($USED$ de $QUOTA$ KB). Aquí está a salvo y se sincronizará solo cuando haya espacio.",
+        "description": "Note above groups that are not synced because sync storage is full (plural form 'one', by the number of groups)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "used": {
+                "content": "$2",
+                "example": "97"
+            },
+            "quota": {
+                "content": "$3",
+                "example": "100"
+            }
+        }
+    },
+    "p_unsyncedNote_full_other": {
+        "message": "El almacenamiento de sincronización de Chrome está lleno ($USED$ de $QUOTA$ KB). Aquí están a salvo y se sincronizarán solos cuando haya espacio.",
+        "description": "Note above groups that are not synced because sync storage is full (plural form 'other', by the number of groups)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            },
+            "used": {
+                "content": "$2",
+                "example": "97"
+            },
+            "quota": {
+                "content": "$3",
+                "example": "100"
+            }
+        }
+    },
+    "p_unsyncedNote_later_one": {
+        "message": "La sincronización de Chrome aún no lo ha recibido. Aquí está a salvo y se sincronizará solo más tarde.",
+        "description": "Note above groups that are not synced for another reason than full storage (plural form 'one', by the number of groups)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_unsyncedNote_later_other": {
+        "message": "La sincronización de Chrome aún no los ha recibido. Aquí están a salvo y se sincronizarán solos más tarde.",
+        "description": "Note above groups that are not synced for another reason than full storage (plural form 'other', by the number of groups)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_makeRoom": {
+        "message": "Liberar espacio: mostrar los grupos más grandes",
+        "description": "Link in the note above groups that are not synced"
+    },
+    "p_biggestHint": {
+        "message": "Espacio que ocupa cada grupo en el almacenamiento de sincronización de Chrome ($USED$ de $QUOTA$ KB usados). Al eliminar un grupo se libera su espacio.",
+        "description": "Above the groups sorted by size",
+        "placeholders": {
+            "used": {
+                "content": "$1",
+                "example": "97"
+            },
+            "quota": {
+                "content": "$2",
+                "example": "100"
+            }
+        }
+    },
+    "p_kb": {
+        "message": "$SIZE$ KB",
+        "description": "Space a group takes in sync storage, in kilobytes",
+        "placeholders": {
+            "size": {
+                "content": "$1",
+                "example": "25.4"
+            }
+        }
+    },
+    "p_notInSync": {
+        "message": "sin sincronizar",
+        "description": "Instead of the size of a group that is not in sync storage (groups sorted by size)"
+    },
+    "p_groupsSynced_one": {
+        "message": "$COUNT$ grupo sincronizado",
+        "description": "Bar when groups that were saved on this computer only got into sync (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_groupsSynced_other": {
+        "message": "$COUNT$ grupos sincronizados",
+        "description": "Bar when groups that were saved on this computer only got into sync (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "p_deletedSynced_one": {
+        "message": "“$NAME$” eliminado. $COUNT$ grupo sincronizado",
+        "description": "Bar after deleting a group made room for groups that were not synced, with Undo (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Oct 12, 21:52"
+            }
+        }
+    },
+    "p_deletedSynced_other": {
+        "message": "“$NAME$” eliminado. $COUNT$ grupos sincronizados",
+        "description": "Bar after deleting a group made room for groups that were not synced, with Undo (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            },
+            "name": {
+                "content": "$2",
+                "example": "Oct 12, 21:52"
+            }
+        }
+    },
+    "s_title": {
+        "message": "Configuración de TabHamster",
+        "description": "Settings page. Title in the band at the top and in the browser tab"
+    },
+    "s_version": {
+        "message": "Versión $VERSION$",
+        "description": "Settings page. Next to the title",
+        "placeholders": {
+            "version": {
+                "content": "$1",
+                "example": "1.0.0"
+            }
+        }
+    },
+    "s_nav": {
+        "message": "Secciones de la configuración",
+        "description": "Settings page. Screen reader label of the side menu"
+    },
+    "s_general": {
+        "message": "General",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_saving": {
+        "message": "Guardar pestañas",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_sync": {
+        "message": "Sincronización y almacenamiento",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_backup": {
+        "message": "Copia de seguridad y restauración",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_theme": {
+        "message": "Tema",
+        "description": "Settings page. Setting name"
+    },
+    "s_theme_text": {
+        "message": "Sistema sigue el modo claro u oscuro de su dispositivo.",
+        "description": "Settings page. Under Theme"
+    },
+    "s_theme_system": {
+        "message": "Sistema",
+        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+    },
+    "s_theme_light": {
+        "message": "Claro",
+        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+    },
+    "s_theme_dark": {
+        "message": "Oscuro",
+        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+    },
+    "s_dateFormat_text": {
+        "message": "Se usa para nombrar los grupos guardados sin nombre.",
+        "description": "Settings page. Under Date format"
+    },
+    "s_dateFormat_dayFirst": {
+        "message": "$DATE$ (primero el día)",
+        "description": "Settings page. Date format choice, shown with the date and time now",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "19-10-2026 14:05"
+            }
+        }
+    },
+    "s_dateFormat_yearFirst": {
+        "message": "$DATE$ (primero el año)",
+        "description": "Settings page. Date format choice, shown with the date and time now",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "2026-10-19 14:05"
+            }
+        }
+    },
+    "s_sessions": {
+        "message": "Guardar sesiones automáticamente",
+        "description": "Settings page. Setting name (switch)"
+    },
+    "s_sessions_text": {
+        "message": "Guarda sus últimas 30 sesiones del navegador en este dispositivo para que pueda recuperar sus ventanas tras un fallo o un reinicio. Si está desactivado, la ventana emergente no tiene la pestaña Sesiones.",
+        "description": "Settings page. Under Save sessions automatically"
+    },
+    "s_curWin": {
+        "message": "Guardar solo la ventana actual",
+        "description": "Settings page. Setting name (switch)"
+    },
+    "s_curWin_text": {
+        "message": "Desactívelo para guardar las pestañas de todas las ventanas abiertas en un solo grupo.",
+        "description": "Settings page. Under Save only the current window"
+    },
+    "s_pinned_text": {
+        "message": "Las pestañas fijadas se vuelven a abrir fijadas al abrir el grupo.",
+        "description": "Settings page. Under Include pinned tabs"
+    },
+    "s_optionFailed": {
+        "message": "No se pudo guardar este ajuste. Inténtelo de nuevo.",
+        "description": "Settings page. Bar when a setting could not be written"
+    },
+    "s_syncUsed": {
+        "message": "$USED$ KB de $QUOTA$ KB usados",
+        "description": "Settings page. Sync storage used",
+        "placeholders": {
+            "used": {
+                "content": "$1",
+                "example": "13.3"
+            },
+            "quota": {
+                "content": "$2",
+                "example": "100"
+            }
+        }
+    },
+    "s_groupsCount_one": {
+        "message": "$COUNT$ grupo",
+        "description": "Number of saved groups (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_groupsCount_other": {
+        "message": "$COUNT$ grupos",
+        "description": "Number of saved groups (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_sync_text": {
+        "message": "Sus grupos se guardan en el almacenamiento de sincronización de Chrome, así que aparecen en todos los dispositivos donde inicie sesión en Chrome con la sincronización activada. Chrome da a TabHamster $QUOTA$ KB ahí. Los grupos se comprimen: hay espacio para unas mil pestañas. Cada grupo también se guarda en este dispositivo. Las sesiones nunca se sincronizan.",
+        "description": "Settings page. Sync and storage explanation",
+        "placeholders": {
+            "quota": {
+                "content": "$1",
+                "example": "100"
+            }
+        }
+    },
+    "s_unsynced_one": {
+        "message": "$COUNT$ grupo está guardado por ahora solo en este dispositivo: $NAMES$",
+        "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            },
+            "names": {
+                "content": "$2",
+                "example": "“Tax return” and “Trip”"
+            }
+        }
+    },
+    "s_unsynced_other": {
+        "message": "$COUNT$ grupos están guardados por ahora solo en este dispositivo: $NAMES$",
+        "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            },
+            "names": {
+                "content": "$2",
+                "example": "“Tax return” and “Trip”"
+            }
+        }
+    },
+    "s_unsyncedHint_one": {
+        "message": "Se sincronizará solo cuando haya espacio. Para liberar espacio, abra TabHamster y haga clic en “sin sincronizar” abajo.",
+        "description": "Settings page. Under the groups waiting for sync, by their number (plural form 'one')"
+    },
+    "s_unsyncedHint_other": {
+        "message": "Se sincronizarán solos cuando haya espacio. Para liberar espacio, abra TabHamster y haga clic en “sin sincronizar” abajo.",
+        "description": "Settings page. Under the groups waiting for sync, by their number (plural form 'other')"
+    },
+    "s_andMore": {
+        "message": "$COUNT$ más",
+        "description": "Settings page. Last item of a list of group names: “A”, “B”, “C” and 2 more",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_backupFile": {
+        "message": "Copia de seguridad en un archivo",
+        "description": "Settings page. Backup row title"
+    },
+    "s_backupFile_text": {
+        "message": "Guarda sus grupos y la configuración. Las sesiones no se incluyen.",
+        "description": "Settings page. Under Back up to a file"
+    },
+    "s_copyText": {
+        "message": "O copiar como texto",
+        "description": "Settings page. Link under Download backup file: copies the backup to the clipboard"
+    },
+    "s_copied": {
+        "message": "Copiado",
+        "description": "Settings page. Shown for a moment instead of Copy backup text instead"
+    },
+    "s_copyFailed": {
+        "message": "No se pudo copiar. Inténtelo de nuevo.",
+        "description": "Settings page. Bar when copying the backup failed"
+    },
+    "s_restore": {
+        "message": "Restaurar desde una copia de seguridad",
+        "description": "Settings page. Restore row title"
+    },
+    "s_restore_text": {
+        "message": "Sus grupos guardados se reemplazan por los de la copia de seguridad. Los grupos que no estén en ella van a Eliminados recientemente, y puede deshacer la restauración.",
+        "description": "Settings page. Under Restore from a backup"
+    },
+    "s_chooseFile": {
+        "message": "Elegir archivo de copia de seguridad",
+        "description": "Settings page. Button"
+    },
+    "s_pasteText": {
+        "message": "O pegar como texto",
+        "description": "Settings page. Link under Choose backup file: shows a text box"
+    },
+    "s_pasteLabel": {
+        "message": "Texto de la copia de seguridad",
+        "description": "Settings page. Label of the text box for a pasted backup"
+    },
+    "s_pastePlaceholder": {
+        "message": "Pegue aquí el texto de una copia de seguridad de TabHamster",
+        "description": "Settings page. Placeholder of the text box for a pasted backup"
+    },
+    "s_continue": {
+        "message": "Continuar",
+        "description": "Settings page. Button under the pasted backup text: shows what restoring it does"
+    },
+    "s_cancel": {
+        "message": "Cancelar",
+        "description": "Settings page. Button"
+    },
+    "s_editText": {
+        "message": "Editar texto",
+        "description": "Settings page. Button next to an error about pasted backup text"
+    },
+    "s_pastedText": {
+        "message": "Texto de copia de seguridad pegado",
+        "description": "Settings page. Title of the restore preview when the backup was pasted (otherwise the file name)"
+    },
+    "s_preview_andSettings": {
+        "message": "y configuración",
+        "description": "Settings page. Restore preview, after “9 groups, 158 tabs, ”"
+    },
+    "s_preview_settingsOnly": {
+        "message": "Solo configuración, sin grupos",
+        "description": "Settings page. Restore preview of a backup without groups"
+    },
+    "s_preview_trashed_one": {
+        "message": "Sus grupos guardados se reemplazan. $COUNT$ grupo que no está en la copia de seguridad va a Eliminados recientemente.",
+        "description": "Settings page. Restore preview (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_preview_trashed_other": {
+        "message": "Sus grupos guardados se reemplazan. $COUNT$ grupos que no están en la copia de seguridad van a Eliminados recientemente.",
+        "description": "Settings page. Restore preview (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_preview_replaced": {
+        "message": "Sus grupos guardados se reemplazan por los de la copia de seguridad.",
+        "description": "Settings page. Restore preview when every saved group is in the backup"
+    },
+    "s_preview_groupsStay": {
+        "message": "Sus grupos guardados se quedan como están.",
+        "description": "Settings page. Restore preview of a backup without groups"
+    },
+    "s_restored_one": {
+        "message": "Copia de seguridad restaurada: $COUNT$ grupo",
+        "description": "Settings page. Bar after a restore, with Undo (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_restored_other": {
+        "message": "Copia de seguridad restaurada: $COUNT$ grupos",
+        "description": "Settings page. Bar after a restore, with Undo (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_lastRestore": {
+        "message": "Última restauración: $WHEN$",
+        "description": "Settings page. Row with Undo restore",
+        "placeholders": {
+            "when": {
+                "content": "$1",
+                "example": "Today, 10:24"
+            }
+        }
+    },
+    "s_lastRestore_groups_one": {
+        "message": "$COUNT$ grupo restaurado.",
+        "description": "Settings page. Under Last restore (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_lastRestore_groups_other": {
+        "message": "$COUNT$ grupos restaurados.",
+        "description": "Settings page. Under Last restore (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_lastRestore_trashed_one": {
+        "message": "$COUNT$ grupo que no estaba en la copia de seguridad está en Eliminados recientemente.",
+        "description": "Settings page. Under Last restore (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_lastRestore_trashed_other": {
+        "message": "$COUNT$ grupos que no estaban en la copia de seguridad están en Eliminados recientemente.",
+        "description": "Settings page. Under Last restore (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_undoRestore": {
+        "message": "Deshacer restauración",
+        "description": "Settings page. Button"
+    },
+    "s_deletedElsewhere": {
+        "message": "Eliminado en otro dispositivo",
+        "description": "Settings page. Recently deleted: where the group was deleted"
+    },
+    "s_deletedByRestore": {
+        "message": "Quitado por una restauración",
+        "description": "Settings page. Recently deleted: the group was not in a restored backup (or a restore was undone)"
+    },
+    "s_restoreGroup": {
+        "message": "Restaurar “$NAME$”",
+        "description": "Settings page. Screen reader label of a Restore button in Recently deleted",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "s_groupRestored": {
+        "message": "“$NAME$” restaurado",
+        "description": "Settings page. Bar after restoring a deleted group",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "s_help_enter": {
+        "message": "Guarda las pestañas abiertas como un grupo. Escriba antes un nombre, o deje el campo vacío y el grupo llevará la fecha y la hora como nombre.",
+        "description": "Settings page. Help, key list. After Enter (Return on a Mac)"
+    },
+    "s_help_typeKey": {
+        "message": "Escribir en el campo",
+        "description": "Settings page. Help, key list. Left column"
+    },
+    "s_help_type": {
+        "message": "Busca en los nombres de los grupos y en los títulos y direcciones de sus pestañas. Si escribe el nombre de un grupo guardado, sus pestañas se reemplazan por las abiertas (puede deshacerlo).",
+        "description": "Settings page. Help, key list. After Type in the field"
+    },
+    "s_help_downKey": {
+        "message": "↓ y luego $KEY$",
+        "description": "Settings page. Help, key list. Left column. KEY is Enter or Return",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Enter"
+            }
+        }
+    },
+    "s_help_down": {
+        "message": "Abre el grupo resaltado de los resultados de búsqueda.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_help_clickKey": {
+        "message": "Clic en un grupo",
+        "description": "Settings page. Help, key list. Left column"
+    },
+    "s_help_click": {
+        "message": "Muestra sus pestañas. Abrir, o $KEY$ sobre el grupo, las abre en esta ventana.",
+        "description": "Settings page. Help, key list. KEY is Enter or Return",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Enter"
+            }
+        }
+    },
+    "s_help_shiftKey": {
+        "message": "$KEY$ + clic",
+        "description": "Settings page. Help, key list. Left column. KEY is ⇧ Shift",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "⇧ Shift"
+            }
+        }
+    },
+    "s_help_shift": {
+        "message": "Abre un grupo en una ventana nueva, como un enlace en Chrome. Lo mismo hacen el botón de ventana junto a Abrir y el clic con el botón central.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_help_arrows": {
+        "message": "Muestran y ocultan las pestañas del grupo resaltado.",
+        "description": "Settings page. Help, key list. After → ←"
+    },
+    "s_help_moveKey": {
+        "message": "Arrastrar, o $KEY$ + ↑ ↓",
+        "description": "Settings page. Help, key list. Left column. KEY is Alt, or ⌥ Option on a Mac",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Alt"
+            }
+        }
+    },
+    "s_help_move": {
+        "message": "Cambia el orden de los grupos.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_help_esc": {
+        "message": "Borra la búsqueda. Con el campo vacío, cierra TabHamster.",
+        "description": "Settings page. Help, key list. After Esc"
+    },
+    "s_help_more": {
+        "message": "Menú del grupo: reemplazar sus pestañas por las abiertas, añadir la pestaña actual, cambiar el nombre, abrir en una ventana de incógnito, copiar los enlaces o eliminar. Los grupos eliminados se quedan en Eliminados recientemente durante 30 días.",
+        "description": "Settings page. Help, key list. After ⋯"
+    },
+    "s_help_sessionsKey": {
+        "message": "Pestaña Sesiones",
+        "description": "Settings page. Help, key list. Left column"
+    },
+    "s_help_sessions": {
+        "message": "Sus últimas 30 sesiones del navegador. Restaurar recupera sus ventanas tal como estaban.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_about_free": {
+        "message": "TabHamster es gratuito y de código abierto.",
+        "description": "Settings page. About"
+    },
+    "s_about_source": {
+        "message": "Código fuente en GitHub",
+        "description": "Settings page. About, link"
+    },
+    "s_about_privacy": {
+        "message": "Política de privacidad",
+        "description": "Settings page. About, link"
+    },
+    "s_about_issues": {
+        "message": "Informar de un problema",
+        "description": "Settings page. About, link to the issues page on GitHub"
+    },
+    "s_about_developer": {
+        "message": "Desarrollador",
+        "description": "Settings page. About, before the developer's name (like 'Translations' and 'Thanks to')"
+    },
+    "s_about_translations": {
+        "message": "Traducciones",
+        "description": "Settings page. About, before the list of translators"
+    },
+    "s_about_thanks": {
+        "message": "Gracias a",
+        "description": "Settings page. About, before a name"
+    },
+    "s_about_ukraine": {
+        "message": "Gloria a Ucrania",
+        "description": "Settings page. About, next to the flag of Ukraine"
     }
 }
