@@ -8,9 +8,11 @@
 // An item with `v` above 2 comes from a newer TabHamster: it is left alone.
 //
 // Every group also has a local record in chrome.storage.local at `lg_<ms>`:
-//   {g: {name, index, tabs}, h, synced, base, trashed?, removing?}
+//   {g: {name, index, tabs}, h, synced, base, trashed?, trashed_by?, removing?}
 //   synced: sync holds exactly this version; base: {h, name, index} of the sync version it was based on;
-//   trashed: time it was deleted (hidden, purged after 30 days); removing: sync removal not done yet.
+//   trashed: time it was deleted (hidden, purged after 30 days); trashed_by: 'here' (deleted on this computer),
+//   'sync' (gone from sync: deleted on another computer) or 'restore' (not in a restored backup), missing before 1.0.0;
+//   removing: sync removal not done yet.
 // Only the background service worker writes groups (one store instance, all calls queued).
 var groupStore = (function () {
     'use strict';
@@ -533,6 +535,7 @@ var groupStore = (function () {
                     case 'missing':
                         // deleted on another device (or sync data was reset): hide, keep for a while
                         rec.trashed = now();
+                        rec.trashed_by = 'sync';
                         await putRecord(records, key, rec);
                         return;
                     case 'incomplete':
@@ -714,6 +717,7 @@ var groupStore = (function () {
             const rec = records[key];
             if (rec) {
                 rec.trashed = now();
+                rec.trashed_by = 'here';
                 rec.removing = true;
                 await putRecord(records, key, rec);
             }
@@ -760,6 +764,7 @@ var groupStore = (function () {
             });
             for (const key of others) {
                 records[key].trashed = now();
+                records[key].trashed_by = 'restore';
                 records[key].removing = true;
                 await putRecord(records, key, records[key]);
             }
@@ -786,6 +791,7 @@ var groupStore = (function () {
                 return {synced: false, error: 'Group not found'};
             }
             delete rec.trashed;
+            delete rec.trashed_by;
             delete rec.removing;
             rec.synced = false;
             await putRecord(records, key, rec);
@@ -880,7 +886,8 @@ var groupStore = (function () {
                 return records[key].trashed && !records[key].discarded;
             }).map(function (key) {
                 const rec = records[key];
-                return {key, name: rec.g.name, index: rec.g.index, tabs: rec.g.tabs, trashed: rec.trashed};
+                return {key, name: rec.g.name, index: rec.g.index, tabs: rec.g.tabs, trashed: rec.trashed,
+                    by: rec.trashed_by || null};
             }).sort(function (a, b) {
                 return b.trashed - a.trashed;
             });
@@ -921,7 +928,10 @@ var groupStore = (function () {
         return {
             /** @returns {Promise<Object>} {key: {name, index, tabs, synced}} for groups that aren't deleted */
             list: () => exclusive(listNow),
-            /** @returns {Promise<Array>} deleted groups kept for 30 days, newest first */
+            /**
+             * @returns {Promise<Array>} deleted groups kept for 30 days, newest first:
+             *   {key, name, index, tabs, trashed, by: 'here' | 'sync' | 'restore' | null (not known)}
+             */
             listTrash: () => exclusive(listTrashNow),
             /**
              * @returns {Promise<{synced: boolean, error?: string, copy?: string}>} saved locally even when sync

@@ -1,141 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="system">
 <head>
     <meta charset="UTF-8"/>
-    <title>{{extName}}</title>
-    <link rel="stylesheet" type="text/css" href="css/options.css">
-    <link rel="stylesheet" type="text/css" href="lib/jsTabs/tabs.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>TabHamster</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/options.css">
+    <script src="js/ui/theme_boot.js"></script>
 </head>
 <body>
+<!-- Texts come from js/options/main.js (t()), not from {{ }}: group names in Recently deleted are user text. -->
+<header class="band">
+    <div class="band-inner">
+        <span class="band-logo" id="logo"></span>
+        <h1 id="title"></h1>
+        <span class="version num" id="version"></span>
+    </div>
+</header>
 
-<div id=message_place>
-    <span id="error">{{o_error}}</span>
-    <span id="success">{{o_saved}}</span>
+<div class="page">
+    <nav class="nav" id="nav"></nav>
+    <main class="main" id="main"></main>
 </div>
-
-<div id="page">
-    <header>
-        <img src="img/ext_icons/48.png" title="{{extDescr}}" width="48" height="48">
-        <strong>{{extName}}</strong>
-    </header>
-
-    <section id="main_tabs" class="tabs">
-        <ul class="tabs_nav">
-            <li><a href="#main">{{o_tabs_main}}</a></li>
-            <li><a href="#backup">{{o_tabs_backup}}</a></li>
-            <li><a href="#help">{{o_tabs_help}}</a></li>
-            <li><a href="#about">{{o_tabs_about}}</a></li>
-        </ul>
-
-        <div class="tabs_content">
-
-            <div id="main">
-                <fieldset>
-                    <legend>{{ o_common_legend }}</legend>
-                    <p>
-                        {{ o_dateFormat_text }}
-                        <select data-storage="date_format">
-                            <option value="eu">{{ o_dateFormat_eu }}</option>
-                            <option value="us">{{ o_dateFormat_us }}</option>
-                        </select>
-                    </p>
-                    <p><label><input id="session_watcher" type="checkbox" data-storage="session_watcher"/>{{ o_sessionWatcher_toggle }}</label></p>
-                </fieldset>
-
-                <fieldset>
-                    <legend>{{ o_savedTabs_legend }}</legend>
-                    <p><label><input type="checkbox" data-storage="pinned"/>{{ o_savedTabs_pinned }}</label></p>
-
-                    <p><label><input type="checkbox" data-storage="cur_win"/>{{ o_savedTabs_cur_win }}</label></p>
-                </fieldset>
-            </div>
-
-            <div id="backup">
-                <fieldset>
-                    <legend>{{ o_backup_restoreLegend }}</legend>
-                    <p>{{ o_backup_restoreInstruction }}</p>
-                    <p><strong>{{ o_backup_restoreInstructionMore }}</strong></p>
-                    <p><label>{{ o_backup_restoreFile }} <input type="file" id="restore_file" accept=".json,.txt"></label></p>
-                    <textarea id="restore_text" cols="60" rows="10"></textarea>
-                    <button id="restore_btn">{{ o_backup_restoreButton }}</button>
-                    <p id="backup_msg"></p>
-                    <p id="undo_restore"><button id="undo_restore_btn">{{ o_backup_undoRestoreButton }}</button>
-                        <span id="undo_restore_time"></span></p>
-                </fieldset>
-                <fieldset>
-                    <legend>{{ o_backup_backupLegend }}</legend>
-                    <p> {{ o_backup_backupInstruction }}</p>
-                    <p> {{ o_backup_backupInstructionMore }}</p>
-                    <p><button id="download_btn">{{ o_backup_downloadButton }}</button></p>
-                    <textarea id="backup_text" cols="60" rows="10" readonly></textarea>
-                </fieldset>
-                <fieldset>
-                    <legend>{{ o_trash_legend }}</legend>
-                    <p>{{ o_trash_info }}</p>
-                    <ul id="trash_list"></ul>
-                    <p id="trash_empty">{{ o_trash_empty }}</p>
-                </fieldset>
-            </div>
-
-            <div id="help">
-                <p>{{ o_help_syncStorage }}</p>
-                <p>{{ o_help_syncStorage_0 }}</p>
-                <p>{{ o_help_syncStorage_1 }}</p>
-                <p>{{ o_help_syncStorage_2 }}</p>
-
-                <div class="help_screenshot"><img src="img/help_screen.png"/></div>
-                <fieldset>
-                    <legend>{{ o_help_tipsLegend }}</legend>
-                    <ul>
-                        <li>{{ o_help_quickAdd }}</li>
-                        <li>{{ o_help_showLinks }}</li>
-                        <li>{{ o_help_inNewWindow }}</li>
-                        <li>{{ o_help_editGroup }}</li>
-                        <li>{{ o_help_recentlyDeleted }}</li>
-                        <li>{{ o_help_overFavicon }}</li>
-                        <li>{{ o_help_settings }}</li>
-                    </ul>
-                </fieldset>
-            </div>
-
-            <div id="about">
-                <dl>
-                    <dt>Source Code:</dt>
-                    <dd><a href="https://github.com/onikienko/TabHamster">GitHub</a></dd>
-                </dl>
-                    <hr>
-                    Spanish translation by <a href="https://github.com/martinib77">Martin Irigaray</a>
-					<br>
-					Hungarian translation by <a href="https://github.com/Med1on">Zoltan Mihics</a>
-                    <br>
-                    French translation by <a href="https://github.com/Dexyne">Aurélien Léger</a>
-                    <br>
-                    Serbian translation by <strong>Sijera</strong>
-                    <hr/>
-                    Thanks to: <a href="https://github.com/richarson">Ricardo J. Barberis</a>
-                    <hr/>
-                    <p>'Pin' icon by <a href="https://icons8.com/">icon8.com</a></p>
-            </div>
-
-        </div>
-    </section>
-
-    <footer>
-        <p class="copyright">
-            &nbsp;<span id="ua_flag">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </p>
-    </footer>
-</div>
-
-<script src="js/helpers/localizer.js"></script>
-<script src="lib/jsTabs/tabs.js"></script>
 
 <script src="js/storage.js"></script>
-<script src="js/utils.js"></script>
 <script src="js/group_store_client.js"></script>
-<script src="js/helpers/quick_options.js"></script>
-<!--<script src="lib/jquery.min.js"></script>-->
-<script src="js/options.js"></script>
-
+<script type="module" src="js/options/main.js"></script>
 </body>
 </html>

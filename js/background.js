@@ -20,9 +20,9 @@ function withoutSyncFlags(list) {
     return out;
 }
 
-// replace_groups: groups not in `data` go to trash; otherwise groups are left alone when `data` has none
+// replace_groups: groups not in `data` go to trash; otherwise groups are left alone when `data` has none.
+// A changed session_watcher option is picked up by the storage listener (watchSessions).
 async function applyBackup(data, replace_groups) {
-    const before = await chrome.storage.sync.get(storage.default_options);
     let result = {errors: {}};
 
     if (replace_groups || Object.keys(data.groups).length) {
@@ -31,11 +31,32 @@ async function applyBackup(data, replace_groups) {
     if (Object.keys(data.options).length) {
         await chrome.storage.sync.set(data.options);
     }
-    if (data.options.hasOwnProperty('session_watcher') && data.options.session_watcher !== before.session_watcher) {
-        // session watcher listeners are set up when the service worker starts
-        setTimeout(() => chrome.runtime.reload(), 500);
-    }
     return result;
+}
+
+// parsed backup text, or {error} with the code from backup.parseText
+async function readBackup(text) {
+    try {
+        return {data: await backup.parseText(text)};
+    } catch (e) {
+        if (e.code) {
+            return {error: e.code};
+        }
+        throw e;
+    }
+}
+
+// what restoring `data` does: groups and tabs in it, settings or not, and how many current groups go to trash
+async function restorePlan(data) {
+    const keys = Object.keys(data.groups);
+    const current = Object.keys(await groups.list());
+    return {
+        groups: keys.length,
+        tabs: keys.reduce((sum, key) => sum + data.groups[key].tabs.length, 0),
+        options: Object.keys(data.options).length > 0,
+        current: current.length,
+        trashed: keys.length ? current.filter(key => !data.groups.hasOwnProperty(key)).length : 0,
+    };
 }
 
 const group_ops = {
@@ -60,24 +81,28 @@ const group_ops = {
         const options = await chrome.storage.sync.get(storage.default_options);
         return backup.exportText(withoutSyncFlags(await groups.list()), options, chrome.storage.sync);
     },
+    // what importBackup would do, nothing is changed: {groups, tabs, options, current, trashed} (see restorePlan)
+    // or {error: 'not_backup' | 'damaged' | 'empty'}
+    previewBackup: async function (text) {
+        const read = await readBackup(text);
+        return read.error ? {error: read.error} : restorePlan(read.data);
+    },
     // {groups: number, errors} or {error: 'not_backup' | 'damaged' | 'empty'} when nothing was changed
     importBackup: async function (text) {
-        let data;
-        try {
-            data = await backup.parseText(text);
-        } catch (e) {
-            if (e.code) {
-                return {error: e.code};
-            }
-            throw e;
+        const read = await readBackup(text);
+        if (read.error) {
+            return {error: read.error};
         }
+        const plan = await restorePlan(read.data);
         await chrome.storage.local.set({[RESTORE_UNDO_KEY]: {
             time: Date.now(),
+            restored: plan.groups,
+            trashed: plan.trashed,
             groups: withoutSyncFlags(await groups.list()),
             options: await chrome.storage.sync.get(storage.default_options),
         }});
-        const result = await applyBackup(data, false);
-        return {groups: Object.keys(data.groups).length, errors: result.errors};
+        const result = await applyBackup(read.data, false);
+        return {groups: plan.groups, errors: result.errors};
     },
     undoRestore: async function () {
         const snapshot = (await chrome.storage.local.get(RESTORE_UNDO_KEY))[RESTORE_UNDO_KEY];
@@ -88,10 +113,15 @@ const group_ops = {
         await chrome.storage.local.remove(RESTORE_UNDO_KEY);
         return {groups: Object.keys(snapshot.groups).length, errors: result.errors};
     },
-    // time of the restore that can be undone, or null
+    // the restore that can be undone: {time, restored: groups from the backup, trashed: groups it sent to trash}
+    // (counts are null for a restore made by 0.4.0), or null
     restoreInfo: async function () {
         const snapshot = (await chrome.storage.local.get(RESTORE_UNDO_KEY))[RESTORE_UNDO_KEY];
-        return snapshot ? snapshot.time : null;
+        return snapshot ? {
+            time: snapshot.time,
+            restored: snapshot.hasOwnProperty('restored') ? snapshot.restored : null,
+            trashed: snapshot.hasOwnProperty('trashed') ? snapshot.trashed : null,
+        } : null;
     },
 };
 
@@ -320,23 +350,43 @@ function onUpdated(tab_id, change_info) {
     }
 }
 
-chrome.tabs.onUpdated.addListener(onUpdated);
-chrome.tabs.onMoved.addListener(updateCurrentSession);
-chrome.tabs.onAttached.addListener(updateCurrentSession);
-chrome.tabs.onRemoved.addListener(updateCurrentSession);
-chrome.tabs.onReplaced.addListener(updateCurrentSession);
+const session_events = [
+    [chrome.tabs.onUpdated, onUpdated],
+    [chrome.tabs.onMoved, updateCurrentSession],
+    [chrome.tabs.onAttached, updateCurrentSession],
+    [chrome.tabs.onRemoved, updateCurrentSession],
+    [chrome.tabs.onReplaced, updateCurrentSession],
+];
 
-storage.area.get({session_watcher: storage.default_options.session_watcher}, async function (from_storage) {
-    if (!from_storage.session_watcher) {
-        chrome.tabs.onUpdated.hasListener(onUpdated) && chrome.tabs.onUpdated.removeListener(onUpdated);
-        chrome.tabs.onMoved.hasListener(updateCurrentSession) && chrome.tabs.onMoved.removeListener(updateCurrentSession);
-        chrome.tabs.onAttached.hasListener(updateCurrentSession) && chrome.tabs.onAttached.removeListener(updateCurrentSession);
-        chrome.tabs.onRemoved.hasListener(updateCurrentSession) && chrome.tabs.onRemoved.removeListener(updateCurrentSession);
-        chrome.tabs.onReplaced.hasListener(updateCurrentSession) && chrome.tabs.onReplaced.removeListener(updateCurrentSession);
-    } else {
-        const session_storage = await chrome.storage.session.get('session_id');
-        if (!session_storage.session_id) {
-            updateCurrentSession();
+// Listeners are added when the service worker starts (Chrome wakes it only for those), then removed if sessions
+// are turned off. The Settings switch changes it at once. Turned off, the current session ends: on again starts a new one.
+async function watchSessions(on) {
+    session_events.forEach(function ([event, listener]) {
+        if (on && !event.hasListener(listener)) {
+            event.addListener(listener);
+        } else if (!on && event.hasListener(listener)) {
+            event.removeListener(listener);
         }
+    });
+    if (!on) {
+        await chrome.storage.session.remove('session_id');
+        return;
+    }
+    const session_storage = await chrome.storage.session.get('session_id');
+    if (!session_storage.session_id) {
+        await updateCurrentSession();
+    }
+}
+
+session_events.forEach(([event, listener]) => event.addListener(listener));
+
+storage.area.get({session_watcher: storage.default_options.session_watcher}, function (from_storage) {
+    watchSessions(!!from_storage.session_watcher);
+});
+
+chrome.storage.onChanged.addListener(function (changes, area_name) {
+    if (area_name === 'sync' && changes.session_watcher) {
+        const value = changes.session_watcher.newValue;
+        watchSessions(!!(value === undefined ? storage.default_options.session_watcher : value));
     }
 });

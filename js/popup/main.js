@@ -8,6 +8,7 @@ import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel} from '../ui/platform.js';
 import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, faviconUrl, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
+import {applyTheme} from '../ui/theme.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName} from '../names.js';
 import {parseQuery, segments, search} from '../search.js';
@@ -1119,16 +1120,6 @@ function render() {
 }
 
 /* ---------- start ---------- */
-
-function applyTheme(theme) {
-    const value = theme === 'light' || theme === 'dark' ? theme : 'system';
-    document.documentElement.setAttribute('data-theme', value);
-    try {
-        localStorage.setItem('theme', value);
-    } catch (e) {
-        // the boot script will follow the system next time
-    }
-}
 
 function switchView(view) {
     state.view = view;

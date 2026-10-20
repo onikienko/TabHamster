@@ -58,6 +58,13 @@ var groupStoreClient = (function () {
         exportBackup: function () {
             return call('exportBackup', []);
         },
+        /**
+         * what importBackup would do, without changing anything: {groups, tabs, options, current, trashed}
+         * or {error: 'not_backup' | 'damaged' | 'empty'}
+         */
+        previewBackup: function (text) {
+            return call('previewBackup', [text]);
+        },
         /** {groups, errors} or {error: 'not_backup' | 'damaged' | 'empty'} when nothing was changed */
         importBackup: function (text) {
             return call('importBackup', [text]);
@@ -66,7 +73,7 @@ var groupStoreClient = (function () {
         undoRestore: function () {
             return call('undoRestore', []);
         },
-        /** time of the restore that can be undone, or null */
+        /** {time, restored, trashed} of the restore that can be undone (counts null if made by 0.4.0), or null */
         restoreInfo: function () {
             return call('restoreInfo', []);
         },

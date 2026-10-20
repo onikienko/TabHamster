@@ -1145,5 +1145,507 @@
                 "example": "Oct 12, 21:52"
             }
         }
+    },
+    "s_title": {
+        "message": "TabHamster settings",
+        "description": "Settings page. Title in the band at the top and in the browser tab"
+    },
+    "s_version": {
+        "message": "Version $VERSION$",
+        "description": "Settings page. Next to the title",
+        "placeholders": {
+            "version": {
+                "content": "$1",
+                "example": "1.0.0"
+            }
+        }
+    },
+    "s_nav": {
+        "message": "Settings sections",
+        "description": "Settings page. Screen reader label of the side menu"
+    },
+    "s_general": {
+        "message": "General",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_saving": {
+        "message": "Saving tabs",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_sync": {
+        "message": "Sync and storage",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_backup": {
+        "message": "Backup and restore",
+        "description": "Settings page. Section and side menu item"
+    },
+    "s_theme": {
+        "message": "Theme",
+        "description": "Settings page. Setting name"
+    },
+    "s_theme_text": {
+        "message": "System follows your computer’s light or dark mode.",
+        "description": "Settings page. Under Theme"
+    },
+    "s_theme_system": {
+        "message": "System",
+        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+    },
+    "s_theme_light": {
+        "message": "Light",
+        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+    },
+    "s_theme_dark": {
+        "message": "Dark",
+        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+    },
+    "s_dateFormat_text": {
+        "message": "Used to name groups saved without a name.",
+        "description": "Settings page. Under Date format"
+    },
+    "s_dateFormat_dayFirst": {
+        "message": "$DATE$ (day first)",
+        "description": "Settings page. Date format choice, shown with the date and time now",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "19-10-2026 14:05"
+            }
+        }
+    },
+    "s_dateFormat_yearFirst": {
+        "message": "$DATE$ (year first)",
+        "description": "Settings page. Date format choice, shown with the date and time now",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "2026-10-19 14:05"
+            }
+        }
+    },
+    "s_sessions": {
+        "message": "Save sessions automatically",
+        "description": "Settings page. Setting name (switch)"
+    },
+    "s_sessions_text": {
+        "message": "Keeps your last 30 browser sessions on this computer, so you can bring your windows back after a crash or restart. When it is off, the popup has no Sessions tab.",
+        "description": "Settings page. Under Save sessions automatically"
+    },
+    "s_curWin": {
+        "message": "Save only the current window",
+        "description": "Settings page. Setting name (switch)"
+    },
+    "s_curWin_text": {
+        "message": "Turn off to save the tabs of all open windows into one group.",
+        "description": "Settings page. Under Save only the current window"
+    },
+    "s_pinned_text": {
+        "message": "Pinned tabs open pinned again when you open the group.",
+        "description": "Settings page. Under Include pinned tabs"
+    },
+    "s_optionFailed": {
+        "message": "Couldn’t save this setting. Try again.",
+        "description": "Settings page. Bar when a setting could not be written"
+    },
+    "s_syncUsed": {
+        "message": "$USED$ KB of $QUOTA$ KB used",
+        "description": "Settings page. Sync storage used",
+        "placeholders": {
+            "used": {
+                "content": "$1",
+                "example": "13.3"
+            },
+            "quota": {
+                "content": "$2",
+                "example": "100"
+            }
+        }
+    },
+    "s_groupsCount_one": {
+        "message": "$COUNT$ group",
+        "description": "Number of saved groups (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_groupsCount_other": {
+        "message": "$COUNT$ groups",
+        "description": "Number of saved groups (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_sync_text": {
+        "message": "Your groups are kept in Chrome sync storage, so they appear on every computer where you sign in to Chrome with sync on. Chrome gives TabHamster $QUOTA$ KB there. Groups are compressed: that is room for about a thousand tabs. Every group is also kept on this computer. Sessions are never synced.",
+        "description": "Settings page. Sync and storage explanation",
+        "placeholders": {
+            "quota": {
+                "content": "$1",
+                "example": "100"
+            }
+        }
+    },
+    "s_unsynced_one": {
+        "message": "$COUNT$ group is saved on this computer only for now: $NAMES$",
+        "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            },
+            "names": {
+                "content": "$2",
+                "example": "“Tax return” and “Trip”"
+            }
+        }
+    },
+    "s_unsynced_other": {
+        "message": "$COUNT$ groups are saved on this computer only for now: $NAMES$",
+        "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            },
+            "names": {
+                "content": "$2",
+                "example": "“Tax return” and “Trip”"
+            }
+        }
+    },
+    "s_unsyncedHint_one": {
+        "message": "It syncs on its own when there is room. To make room, open TabHamster and click “not synced” at the bottom.",
+        "description": "Settings page. Under the groups waiting for sync, by their number (plural form 'one')"
+    },
+    "s_unsyncedHint_other": {
+        "message": "They sync on their own when there is room. To make room, open TabHamster and click “not synced” at the bottom.",
+        "description": "Settings page. Under the groups waiting for sync, by their number (plural form 'other')"
+    },
+    "s_andMore": {
+        "message": "$COUNT$ more",
+        "description": "Settings page. Last item of a list of group names: “A”, “B”, “C” and 2 more",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_backupFile": {
+        "message": "Back up to a file",
+        "description": "Settings page. Backup row title"
+    },
+    "s_backupFile_text": {
+        "message": "Saves your groups and settings. Sessions are not included.",
+        "description": "Settings page. Under Back up to a file"
+    },
+    "s_copyText": {
+        "message": "Copy backup text instead",
+        "description": "Settings page. Link under Download backup file: copies the backup to the clipboard"
+    },
+    "s_copied": {
+        "message": "Copied",
+        "description": "Settings page. Shown for a moment instead of Copy backup text instead"
+    },
+    "s_copyFailed": {
+        "message": "Couldn’t copy. Try again.",
+        "description": "Settings page. Bar when copying the backup failed"
+    },
+    "s_restore": {
+        "message": "Restore from a backup",
+        "description": "Settings page. Restore row title"
+    },
+    "s_restore_text": {
+        "message": "Your saved groups are replaced by the ones in the backup. Groups that aren’t in it go to Recently deleted, and you can undo the restore.",
+        "description": "Settings page. Under Restore from a backup"
+    },
+    "s_chooseFile": {
+        "message": "Choose backup file",
+        "description": "Settings page. Button"
+    },
+    "s_pasteText": {
+        "message": "Paste backup text instead",
+        "description": "Settings page. Link under Choose backup file: shows a text box"
+    },
+    "s_pasteLabel": {
+        "message": "Backup text",
+        "description": "Settings page. Label of the text box for a pasted backup"
+    },
+    "s_pastePlaceholder": {
+        "message": "Paste the text of a TabHamster backup here",
+        "description": "Settings page. Placeholder of the text box for a pasted backup"
+    },
+    "s_continue": {
+        "message": "Continue",
+        "description": "Settings page. Button under the pasted backup text: shows what restoring it does"
+    },
+    "s_cancel": {
+        "message": "Cancel",
+        "description": "Settings page. Button"
+    },
+    "s_editText": {
+        "message": "Edit text",
+        "description": "Settings page. Button next to an error about pasted backup text"
+    },
+    "s_pastedText": {
+        "message": "Pasted backup text",
+        "description": "Settings page. Title of the restore preview when the backup was pasted (otherwise the file name)"
+    },
+    "s_preview_andSettings": {
+        "message": "and settings",
+        "description": "Settings page. Restore preview, after “9 groups, 158 tabs, ”"
+    },
+    "s_preview_settingsOnly": {
+        "message": "Settings only, no groups",
+        "description": "Settings page. Restore preview of a backup without groups"
+    },
+    "s_preview_trashed_one": {
+        "message": "Your saved groups are replaced. $COUNT$ group that isn’t in the backup goes to Recently deleted.",
+        "description": "Settings page. Restore preview (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_preview_trashed_other": {
+        "message": "Your saved groups are replaced. $COUNT$ groups that aren’t in the backup go to Recently deleted.",
+        "description": "Settings page. Restore preview (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_preview_replaced": {
+        "message": "Your saved groups are replaced by the ones in the backup.",
+        "description": "Settings page. Restore preview when every saved group is in the backup"
+    },
+    "s_preview_groupsStay": {
+        "message": "Your saved groups stay as they are.",
+        "description": "Settings page. Restore preview of a backup without groups"
+    },
+    "s_restored_one": {
+        "message": "Backup restored: $COUNT$ group",
+        "description": "Settings page. Bar after a restore, with Undo (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_restored_other": {
+        "message": "Backup restored: $COUNT$ groups",
+        "description": "Settings page. Bar after a restore, with Undo (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_lastRestore": {
+        "message": "Last restore: $WHEN$",
+        "description": "Settings page. Row with Undo restore",
+        "placeholders": {
+            "when": {
+                "content": "$1",
+                "example": "Today, 10:24"
+            }
+        }
+    },
+    "s_lastRestore_groups_one": {
+        "message": "$COUNT$ group restored.",
+        "description": "Settings page. Under Last restore (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_lastRestore_groups_other": {
+        "message": "$COUNT$ groups restored.",
+        "description": "Settings page. Under Last restore (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "9"
+            }
+        }
+    },
+    "s_lastRestore_trashed_one": {
+        "message": "$COUNT$ group that wasn’t in the backup is in Recently deleted.",
+        "description": "Settings page. Under Last restore (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_lastRestore_trashed_other": {
+        "message": "$COUNT$ groups that weren’t in the backup are in Recently deleted.",
+        "description": "Settings page. Under Last restore (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
+    "s_undoRestore": {
+        "message": "Undo restore",
+        "description": "Settings page. Button"
+    },
+    "s_deletedElsewhere": {
+        "message": "Deleted on another computer",
+        "description": "Settings page. Recently deleted: where the group was deleted"
+    },
+    "s_deletedByRestore": {
+        "message": "Removed by a restore",
+        "description": "Settings page. Recently deleted: the group was not in a restored backup (or a restore was undone)"
+    },
+    "s_restoreGroup": {
+        "message": "Restore “$NAME$”",
+        "description": "Settings page. Screen reader label of a Restore button in Recently deleted",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "s_groupRestored": {
+        "message": "“$NAME$” restored",
+        "description": "Settings page. Bar after restoring a deleted group",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
+    },
+    "s_help_enter": {
+        "message": "Saves the open tabs as a group. Type a name first, or leave the field empty and the group is named by date and time.",
+        "description": "Settings page. Help, key list. After Enter (Return on a Mac)"
+    },
+    "s_help_typeKey": {
+        "message": "Type in the field",
+        "description": "Settings page. Help, key list. Left column"
+    },
+    "s_help_type": {
+        "message": "Searches group names and the titles and addresses of their tabs. Typing the name of a saved group replaces its tabs with the open ones (you can undo it).",
+        "description": "Settings page. Help, key list. After Type in the field"
+    },
+    "s_help_downKey": {
+        "message": "↓, then $KEY$",
+        "description": "Settings page. Help, key list. Left column. KEY is Enter or Return",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Enter"
+            }
+        }
+    },
+    "s_help_down": {
+        "message": "Opens the highlighted group from the search results.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_help_clickKey": {
+        "message": "Click a group",
+        "description": "Settings page. Help, key list. Left column"
+    },
+    "s_help_click": {
+        "message": "Shows its tabs. Open, or $KEY$ on the group, opens them in this window.",
+        "description": "Settings page. Help, key list. KEY is Enter or Return",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Enter"
+            }
+        }
+    },
+    "s_help_shiftKey": {
+        "message": "$KEY$ + click",
+        "description": "Settings page. Help, key list. Left column. KEY is ⇧ Shift",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "⇧ Shift"
+            }
+        }
+    },
+    "s_help_shift": {
+        "message": "Opens a group in a new window, like a link in Chrome. So do the window button next to Open and a middle click.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_help_arrows": {
+        "message": "Show and hide the tabs of the highlighted group.",
+        "description": "Settings page. Help, key list. After → ←"
+    },
+    "s_help_moveKey": {
+        "message": "Drag, or $KEY$ + ↑ ↓",
+        "description": "Settings page. Help, key list. Left column. KEY is Alt, or ⌥ Option on a Mac",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Alt"
+            }
+        }
+    },
+    "s_help_move": {
+        "message": "Reorders groups.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_help_esc": {
+        "message": "Clears the search. With an empty field it closes TabHamster.",
+        "description": "Settings page. Help, key list. After Esc"
+    },
+    "s_help_more": {
+        "message": "Group menu: replace its tabs with the open ones, add the current tab, rename, open in an incognito window, copy links, or delete. Deleted groups stay in Recently deleted for 30 days.",
+        "description": "Settings page. Help, key list. After ⋯"
+    },
+    "s_help_sessionsKey": {
+        "message": "Sessions tab",
+        "description": "Settings page. Help, key list. Left column"
+    },
+    "s_help_sessions": {
+        "message": "Your last 30 browser sessions. Restore brings back their windows as they were.",
+        "description": "Settings page. Help, key list. "
+    },
+    "s_about_free": {
+        "message": "TabHamster is free and open source.",
+        "description": "Settings page. About"
+    },
+    "s_about_source": {
+        "message": "Source code on GitHub",
+        "description": "Settings page. About, link"
+    },
+    "s_about_privacy": {
+        "message": "Privacy policy",
+        "description": "Settings page. About, link"
+    },
+    "s_about_translations": {
+        "message": "Translations",
+        "description": "Settings page. About, before the list of translators"
+    },
+    "s_about_thanks": {
+        "message": "Thanks to",
+        "description": "Settings page. About, before a name"
+    },
+    "s_about_ukraine": {
+        "message": "Glory to Ukraine",
+        "description": "Settings page. About, next to the flag of Ukraine"
     }
 }

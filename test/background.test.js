@@ -348,9 +348,13 @@ test('backup: restoring a 0.3.0 backup replaces groups, and can be undone', asyn
         {url: 'https://example.com/', title: 'Example', id: 0},
         {url: 'https://example.org/', title: 'https://example.org/', id: 1, pinned: true},
     ]}});
-    assert.deepEqual((await bg.groups('listTrash')).result.map(g => g.key).sort(), Object.keys(current));
+    const trash = (await bg.groups('listTrash')).result;
+    assert.deepEqual(trash.map(g => g.key).sort(), Object.keys(current));
+    assert.deepEqual(trash.map(g => g.by), ['restore', 'restore']);
     assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'eu');
-    assert.equal(typeof (await bg.groups('restoreInfo')).result, 'number');
+    const info = (await bg.groups('restoreInfo')).result;
+    assert.equal(typeof info.time, 'number');
+    assert.deepEqual([info.restored, info.trashed], [1, 2]);
 
     assert.deepEqual(await bg.groups('undoRestore'), {result: {groups: 2, errors: {}}});
     assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
@@ -373,6 +377,7 @@ test('backup: bad input changes nothing', async () => {
         [damaged, 'damaged'],
     ];
     for (const [text, code] of cases) {
+        assert.deepEqual(await bg.groups('previewBackup', text), {result: {error: code}}, text);
         assert.deepEqual(await bg.groups('importBackup', text), {result: {error: code}}, text);
     }
     assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
@@ -397,4 +402,57 @@ test('backup: options only leave groups alone', async () => {
     assert.deepEqual(await bg.groups('importBackup', '{"date_format": "eu"}'), {result: {groups: 0, errors: {}}});
     assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
     assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'eu');
+});
+
+test('backup: preview says what a restore would do and changes nothing', async () => {
+    const current = {tg_1700000000001: makeGroup(5, 1), tg_1700000000002: makeGroup(5, 2), tg_1700000000003: makeGroup(5, 3)};
+    const bg = await backgroundWithGroups(current);
+    const backup_text = JSON.stringify({
+        date_format: 'eu',
+        tg_1700000000001: makeGroup(7, 11),
+        tg_1600000000001: makeGroup(3, 12),
+    });
+
+    assert.deepEqual(await bg.groups('previewBackup', backup_text),
+        {result: {groups: 2, tabs: 10, options: true, current: 3, trashed: 2}});
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
+    assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'us');
+    assert.equal((await bg.groups('restoreInfo')).result, null);
+
+    // settings only: groups are left alone
+    assert.deepEqual(await bg.groups('previewBackup', JSON.stringify({pinned: 0})),
+        {result: {groups: 0, tabs: 0, options: true, current: 3, trashed: 0}});
+});
+
+test('trash: says where a group was deleted', async () => {
+    const bg = await backgroundWithGroups({tg_1: makeGroup(3, 1), tg_2: makeGroup(3, 2)});
+    await bg.groups('remove', 'tg_1');
+    // gone from sync: deleted on another computer
+    await bg.chrome.storage.sync.remove('tg_2');
+    await bg.groups('list');
+
+    const trash = (await bg.groups('listTrash')).result;
+    assert.deepEqual(trash.map(g => [g.key, g.by]).sort(), [['tg_1', 'here'], ['tg_2', 'sync']]);
+    await bg.groups('restore', 'tg_2');
+    await bg.groups('remove', 'tg_2');
+    assert.equal((await bg.groups('listTrash')).result.find(g => g.key === 'tg_2').by, 'here');
+});
+
+test('sessions switch: listeners and the current session follow the option without a reload', async () => {
+    const bg = startBackground();
+    const tabs = bg.chrome.tabs;
+    const change = value => bg.chrome.storage.onChanged.listeners.forEach(fn =>
+        fn({session_watcher: {newValue: value}}, 'sync'));
+    await waitFor(async () => (await bg.chrome.storage.session.get('session_id')).session_id);
+    assert.equal(tabs.onRemoved.listeners.length, 1);
+
+    change(0);
+    await waitFor(async () => !(await bg.chrome.storage.session.get('session_id')).session_id);
+    assert.equal(tabs.onRemoved.listeners.length, 0);
+    assert.equal(tabs.onUpdated.listeners.length, 0);
+
+    change(1);
+    await waitFor(async () => (await bg.chrome.storage.session.get('session_id')).session_id);
+    assert.equal(tabs.onRemoved.listeners.length, 1);
+    assert.equal(tabs.onUpdated.listeners.length, 1);
 });

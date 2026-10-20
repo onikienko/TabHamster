@@ -234,6 +234,9 @@
             getURL: function (path) {
                 return root + path.replace(/^\//, '');
             },
+            getManifest: function () {
+                return {version: 'harness'};
+            },
             sendMessage: function (msg) {
                 var copy = JSON.parse(JSON.stringify(msg));
                 return new Promise(function (resolve) {
