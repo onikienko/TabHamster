@@ -1348,6 +1348,34 @@
         "message": "Deshacer restauración",
         "description": "Settings page. Button"
     },
+    "s_undoPreview_title": {
+        "message": "¿Deshacer la restauración?",
+        "description": "Settings page. Panel after pressing Undo restore: title"
+    },
+    "s_undoPreview_text": {
+        "message": "Los grupos guardados y la configuración vuelven a como estaban antes de ella.",
+        "description": "Settings page. Panel after pressing Undo restore: what it does"
+    },
+    "s_undoPreview_trashed_one": {
+        "message": "$COUNT$ grupo que no estaba entonces, o que ha cambiado desde entonces, va a Eliminados recientemente.",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "s_undoPreview_trashed_other": {
+        "message": "$COUNT$ grupos que no estaban entonces, o que han cambiado desde entonces, van a Eliminados recientemente.",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
     "s_deletedElsewhere": {
         "message": "Eliminado en otro dispositivo",
         "description": "Settings page. Recently deleted: where the group was deleted"

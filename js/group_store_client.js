@@ -83,6 +83,10 @@ var groupStoreClient = (function () {
         importBackup: function (text) {
             return call('importBackup', [text]);
         },
+        /** what undoRestore would do: {groups, tabs, options, current, trashed} or {error: 'nothing_to_undo'} */
+        previewUndoRestore: function () {
+            return call('previewUndoRestore', []);
+        },
         /** {groups, errors} or {error: 'nothing_to_undo'} */
         undoRestore: function () {
             return call('undoRestore', []);

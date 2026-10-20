@@ -47,8 +47,9 @@ async function readBackup(text) {
 }
 
 // what restoring `data` does: groups and tabs in it, settings or not, and how many current groups go to trash
-// (not in the backup, or there with another name or tabs: replaceAll keeps that version in trash)
-async function restorePlan(data) {
+// (not in the backup, or there with another name or tabs: replaceAll keeps that version in trash).
+// replace_groups: as applyBackup's (groups go even when `data` has none)
+async function restorePlan(data, replace_groups) {
     const keys = Object.keys(data.groups);
     const list = await groups.list();
     const current = Object.keys(list);
@@ -57,7 +58,7 @@ async function restorePlan(data) {
         tabs: keys.reduce((sum, key) => sum + data.groups[key].tabs.length, 0),
         options: Object.keys(data.options).length > 0,
         current: current.length,
-        trashed: keys.length ? current.filter(key => !data.groups.hasOwnProperty(key) ||
+        trashed: keys.length || replace_groups ? current.filter(key => !data.groups.hasOwnProperty(key) ||
             !groupStore.sameContent(list[key], data.groups[key])).length : 0,
     };
 }
@@ -108,6 +109,11 @@ const group_ops = {
         }});
         const result = await applyBackup(read.data, false);
         return {groups: plan.groups, errors: result.errors};
+    },
+    // what undoRestore would do: {groups, tabs, options, current, trashed} (see restorePlan) or {error: 'nothing_to_undo'}
+    previewUndoRestore: async function () {
+        const snapshot = (await chrome.storage.local.get(RESTORE_UNDO_KEY))[RESTORE_UNDO_KEY];
+        return snapshot ? restorePlan(snapshot, true) : {error: 'nothing_to_undo'};
     },
     undoRestore: async function () {
         const snapshot = (await chrome.storage.local.get(RESTORE_UNDO_KEY))[RESTORE_UNDO_KEY];

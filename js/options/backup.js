@@ -21,6 +21,8 @@ const el = {
     panel: h('div', {class: 'panel', hidden: true}),
     // the restore that can be undone
     undo: h('div', {class: 'row undo', hidden: true}),
+    // under it: what undoing it does, before it is done
+    undoPanel: h('div', {class: 'panel', hidden: true}),
 };
 
 let ctx = null;
@@ -202,8 +204,47 @@ function fileInput() {
 
 /* ---------- undo of the last restore ---------- */
 
+function closeUndoPanel(button) {
+    clear(el.undoPanel).hidden = true;
+    if (button && button.isConnected) {
+        button.focus();
+    }
+}
+
+/** what undoing the last restore does, with Cancel and Undo restore */
+async function confirmUndo(button) {
+    let res;
+    try {
+        res = await groupStoreClient.previewUndoRestore();
+    } catch (e) {
+        console.error('TabHamster: undo restore preview failed', e);
+        showBar(t('o_backup_error_other'));
+        return;
+    }
+    if (res.error) {
+        await ctx.reloadAll();
+        return;
+    }
+    const confirm = h('button', {class: 'btn primary', type: 'button'}, t('s_undoRestore'));
+    confirm.addEventListener('click', async () => {
+        confirm.disabled = true;
+        closeUndoPanel(null);
+        await undoRestore();
+    });
+    clear(el.undoPanel).hidden = false;
+    el.undoPanel.append(
+        h('p', {class: 'panel-title'}, t('s_undoPreview_title')),
+        h('p', null, t('s_undoPreview_text')),
+        res.trashed ? h('p', {class: 'muted'}, plural('s_undoPreview_trashed', res.trashed)) : null,
+        h('div', {class: 'panel-buttons'},
+            h('button', {class: 'btn tonal', type: 'button', onClick: () => closeUndoPanel(button)}, t('s_cancel')),
+            confirm));
+    confirm.focus();
+}
+
 export function renderRestoreInfo(info) {
     clear(el.undo).hidden = !info;
+    clear(el.undoPanel).hidden = true;
     if (!info) {
         return;
     }
@@ -214,11 +255,13 @@ export function renderRestoreInfo(info) {
     if (info.trashed) {
         details.push(plural('s_lastRestore_trashed', info.trashed));
     }
+    const button = h('button', {class: 'btn tonal', type: 'button'}, t('s_undoRestore'));
+    button.addEventListener('click', () => confirmUndo(button));
     el.undo.append(
         h('div', {class: 'row-label'},
             h('span', {class: 'row-title'}, t('s_lastRestore', dayTime(info.time, lang))),
             details.length ? h('p', {class: 'row-text'}, details.join(' ')) : null),
-        h('button', {class: 'btn tonal', type: 'button', onClick: undoRestore}, t('s_undoRestore')));
+        button);
 }
 
 /** rows of the Backup and restore section; context: {reloadAll} */
@@ -246,5 +289,6 @@ export function backupRows(context) {
                 input)),
         el.panel,
         el.undo,
+        el.undoPanel,
     ];
 }

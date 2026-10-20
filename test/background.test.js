@@ -398,11 +398,22 @@ test('backup: restoring a 0.3.0 backup replaces groups, and can be undone', asyn
     assert.equal(typeof info.time, 'number');
     assert.deepEqual([info.restored, info.trashed], [1, 2]);
 
+    assert.deepEqual(await bg.groups('previewUndoRestore'),
+        {result: {groups: 2, tabs: 10, options: true, current: 1, trashed: 1}}, 'the restored group goes');
     assert.deepEqual(await bg.groups('undoRestore'), {result: {groups: 2, errors: {}}});
     assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
     assert.equal((await bg.chrome.storage.sync.get('date_format')).date_format, 'us');
     assert.equal((await bg.groups('restoreInfo')).result, null);
     assert.deepEqual(await bg.groups('undoRestore'), {result: {error: 'nothing_to_undo'}});
+    assert.deepEqual(await bg.groups('previewUndoRestore'), {result: {error: 'nothing_to_undo'}});
+});
+
+test('backup: undo of a restore made with no groups saved: every group goes', async () => {
+    const bg = startBackground();
+    await bg.groups('importBackup', JSON.stringify({tg_1600000000001: makeGroup(3, 1), tg_1600000000002: makeGroup(3, 2)}));
+    assert.equal((await bg.groups('previewUndoRestore')).result.trashed, 2);
+    await bg.groups('undoRestore');
+    assert.deepEqual((await bg.groups('list')).result, {});
 });
 
 test('backup: bad input changes nothing', async () => {

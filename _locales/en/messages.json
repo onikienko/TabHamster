@@ -1348,6 +1348,34 @@
         "message": "Undo restore",
         "description": "Settings page. Button"
     },
+    "s_undoPreview_title": {
+        "message": "Undo the restore?",
+        "description": "Settings page. Panel after pressing Undo restore: title"
+    },
+    "s_undoPreview_text": {
+        "message": "Saved groups and settings go back to how they were before it.",
+        "description": "Settings page. Panel after pressing Undo restore: what it does"
+    },
+    "s_undoPreview_trashed_one": {
+        "message": "$COUNT$ group that wasn’t there before it, or has changed since, goes to Recently deleted.",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "s_undoPreview_trashed_other": {
+        "message": "$COUNT$ groups that weren’t there before it, or have changed since, go to Recently deleted.",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
     "s_deletedElsewhere": {
         "message": "Deleted on another computer",
         "description": "Settings page. Recently deleted: where the group was deleted"

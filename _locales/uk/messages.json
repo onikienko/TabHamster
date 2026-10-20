@@ -1697,6 +1697,44 @@
         "message": "Скасувати відновлення",
         "description": "Settings page. Button"
     },
+    "s_undoPreview_title": {
+        "message": "Скасувати відновлення?",
+        "description": "Settings page. Panel after pressing Undo restore: title"
+    },
+    "s_undoPreview_text": {
+        "message": "Збережені групи й налаштування повернуться до стану, який був перед ним.",
+        "description": "Settings page. Panel after pressing Undo restore: what it does"
+    },
+    "s_undoPreview_trashed_one": {
+        "message": "$COUNT$ група, якої тоді не було або яка відтоді змінилася, потрапить до «Нещодавно видалених».",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "s_undoPreview_trashed_few": {
+        "message": "$COUNT$ групи, яких тоді не було або які відтоді змінилися, потраплять до «Нещодавно видалених».",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'few')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "s_undoPreview_trashed_other": {
+        "message": "$COUNT$ груп, яких тоді не було або які відтоді змінилися, потраплять до «Нещодавно видалених».",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
     "s_deletedElsewhere": {
         "message": "Видалено на іншому комп'ютері",
         "description": "Settings page. Recently deleted: where the group was deleted"

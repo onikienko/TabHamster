@@ -1348,6 +1348,34 @@
         "message": "Annuler la restauration",
         "description": "Settings page. Button"
     },
+    "s_undoPreview_title": {
+        "message": "Annuler la restauration ?",
+        "description": "Settings page. Panel after pressing Undo restore: title"
+    },
+    "s_undoPreview_text": {
+        "message": "Les groupes enregistrés et les paramètres reviennent à leur état d’avant la restauration.",
+        "description": "Settings page. Panel after pressing Undo restore: what it does"
+    },
+    "s_undoPreview_trashed_one": {
+        "message": "$COUNT$ groupe absent à ce moment-là, ou modifié depuis, va dans Supprimés récemment.",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "s_undoPreview_trashed_other": {
+        "message": "$COUNT$ groupes absents à ce moment-là, ou modifiés depuis, vont dans Supprimés récemment.",
+        "description": "Settings page. Panel after pressing Undo restore: groups that go to Recently deleted (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
     "s_deletedElsewhere": {
         "message": "Supprimé sur un autre ordinateur",
         "description": "Settings page. Recently deleted: where the group was deleted"
