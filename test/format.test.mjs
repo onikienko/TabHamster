@@ -54,6 +54,9 @@ test('dayName: Today, Yesterday, then dates; or always the date', () => {
     assert.equal(dayName(new Date(2026, 9, 17, 12, 0).getTime(), 'en-US', now), 'Oct 17');
     assert.equal(dayName(new Date(2026, 9, 18, 12, 0).getTime(), 'en-US', now, false), 'Oct 18');
     assert.equal(dayName(new Date(2026, 9, 18, 12, 0).getTime(), 'uk', now), 'Учора');
+    // mid-sentence
+    assert.equal(dayName(new Date(2026, 9, 18, 12, 0).getTime(), 'fr', now, true, false), 'hier');
+    assert.equal(dayName(new Date(2026, 9, 19, 12, 0).getTime(), 'uk', now, true, false), 'сьогодні');
 });
 
 test('interval: one day, across days, relative or not', () => {

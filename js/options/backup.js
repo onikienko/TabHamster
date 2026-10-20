@@ -259,7 +259,7 @@ export function renderRestoreInfo(info) {
     button.addEventListener('click', () => confirmUndo(button));
     el.undo.append(
         h('div', {class: 'row-label'},
-            h('span', {class: 'row-title'}, t('s_lastRestore', dayTime(info.time, lang))),
+            h('span', {class: 'row-title'}, t('s_lastRestore', dayTime(info.time, lang, undefined, true, false))),
             details.length ? h('p', {class: 'row-text'}, details.join(' ')) : null),
         button);
 }

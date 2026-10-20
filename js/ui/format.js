@@ -70,21 +70,22 @@ function startOfDay(ms) {
 /**
  * "Today", "Yesterday" (in the language, from Intl), otherwise like shortDate.
  * relative false: always the date (for text that stays, like a group name).
+ * capital false: "today", for the middle of a sentence ("Last restore: today, 14:02").
  */
-export function dayName(ms, lang, now, relative = true) {
+export function dayName(ms, lang, now, relative = true, capital = true) {
     const today = now === undefined ? Date.now() : now;
     // rounded: a day with a clock change is 23 or 25 hours
     const days = Math.round((startOfDay(today) - startOfDay(ms)) / 864e5);
     if (relative && (days === 0 || days === 1)) {
         const word = formatter(Intl.RelativeTimeFormat, lang, {numeric: 'auto'}).format(-days, 'day');
-        return word.charAt(0).toLocaleUpperCase(lang) + word.slice(1);
+        return capital ? word.charAt(0).toLocaleUpperCase(lang) + word.slice(1) : word;
     }
     return shortDate(ms, lang, today);
 }
 
-/** "Yesterday, 14:02" */
-export function dayTime(ms, lang, now, relative = true) {
-    return dayName(ms, lang, now, relative) + ', ' + shortTime(ms, lang);
+/** "Yesterday, 14:02" (capital: see dayName) */
+export function dayTime(ms, lang, now, relative = true, capital = true) {
+    return dayName(ms, lang, now, relative, capital) + ', ' + shortTime(ms, lang);
 }
 
 /** when a session ran: "Yesterday, 14:02–23:05", across days "Oct 11, 10:02–Oct 12, 01:51" */
