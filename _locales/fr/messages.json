@@ -8,7 +8,7 @@
         "description": "ne pas traduire le nom de l'extension"
     },
     "extDescr": {
-        "message": "Gestionnaire de session et sauveur d'onglets. Avec synchronisation",
+        "message": "Gestionnaire de sessions et d’onglets. Avec synchronisation.",
         "description": ""
     },
 
@@ -26,7 +26,7 @@
     },
 
     "p_syncStorageDefault_error": {
-        "message": "Une erreur s'est produite. Réessayez."
+        "message": "Une erreur s’est produite. Réessayez."
     },
 
     "o_tabs_help": {
@@ -78,15 +78,15 @@
         "description": ""
     },
     "o_backup_error_notBackup": {
-        "message": "Ce n'est pas une sauvegarde TabHamster. Rien n'a été modifié.",
+        "message": "Ce n’est pas une sauvegarde TabHamster. Rien n’a été modifié.",
         "description": ""
     },
     "o_backup_error_damaged": {
-        "message": "Certains groupes de cette sauvegarde sont illisibles. Rien n'a été modifié.",
+        "message": "Certains groupes de cette sauvegarde sont illisibles. Rien n’a été modifié.",
         "description": ""
     },
     "o_backup_error_empty": {
-        "message": "Cette sauvegarde ne contient ni groupes enregistrés ni paramètres. Rien n'a été modifié.",
+        "message": "Cette sauvegarde ne contient ni groupes enregistrés ni paramètres. Rien n’a été modifié.",
         "description": ""
     },
     "o_backup_error_other": {
@@ -1027,7 +1027,7 @@
         "description": "Settings page. Setting name"
     },
     "s_theme_text": {
-        "message": "Système suit le mode clair ou sombre de votre ordinateur.",
+        "message": "« Système » suit le mode clair ou sombre de votre ordinateur.",
         "description": "Settings page. Under Theme"
     },
     "s_theme_system": {

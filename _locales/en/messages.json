@@ -83,7 +83,7 @@
         "description": ""
     },
     "o_backup_error_damaged": {
-        "message": "Some groups in this backup can't be read. Nothing was changed.",
+        "message": "Some groups in this backup can’t be read. Nothing was changed.",
         "description": ""
     },
     "o_backup_error_empty": {
@@ -705,7 +705,7 @@
         }
     },
     "p_copyFailed": {
-        "message": "Couldn't copy the links.",
+        "message": "Couldn’t copy the links.",
         "description": "Bar when copying to the clipboard failed"
     },
     "p_openFailed": {

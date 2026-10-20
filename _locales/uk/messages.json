@@ -8,7 +8,7 @@
         "description": "Ім'я розширення. Не перекладати"
     },
     "extDescr": {
-        "message": "Зберігай відкриті вкладки, керуй сесіями браузера",
+        "message": "Зберігайте відкриті вкладки й керуйте сесіями браузера. Із синхронізацією.",
         "description": "Короткий опис розширення"
     },
 
@@ -980,7 +980,7 @@
         "description": "Session menu; also the tooltip of the Open button on a group row"
     },
     "p_tip_shiftClick": {
-        "message": "або клацніть групу з $KEY$",
+        "message": "або клацніть групу, утримуючи $KEY$",
         "description": "Second line of the tooltip of the 'Open in new window' button: clicking the group's name or Open with this key held does the same",
         "placeholders": {
             "key": {
@@ -1494,7 +1494,7 @@
         "description": "Settings page. Backup row title"
     },
     "s_backupFile_text": {
-        "message": "Зберігає ваші групи й налаштування. Сесії не входять.",
+        "message": "Зберігає ваші групи й налаштування. Сесії до неї не входять.",
         "description": "Settings page. Under Back up to a file"
     },
     "s_copyText": {
@@ -1806,7 +1806,7 @@
         "description": "Settings page. Help, key list. "
     },
     "s_help_clickKey": {
-        "message": "Клацання по групі",
+        "message": "Клацання на групу",
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_click": {

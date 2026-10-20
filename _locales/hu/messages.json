@@ -5,7 +5,7 @@
     },
    "extDescr": {
       "description": "",
-      "message": "Böngészési munkamenetek kezelése és fülek mentése. Szinkronizációval"
+      "message": "Böngészési munkamenetek kezelése és fülek mentése. Szinkronizációval."
    },
    "extName": {
       "description": "do not translate extension name",
@@ -362,7 +362,7 @@
         "description": "Popup, no saved groups yet"
     },
     "p_empty_restore": {
-        "message": "Visszaállítás biztonsági mentés fájlból",
+        "message": "Visszaállítás biztonsági mentési fájlból",
         "description": "Link in the popup when there are no saved groups: opens the backup page of the settings"
     },
     "p_clearSearch": {
@@ -1216,7 +1216,7 @@
         "description": "Settings page. Under Restore from a backup"
     },
     "s_chooseFile": {
-        "message": "Biztonsági mentés fájl kiválasztása",
+        "message": "Biztonsági mentési fájl kiválasztása",
         "description": "Settings page. Button"
     },
     "s_pasteText": {
@@ -1244,7 +1244,7 @@
         "description": "Settings page. Button next to an error about pasted backup text"
     },
     "s_pastedText": {
-        "message": "Beillesztett biztonsági mentés szöveg",
+        "message": "Beillesztett biztonsági mentési szöveg",
         "description": "Settings page. Title of the restore preview when the backup was pasted (otherwise the file name)"
     },
     "s_preview_andSettings": {
@@ -1494,7 +1494,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Csoport menü: a fülei cseréje a nyitott fülekre, az aktuális fül hozzáadása, átnevezés, megnyitás inkognitóablakban, linkek másolása vagy törlés. A törölt csoportok 30 napig a Nemrég törölt között maradnak.",
+        "message": "Csoportmenü: a fülei cseréje a nyitott fülekre, az aktuális fül hozzáadása, átnevezés, megnyitás inkognitóablakban, linkek másolása vagy törlés. A törölt csoportok 30 napig a Nemrég törölt között maradnak.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {

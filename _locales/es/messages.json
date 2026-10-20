@@ -817,7 +817,7 @@
         "description": "Chip in the popup's field while only groups that are not synced are shown. Chip inside the field: about 16 characters."
     },
     "p_filterBiggest": {
-        "message": "Más grandes",
+        "message": "Más grandes primero",
         "description": "Chip in the popup's field while groups are sorted by the space they take in sync storage. Chip inside the field: about 16 characters."
     },
     "p_removeFilter": {
@@ -1027,7 +1027,7 @@
         "description": "Settings page. Setting name"
     },
     "s_theme_text": {
-        "message": "Sistema sigue el modo claro u oscuro de su dispositivo.",
+        "message": "“Sistema” sigue el modo claro u oscuro de su dispositivo.",
         "description": "Settings page. Under Theme"
     },
     "s_theme_system": {
