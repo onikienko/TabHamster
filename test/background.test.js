@@ -221,6 +221,14 @@ test('open in the current window: some bad tabs are counted, all bad is an error
         {error: 'Cannot open bad:2'});
 });
 
+test('open in the current window: no active tab found, the tabs still open there', async () => {
+    const browser = fakeBrowser();
+    const bg = startBackground({browser});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1}), {result: {failed: 0}});
+    assert.deepEqual(browser.calls.map(c => [c[0], c[1].windowId, c[1].active]),
+        [['create', 1, true], ['create', 1, false], ['create', 1, false]]);
+});
+
 test('open in the current window: a blank new tab takes the first tab', async () => {
     const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'});
     const bg = startBackground({browser});
@@ -434,6 +442,16 @@ test('backup: undo of a restore made with no groups saved: every group goes', as
     assert.equal((await bg.groups('previewUndoRestore')).result.trashed, 2);
     await bg.groups('undoRestore');
     assert.deepEqual((await bg.groups('list')).result, {});
+});
+
+test('backup: a restore made by 0.4.0 (no counts in its snapshot) shows and undoes', async () => {
+    const current = {tg_1700000000001: makeGroup(5, 1)};
+    const bg = await backgroundWithGroups(current);
+    await bg.chrome.storage.local.set({restore_undo: {time: 1700000000000, groups: {tg_1600000000001: makeGroup(3, 2)},
+        options: OPTIONS}});
+    assert.deepEqual((await bg.groups('restoreInfo')).result, {time: 1700000000000, restored: null, trashed: null});
+    assert.deepEqual(await bg.groups('undoRestore'), {result: {groups: 1, errors: {}}});
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), {tg_1600000000001: makeGroup(3, 2)});
 });
 
 test('backup: bad input changes nothing', async () => {

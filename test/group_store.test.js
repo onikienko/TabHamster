@@ -906,6 +906,67 @@ test('on_synced: groups that waited for sync and got there', async () => {
     assert.deepEqual(calls, [['tg_2']], 'once');
 });
 
+test('a discard waiting for sync while another device saves the group again: nothing is lost', async () => {
+    const {net, a, b} = await twoSyncedDevices(makeGroup(5, 1));
+    failWrites(a.sync, RATE_ERROR, 'remove');
+    assert.equal((await a.store.discard('tg_1')).synced, false);
+    a.sync.beforeWrite = null;
+    await b.store.setTabs('tg_1', makeTabs(7, 9));
+    net.upload(b.dev);
+    net.download(a.dev);
+    // a finishes its discard: the group goes from sync, and b keeps its version in Recently deleted
+    await a.store.reconcile();
+    net.syncAll();
+    await b.store.reconcile();
+    assert.deepEqual(await a.store.list(), {});
+    assert.deepEqual(await b.store.list(), {});
+    const trash = await b.store.listTrash();
+    assert.deepEqual(trash.map(g => [g.key, g.by, g.tabs.length]), [['tg_1', 'sync', 7]]);
+});
+
+test('on_synced: replaceAll doesn\'t report the groups it saved itself', async () => {
+    const calls = [];
+    const {store, sync} = makeDevice({on_synced: keys => calls.push(keys)});
+    await store.save('tg_1', makeGroup(400, 1));
+    await fill(sync, 102000);
+    assert.equal((await store.save('tg_2', makeGroup(100, 2))).synced, false);
+    // tg_1 goes to trash and frees room; tg_2 is in the backup, so its result says it
+    const res = await store.replaceAll({tg_2: makeGroup(100, 2)});
+    assert.deepEqual(res.errors, {});
+    assert.equal((await store.list()).tg_2.synced, true);
+    assert.deepEqual(calls, []);
+});
+
+test('renumbering many groups with sync nearly full: one by one, the rest go later', async () => {
+    const {store, sync} = makeDevice();
+    for (let i = 1; i <= 20; i++) {
+        await store.save('tg_' + i, makeGroup(2, i, 'g' + i));
+    }
+    // too little room for 20 headers that each grow by 2 digits
+    await fill(sync, sync.QUOTA_BYTES - 1024 - 20);
+    const indexes = {};
+    for (let i = 1; i <= 20; i++) {
+        indexes['tg_' + i] = 100 + i;
+    }
+    const res = await store.setIndex(indexes);
+    const synced = Object.values(res).filter(r => r.synced).length;
+    assert.ok(synced > 0 && synced < 20, synced + ' synced');
+    assert.ok(Object.values(res).filter(r => !r.synced).every(r => r.error === QUOTA_ERROR));
+    const list = await store.list();
+    assert.ok(Object.keys(indexes).every(key => list[key].index === indexes[key]), 'all moved here');
+
+    sync.rawRemove(['filler_0']);
+    await store.reconcile();
+    const remote = await syncGroups(sync);
+    assert.ok(Object.keys(indexes).every(key => remote[key].group.index === indexes[key]), 'all in sync later');
+});
+
+test('0.4.0 trash records (no trashed_by) list as deleted by someone not known', async () => {
+    const {store, local} = makeDevice();
+    local.rawSet({lg_1: {g: makeGroup(3, 1), h: gs.tabsHash(makeTabs(3, 1)), synced: false, base: null, trashed: Date.now()}});
+    assert.deepEqual((await store.listTrash()).map(g => [g.key, g.by]), [['tg_1', null]]);
+});
+
 test('fuzz: two devices end up with the same groups', async () => {
     let converged = 0;
     for (let seed = 1; seed <= 20; seed++) {
