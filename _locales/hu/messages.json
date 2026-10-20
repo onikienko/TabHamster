@@ -7,81 +7,9 @@
       "description": "do not translate extension name",
       "message": "TabHamster"
    },
-   "o_common_legend": {
-      "description": "",
-      "message": "Fő beállítások"
-   },
-   "o_dateFormat_eu": {
-      "description": "EU date format",
-      "message": "nap / hónap / év"
-   },
    "o_dateFormat_text": {
       "description": "",
       "message": "Időformátum"
-   },
-   "o_dateFormat_us": {
-      "description": "US date format",
-      "message": "év / hónap / nap"
-   },
-   "o_error": {
-      "description": "Error during save settings",
-      "message": "Hiba a mentésnél"
-   },
-   "o_help_editGroup": {
-      "description": "",
-      "message": "Egyszerűen tudjuk szerkeszteni, törölni és módosítani a mentett csoportokat (a negyedik pont a képernyőfotón)."
-   },
-   "o_help_inNewWindow": {
-      "description": "",
-      "message": "'Ctrl + klikk' a mentett csoport (vagy folyamat) nevén új ablakba nyitja meg a füleket. Járható út még a kis ikonokra történő kattintás is. (a harmadik pont a képernyőképen)"
-   },
-   "o_help_overFavicon": {
-      "description": "",
-      "message": "Ha az egérmutatót a favikonokra mozgatjuk, akkor rögtön meglátjuk a hivatkozásokat."
-   },
-   "o_help_quickAdd": {
-      "description": "",
-      "message": "A kiterjesztés ablakában az ENTER billentyű lenyomásával azonnal egy csoportba menthetjük a megnyitott füleket."
-   },
-   "o_help_settings": {
-      "description": "",
-      "message": "Tekintsük át a beállításokat!"
-   },
-   "o_help_showLinks": {
-      "description": "",
-      "message": "Ahhoz, hogy áttekintsük a csoportba mentett lapokat, kattintsunk a szürke háromszögre (a második pont a képernyőfotón)."
-   },
-   "o_help_syncStorage": {
-      "description": "",
-      "message": "A fülcsoportok bekerülnek a szinkronizációs adatbázisba. Ezeket a bejelentkezés után egy másik számítógépen is elérhetjük."
-   },
-   "o_help_syncStorage_0": {
-      "description": "",
-      "message": "A folyamatok nem kerülnek szinkronizálásra."
-   },
-   "o_help_syncStorage_1": {
-      "description": "",
-      "message": "A szinkronizációs adatbázis mérete limitált. A kihasználtságot mi magunk is ellenőrizhetjük (első pont a lenti képernyőképen)."
-   },
-   "o_help_syncStorage_2": {
-      "description": "",
-      "message": "A csoportok tömörítve vannak, így egy csoportban több száz fül is lehet. Minden csoport ezen a számítógépen is megmarad: ha a szinkronizációs tárhely megtelt, a csoport akkor is mentésre kerül, és ⚠ jelöli, amíg nem lesz hely a szinkronizálásban."
-   },
-   "o_help_tipsLegend": {
-      "description": "",
-      "message": "Tippek"
-   },
-   "o_saved": {
-      "description": "Settings saved OK",
-      "message": "Mentve"
-   },
-   "o_savedTabs_cur_win": {
-      "description": "",
-      "message": "Csak a jelenlegi ablak"
-   },
-   "o_savedTabs_legend": {
-      "description": "Legend tag",
-      "message": "Szűrő a fülek mentéséhez (nem folyamatok)"
    },
    "o_savedTabs_pinned": {
       "description": "",
@@ -95,65 +23,9 @@
       "description": "Tab name. Prefix 'o_' for options page",
       "message": "Segítség"
    },
-   "o_tabs_main": {
-      "description": "Settings tab",
-      "message": "Beállítások"
-   },
-   "p_GroupNameToSave": {
-      "description": "Placeholder in text input",
-      "message": "Új csoport a megnyitott fülekkel"
-   },
-   "p_addLinkLink_popup": {
-      "description": "",
-      "message": "Hivatkozás"
-   },
-   "p_addLinkTitle_popup": {
-      "description": "",
-      "message": "Cím"
-   },
-   "p_addLinkToGroup_btn_title": {
-      "message": "Új hivatkozás a csoportba"
-   },
-   "p_currentSession": {
-      "message": "Aktuális"
-   },
-   "p_delGroup_btn_title": {
-      "message": "Csoport törlés"
-   },
-   "p_delLinkFromGroup_btn_title": {
-      "message": "Törlés"
-   },
-   "p_downGroup_btn_title": {
-      "message": "Le"
-   },
-   "p_editGroupName_btn_title": {
-      "message": "Csoportnév szerkesztés"
-   },
-   "p_editLink_btn_title": {
-      "message": "Szerkesztés"
-   },
-   "p_groupBtn": {
-      "description": "Btn hint",
-      "message": "Mentés"
-   },
-   "p_groupInNewWindow_btn_title": {
-      "message": "Megnyitás új ablakban (Ctrl + klikk)"
-   },
-   "p_helpBtn": {
-      "description": "Title for help button",
-      "message": "Segítség"
-   },
-   "p_newGroupName_popup": {
-      "description": "",
-      "message": "Az új csoport neve:"
-   },
    "p_optionsBtn": {
       "description": "Prefix 'p_' - popup",
       "message": "Beállítások"
-   },
-   "p_synStorageUsage_title": {
-      "description": "",
-      "message": "A böngészők szinkronizációs adatbázisának kihasználtsága"
    },
    "p_syncStorageDefault_error": {
       "message": "Hiba történt. Próbálja újra."
@@ -166,18 +38,6 @@
       "description": "",
       "message": "Folyamatok"
    },
-   "p_tabsNumbers_text": {
-      "message": "Fülek:"
-   },
-   "p_upGroup_btn_title": {
-      "message": "Fel"
-   },
-   "p_window_text": {
-      "message": "Ablak"
-   },
-   "p_windowsNumbers_text": {
-      "message": "Ablak:"
-   },
     "bg_conflictCopy": {
         "message": "ütköző másolat",
         "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
@@ -185,20 +45,6 @@
     "p_notSynced_title": {
         "message": "Csak ezen a számítógépen mentve, a böngésző szinkronizálásában nincs benne",
         "description": "Tooltip of the mark next to a saved group that is not in browser sync"
-    },
-    "p_notSyncedCount": {
-        "message": "$COUNT$ nincs szinkronizálva",
-        "description": "After the sync storage usage on the Saved groups tab",
-        "placeholders": {
-            "count": {
-                "content": "$1",
-                "example": "2"
-            }
-        }
-    },
-    "p_savedLocally_full": {
-        "message": "Csak ezen a számítógépen mentve: a böngésző szinkronizációs tárhelye megtelt. Törölje a már nem szükséges csoportokat a szinkronizáláshoz.",
-        "description": "Shown when a group was saved but sync storage has no room"
     },
     "p_savedLocally_later": {
         "message": "Ezen a számítógépen mentve. Később lesz szinkronizálva.",
@@ -208,10 +54,6 @@
         "message": "Nincs menthető fül. A rögzített füleket a kiterjesztés kihagyja, hacsak be nem kapcsolja őket a beállításokban.",
         "description": "Shown when Save finds no tabs to save"
     },
-    "p_groupDeleted_text": {
-        "message": "Csoport törölve.",
-        "description": "Bar shown for a few seconds after a group is deleted"
-    },
     "p_undo_btn": {
         "message": "Visszavonás",
         "description": "Button on the bar after a group is deleted"
@@ -220,20 +62,12 @@
         "message": "Biztonsági mentés letöltése",
         "description": ""
     },
-    "o_backup_restoreFile": {
-        "message": "Biztonsági mentés fájlja:",
-        "description": ""
-    },
     "o_backup_restored": {
         "message": "Biztonsági mentés visszaállítva.",
         "description": ""
     },
     "o_backup_undone": {
         "message": "Visszaállítás visszavonva.",
-        "description": ""
-    },
-    "o_backup_undoRestoreButton": {
-        "message": "Utolsó visszaállítás visszavonása",
         "description": ""
     },
     "o_backup_error_notBackup": {
@@ -264,56 +98,8 @@
         "message": "Nincsenek nemrég törölt csoportok.",
         "description": ""
     },
-    "o_trash_deletedAt": {
-        "message": "törölve:",
-        "description": ""
-    },
     "o_trash_restoreButton": {
         "message": "Visszaállítás",
         "description": ""
-    },
-    "o_backup_backupInstruction": {
-        "message": "Kattintson a „Biztonsági mentés letöltése” gombra a csoportok és a beállítások fájlba mentéséhez. Az alábbi szöveget is kimásolhatja.",
-        "description": ""
-    },
-    "o_backup_restoreInstruction": {
-        "message": "Válasszon egy biztonsági mentés fájlt, vagy illessze be alább a mentés szövegét, majd kattintson a „Beállítások és mentett csoportok visszaállítása” gombra.",
-        "description": ""
-    },
-    "o_backup_restoreInstructionMore": {
-        "message": "A mentett csoportokat a biztonsági mentés csoportjai váltják fel. A mentésben nem szereplő csoportok a „Nemrég törölt” részbe kerülnek (lejjebb ezen az oldalon), és a visszaállítás visszavonható.",
-        "description": ""
-    },
-    "p_overwriteGroup_popup": {
-        "message": "Már létezik ilyen nevű csoport. Lecseréli a jelenlegi fülekre?",
-        "description": "Modal window dialog"
-    },
-    "o_tabs_backup": {
-        "message": "Biztonsági mentés / Visszaállítás",
-        "description": "Tab name"
-    },
-    "o_sessionWatcher_toggle": {
-        "message": "Munkamenetek figyelése. Kikapcsolva nincs automatikus munkamenet-mentés. A kiterjesztés automatikusan újraindul!",
-        "description": ""
-    },
-    "o_backup_backupLegend": {
-        "message": "Biztonsági mentés",
-        "description": ""
-    },
-    "o_backup_backupInstructionMore": {
-        "message": "Ezekkel az adatokkal visszaállíthatja a mentett csoportokat és a kiterjesztés beállításait. A munkamenetek nem állíthatók vissza.",
-        "description": ""
-    },
-    "o_backup_restoreLegend": {
-        "message": "Visszaállítás",
-        "description": ""
-    },
-    "o_backup_restoreButton": {
-        "message": "Beállítások és mentett csoportok visszaállítása",
-        "description": ""
-    },
-    "o_help_recentlyDeleted": {
-        "message": "A törölt csoportok 30 napig visszaállíthatók: Beállítások > Biztonsági mentés / Visszaállítás > Nemrég törölt.",
-        "description": "Help tab tip: where deleted groups can be restored"
     }
 }

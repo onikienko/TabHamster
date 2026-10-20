@@ -12,18 +12,6 @@
         "message": "Налаштування",
         "description": "Підказка для кнопки.  Префікс 'p_' вказує, що текст відноситься до popup"
     },
-    "p_helpBtn": {
-        "message": "Допомога",
-        "description": "Підказка для кнопки"
-    },
-    "p_GroupNameToSave": {
-        "message": "Нова група з відкритих вкладок",
-        "description": "Placeholder в текстовому полі для нового набору"
-    },
-    "p_groupBtn": {
-        "message": "Зберегти відкриті в групу",
-        "description": "Підказка для кнопки."
-    },
     "p_tabName_Saved": {
         "message": "Збережені",
         "description": "Ім'я таба для збережених груп вкладок"
@@ -32,198 +20,28 @@
         "message": "Сесії",
         "description": "Ім'я таба для збережених сесій"
     },
-    "p_synStorageUsage_title": {
-        "message": "Відсоток використання сховища Chrome",
-        "description": "Хінт для показу зайнятого місця в сховищі"
-    },
 
-    "p_newGroupName_popup": {
-        "message": "Нове ім'я групи:",
-        "description": "Модальне вікно для редагування імені групи вкладок"
-    },
-    "p_addLinkTitle_popup": {
-        "message": "Назва",
-        "description": "Модальне вікно для редагування імені групи вкладок"
-    },
-    "p_addLinkLink_popup": {
-        "message": "URL",
-        "description": "Модальне вікно для редагування імені групи вкладок"
-    },
-    "p_overwriteGroup_popup": {
-        "message": "Група з такою назвою вже існує. Замінити її вкладки поточними?",
-        "description": "Модальне вікно "
-    },
-    "p_delGroup_btn_title": {
-        "message": "Видалити групу"
-    },
-    "p_editGroupName_btn_title": {
-        "message": "Змінити ім'я групи"
-    },
-    "p_groupInNewWindow_btn_title": {
-        "message": "Відкрити в новому вікні (Ctrl + клік)"
-    },
-    "p_addLinkToGroup_btn_title": {
-        "message": "Додати посилання в групу"
-    },
-    "p_delLinkFromGroup_btn_title": {
-        "message": "Видалити з групи"
-    },
-    "p_editLink_btn_title": {
-        "message": "Редагувати"
-    },
-    "p_upGroup_btn_title": {
-        "message": "Вгору"
-    },
-    "p_downGroup_btn_title": {
-        "message": "Вниз"
-    },
-    "p_windowsNumbers_text": {
-        "message": "Вікон:"
-    },
-    "p_tabsNumbers_text": {
-        "message": "Табів:"
-    },
-    "p_window_text": {
-        "message": "Вікно"
-    },
     "p_syncStorageDefault_error": {
         "message": "Щось пішло не так. Спробуйте ще раз."
     },
-    "p_currentSession": {
-        "message": "Поточна"
-    },
-
 
     "o_tabs_help": {
         "message": "Допомога",
         "description": "Підказка для кнопки.  Префікс 'o_' вказує, що текст відноситься до  options.html"
     },
-    "o_tabs_backup": {
-        "message": "Резерв / Відновлення",
-        "description": "Ім'я вкладки"
-    },
-    "o_tabs_main": {
-        "message": "Налаштування",
-        "description": "Ім'я вкладки"
-    },
     "o_tabs_about": {
         "message": "Про розширення",
         "description": "Ім'я вкладки"
     },
-    "o_error": {
-        "message": "Помилка під час збереження налаштувань",
-        "description": "Повідомлення про помилку під час збереження налаштувань в storage"
-    },
-    "o_saved": {
-        "message": "Зміни збережені",
-        "description": "Повідомлення про успішне збереження настройок"
-    },
-    "o_savedTabs_legend": {
-        "message": "Фільтр для вкладок, що зберігаються (на сесії не поширюється)",
-        "description": "Legend tag"
-    },
     "o_savedTabs_pinned": {
         "message": "Додавати закріплені вкладки (Pinned tabs) в набір",
-        "description": ""
-    },
-    "o_savedTabs_cur_win": {
-        "message": "Зберігати в набір тільки вкладки з поточного вікна",
-        "description": ""
-    },
-    "o_common_legend": {
-        "message": "Загальні",
         "description": ""
     },
     "o_dateFormat_text": {
         "message": "Формат дати",
         "description": ""
     },
-    "o_dateFormat_eu": {
-        "message": "ДД-MM-РРРР",
-        "description": "EU date format"
-    },
-    "o_dateFormat_us": {
-        "message": "РРРР-MM-ДД",
-        "description": "US date format"
-    },
-    "o_help_syncStorage": {
-        "message": "Групи вкладок зберігаються у сховищі браузера, яке синхронізується. Збережені вкладки будуть доступні, наприклад, удома і на роботі, якщо в браузері виконано вхід з вашим акаунтом.",
-        "description": ""
-    },
-    "o_help_syncStorage_0": {
-        "message": "Сесії не синхронізуються.",
-        "description": ""
-    },
-    "o_help_syncStorage_1": {
-        "message": "Сховище для синхронізації має обмежений розмір. Відсоток його використання можна побачити біля вкладки (№1 на скріншоті). У більшості випадків цього розміру достатньо. Якщо сховище переповнене, можна видалити групи, які не використовуються.",
-        "description": ""
-    },
-    "o_help_syncStorage_2": {
-        "message": "Групи стискаються, тож у групі можуть бути сотні вкладок. Кожна група також зберігається на цьому комп'ютері: якщо сховище синхронізації заповнене, група все одно зберігається і позначається ⚠, доки в синхронізації не з'явиться місце.",
-        "description": ""
-    },
-    "o_help_tipsLegend": {
-        "message": "Поради та підказки",
-        "description": ""
-    },
-    "o_help_quickAdd": {
-        "message": "Щоб швидко зберегти всі відкриті вкладки в групу, відкрийте вікно розширення та натисніть Enter. Нова група матиме назву з поточних дати й часу (її можна змінити пізніше).",
-        "description": ""
-    },
-    "o_help_showLinks": {
-        "message": "Щоб переглянути вкладки збереженої групи, клацніть на сірий трикутник біля назви групи (№2 на скріншоті).",
-        "description": ""
-    },
-    "o_help_inNewWindow": {
-        "message": "Ctrl + клік на назві збереженої групи (або сесії) відкриє її в новому вікні браузера. Також можна клацнути на значок біля назви групи (№3 на скріншоті).",
-        "description": ""
-    },
-    "o_help_editGroup": {
-        "message": "Збережені групи можна редагувати, видаляти та переміщувати (№4 на скріншоті).",
-        "description": ""
-    },
-    "o_help_overFavicon": {
-        "message": "Щоб побачити URL вкладки, наведіть курсор на її значок.",
-        "description": ""
-    },
-    "o_help_settings": {
-        "message": "У налаштуваннях можна вибрати формат дати та змінити фільтри для збереження вкладок.",
-        "description": ""
-    },
-    "o_sessionWatcher_toggle": {
-        "message": "Слідкувати за сесіями. Зніміть прапорець, щоб вимкнути автоматичне збереження сесій. Розширення буде автоматично перезавантажено.",
-        "description": ""
-    },
 
-    "o_backup_backupLegend": {
-        "message": "Резерв",
-        "description": ""
-    },
-    "o_backup_backupInstruction": {
-        "message": "Натисніть \"Завантажити файл резервної копії\", щоб зберегти групи й налаштування у файл. Також можна скопіювати текст нижче.",
-        "description": ""
-    },
-    "o_backup_backupInstructionMore": {
-        "message": "За допомогою цих даних можна відновити збережені групи й налаштування. Сесії відновити неможливо.",
-        "description": ""
-    },
-
-    "o_backup_restoreLegend": {
-        "message": "Відновлення",
-        "description": ""
-    },
-    "o_backup_restoreInstruction": {
-        "message": "Виберіть файл резервної копії або вставте її текст нижче, потім натисніть \"Відновити налаштування і збережені групи\".",
-        "description": ""
-    },
-    "o_backup_restoreInstructionMore": {
-        "message": "Збережені групи буде замінено групами з резервної копії. Групи, яких немає в копії, потраплять до \"Нещодавно видалених\" (нижче на цій сторінці), і відновлення можна скасувати.",
-        "description": ""
-    },
-    "o_backup_restoreButton": {
-        "message": "Відновити налаштування і збережені групи",
-        "description": ""
-    },
     "bg_conflictCopy": {
         "message": "конфліктна копія",
         "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
@@ -231,20 +49,6 @@
     "p_notSynced_title": {
         "message": "Збережено лише на цьому комп'ютері, не синхронізовано",
         "description": "Tooltip of the mark next to a saved group that is not in browser sync"
-    },
-    "p_notSyncedCount": {
-        "message": "не синхронізовано: $COUNT$",
-        "description": "After the sync storage usage on the Saved groups tab",
-        "placeholders": {
-            "count": {
-                "content": "$1",
-                "example": "2"
-            }
-        }
-    },
-    "p_savedLocally_full": {
-        "message": "Збережено лише на цьому комп'ютері: сховище синхронізації браузера заповнене. Видаліть групи, які більше не потрібні, щоб синхронізувати.",
-        "description": "Shown when a group was saved but sync storage has no room"
     },
     "p_savedLocally_later": {
         "message": "Збережено на цьому комп'ютері. Буде синхронізовано пізніше.",
@@ -254,10 +58,6 @@
         "message": "Немає вкладок для збереження. Закріплені вкладки пропускаються, якщо їх не ввімкнено в налаштуваннях.",
         "description": "Shown when Save finds no tabs to save"
     },
-    "p_groupDeleted_text": {
-        "message": "Групу видалено.",
-        "description": "Bar shown for a few seconds after a group is deleted"
-    },
     "p_undo_btn": {
         "message": "Скасувати",
         "description": "Button on the bar after a group is deleted"
@@ -266,20 +66,12 @@
         "message": "Завантажити файл резервної копії",
         "description": ""
     },
-    "o_backup_restoreFile": {
-        "message": "Файл резервної копії:",
-        "description": ""
-    },
     "o_backup_restored": {
         "message": "Резервну копію відновлено.",
         "description": ""
     },
     "o_backup_undone": {
         "message": "Відновлення скасовано.",
-        "description": ""
-    },
-    "o_backup_undoRestoreButton": {
-        "message": "Скасувати останнє відновлення",
         "description": ""
     },
     "o_backup_error_notBackup": {
@@ -310,16 +102,8 @@
         "message": "Немає нещодавно видалених груп.",
         "description": ""
     },
-    "o_trash_deletedAt": {
-        "message": "видалено",
-        "description": ""
-    },
     "o_trash_restoreButton": {
         "message": "Відновити",
         "description": ""
-    },
-    "o_help_recentlyDeleted": {
-        "message": "Видалені групи можна відновити протягом 30 днів: Налаштування > Резерв / Відновлення > Нещодавно видалені.",
-        "description": "Help tab tip: where deleted groups can be restored"
     }
 }

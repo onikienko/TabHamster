@@ -12,18 +12,6 @@
         "message": "Settings",
         "description": "Prefix 'p_' - popup"
     },
-    "p_helpBtn": {
-        "message": "Help",
-        "description": "Title for help button"
-    },
-    "p_GroupNameToSave": {
-        "message": "New group from open tabs",
-        "description": "Placeholder in text input"
-    },
-    "p_groupBtn": {
-        "message": "Save",
-        "description": "Btn hint"
-    },
     "p_tabName_Saved": {
         "message": "Saved groups",
         "description": "Tab, half the popup width: about 20 characters."
@@ -32,198 +20,28 @@
         "message": "Sessions",
         "description": "Tab, half the popup width: about 20 characters."
     },
-    "p_synStorageUsage_title": {
-        "message": "Browser's sync storage usage",
-        "description": ""
-    },
 
-    "p_newGroupName_popup": {
-        "message": "New group name:",
-        "description": "Modal window dialog"
-    },
-    "p_addLinkTitle_popup": {
-        "message": "Title",
-        "description": "Modal window dialog"
-    },
-    "p_addLinkLink_popup": {
-        "message": "URL",
-        "description": "Modal window dialog"
-    },
-    "p_overwriteGroup_popup": {
-        "message": "A group with this name already exists. Replace its tabs with the current tabs?",
-        "description": "Modal window dialog"
-    },
-    "p_delGroup_btn_title": {
-        "message": "Delete group"
-    },
-    "p_editGroupName_btn_title": {
-        "message": "Edit group name"
-    },
-    "p_groupInNewWindow_btn_title": {
-        "message": "Open in new window (Ctrl + click)"
-    },
-    "p_addLinkToGroup_btn_title": {
-        "message": "Add a link to the group"
-    },
-    "p_delLinkFromGroup_btn_title": {
-        "message": "Delete"
-    },
-    "p_editLink_btn_title": {
-        "message": "Edit"
-    },
-    "p_upGroup_btn_title": {
-        "message": "Up"
-    },
-    "p_downGroup_btn_title": {
-        "message": "Down"
-    },
-    "p_windowsNumbers_text": {
-        "message": "Win:"
-    },
-    "p_tabsNumbers_text": {
-        "message": "Tabs:"
-    },
-    "p_window_text": {
-        "message": "Window"
-    },
     "p_syncStorageDefault_error": {
         "message": "Something went wrong. Please try again."
     },
-    "p_currentSession": {
-        "message": "Current"
-    },
-
 
     "o_tabs_help": {
         "message": "Help",
         "description": "Tab name. Prefix 'o_' for options page"
     },
-    "o_tabs_backup": {
-        "message": "Backup / Restore",
-        "description": "Tab name"
-    },
-    "o_tabs_main": {
-        "message": "Settings",
-        "description": "Settings tab"
-    },
     "o_tabs_about": {
         "message": "About",
         "description": "About tab"
     },
-    "o_error": {
-        "message": "Save error",
-        "description": "Error during save settings"
-    },
-    "o_saved": {
-        "message": "Saved",
-        "description": "Settings saved OK"
-    },
-    "o_savedTabs_legend": {
-        "message": "Tabs to save in groups (sessions are not affected)",
-        "description": "Legend tag"
-    },
     "o_savedTabs_pinned": {
         "message": "Include pinned tabs",
-        "description": ""
-    },
-    "o_savedTabs_cur_win": {
-        "message": "Current window only",
-        "description": ""
-    },
-    "o_common_legend": {
-        "message": "Main",
         "description": ""
     },
     "o_dateFormat_text": {
         "message": "Date format",
         "description": ""
     },
-    "o_dateFormat_eu": {
-        "message": "DD-MM-YYYY",
-        "description": "EU date format"
-    },
-    "o_dateFormat_us": {
-        "message": "YYYY-MM-DD",
-        "description": "US date format"
-    },
-    "o_help_syncStorage": {
-        "message": "Tab groups are stored in browser sync storage. Sign in to the browser to get them on your other computers.",
-        "description": ""
-    },
-    "o_help_syncStorage_0": {
-        "message": "Sessions are not synced.",
-        "description": ""
-    },
-    "o_help_syncStorage_1": {
-        "message": "Sync storage is limited in size. You can see how much of it is used (No. 1 on the screenshot).",
-        "description": ""
-    },
-    "o_help_syncStorage_2": {
-        "message": "Groups are compressed, so a group can have hundreds of tabs. Every group is also kept on this computer: if sync storage is full, the group is still saved and marked with ⚠ until there is room in sync.",
-        "description": ""
-    },
-    "o_help_tipsLegend": {
-        "message": "Tips",
-        "description": ""
-    },
-    "o_help_quickAdd": {
-        "message": "To quickly save all open tabs as a group, just open the extension window and press Enter.",
-        "description": ""
-    },
-    "o_help_showLinks": {
-        "message": "To see the tabs of a saved group, click the gray triangle (No. 2 on the screenshot).",
-        "description": ""
-    },
-    "o_help_inNewWindow": {
-        "message": "Ctrl + click on a group (or session) name opens it in a new window. You can also click the icon next to the group name (No. 3 on the screenshot).",
-        "description": ""
-    },
-    "o_help_editGroup": {
-        "message": "You can edit, delete and move any saved group (No. 4 on the screenshot).",
-        "description": ""
-    },
-    "o_help_overFavicon": {
-        "message": "Hover over a tab's icon to see its URL.",
-        "description": ""
-    },
-    "o_help_settings": {
-        "message": "Take a look at the extension's settings.",
-        "description": ""
-    },
-    "o_sessionWatcher_toggle": {
-        "message": "Watch sessions. Uncheck to turn off automatic session saving. The extension will reload automatically.",
-        "description": ""
-    },
 
-    "o_backup_backupLegend": {
-        "message": "Backup",
-        "description": ""
-    },
-    "o_backup_backupInstruction": {
-        "message": "Press \"Download backup file\" to save your groups and settings to a file. You can also copy the text below.",
-        "description": ""
-    },
-    "o_backup_backupInstructionMore": {
-        "message": "You can use it to restore your saved groups and settings. Sessions are not included.",
-        "description": ""
-    },
-
-    "o_backup_restoreLegend": {
-        "message": "Restore",
-        "description": ""
-    },
-    "o_backup_restoreInstruction": {
-        "message": "Choose a backup file or paste backup text below, then press \"Restore settings and saved groups\".",
-        "description": ""
-    },
-    "o_backup_restoreInstructionMore": {
-        "message": "Saved groups are replaced by the ones from the backup. Groups that are not in the backup go to \"Recently deleted\" (below on this page), and you can undo the restore.",
-        "description": ""
-    },
-    "o_backup_restoreButton": {
-        "message": "Restore settings and saved groups",
-        "description": ""
-    },
     "bg_conflictCopy": {
         "message": "conflict copy",
         "description": "Added to the name of a group copy kept when the group was edited on two computers at once"
@@ -231,20 +49,6 @@
     "p_notSynced_title": {
         "message": "Saved on this computer only, not in browser sync",
         "description": "Tooltip of the mark next to a saved group that is not in browser sync"
-    },
-    "p_notSyncedCount": {
-        "message": "$COUNT$ not synced",
-        "description": "After the sync storage usage on the Saved groups tab",
-        "placeholders": {
-            "count": {
-                "content": "$1",
-                "example": "2"
-            }
-        }
-    },
-    "p_savedLocally_full": {
-        "message": "Saved on this computer only: browser sync storage is full. Delete groups you no longer need to sync it.",
-        "description": "Shown when a group was saved but sync storage has no room"
     },
     "p_savedLocally_later": {
         "message": "Saved on this computer. It will be synced later.",
@@ -254,10 +58,6 @@
         "message": "No tabs to save. Pinned tabs are skipped unless you turn them on in Settings.",
         "description": "Shown when Save finds no tabs to save"
     },
-    "p_groupDeleted_text": {
-        "message": "Group deleted.",
-        "description": "Bar shown for a few seconds after a group is deleted"
-    },
     "p_undo_btn": {
         "message": "Undo",
         "description": "Button on the bar after a group is deleted"
@@ -266,20 +66,12 @@
         "message": "Download backup file",
         "description": ""
     },
-    "o_backup_restoreFile": {
-        "message": "Backup file:",
-        "description": ""
-    },
     "o_backup_restored": {
         "message": "Backup restored.",
         "description": ""
     },
     "o_backup_undone": {
         "message": "Restore undone.",
-        "description": ""
-    },
-    "o_backup_undoRestoreButton": {
-        "message": "Undo last restore",
         "description": ""
     },
     "o_backup_error_notBackup": {
@@ -310,17 +102,9 @@
         "message": "No recently deleted groups.",
         "description": ""
     },
-    "o_trash_deletedAt": {
-        "message": "deleted",
-        "description": ""
-    },
     "o_trash_restoreButton": {
         "message": "Restore",
         "description": ""
-    },
-    "o_help_recentlyDeleted": {
-        "message": "Deleted groups can be restored for 30 days: Settings > Backup / Restore > Recently deleted.",
-        "description": "Help tab tip: where deleted groups can be restored"
     },
     "p_field_placeholder": {
         "message": "Search or name a group",
@@ -445,14 +229,6 @@
     "p_moreActions": {
         "message": "More actions",
         "description": "Icon button on a group row that opens its menu"
-    },
-    "p_expandGroup": {
-        "message": "Show tabs",
-        "description": "Chevron button on a group row (screen reader label)"
-    },
-    "p_collapseGroup": {
-        "message": "Hide tabs",
-        "description": "Chevron button on an open group row (screen reader label)"
     },
     "p_currentSessionSince": {
         "message": "Current session, since $TIME$",
@@ -1689,6 +1465,14 @@
     "s_about_privacy": {
         "message": "Privacy policy",
         "description": "Settings page. About, link"
+    },
+    "s_about_issues": {
+        "message": "Report a problem",
+        "description": "Settings page. About, link to the issues page on GitHub"
+    },
+    "s_about_developer": {
+        "message": "Developer",
+        "description": "Settings page. About, before the developer's name (like 'Translations' and 'Thanks to')"
     },
     "s_about_translations": {
         "message": "Translations",

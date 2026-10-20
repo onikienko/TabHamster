@@ -12,18 +12,6 @@
         "message": "Opciones",
         "description": "Prefix 'p_' - popup"
     },
-    "p_helpBtn": {
-        "message": "Ayuda",
-        "description": "Título para el botón de ayuda"
-    },
-    "p_GroupNameToSave": {
-        "message": "Pestañas a un nuevo grupo",
-        "description": "Indicador de lugar para ingreso de texto"
-    },
-    "p_groupBtn": {
-        "message": "Guardar",
-        "description": "Ayuda para Botón"
-    },
     "p_tabName_Saved": {
         "message": "Grupos guardados",
         "description": ""
@@ -32,154 +20,25 @@
         "message": "Sesiones",
         "description": ""
     },
-    "p_synStorageUsage_title": {
-        "message": "Uso del espacio de sincronización del Navegador",
-        "description": ""
-    },
 
-    "p_newGroupName_popup": {
-        "message": "Nuevo nombre para el grupo:",
-        "description": ""
-    },
-    "p_addLinkTitle_popup": {
-        "message": "Título",
-        "description": ""
-    },
-    "p_addLinkLink_popup": {
-        "message": "URL",
-        "description": ""
-    },
-    "p_delGroup_btn_title": {
-        "message": "Eliminar grupo"
-    },
-    "p_editGroupName_btn_title": {
-        "message": "Editar nombre del grupo"
-    },
-    "p_groupInNewWindow_btn_title": {
-        "message": "Abrir en una nueva ventana (Ctrl + click)"
-    },
-    "p_addLinkToGroup_btn_title": {
-        "message": "Nuevo vínculo a grupo"
-    },
-    "p_delLinkFromGroup_btn_title": {
-        "message": "Eliminar"
-    },
-    "p_editLink_btn_title": {
-        "message": "Editar"
-    },
-    "p_upGroup_btn_title": {
-        "message": "Subir"
-    },
-    "p_downGroup_btn_title": {
-        "message": "Bajar"
-    },
-    "p_windowsNumbers_text": {
-        "message": "Ventana:"
-    },
-    "p_tabsNumbers_text": {
-        "message": "Pestaña:"
-    },
-    "p_window_text": {
-        "message": "Ventana"
-    },
     "p_syncStorageDefault_error": {
         "message": "Algo ha salido mal. Inténtelo de nuevo."
     },
-    "p_currentSession": {
-        "message": "Actual"
-    },
-
 
     "o_tabs_help": {
         "message": "Ayuda",
         "description": "Nombre de la Pestaña. Prefijo 'o_' por Opciones"
     },
-    "o_tabs_main": {
-        "message": "Opciones",
-        "description": "Pestaña Opciones"
-    },
     "o_tabs_about": {
         "message": "Acerca de",
         "description": "Pestaña con información del producto"
-    },
-    "o_error": {
-        "message": "Error al guardar",
-        "description": "Error al guardar las opciones"
-    },
-    "o_saved": {
-        "message": "Guardado",
-        "description": "Opciones correctamente guardadas"
-    },
-    "o_savedTabs_legend": {
-        "message": "Filtro para guardado de pestañas (no sesiones)",
-        "description": "Etiqueta para leyenda"
     },
     "o_savedTabs_pinned": {
         "message": "Agregar pestañas Fijas al conjunto",
         "description": ""
     },
-    "o_savedTabs_cur_win": {
-        "message": "Únicamente ventana actual",
-        "description": ""
-    },
-    "o_common_legend": {
-        "message": "Principal",
-        "description": ""
-    },
     "o_dateFormat_text": {
         "message": "Formato de fecha",
-        "description": ""
-    },
-    "o_dateFormat_eu": {
-        "message": "DD-MM-YYYY",
-        "description": "Formato europeo"
-    },
-    "o_dateFormat_us": {
-        "message": "YYYY-MM-DD",
-        "description": "Formato americano"
-    },
-    "o_help_syncStorage": {
-        "message": "Los grupos de pestañas son guardados en el espacio de sincronización. Inicie sesión en el navegador para obtenerlos en otro dispositivo.",
-        "description": ""
-    },
-    "o_help_syncStorage_0": {
-        "message": "Las sesiones no se sincronizan.",
-        "description": ""
-    },
-    "o_help_syncStorage_1": {
-        "message": "El espacio de sincronización es de tamaño limitado. Puede consultar el uso de dicho espacio (Vea No.1 en la captura de pantalla).",
-        "description": ""
-    },
-    "o_help_syncStorage_2": {
-        "message": "Los grupos se comprimen, así que un grupo puede tener cientos de pestañas. Cada grupo también se guarda en este dispositivo: si el almacenamiento de sincronización está lleno, el grupo se guarda igualmente y se marca con ⚠ hasta que haya espacio en la sincronización.",
-        "description": ""
-    },
-    "o_help_tipsLegend": {
-        "message": "Consejos",
-        "description": ""
-    },
-    "o_help_quickAdd": {
-        "message": "Para guardar rápidamente todas las pestañas abiertas en un grupo, abra la ventana de la extensión y presione 'ENTER'.",
-        "description": ""
-    },
-    "o_help_showLinks": {
-        "message": "Para ver las pestañas guardadas en un grupo presione sobre el triángulo gris (No.2 en la captura de pantalla)",
-        "description": ""
-    },
-    "o_help_inNewWindow": {
-        "message": "'Ctrl + click' en el nombre de un grupo (o sesión) lo abrirá en una nueva ventana. O presione en el icono al costado del nombre del grupo (No.3 en la captura de pantalla).",
-        "description": ""
-    },
-    "o_help_editGroup": {
-        "message": "Usted puede editar, eliminar y cambiar la posición para cada grupo guardado (No.4 en la captura de pantalla)",
-        "description": ""
-    },
-    "o_help_overFavicon": {
-        "message": "Ubique el puntero del ratón sobre el favicon para ver la url de una pestaña.",
-        "description": ""
-    },
-    "o_help_settings": {
-        "message": "Mire las opciones de la extensión",
         "description": ""
     },
     "bg_conflictCopy": {
@@ -190,20 +49,6 @@
         "message": "Guardado solo en este dispositivo, no está en la sincronización del navegador",
         "description": "Tooltip of the mark next to a saved group that is not in browser sync"
     },
-    "p_notSyncedCount": {
-        "message": "$COUNT$ sin sincronizar",
-        "description": "After the sync storage usage on the Saved groups tab",
-        "placeholders": {
-            "count": {
-                "content": "$1",
-                "example": "2"
-            }
-        }
-    },
-    "p_savedLocally_full": {
-        "message": "Guardado solo en este dispositivo: el almacenamiento de sincronización del navegador está lleno. Elimine los grupos que ya no necesite para sincronizarlo.",
-        "description": "Shown when a group was saved but sync storage has no room"
-    },
     "p_savedLocally_later": {
         "message": "Guardado en este dispositivo. Se sincronizará más tarde.",
         "description": "Shown when a group was saved but could not reach sync storage right now"
@@ -211,10 +56,6 @@
     "p_nothingToSave": {
         "message": "No hay pestañas para guardar. Las pestañas fijadas se omiten salvo que lo active en la configuración.",
         "description": "Shown when Save finds no tabs to save"
-    },
-    "p_groupDeleted_text": {
-        "message": "Grupo eliminado.",
-        "description": "Bar shown for a few seconds after a group is deleted"
     },
     "p_undo_btn": {
         "message": "Deshacer",
@@ -224,20 +65,12 @@
         "message": "Descargar archivo de copia de seguridad",
         "description": ""
     },
-    "o_backup_restoreFile": {
-        "message": "Archivo de copia de seguridad:",
-        "description": ""
-    },
     "o_backup_restored": {
         "message": "Copia de seguridad restaurada.",
         "description": ""
     },
     "o_backup_undone": {
         "message": "Restauración deshecha.",
-        "description": ""
-    },
-    "o_backup_undoRestoreButton": {
-        "message": "Deshacer la última restauración",
         "description": ""
     },
     "o_backup_error_notBackup": {
@@ -268,56 +101,8 @@
         "message": "No hay grupos eliminados recientemente.",
         "description": ""
     },
-    "o_trash_deletedAt": {
-        "message": "eliminado el",
-        "description": ""
-    },
     "o_trash_restoreButton": {
         "message": "Restaurar",
         "description": ""
-    },
-    "o_backup_backupInstruction": {
-        "message": "Pulse \"Descargar archivo de copia de seguridad\" para guardar sus grupos y su configuración en un archivo. También puede copiar el texto de abajo.",
-        "description": ""
-    },
-    "o_backup_restoreInstruction": {
-        "message": "Elija un archivo de copia de seguridad o pegue abajo el texto de la copia y pulse \"Restaurar configuración y grupos guardados\".",
-        "description": ""
-    },
-    "o_backup_restoreInstructionMore": {
-        "message": "Los grupos guardados se sustituyen por los de la copia de seguridad. Los grupos que no están en la copia pasan a \"Eliminados recientemente\" (más abajo en esta página), y puede deshacer la restauración.",
-        "description": ""
-    },
-    "p_overwriteGroup_popup": {
-        "message": "Ya existe un grupo con el mismo nombre. ¿Desea sustituirlo por las pestañas actuales?",
-        "description": "Modal window dialog"
-    },
-    "o_tabs_backup": {
-        "message": "Copia de seguridad / Restaurar",
-        "description": "Tab name"
-    },
-    "o_sessionWatcher_toggle": {
-        "message": "Vigilar sesiones. Si se desmarca, se desactiva el guardado automático de sesiones. ¡La extensión se reiniciará automáticamente!",
-        "description": ""
-    },
-    "o_backup_backupLegend": {
-        "message": "Copia de seguridad",
-        "description": ""
-    },
-    "o_backup_backupInstructionMore": {
-        "message": "Con estos datos podrá restaurar sus grupos guardados y la configuración de la extensión. Las sesiones no se pueden restaurar.",
-        "description": ""
-    },
-    "o_backup_restoreLegend": {
-        "message": "Restaurar",
-        "description": ""
-    },
-    "o_backup_restoreButton": {
-        "message": "Restaurar configuración y grupos guardados",
-        "description": ""
-    },
-    "o_help_recentlyDeleted": {
-        "message": "Los grupos eliminados se pueden restaurar durante 30 días: Opciones > Copia de seguridad / Restaurar > Eliminados recientemente.",
-        "description": "Help tab tip: where deleted groups can be restored"
     }
 }
