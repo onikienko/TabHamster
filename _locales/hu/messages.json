@@ -1666,5 +1666,62 @@
     "s_siteIcons_text": {
         "message": "A böngésző csak a benne megnyitott webhelyek ikonjait ismeri. A többihez, például a másik számítógépen mentett fülekhez, a felugró ablak minden ikont a saját webhelyéről tölt be, így a webhely látja az IP-címét.",
         "description": "Settings page. Under Load missing icons from sites"
+    },
+
+    "w_title": {
+        "message": "Üdvözli a TabHamster",
+        "description": "Welcome page (opened on install). Browser tab title"
+    },
+    "w_heading": {
+        "message": "Tartsa kéznél a TabHamstert",
+        "description": "Welcome page. Heading above the drawing of the toolbar"
+    },
+    "w_hidden": {
+        "message": "A böngésző az új bővítményeket a bővítmények menüjébe rejti. Rögzítse a TabHamstert az eszköztáron, hogy egy kattintásnyira legyen.",
+        "description": "Welcome page. Under the heading"
+    },
+    "w_menu": {
+        "message": "Bővítmények",
+        "description": "Welcome page. Drawing of the browser toolbar: title of the extensions menu (keep it short, about 12 characters)"
+    },
+    "w_drawing": {
+        "message": "A böngésző eszköztára: a bővítmények gomb egy menüt nyit meg, a TabHamster melletti gombostű pedig az eszköztáron tartja",
+        "description": "Welcome page. Screen reader text for the drawing"
+    },
+    "w_step1": {
+        "message": "Kattintson az eszköztáron a bővítmények gombra.",
+        "description": "Welcome page. Step 1 under the drawing"
+    },
+    "w_step2": {
+        "message": "Kattintson a TabHamster melletti gombostűre.",
+        "description": "Welcome page. Step 2 under the drawing"
+    },
+    "w_done": {
+        "message": "Kész. A TabHamster az eszköztáron van.",
+        "description": "Welcome page. Shown under the steps once TabHamster is pinned"
+    },
+    "w_pinned": {
+        "message": "A TabHamster az eszköztáron van",
+        "description": "Welcome page. Heading when TabHamster was pinned already (no drawing then)"
+    },
+    "w_saveThen": {
+        "message": "Ezután kattintson a TabHamster gombra, hogy a nyitott füleket csoportként mentse, és nyissa meg őket újra, amikor szüksége van rájuk.",
+        "description": "Welcome page. Under the drawing"
+    },
+    "w_save": {
+        "message": "Kattintson rá, hogy a nyitott füleket csoportként mentse, és nyissa meg őket újra, amikor szüksége van rájuk.",
+        "description": "Welcome page. Under the heading “TabHamster is in your toolbar”; “it” is TabHamster"
+    },
+    "w_sync": {
+        "message": "Másik számítógépen is használja a TabHamstert? Ha a böngésző szinkronizálása be van kapcsolva, a csoportjai maguktól megjelennek itt.",
+        "description": "Welcome page. Before the link w_backup"
+    },
+    "w_backup": {
+        "message": "Szinkronizálás nélkül állítsa vissza őket biztonsági mentésből.",
+        "description": "Welcome page. Link to Settings, Backup and restore, after w_sync"
+    },
+    "s_help_welcome": {
+        "message": "A TabHamster rögzítése az eszköztáron",
+        "description": "Settings page, Help. Link to the welcome page, under the list of keys"
     }
 }

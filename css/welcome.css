@@ -1,0 +1,273 @@
+/* Welcome page (welcome.html). Colours and base styles: css/theme.css. Design: the "TabHamster welcome page" canvas. */
+
+body {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+p {
+    margin: 0;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+/* band, as on the settings page */
+
+.band {
+    background: var(--band);
+}
+
+.band-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 14px 24px;
+}
+
+.band-logo {
+    flex: none;
+    display: flex;
+}
+
+.band h1 {
+    margin: 0;
+    color: #FFFFFF;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+/* page */
+
+.welcome {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+}
+
+h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 600;
+}
+
+.intro {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pinned-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.check-badge {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--save);
+    color: var(--on-save);
+}
+
+.check-badge svg, .step-check {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.next {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.next a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* the drawing */
+
+.drawing {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.art {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.d-bar {
+    fill: var(--seg);
+}
+
+.d-line {
+    fill: var(--line);
+}
+
+.d-field {
+    fill: var(--surface);
+}
+
+.d-ghost {
+    fill: var(--guide);
+}
+
+.d-ghost-stroke, .d-stroke {
+    fill: none;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.d-ghost-stroke {
+    stroke: var(--guide);
+}
+
+.d-stroke {
+    stroke: var(--on-tonal);
+}
+
+.d-puzzle {
+    fill: var(--on-tonal);
+}
+
+.d-target {
+    fill: var(--tonal);
+    stroke: var(--save);
+    stroke-width: 2;
+}
+
+.d-badge {
+    fill: var(--save);
+}
+
+.d-badge-text {
+    fill: var(--on-save);
+    font-size: 12px;
+    font-weight: 700;
+    text-anchor: middle;
+}
+
+.d-menu {
+    fill: var(--raised);
+    stroke: var(--line);
+}
+
+.d-title {
+    fill: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.d-row {
+    fill: var(--menu-hover);
+}
+
+/* the toolbar icon is cyan in both themes */
+.d-icon {
+    fill: #00B6E8;
+}
+
+.d-face {
+    fill: #FFFFFF;
+}
+
+.d-name {
+    fill: var(--text);
+    font-size: 13px;
+}
+
+.pinned .d-pin {
+    fill: var(--on-tonal);
+}
+
+.drawing:not(.pinned) .pinned-only, .pinned .unpinned-only {
+    display: none;
+}
+
+/* steps under the drawing; pinned: checks and "Done" */
+
+figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 18px 16px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    line-height: 19px;
+}
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.step-badge {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--save);
+    color: var(--on-save);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.step-check, .pinned .step-num {
+    display: none;
+}
+
+.pinned .step-check {
+    display: block;
+}
+
+.pinned .steps {
+    color: var(--muted);
+}
+
+.done {
+    margin-top: 4px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--tonal);
+    color: var(--on-tonal);
+    font-weight: 600;
+}
+
+.drawing:not(.pinned) .done {
+    display: none;
+}

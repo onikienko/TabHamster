@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>TabHamster</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/welcome.css">
+    <script src="js/ui/theme_boot.js"></script>
+</head>
+<body>
+<!-- Opened on install (js/background.js) and from Settings, Help. Texts come from js/welcome.js. -->
+<header class="band">
+    <div class="band-inner">
+        <span class="band-logo" id="logo"></span>
+        <h1>TabHamster</h1>
+    </div>
+</header>
+
+<main class="welcome" id="welcome" hidden>
+    <!-- not pinned yet: the drawing -->
+    <div class="intro" id="intro">
+        <h2 id="heading"></h2>
+        <p class="muted" id="hidden_text"></p>
+    </div>
+    <!-- pinned before the page opened: no drawing -->
+    <div class="pinned-title" id="pinned_title" hidden>
+        <span class="check-badge" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+        <h2 id="pinned_heading"></h2>
+    </div>
+
+    <figure class="drawing" id="drawing">
+        <!-- a toolbar of no browser in particular: the extensions button (1), its menu, the pin next to TabHamster (2).
+             .pinned on the figure: the pin filled and the TabHamster button in the toolbar -->
+        <svg class="art" viewBox="0 0 592 244" role="img" id="art">
+            <rect class="d-bar" x="0" y="0" width="592" height="52"/>
+            <rect class="d-line" x="0" y="51" width="592" height="1"/>
+            <circle class="d-ghost" cx="22" cy="26" r="5"/>
+            <circle class="d-ghost" cx="40" cy="26" r="5"/>
+            <rect class="d-field" x="60" y="12" width="352" height="28" rx="14"/>
+            <rect class="d-ghost" x="78" y="23" width="150" height="6" rx="3"/>
+            <rect class="d-ghost unpinned-only" x="430" y="17" width="18" height="18" rx="4"/>
+            <g class="pinned-only">
+                <rect class="d-icon" x="428" y="16" width="20" height="20" rx="5"/>
+                <svg x="430.5" y="22.5" width="15" height="7" viewBox="2.97 23.97 86.56 40.03">
+                    <path class="d-face" d="M2.97 58.81V49.97L24.91 41.34L2.97 32.81V24.03L34.41 37.62V45.12ZM41.97 64V55.22H50.75V64ZM89.53 58.78 58.12 45.12V37.56L89.53 23.97V32.88L67.62 41.25L89.53 49.94Z"/>
+                </svg>
+            </g>
+            <circle class="d-target" cx="488" cy="26" r="18"/>
+            <!-- Material Icons "extension" (outlined, Apache 2.0), the shape of Chrome's own button -->
+            <path class="d-puzzle" transform="translate(476 14)" d="M10.5 4.5c.28 0 .5.22.5.5v2h6v6h2c.28 0 .5.22.5.5s-.22.5-.5.5h-2v6h-2.12c-.68-1.75-2.39-3-4.38-3s-3.7 1.25-4.38 3H4v-2.12c1.75-.68 3-2.39 3-4.38 0-1.99-1.24-3.7-2.99-4.38L4 7h6V5c0-.28.22-.5.5-.5m0-2C9.12 2.5 8 3.62 8 5H4c-1.1 0-1.99.9-1.99 2v3.8h.29c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-.3c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7v.3H17c1.1 0 2-.9 2-2v-4c1.38 0 2.5-1.12 2.5-2.5S20.38 11 19 11V7c0-1.1-.9-2-2-2h-4c0-1.38-1.12-2.5-2.5-2.5z"/>
+            <circle class="d-ghost" cx="560" cy="20" r="1.8"/>
+            <circle class="d-ghost" cx="560" cy="26" r="1.8"/>
+            <circle class="d-ghost" cx="560" cy="32" r="1.8"/>
+            <circle class="d-badge" cx="510" cy="8" r="9"/>
+            <text class="d-badge-text" x="510" y="12">1</text>
+
+            <rect class="d-menu" x="296" y="62" width="284" height="170" rx="10"/>
+            <text class="d-title" x="314" y="88" id="menu_title"></text>
+            <rect class="d-ghost" x="320" y="106" width="16" height="16" rx="4"/>
+            <rect class="d-ghost" x="346" y="111" width="120" height="6" rx="3"/>
+            <g class="d-ghost-stroke" transform="translate(546 106) scale(0.6667)">
+                <path d="M12 17v5"/>
+                <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>
+            </g>
+            <rect class="d-row" x="304" y="134" width="268" height="40" rx="8"/>
+            <rect class="d-icon" x="320" y="144" width="20" height="20" rx="5"/>
+            <svg x="322.5" y="150.5" width="15" height="7" viewBox="2.97 23.97 86.56 40.03">
+                <path class="d-face" d="M2.97 58.81V49.97L24.91 41.34L2.97 32.81V24.03L34.41 37.62V45.12ZM41.97 64V55.22H50.75V64ZM89.53 58.78 58.12 45.12V37.56L89.53 23.97V32.88L67.62 41.25L89.53 49.94Z"/>
+            </svg>
+            <text class="d-name" x="350" y="159">TabHamster</text>
+            <circle class="d-target" cx="554" cy="154" r="15"/>
+            <g class="d-stroke d-pin" transform="translate(545 145) scale(0.75)">
+                <path d="M12 17v5"/>
+                <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>
+            </g>
+            <circle class="d-badge" cx="574" cy="136" r="9"/>
+            <text class="d-badge-text" x="574" y="140">2</text>
+            <rect class="d-ghost" x="320" y="190" width="16" height="16" rx="4"/>
+            <rect class="d-ghost" x="346" y="195" width="96" height="6" rx="3"/>
+            <g class="d-ghost-stroke" transform="translate(546 190) scale(0.6667)">
+                <path d="M12 17v5"/>
+                <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>
+            </g>
+
+            <rect class="d-bar" x="24" y="76" width="220" height="10" rx="5"/>
+            <rect class="d-bar" x="24" y="98" width="180" height="8" rx="4"/>
+            <rect class="d-bar" x="24" y="116" width="200" height="8" rx="4"/>
+            <rect class="d-bar" x="24" y="134" width="150" height="8" rx="4"/>
+        </svg>
+        <figcaption>
+            <ol class="steps">
+                <li><span class="step-badge" aria-hidden="true"><span class="step-num">1</span><svg class="step-check" width="12" height="12" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span id="step1"></span></li>
+                <li><span class="step-badge" aria-hidden="true"><span class="step-num">2</span><svg class="step-check" width="12" height="12" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span id="step2"></span></li>
+            </ol>
+            <p class="done" id="done" role="status"></p>
+        </figcaption>
+    </figure>
+
+    <div class="next">
+        <p id="save_text"></p>
+        <p class="muted"><span id="sync_text"></span> <a href="options.html#backup" id="backup_link"></a></p>
+    </div>
+</main>
+
+<script type="module" src="js/welcome.js"></script>
+</body>
+</html>

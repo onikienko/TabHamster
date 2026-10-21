@@ -326,7 +326,8 @@ function help() {
         [t('s_help_sessionsKey'), t('s_help_sessions')],
     ];
     return [h('dl', {class: 'keys'}, tips.map(([key, text]) => h('div', {class: 'row'},
-        h('dt', null, key), h('dd', null, text))))];
+        h('dt', null, key), h('dd', null, text)))),
+    h('p', {class: 'welcome-link'}, h('a', {href: 'welcome.html'}, t('s_help_welcome')))];
 }
 
 // translators of the store texts and the extension, by language

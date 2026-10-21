@@ -2024,5 +2024,62 @@
     "s_siteIcons_text": {
         "message": "Прегледач има иконице само сајтова отворених у њему. За остале, на пример картице сачуване на другом рачунару, искачући прозор учитава сваку иконицу са њеног сајта, па сајт види вашу IP адресу.",
         "description": "Settings page. Under Load missing icons from sites"
+    },
+
+    "w_title": {
+        "message": "Добро дошли у TabHamster",
+        "description": "Welcome page (opened on install). Browser tab title"
+    },
+    "w_heading": {
+        "message": "Нека TabHamster буде на дохват руке",
+        "description": "Welcome page. Heading above the drawing of the toolbar"
+    },
+    "w_hidden": {
+        "message": "Прегледач скрива нова проширења у свом менију проширења. Закачите TabHamster на траку са алаткама да би био на један клик.",
+        "description": "Welcome page. Under the heading"
+    },
+    "w_menu": {
+        "message": "Проширења",
+        "description": "Welcome page. Drawing of the browser toolbar: title of the extensions menu (keep it short, about 12 characters)"
+    },
+    "w_drawing": {
+        "message": "Трака са алаткама прегледача: дугме за проширења отвара мени, а чиода поред TabHamster-а га држи на траци са алаткама",
+        "description": "Welcome page. Screen reader text for the drawing"
+    },
+    "w_step1": {
+        "message": "Кликните на дугме за проширења на траци са алаткама.",
+        "description": "Welcome page. Step 1 under the drawing"
+    },
+    "w_step2": {
+        "message": "Кликните на чиоду поред TabHamster-а.",
+        "description": "Welcome page. Step 2 under the drawing"
+    },
+    "w_done": {
+        "message": "Готово. TabHamster је на вашој траци са алаткама.",
+        "description": "Welcome page. Shown under the steps once TabHamster is pinned"
+    },
+    "w_pinned": {
+        "message": "TabHamster је на вашој траци са алаткама",
+        "description": "Welcome page. Heading when TabHamster was pinned already (no drawing then)"
+    },
+    "w_saveThen": {
+        "message": "Затим кликните на дугме TabHamster да сачувате отворене картице као групу и поново их отворите кад год вам затребају.",
+        "description": "Welcome page. Under the drawing"
+    },
+    "w_save": {
+        "message": "Кликните на њега да сачувате отворене картице као групу и поново их отворите кад год вам затребају.",
+        "description": "Welcome page. Under the heading “TabHamster is in your toolbar”; “it” is TabHamster"
+    },
+    "w_sync": {
+        "message": "Користите TabHamster на другом рачунару? Када је синхронизација прегледача укључена, ваше групе се саме појављују овде.",
+        "description": "Welcome page. Before the link w_backup"
+    },
+    "w_backup": {
+        "message": "Без синхронизације вратите их из датотеке резервне копије.",
+        "description": "Welcome page. Link to Settings, Backup and restore, after w_sync"
+    },
+    "s_help_welcome": {
+        "message": "Како закачити TabHamster на траку са алаткама",
+        "description": "Settings page, Help. Link to the welcome page, under the list of keys"
     }
 }

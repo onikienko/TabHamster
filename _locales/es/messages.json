@@ -1669,5 +1669,62 @@
     "s_siteIcons_text": {
         "message": "El navegador solo tiene los iconos de los sitios abiertos en él. Para los demás, como las pestañas guardadas en otro dispositivo, la ventana emergente carga cada icono desde su sitio, por lo que el sitio ve su dirección IP.",
         "description": "Settings page. Under Load missing icons from sites"
+    },
+
+    "w_title": {
+        "message": "Le damos la bienvenida a TabHamster",
+        "description": "Welcome page (opened on install). Browser tab title"
+    },
+    "w_heading": {
+        "message": "Tenga TabHamster a mano",
+        "description": "Welcome page. Heading above the drawing of the toolbar"
+    },
+    "w_hidden": {
+        "message": "El navegador oculta las extensiones nuevas en su menú de extensiones. Fije TabHamster en la barra de herramientas para tenerlo a un clic.",
+        "description": "Welcome page. Under the heading"
+    },
+    "w_menu": {
+        "message": "Extensiones",
+        "description": "Welcome page. Drawing of the browser toolbar: title of the extensions menu (keep it short, about 12 characters)"
+    },
+    "w_drawing": {
+        "message": "La barra de herramientas del navegador: el botón de extensiones abre un menú, y la chincheta junto a TabHamster lo mantiene en la barra",
+        "description": "Welcome page. Screen reader text for the drawing"
+    },
+    "w_step1": {
+        "message": "Haga clic en el botón de extensiones de la barra de herramientas.",
+        "description": "Welcome page. Step 1 under the drawing"
+    },
+    "w_step2": {
+        "message": "Haga clic en la chincheta junto a TabHamster.",
+        "description": "Welcome page. Step 2 under the drawing"
+    },
+    "w_done": {
+        "message": "Listo. TabHamster está en su barra de herramientas.",
+        "description": "Welcome page. Shown under the steps once TabHamster is pinned"
+    },
+    "w_pinned": {
+        "message": "TabHamster está en su barra de herramientas",
+        "description": "Welcome page. Heading when TabHamster was pinned already (no drawing then)"
+    },
+    "w_saveThen": {
+        "message": "Después, haga clic en el botón de TabHamster para guardar las pestañas abiertas como un grupo, y vuelva a abrirlas cuando las necesite.",
+        "description": "Welcome page. Under the drawing"
+    },
+    "w_save": {
+        "message": "Haga clic en él para guardar las pestañas abiertas como un grupo, y vuelva a abrirlas cuando las necesite.",
+        "description": "Welcome page. Under the heading “TabHamster is in your toolbar”; “it” is TabHamster"
+    },
+    "w_sync": {
+        "message": "¿Usa TabHamster en otro dispositivo? Con la sincronización del navegador activada, sus grupos aparecen aquí solos.",
+        "description": "Welcome page. Before the link w_backup"
+    },
+    "w_backup": {
+        "message": "Sin sincronización, restáurelos desde un archivo de copia de seguridad.",
+        "description": "Welcome page. Link to Settings, Backup and restore, after w_sync"
+    },
+    "s_help_welcome": {
+        "message": "Cómo fijar TabHamster en la barra de herramientas",
+        "description": "Settings page, Help. Link to the welcome page, under the list of keys"
     }
 }

@@ -2028,5 +2028,62 @@
     "s_siteIcons_text": {
         "message": "Браузер має значки лише сайтів, відкритих у ньому. Для інших, наприклад вкладок, збережених на іншому комп'ютері, спливаюче вікно завантажує кожен значок з його сайту, тож сайт бачить вашу IP-адресу.",
         "description": "Settings page. Under Load missing icons from sites"
+    },
+
+    "w_title": {
+        "message": "Вітаємо в TabHamster",
+        "description": "Welcome page (opened on install). Browser tab title"
+    },
+    "w_heading": {
+        "message": "Тримайте TabHamster під рукою",
+        "description": "Welcome page. Heading above the drawing of the toolbar"
+    },
+    "w_hidden": {
+        "message": "Браузер ховає нові розширення в меню розширень. Закріпіть TabHamster на панелі інструментів для швидкого доступу.",
+        "description": "Welcome page. Under the heading"
+    },
+    "w_menu": {
+        "message": "Розширення",
+        "description": "Welcome page. Drawing of the browser toolbar: title of the extensions menu (keep it short, about 12 characters)"
+    },
+    "w_drawing": {
+        "message": "Панель інструментів браузера: кнопка розширень відкриває меню, а шпилька біля TabHamster тримає його на панелі інструментів",
+        "description": "Welcome page. Screen reader text for the drawing"
+    },
+    "w_step1": {
+        "message": "Натисніть кнопку розширень на панелі інструментів.",
+        "description": "Welcome page. Step 1 under the drawing"
+    },
+    "w_step2": {
+        "message": "Натисніть шпильку біля TabHamster.",
+        "description": "Welcome page. Step 2 under the drawing"
+    },
+    "w_done": {
+        "message": "Готово. TabHamster на вашій панелі інструментів.",
+        "description": "Welcome page. Shown under the steps once TabHamster is pinned"
+    },
+    "w_pinned": {
+        "message": "TabHamster на вашій панелі інструментів",
+        "description": "Welcome page. Heading when TabHamster was pinned already (no drawing then)"
+    },
+    "w_saveThen": {
+        "message": "Потім натисніть кнопку TabHamster, щоб зберегти відкриті вкладки як групу, і відкривайте їх знову, коли вони знадобляться.",
+        "description": "Welcome page. Under the drawing"
+    },
+    "w_save": {
+        "message": "Натисніть на нього, щоб зберегти відкриті вкладки як групу, і відкривайте їх знову, коли вони знадобляться.",
+        "description": "Welcome page. Under the heading “TabHamster is in your toolbar”; “it” is TabHamster"
+    },
+    "w_sync": {
+        "message": "Користуєтеся TabHamster на іншому комп'ютері? Коли синхронізацію браузера ввімкнено, ваші групи з'являються тут самі.",
+        "description": "Welcome page. Before the link w_backup"
+    },
+    "w_backup": {
+        "message": "Без синхронізації відновіть їх із файлу резервної копії.",
+        "description": "Welcome page. Link to Settings, Backup and restore, after w_sync"
+    },
+    "s_help_welcome": {
+        "message": "Як закріпити TabHamster на панелі інструментів",
+        "description": "Settings page, Help. Link to the welcome page, under the list of keys"
     }
 }

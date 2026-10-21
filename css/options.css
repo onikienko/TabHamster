@@ -450,6 +450,17 @@ h2 {
     line-height: 19px;
 }
 
+.welcome-link {
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+}
+
+.welcome-link a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
 /* about */
 
 .about-text {

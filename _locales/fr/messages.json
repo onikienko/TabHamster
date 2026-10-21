@@ -1669,5 +1669,62 @@
     "s_siteIcons_text": {
         "message": "Le navigateur n’a que les icônes des sites ouverts dans celui-ci. Pour les autres, comme les onglets enregistrés sur un autre ordinateur, la fenêtre de TabHamster charge chaque icône depuis son site, qui voit alors votre adresse IP.",
         "description": "Settings page. Under Load missing icons from sites"
+    },
+
+    "w_title": {
+        "message": "Bienvenue dans TabHamster",
+        "description": "Welcome page (opened on install). Browser tab title"
+    },
+    "w_heading": {
+        "message": "Gardez TabHamster à portée de main",
+        "description": "Welcome page. Heading above the drawing of the toolbar"
+    },
+    "w_hidden": {
+        "message": "Le navigateur range les nouvelles extensions dans son menu des extensions. Épinglez TabHamster à la barre d’outils pour l’avoir à un clic.",
+        "description": "Welcome page. Under the heading"
+    },
+    "w_menu": {
+        "message": "Extensions",
+        "description": "Welcome page. Drawing of the browser toolbar: title of the extensions menu (keep it short, about 12 characters)"
+    },
+    "w_drawing": {
+        "message": "La barre d’outils du navigateur : le bouton des extensions ouvre un menu, et l’épingle à côté de TabHamster le garde dans la barre d’outils",
+        "description": "Welcome page. Screen reader text for the drawing"
+    },
+    "w_step1": {
+        "message": "Cliquez sur le bouton des extensions dans la barre d’outils.",
+        "description": "Welcome page. Step 1 under the drawing"
+    },
+    "w_step2": {
+        "message": "Cliquez sur l’épingle à côté de TabHamster.",
+        "description": "Welcome page. Step 2 under the drawing"
+    },
+    "w_done": {
+        "message": "C’est fait. TabHamster est dans votre barre d’outils.",
+        "description": "Welcome page. Shown under the steps once TabHamster is pinned"
+    },
+    "w_pinned": {
+        "message": "TabHamster est dans votre barre d’outils",
+        "description": "Welcome page. Heading when TabHamster was pinned already (no drawing then)"
+    },
+    "w_saveThen": {
+        "message": "Cliquez ensuite sur le bouton TabHamster pour enregistrer les onglets ouverts dans un groupe, et rouvrez-les quand vous en avez besoin.",
+        "description": "Welcome page. Under the drawing"
+    },
+    "w_save": {
+        "message": "Cliquez dessus pour enregistrer les onglets ouverts dans un groupe, et rouvrez-les quand vous en avez besoin.",
+        "description": "Welcome page. Under the heading “TabHamster is in your toolbar”; “it” is TabHamster"
+    },
+    "w_sync": {
+        "message": "Vous utilisez TabHamster sur un autre ordinateur ? Avec la synchronisation du navigateur activée, vos groupes arrivent ici tout seuls.",
+        "description": "Welcome page. Before the link w_backup"
+    },
+    "w_backup": {
+        "message": "Sans synchronisation, restaurez-les depuis un fichier de sauvegarde.",
+        "description": "Welcome page. Link to Settings, Backup and restore, after w_sync"
+    },
+    "s_help_welcome": {
+        "message": "Comment épingler TabHamster à la barre d’outils",
+        "description": "Settings page, Help. Link to the welcome page, under the list of keys"
     }
 }
