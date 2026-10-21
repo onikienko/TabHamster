@@ -146,13 +146,14 @@ async function preview(text, source) {
     }
     const restoreButton = h('button', {class: 'btn primary', type: 'button'}, t('o_trash_restoreButton'));
     restoreButton.addEventListener('click', () => restore(text, restoreButton));
-    el.panel.append(
+    // append() writes a null as the text "null": the parts that may be missing are filtered out
+    el.panel.append(...[
         h('p', {class: 'panel-title ellipsis'}, source || t('s_pastedText')),
         h('p', {class: 'num'}, contents),
         effect ? h('p', {class: 'muted'}, effect) : null,
         h('div', {class: 'panel-buttons'},
             h('button', {class: 'btn tonal', type: 'button', onClick: () => closePanel()}, t('s_cancel')),
-            restoreButton));
+            restoreButton)].filter(Boolean));
     restoreButton.focus();
 }
 
@@ -281,13 +282,13 @@ async function confirmUndo(button) {
         await undoRestore();
     });
     clear(el.undoPanel).hidden = false;
-    el.undoPanel.append(
+    el.undoPanel.append(...[
         h('p', {class: 'panel-title'}, t('s_undoPreview_title')),
         h('p', null, t('s_undoPreview_text')),
         res.trashed ? h('p', {class: 'muted'}, plural('s_undoPreview_trashed', res.trashed)) : null,
         h('div', {class: 'panel-buttons'},
             h('button', {class: 'btn tonal', type: 'button', onClick: () => closeUndoPanel(button)}, t('s_cancel')),
-            confirm));
+            confirm)].filter(Boolean));
     confirm.focus();
 }
 
