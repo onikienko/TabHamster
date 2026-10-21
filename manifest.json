@@ -11,14 +11,15 @@
         "16": "img/ext_icons/16.png",
         "32": "img/ext_icons/32.png",
         "48": "img/ext_icons/48.png",
+        "96": "img/ext_icons/96.png",
         "128": "img/ext_icons/128.png"
     },
 
     "action": {
         "default_icon": {
             "16": "img/ext_icons/16.png",
-            "32": "img/ext_icons/32.png",
-            "48": "img/ext_icons/48.png"
+            "24": "img/ext_icons/24.png",
+            "32": "img/ext_icons/32.png"
         },
         "default_popup": "popup.html"
     },
