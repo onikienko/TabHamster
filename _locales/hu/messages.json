@@ -1646,5 +1646,25 @@
     "s_help_f2": {
         "message": "Szerkeszti a kijelölt fül címét és webcímét.",
         "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
+    },
+    "p_siteIcons_ask": {
+        "message": "Betölti a hiányzó ikonokat a webhelyekről?",
+        "description": "Popup bar, shown once when tabs of sites never opened in this browser have no icon (such as groups synced from another computer). Buttons: p_siteIcons_load, p_siteIcons_no"
+    },
+    "p_siteIcons_load": {
+        "message": "Betöltés",
+        "description": "Popup bar button: load the missing icons from the sites (p_siteIcons_ask)"
+    },
+    "p_siteIcons_no": {
+        "message": "Nem, köszönöm",
+        "description": "Popup bar button: don't load icons from the sites, don't ask again (p_siteIcons_ask)"
+    },
+    "s_siteIcons": {
+        "message": "Hiányzó ikonok betöltése a webhelyekről",
+        "description": "Settings page, General. On/off switch"
+    },
+    "s_siteIcons_text": {
+        "message": "A böngésző csak a benne megnyitott webhelyek ikonjait ismeri. A többihez, például a másik számítógépen mentett fülekhez, a felugró ablak minden ikont a saját webhelyéről tölt be, így a webhely látja az IP-címét.",
+        "description": "Settings page. Under Load missing icons from sites"
     }
 }

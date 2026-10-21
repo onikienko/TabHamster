@@ -6,7 +6,8 @@ import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel, keyCombo, isMac} from '../ui/platform.js';
-import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, withScheme, faviconUrl, kilobytes} from '../ui/format.js';
+import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, withScheme, kilobytes} from '../ui/format.js';
+import {knownIcon, chromeIcon, siteIcon, siteIconFailed} from '../ui/favicons.js';
 import {showBar, hideBarAbout} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
@@ -1089,11 +1090,61 @@ function isCut(node) {
     return node.scrollWidth > node.clientWidth;
 }
 
+// the question about icons from the sites was shown since the popup opened
+let iconsAsked = false;
+
+/** stores the answer about icons from the sites; the rows show it at once */
+async function setSiteIcons(value) {
+    state.options.site_icons = value;
+    render();
+    try {
+        await chrome.storage.sync.set({site_icons: value});
+    } catch (e) {
+        console.error('TabHamster: option not saved', e);
+    }
+}
+
+function askSiteIcons() {
+    if (iconsAsked) {
+        return;
+    }
+    iconsAsked = true;
+    showBar(t('p_siteIcons_ask'), [
+        {label: t('p_siteIcons_load'), run: () => setSiteIcons('load')},
+        {label: t('p_siteIcons_no'), run: () => setSiteIcons('off')},
+    ], {stay: true});
+}
+
+/** Chrome's icon, else the site's own /favicon.ico if allowed, else a globe */
+function showFavicon(box, url, chromeSrc) {
+    const site = chromeSrc ? null : siteIcon(url);
+    const src = chromeSrc || (state.options.site_icons === 'load' ? site : null);
+    if (!src) {
+        box.replaceChildren(icon('globe', 14));
+        if (site && state.options.site_icons === 'ask') {
+            askSiteIcons();
+        }
+        return;
+    }
+    const img = h('img', {src, alt: '', width: 16, height: 16, referrerpolicy: 'no-referrer'});
+    img.addEventListener('error', () => {
+        if (src === site) {
+            siteIconFailed(url);
+        }
+        box.replaceChildren(icon('globe', 14));
+    }, {once: true});
+    box.replaceChildren(img);
+}
+
 function favicon(url) {
     const box = h('span', {class: 'fav', 'aria-hidden': 'true'});
-    const img = h('img', {src: faviconUrl(url), alt: '', width: 16, height: 16});
-    img.addEventListener('error', () => box.replaceChildren(icon('globe', 14)), {once: true});
-    box.append(img);
+    const known = knownIcon(url);
+    if (known !== undefined) {
+        showFavicon(box, url, known);
+    } else {
+        // the box keeps its size meanwhile: nothing moves when the icon comes
+        chromeIcon(url).then((src) => showFavicon(box, url, src));
+    }
     return box;
 }
 

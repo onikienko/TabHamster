@@ -1649,5 +1649,25 @@
     "s_help_f2": {
         "message": "Edits the title and address of the focused tab.",
         "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
+    },
+    "p_siteIcons_ask": {
+        "message": "Load missing icons from sites?",
+        "description": "Popup bar, shown once when tabs of sites never opened in this browser have no icon (such as groups synced from another computer). Buttons: p_siteIcons_load, p_siteIcons_no"
+    },
+    "p_siteIcons_load": {
+        "message": "Load",
+        "description": "Popup bar button: load the missing icons from the sites (p_siteIcons_ask)"
+    },
+    "p_siteIcons_no": {
+        "message": "No thanks",
+        "description": "Popup bar button: don't load icons from the sites, don't ask again (p_siteIcons_ask)"
+    },
+    "s_siteIcons": {
+        "message": "Load missing icons from sites",
+        "description": "Settings page, General. On/off switch"
+    },
+    "s_siteIcons_text": {
+        "message": "The browser only has icons of sites opened in it. For the others, such as tabs saved on another computer, the popup loads each icon from its site, so the site sees your IP address.",
+        "description": "Settings page. Under Load missing icons from sites"
     }
 }

@@ -44,6 +44,7 @@ var backup = (function () {
         date_format: ['eu', 'us'],
         active_tab: ['#saved', '#sessions'],
         theme: ['system', 'light', 'dark'],
+        site_icons: ['ask', 'load', 'off'],
     };
 
     // an option value as the extension uses it, or undefined (the current setting stays): a hand-edited backup can

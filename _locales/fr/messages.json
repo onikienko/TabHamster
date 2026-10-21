@@ -1649,5 +1649,25 @@
     "s_help_f2": {
         "message": "Modifie le titre et l’adresse de l’onglet sélectionné.",
         "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
+    },
+    "p_siteIcons_ask": {
+        "message": "Charger les icônes manquantes depuis les sites ?",
+        "description": "Popup bar, shown once when tabs of sites never opened in this browser have no icon (such as groups synced from another computer). Buttons: p_siteIcons_load, p_siteIcons_no"
+    },
+    "p_siteIcons_load": {
+        "message": "Charger",
+        "description": "Popup bar button: load the missing icons from the sites (p_siteIcons_ask)"
+    },
+    "p_siteIcons_no": {
+        "message": "Non merci",
+        "description": "Popup bar button: don't load icons from the sites, don't ask again (p_siteIcons_ask)"
+    },
+    "s_siteIcons": {
+        "message": "Charger les icônes manquantes depuis les sites",
+        "description": "Settings page, General. On/off switch"
+    },
+    "s_siteIcons_text": {
+        "message": "Le navigateur n’a que les icônes des sites ouverts dans celui-ci. Pour les autres, comme les onglets enregistrés sur un autre ordinateur, la fenêtre de TabHamster charge chaque icône depuis son site, qui voit alors votre adresse IP.",
+        "description": "Settings page. Under Load missing icons from sites"
     }
 }

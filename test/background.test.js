@@ -546,6 +546,14 @@ test('backup: hand-edited option values come in as the extension uses them, odd 
     assert.deepEqual(options, {pinned: 1, cur_win: 1, session_watcher: 0, date_format: 'us', active_tab: '#sessions'});
 });
 
+test('backup: the answer about icons from the sites comes back, an odd one is left out', async () => {
+    const bg = await backgroundWithGroups({tg_1700000000001: makeGroup(5, 1)});
+    await bg.groups('importBackup', JSON.stringify({site_icons: 'load'}));
+    assert.equal((await bg.chrome.storage.sync.get('site_icons')).site_icons, 'load');
+    await bg.groups('importBackup', JSON.stringify({site_icons: 1}));
+    assert.equal((await bg.chrome.storage.sync.get('site_icons')).site_icons, 'load');
+});
+
 test('backup: javascript: addresses are left out', async () => {
     const bg = startBackground();
     const text = JSON.stringify({tg_1600000000001: {name: 'x', index: 1, tabs: [

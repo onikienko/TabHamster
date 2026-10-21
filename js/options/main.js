@@ -118,13 +118,14 @@ function row(titleId, title, text, control, labelFor) {
         control);
 }
 
-/** on/off option stored as 1 / 0 (like 0.3.0 did) */
-function switchControl(name, labelId) {
+/** on/off option stored as 1 / 0 (like 0.3.0 did), or as the two given values */
+function switchControl(name, labelId, on = 1, off = 0) {
+    const isOn = () => (on === 1 ? !!state.options[name] : state.options[name] === on);
     const button = h('button', {
         class: 'switch', type: 'button', role: 'switch', 'aria-labelledby': labelId,
-        onClick: () => setOption(name, state.options[name] ? 0 : 1),
+        onClick: () => setOption(name, isOn() ? off : on),
     }, h('span', {class: 'knob'}));
-    updaters.push(() => button.setAttribute('aria-checked', String(!!state.options[name])));
+    updaters.push(() => button.setAttribute('aria-checked', String(isOn())));
     return button;
 }
 
@@ -190,6 +191,9 @@ function general() {
         row('theme_label', t('s_theme'), t('s_theme_text'), themeControl('theme_label')),
         row('date_label', t('o_dateFormat_text'), t('s_dateFormat_text'), dateFormatControl('date_format'), 'date_format'),
         row('sessions_label', t('s_sessions'), t('s_sessions_text'), switchControl('session_watcher', 'sessions_label')),
+        // not asked yet ('ask') is off
+        row('site_icons_label', t('s_siteIcons'), t('s_siteIcons_text'),
+            switchControl('site_icons', 'site_icons_label', 'load', 'off')),
     ];
 }
 

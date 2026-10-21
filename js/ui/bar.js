@@ -1,5 +1,6 @@
 // The dark bar above the footer: "Saved 12 tabs as …" with Undo. Hides after a few seconds,
-// not while the pointer or the keyboard is on it. One bar at a time; a new message replaces the old one.
+// not while the pointer or the keyboard is on it; a question (`stay`) waits for its answer.
+// One bar at a time; a new message replaces the old one.
 // It is part of the layout (before #footer), not an overlay: a short popup grows instead of being covered,
 // and the page shrinks its list while it is shown (body.has-bar).
 // Screen readers read it from a live region that is always there (one made and filled at once is often missed).
@@ -10,12 +11,14 @@ const SHOW_MS = 5000;
 let bar = null;
 let timer = null;
 let held = false;
+let stays = false;
 // what the bar's action is about (a group key), for hideBarAbout
 let about = null;
 
 function hide() {
     clearTimeout(timer);
     about = null;
+    stays = false;
     if (bar) {
         bar.hidden = true;
         bar.replaceChildren();
@@ -25,7 +28,7 @@ function hide() {
 
 function schedule() {
     clearTimeout(timer);
-    if (!held) {
+    if (!held && !stays) {
         timer = setTimeout(hide, SHOW_MS);
     }
 }
@@ -65,14 +68,18 @@ ensure();
 
 /**
  * showBar('Saved 12 tabs as "x"', {label: 'Undo', run: async () => {...}, about: 'tg_1'})
- * The action runs once; the bar hides when it is pressed. `about` (optional): what the action is about, see hideBarAbout.
+ * One of the actions runs, once; the bar hides when one is pressed. `about` (optional): what the action is about, see
+ * hideBarAbout. A list of actions makes buttons in that order; `stay` keeps the bar until one is pressed (or another
+ * message replaces it).
  */
-export function showBar(text, action) {
+export function showBar(text, action, {stay = false} = {}) {
     const el = ensure();
-    about = (action && action.about) || null;
+    const actions = [action || []].flat();
+    about = (actions[0] && actions[0].about) || null;
+    stays = stay;
     el.replaceChildren(h('span', {class: 'bar-text'}, text));
-    if (action) {
-        let done = false;
+    let done = false;
+    for (const each of actions) {
         el.append(h('button', {
             class: 'bar-action', type: 'button',
             onClick: async () => {
@@ -82,9 +89,9 @@ export function showBar(text, action) {
                 done = true;
                 held = false;
                 hide();
-                await action.run();
+                await each.run();
             },
-        }, action.label));
+        }, each.label));
     }
     el.hidden = false;
     document.body.classList.add('has-bar');

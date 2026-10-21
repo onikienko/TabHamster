@@ -2004,5 +2004,25 @@
     "s_help_f2": {
         "message": "Мења наслов и адресу изабране картице.",
         "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
+    },
+    "p_siteIcons_ask": {
+        "message": "Учитати иконице које недостају са сајтова?",
+        "description": "Popup bar, shown once when tabs of sites never opened in this browser have no icon (such as groups synced from another computer). Buttons: p_siteIcons_load, p_siteIcons_no"
+    },
+    "p_siteIcons_load": {
+        "message": "Учитај",
+        "description": "Popup bar button: load the missing icons from the sites (p_siteIcons_ask)"
+    },
+    "p_siteIcons_no": {
+        "message": "Не, хвала",
+        "description": "Popup bar button: don't load icons from the sites, don't ask again (p_siteIcons_ask)"
+    },
+    "s_siteIcons": {
+        "message": "Учитавај иконице које недостају са сајтова",
+        "description": "Settings page, General. On/off switch"
+    },
+    "s_siteIcons_text": {
+        "message": "Прегледач има иконице само сајтова отворених у њему. За остале, на пример картице сачуване на другом рачунару, искачући прозор учитава сваку иконицу са њеног сајта, па сајт види вашу IP адресу.",
+        "description": "Settings page. Under Load missing icons from sites"
     }
 }

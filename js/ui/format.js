@@ -1,4 +1,4 @@
-// Dates, addresses and favicons for display, and addresses as typed.
+// Dates and addresses for display, and addresses as typed.
 
 /** creation time from a `tg_<ms>` key (saved groups and sessions) */
 export function keyTime(key) {
@@ -228,12 +228,4 @@ export function hostOf(url) {
 export function withScheme(url) {
     return /^[a-z][a-z0-9+.-]*:\/\//i.test(url) || /^(about|data|mailto|file|view-source|chrome):/i.test(url) ?
         url : 'https://' + url;
-}
-
-/** Chrome's cached favicon for a page (needs the "favicon" permission) */
-export function faviconUrl(pageUrl) {
-    const url = new URL(chrome.runtime.getURL('/_favicon/'));
-    url.searchParams.set('pageUrl', pageUrl);
-    url.searchParams.set('size', '32');
-    return url.toString();
 }
