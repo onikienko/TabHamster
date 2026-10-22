@@ -220,6 +220,9 @@ test('page client: tab changes, add, discard and their arguments reach the store
     await client.editTab('tg_1', seen.tabs[2], 2, {url: 'https://x.example/', title: 'X'});
     const added = await client.addTab('tg_1', {url: 'https://new.example/', title: 'New', pinned: true});
     assert.equal(added.synced, true);
+    assert.equal((await client.addTab('tg_1', {url: 'https://new.example/', title: 'Again'})).unchanged, true);
+    const twice = await client.addTab('tg_1', {url: 'https://new.example/', title: 'Again'}, true);
+    await client.setTabs('tg_1', twice.before, twice.h);
     assert.deepEqual(JSON.parse(JSON.stringify((await client.list()).tg_1.tabs)), [t[0],
         {url: 'https://x.example/', title: 'X', id: 2}, {url: 'https://new.example/', title: 'New', id: 3, pinned: true}]);
     assert.deepEqual(await client.removeTab('tg_9', t[0], 0), {synced: false, error: 'Group not found'});

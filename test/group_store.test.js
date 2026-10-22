@@ -554,6 +554,10 @@ test('removeTab, editTab, addTab from an old view work on the tabs as they are n
     assert.deepEqual((await store.list()).tg_1.tabs.at(-1), {url: 'https://new.example/', title: 'New', id: 5});
     assert.deepEqual(await store.addTab('tg_1', {url: t[4].url, title: 'again'}),
         {synced: true, h: added.h, unchanged: true});
+    // unless asked to (a link typed by hand)
+    const twice = await store.addTab('tg_1', {url: t[4].url, title: 'again'}, true);
+    assert.deepEqual((await store.list()).tg_1.tabs.at(-1), {url: t[4].url, title: 'again', id: 6});
+    await store.setTabs('tg_1', twice.before, twice.h);
 
     // the popup's Undo
     await store.setTabs('tg_1', added.before, added.h);

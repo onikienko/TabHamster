@@ -1013,16 +1013,15 @@ function tabEditor(key, editing) {
         const name = groupName(key, group);
         // where the tab is now (an earlier change may have been shown since the editor opened)
         const at = tab ? tabIndexIn(group.tabs, editing) : -1;
-        const exists = !tab && group.tabs.some((saved) => saved.url === newUrl);
-        if (commit && newUrl && exists) {
-            showBar(t('p_alreadyInGroup', name));
-        }
-        const changed = commit && newUrl && !exists && (!tab || newUrl !== tab.url || newTitle !== (tab.title || ''));
+        const changed = commit && newUrl && (!tab || newUrl !== tab.url || newTitle !== (tab.title || ''));
         // shown at once; the background makes the change to the tabs as they are by then. A new link's id comes
-        // from the store
+        // from the store. A link typed by hand is added also when the group has its address (it was meant); groups
+        // read meanwhile that have one more of it than now got it from the background already
+        const same = (tabs) => tabs.filter((other) => other.url === newUrl).length;
+        const had = same(group.tabs);
         const saved = changed ? showTabChange(key, (tabs) => {
             if (!tab) {
-                return tabs.some((other) => other.url === newUrl) ? tabs : tabs.concat({url: newUrl, title: newTitle});
+                return same(tabs) > had ? tabs : tabs.concat({url: newUrl, title: newTitle});
             }
             const i = tabIndexIn(tabs, editing);
             return i === -1 ? tabs :
@@ -1041,9 +1040,10 @@ function tabEditor(key, editing) {
         }
         try {
             const res = await (tab ? groupStoreClient.editTab(key, tab, editing.index, {url: newUrl, title: newTitle}) :
-                groupStoreClient.addTab(key, {url: newUrl, title: newTitle})).finally(saved);
+                groupStoreClient.addTab(key, {url: newUrl, title: newTitle}, true)).finally(saved);
+            // a new link is always added: only an edited tab can be gone
             await tabChanged(key, name, res, tab ? t('p_tabChanged') : t('p_tabAdded', [newTitle || newUrl, name]),
-                t(tab ? 'p_tabGone' : 'p_alreadyInGroup', name));
+                t('p_tabGone', name));
         } catch (e) {
             console.error('TabHamster: tab edit failed', e);
             showBar(t('p_syncStorageDefault_error'));

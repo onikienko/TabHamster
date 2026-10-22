@@ -50,9 +50,12 @@ var groupStoreClient = (function () {
         editTab: function (key, seen, index, edit) {
             return call('editTab', [key, seen, index, edit]);
         },
-        /** a new last tab {url, title, pinned?} with an id of its own; unchanged: the group already has the address */
-        addTab: function (key, tab) {
-            return call('addTab', [key, tab]);
+        /**
+         * a new last tab {url, title, pinned?} with an id of its own; unchanged: the group already has the address,
+         * unless duplicate (added all the same)
+         */
+        addTab: function (key, tab, duplicate) {
+            return call('addTab', [key, tab, duplicate]);
         },
         /** like removeTab; the tab goes to `pos` among the group's other tabs (0 = first) */
         moveTab: function (key, seen, index, pos) {

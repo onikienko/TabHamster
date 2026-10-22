@@ -1169,9 +1169,12 @@ var groupStore = (function () {
                 const i = findTab(tabs, seen, index);
                 return i === -1 ? null : tabs.map((tab, j) => (j === i ? Object.assign({}, tab, edit) : tab));
             }), [key]),
-            /** a new last tab {url, title, pinned?}, with an id of its own; `unchanged`: the group has that address */
-            addTab: (key, tab) => change(() => changeTabsNow(key, function (tabs) {
-                return tabs.some(saved => saved && saved.url === tab.url) ? null :
+            /**
+             * a new last tab {url, title, pinned?}, with an id of its own; `unchanged`: the group has that address,
+             * unless `duplicate` (a link typed by hand is added all the same)
+             */
+            addTab: (key, tab, duplicate) => change(() => changeTabsNow(key, function (tabs) {
+                return !duplicate && tabs.some(saved => saved && saved.url === tab.url) ? null :
                     tabs.concat(Object.assign({}, tab, {id: nextTabId(tabs)}));
             }), [key]),
             /** like removeTab; the tab goes to `pos` among the group's other tabs (0 = first) */
