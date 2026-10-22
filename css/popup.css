@@ -724,6 +724,31 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     min-width: 0;
 }
 
+/* ? after a question: the tooltip says more (the icons question: what loading costs) */
+.bar-help {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin: -3px 0 -3px 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    vertical-align: middle;
+    opacity: .72;
+    cursor: help;
+}
+
+.bar-help:hover {
+    opacity: 1;
+}
+
+.bar-help:focus-visible {
+    outline-color: var(--snack-action);
+}
+
 .bar-action {
     flex: none;
     height: 32px;

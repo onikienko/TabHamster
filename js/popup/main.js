@@ -1109,7 +1109,10 @@ function askSiteIcons() {
         return;
     }
     iconsAsked = true;
-    showBar(t('p_siteIcons_ask'), [
+    // what loading costs, in the words of Settings: the sites see the IP address
+    const about = t('s_siteIcons_text');
+    showBar([t('p_siteIcons_ask'), setTip(h('button', {class: 'bar-help', type: 'button', 'aria-label': about},
+        icon('help', 16)), {text: about})], [
         {label: t('p_siteIcons_load'), run: () => setSiteIcons('load')},
         {label: t('p_siteIcons_no'), run: () => setSiteIcons('off')},
     ], {stay: true});

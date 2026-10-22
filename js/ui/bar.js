@@ -68,6 +68,7 @@ ensure();
 
 /**
  * showBar('Saved 12 tabs as "x"', {label: 'Undo', run: async () => {...}, about: 'tg_1'})
+ * The text can be a list of strings and elements (a ? button with a tooltip).
  * One of the actions runs, once; the bar hides when one is pressed. `about` (optional): what the action is about, see
  * hideBarAbout. A list of actions makes buttons in that order; `stay` keeps the bar until one is pressed (or another
  * message replaces it).
