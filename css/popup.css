@@ -687,9 +687,15 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     line-height: 20px;
 }
 
+/* as the other links in the popup: underlined under the pointer only */
 .empty a {
     margin-top: 6px;
     font-weight: 600;
+    text-decoration: none;
+}
+
+.empty a:hover {
+    text-decoration: underline;
 }
 
 /* a group that was just saved */

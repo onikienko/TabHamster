@@ -351,7 +351,7 @@
         "description": "Popup, no saved groups yet"
     },
     "p_empty_text": {
-        "message": "Press $KEY$ to keep the open tabs as a group. Type a name first, or leave it empty and the group is named by date and time.",
+        "message": "Press $KEY$ to save the open tabs as a group. Type a name first, or leave it empty and the group is named by date and time.",
         "description": "Popup, no saved groups yet. KEY is Enter or Return",
         "placeholders": {
             "key": {

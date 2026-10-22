@@ -351,7 +351,7 @@
         "description": "Popup, no saved groups yet"
     },
     "p_empty_text": {
-        "message": "Appuyez sur $KEY$ pour conserver les onglets ouverts dans un groupe. Saisissez d’abord un nom, ou laissez le champ vide et le groupe portera la date et l’heure.",
+        "message": "Appuyez sur $KEY$ pour enregistrer les onglets ouverts dans un groupe. Saisissez d’abord un nom, ou laissez le champ vide et le groupe portera la date et l’heure.",
         "description": "Popup, no saved groups yet. KEY is Enter or Return",
         "placeholders": {
             "key": {
