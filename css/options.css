@@ -90,8 +90,10 @@ p {
     color: var(--text);
 }
 
+/* stronger than a hovered item (--hover); stays so under the pointer */
 .nav a[aria-current="true"] {
-    background: var(--seg);
+    background: var(--tonal);
+    color: var(--on-tonal);
     font-weight: 600;
 }
 

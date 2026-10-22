@@ -388,8 +388,9 @@ body.keyboard .row:has(:focus) .end-meta {
     color: var(--muted);
 }
 
+/* darker than a hovered row (--hover), on which these buttons sit */
 .ib:hover {
-    background: var(--seg);
+    background: var(--line);
     color: var(--text);
 }
 
@@ -895,7 +896,7 @@ body.keyboard .item.target > .row:has(:focus) {
 }
 
 .ib[aria-expanded="true"] {
-    background: var(--seg);
+    background: var(--line);
     color: var(--text);
 }
 
