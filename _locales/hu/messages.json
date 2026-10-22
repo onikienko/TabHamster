@@ -1731,7 +1731,7 @@
         }
     },
     "p_movedDeleted": {
-        "message": "Fül áthelyezve ide: „$NAME$”. „$OLD$” csoportban nem maradt több fül, ezért törölve.",
+        "message": "Fül áthelyezve ide: „$NAME$”. Ebben a csoportban nem maradt több fül, ezért törölve: „$OLD$”.",
         "description": "Bar after dragging the last tab of a group into another group: the group it left is deleted (Recently deleted). With Undo, which brings back both",
         "placeholders": {
             "name": {
@@ -1745,7 +1745,7 @@
         }
     },
     "p_tabRemovedDeleted": {
-        "message": "Fül eltávolítva. „$NAME$” csoportban nem maradt több fül, ezért törölve.",
+        "message": "Fül eltávolítva. Ebben a csoportban nem maradt több fül, ezért törölve: „$NAME$”.",
         "description": "Bar after removing the last tab of a saved group: the group is deleted too (Recently deleted). With Undo, which brings it back",
         "placeholders": {
             "name": {

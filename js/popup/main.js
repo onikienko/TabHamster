@@ -618,7 +618,8 @@ function moveTab(at, pos) {
     render();
     movesLeft++;
     groupStoreClient.moveTab(at.key, at.tab, at.index, pos).then((res) => {
-        if (res.error) {
+        // no hash: the group is gone. An error with a hash is only sync failing: the move is saved on this computer
+        if (!res.h) {
             throw new Error(res.error);
         }
         keepHash(at.key, res);
@@ -646,7 +647,9 @@ async function moveTabTo(at, to, pos) {
     hideBarAbout(at.key);
     hideBarAbout(to);
     const index = pos === null ? dest.tabs.length : pos;
-    // with the id the store gives it there (as its addTab): a move right after this one finds it by that id
+    // with the id the store gives it there (as its addTab): a move right after this one finds it by that id. Not
+    // if a link added to that group by hand is still being saved: the link takes the id, and a quick next move of
+    // this tab finds nothing (rare; the tab stays where it is)
     const moved = Object.assign({}, at.tab, {id: groupStore.nextTabId(dest.tabs)});
     // shown at once; a group left without tabs is left out of the list (it is being deleted). Groups read meanwhile
     // get the tab only while the group it leaves still has it (not moved yet): this change comes first
@@ -686,7 +689,9 @@ async function moveTabTo(at, to, pos) {
     const copy = res.to.copy ? toName : res.from.copy ? fromName : null;
     const text = copy ? t('p_savedAsCopy', copy) :
         res.from.removed ? t('p_movedDeleted', [toName, fromName]) : t('p_movedTo', toName);
-    showBar(text + notSyncedNote(res.to), undoAction(async () => {
+    // either group can be the one that stayed on this computer (not one that was deleted: there's nothing to sync)
+    const unsynced = !res.to.synced || res.from.removed || res.from.synced ? res.to : res.from;
+    showBar(text + notSyncedNote(unsynced), undoAction(async () => {
         await undoTabs(to, {tabs: res.to.before}, res.to)();
         await (res.from.removed ? groupStoreClient.restore(at.key) :
             undoTabs(at.key, {tabs: res.from.before}, res.from)());
