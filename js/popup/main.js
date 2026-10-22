@@ -1578,22 +1578,19 @@ function renderSave() {
     clear(el.save);
     setTip(el.save, null);
     el.save.removeAttribute('aria-label');
-    // the field keeps room to type (css/popup.css): "Save as “…”" cuts the name first (it is in the field anyway)
-    const around = intent.kind !== 'replace' && intent.name ? t('p_saveAs', '').split('') : null;
-    const text = h('span', {class: 'save-text'}, ...(around ?
-        [around[0], h('span', {class: 'save-name'}, intent.name), around[1]] : [label]));
+    // while typing the field keeps room to type (css/popup.css) and "Save as “…”" can't fit a name in any language:
+    // only "Save", "Replace" then (the name is in the field); the full label is the tooltip
+    const short = !!intent.name;
+    const text = h('span', {class: 'save-text'},
+        short ? t(intent.kind === 'replace' ? 'p_replaceShort' : 'p_saveShort') : label);
     el.save.append(text, icon('enter', 14));
-    const name = text.querySelector('.save-name');
-    // still too long, or the name cut to a letter or two (longer languages, a chip in the field): "Save", "Replace";
-    // if even that doesn't fit, only the ↵ icon (the full label is the tooltip)
-    if (isCut(text) || name && isCut(name) && name.clientWidth < 28) {
-        text.replaceChildren(t(intent.kind === 'replace' ? 'p_replaceShort' : 'p_saveShort'));
+    // a chip in the field can leave room for no text at all: only the ↵ icon
+    if (isCut(text)) {
+        text.remove();
+    }
+    if (short || !text.isConnected) {
         el.save.setAttribute('aria-label', label);
-        // the button says it all unless it had to be shortened
         setTip(el.save, {text: label, keys: [ENTER]});
-        if (isCut(text)) {
-            text.remove();
-        }
     }
     el.field.placeholder = t(state.filter ? 'p_field_placeholder_' + state.filter :
         Object.keys(state.groups).length || state.groupsError ? 'p_field_placeholder' : 'p_field_placeholder_first');

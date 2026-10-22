@@ -262,7 +262,7 @@
     },
     "p_saveAs": {
         "message": "Enregistrer sous « $NAME$ »",
-        "description": "Save button while a new group name is typed. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead.",
+        "description": "Tooltip and screen reader label of the Save button while a new group name is typed in the field (the button itself shows p_saveShort).",
         "placeholders": {
             "name": {
                 "content": "$1",
@@ -272,15 +272,15 @@
     },
     "p_replaceGroup": {
         "message": "Remplacer le groupe",
-        "description": "Save button when the typed name is the name of a saved group: its tabs will be replaced by the open tabs. Button next to the field: keep it under about 20 characters (without the name). If it leaves too little room to type, p_saveShort / p_replaceShort shows instead."
+        "description": "Tooltip and screen reader label of the Save button when the typed name is the name of a saved group: its tabs will be replaced by the open tabs (the button itself shows p_replaceShort)."
     },
     "p_saveShort": {
         "message": "Enregistrer",
-        "description": "Save button when its full text leaves too little room to type in the field. One short word, about 10 characters."
+        "description": "Save button while a group name is typed in the field (the field needs the room). One short word, about 10 characters."
     },
     "p_replaceShort": {
         "message": "Remplacer",
-        "description": "Replace group button when its full text leaves too little room to type in the field. One short word, about 10 characters."
+        "description": "Save button while the typed name is the name of a saved group: its tabs will be replaced. One short word, about 10 characters."
     },
     "p_savedAs_one": {
         "message": "$COUNT$ onglet enregistré sous « $NAME$ »",

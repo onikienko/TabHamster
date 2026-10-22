@@ -130,12 +130,6 @@ button {
     white-space: nowrap;
 }
 
-.save-name {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .save:focus-visible {
     outline-color: var(--on-tonal);
 }
