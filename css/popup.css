@@ -730,13 +730,14 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     place-items: center;
     width: 22px;
     height: 22px;
-    margin: -3px 0 -3px 2px;
+    /* centred on the 18 px line: "middle" puts it on the lowercase letters, a bit low */
+    margin: -2px 0 -2px 2px;
     padding: 0;
     border: 0;
     border-radius: 6px;
     background: transparent;
     color: inherit;
-    vertical-align: middle;
+    vertical-align: top;
     opacity: .72;
     cursor: help;
 }
