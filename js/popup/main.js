@@ -728,11 +728,25 @@ function dropTab(link, to, pos) {
     const at = rowTabs.get(link);
     if (!at) {
         render();
-    } else if (to === at.key) {
+        return;
+    }
+    if (to === at.key) {
         moveTab(at, pos);
     } else {
+        // drawn at once, before the background answers
         act(() => moveTabTo(at, to, pos))();
     }
+    // the focus goes to the tab in its new place (a dragged row loses it: see dropGroup)
+    focusTab(to, pos === null ? state.groups[to].tabs.length - 1 : pos);
+}
+
+/**
+ * a group row dropped (js/popup/drag.js). The browser takes the focus away from a row moved in the page while it is
+ * dragged: it goes to the group's name, so arrow keys go on from there
+ */
+function dropGroup(key, pos) {
+    moveGroup(key, pos);
+    focusName(key);
 }
 
 /** the saved groups are shown (not sessions) and not filtered: only then can they be reordered */
@@ -2062,7 +2076,7 @@ async function start() {
             }
             return row;
         },
-        drop: moveGroup,
+        drop: dropGroup,
         // the floating copy of a tab: its row without Edit and Remove
         tabGhost: (item) => item.querySelector('.tab-row').cloneNode(true),
         dropTab,

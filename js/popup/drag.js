@@ -250,6 +250,8 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
             tab, item, key: press.key, ghost: copy, y: e.clientY, offset: press.y - rect.top, pointerId: e.pointerId,
             // where it was: a group's place among the items; a tab's group and place in its list
             home: {parent: item.parentElement, next: item.nextSibling, item: tab ? item.closest('.item') : null},
+            // the row loses the focus when it moves in the page; Esc gives it back
+            focused: document.activeElement,
             from: tab ? Array.from(item.parentElement.children).indexOf(item) : items().indexOf(item),
         };
         // a group moves as its row, not with its open tab list (class `dragging` hides it)
@@ -289,6 +291,9 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
                     left.remove();
                 }
             });
+        }
+        if (!commit && d.focused && d.focused.isConnected && d.focused !== document.activeElement) {
+            d.focused.focus({preventScroll: true});
         }
         d.ghost.remove();
         d.item.classList.remove('dragging');
