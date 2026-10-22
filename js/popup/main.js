@@ -1408,20 +1408,34 @@ function rowEnd(details, actions) {
 // columns of the row details; fitColumns sets --w-<column> on the list
 const COLUMNS = ['count', 'date', 'size', 'wins'];
 
-function fitColumns() {
-    for (const column of COLUMNS) {
-        el.list.style.removeProperty('--w-' + column);
-    }
-    // all reads after the writes above: one layout
-    const widths = {};
-    for (const meta of el.list.querySelectorAll('.end-meta > .meta')) {
+/**
+ * Sets the column widths for the list's new content, before it goes in. Measured on a copy of each different entry,
+ * outside the list: measuring in the list would lay out every row first, slow with hundreds of groups (and again
+ * after the widths change).
+ */
+function fitColumns(content) {
+    const samples = new Map();
+    for (const meta of content.querySelectorAll('.end-meta > .meta')) {
         const column = COLUMNS.find((c) => meta.classList.contains(c));
         if (column) {
-            widths[column] = Math.max(widths[column] || 0, meta.getBoundingClientRect().width);
+            samples.set(column + '\n' + meta.textContent, meta);
         }
     }
-    for (const [column, width] of Object.entries(widths)) {
-        el.list.style.setProperty('--w-' + column, Math.ceil(width) + 'px');
+    const box = h('div', {class: 'end-meta measure', 'aria-hidden': 'true'},
+        Array.from(samples.values(), (meta) => meta.cloneNode(true)));
+    document.body.append(box);
+    const widths = {};
+    for (const meta of box.children) {
+        const column = COLUMNS.find((c) => meta.classList.contains(c));
+        widths[column] = Math.max(widths[column] || 0, meta.getBoundingClientRect().width);
+    }
+    box.remove();
+    for (const column of COLUMNS) {
+        if (widths[column]) {
+            el.list.style.setProperty('--w-' + column, Math.ceil(widths[column]) + 'px');
+        } else {
+            el.list.style.removeProperty('--w-' + column);
+        }
     }
 }
 
@@ -1612,8 +1626,9 @@ function renderList() {
     closeMenu(false);
     // focus in a group comes back after the list is drawn again (Alt+↑ ↓ moves, reloads, a removed tab)
     const focused = listFocus();
-    drawList();
-    fitColumns();
+    const content = drawList();
+    fitColumns(content);
+    el.list.replaceChildren(content);
     restoreFocus(focused);
     const stops = listStops();
     setStop(stops.includes(document.activeElement) ? document.activeElement : stops[0]);
@@ -1637,39 +1652,41 @@ function redrawItem(key) {
     }
 }
 
+/** the list's content, not yet in it */
 function drawList() {
-    clear(el.list);
+    const list = document.createDocumentFragment();
     if (state.view === 'sessions' && state.options.session_watcher) {
         const results = state.results.sessions;
-        el.list.append(...(results.length || !state.words.length ? results.map(sessionItem) : [noMatches(true)]));
-        return;
+        list.append(...(results.length || !state.words.length ? results.map(sessionItem) : [noMatches(true)]));
+        return list;
     }
     if (state.groupsError) {
-        el.list.append(h('p', {class: 'message'}, t('p_loadError')));
-        return;
+        list.append(h('p', {class: 'message'}, t('p_loadError')));
+        return list;
     }
     if (!Object.keys(state.groups).length) {
-        el.list.append(emptyState());
-        return;
+        list.append(emptyState());
+        return list;
     }
     if (state.filter === 'unsynced') {
-        el.list.append(unsyncedNote());
+        list.append(unsyncedNote());
     } else if (state.filter === 'biggest' && state.usage) {
-        el.list.append(h('p', {class: 'hint'}, t('p_biggestHint', usageKB())));
+        list.append(h('p', {class: 'hint'}, t('p_biggestHint', usageKB())));
     }
     const results = state.results.saved;
     if (!results.length) {
-        el.list.append(noMatches(false));
-        return;
+        list.append(noMatches(false));
+        return list;
     }
     // a group with the typed name: Enter replaces it, so it comes first, under a note that says so
     const intent = saveIntent();
     const target = intent.kind === 'replace' ? intent.key : null;
     if (target) {
-        el.list.append(replaceNote(target));
+        list.append(replaceNote(target));
     }
-    el.list.append(...results.filter((r) => r.key === target).concat(results.filter((r) => r.key !== target))
+    list.append(...results.filter((r) => r.key === target).concat(results.filter((r) => r.key !== target))
         .map((r) => groupItem(r, r.key === target)));
+    return list;
 }
 
 function settingsButton() {
@@ -1774,9 +1791,10 @@ function render() {
     renderFilter();
     runSearch();
     renderTabs();
+    // before the list changes: its check whether the label fits would lay out the whole new list
+    renderSave();
     renderList();
     renderFooter();
-    renderSave();
 }
 
 /** draws what render() put off */

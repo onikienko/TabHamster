@@ -314,6 +314,14 @@ body.keyboard .row:has(> .name:focus) {
     gap: 8px;
 }
 
+/* column widths are measured on copies of the entries here (fitColumns in js/popup/main.js) */
+.end-meta.measure {
+    position: fixed;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+}
+
 /* on hover the buttons cover the end of the row (details, not-synced mark, the end of a long name): nothing moves.
    Hidden with opacity, not visibility: Tab from the name must reach them (a hidden button can't take the focus)
    and screen readers find them on every row. */

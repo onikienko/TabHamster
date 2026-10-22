@@ -69,16 +69,29 @@ const ICONS = {
         ['path', {d: 'M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18'}]],
 };
 
+// each icon is built once for each size and copied after that: a list draws hundreds of them
+const built = new Map();
+
 /** icon('search', 16) → decorative svg; pass a label for a meaningful one */
 export function icon(name, size, label) {
-    const parts = ICONS[name];
-    if (!parts) {
-        throw new Error('Unknown icon: ' + name);
+    const key = name + ' ' + (size || 16);
+    if (!built.has(key)) {
+        const parts = ICONS[name];
+        if (!parts) {
+            throw new Error('Unknown icon: ' + name);
+        }
+        built.set(key, svg('svg', {
+                class: 'icon icon-' + name, width: size || 16, height: size || 16, viewBox: '0 0 24 24',
+                fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+            },
+            parts.map(([tag, attrs]) => svg(tag, attrs))));
     }
-    return svg('svg', {
-            class: 'icon icon-' + name, width: size || 16, height: size || 16, viewBox: '0 0 24 24',
-            fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
-            role: label ? 'img' : null, 'aria-label': label || null, 'aria-hidden': label ? null : 'true',
-        },
-        parts.map(([tag, attrs]) => svg(tag, attrs)));
+    const copy = built.get(key).cloneNode(true);
+    if (label) {
+        copy.setAttribute('role', 'img');
+        copy.setAttribute('aria-label', label);
+    } else {
+        copy.setAttribute('aria-hidden', 'true');
+    }
+    return copy;
 }

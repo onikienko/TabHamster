@@ -16,6 +16,12 @@ const asked = new Map();
 // origins whose /favicon.ico didn't load
 const failed = new Set();
 let blank = null;
+// Checks start after the list is drawn, a few at a time, in the order asked (the top rows first): starting hundreds of
+// fetches at once held up drawing a list with hundreds of tabs. [{pageUrl, done}]
+const waiting = [];
+const AT_ONCE = 6;
+let running = 0;
+let timer = null;
 
 /** Chrome's cached favicon for a page */
 export function faviconUrl(pageUrl) {
@@ -53,10 +59,25 @@ export function knownIcon(pageUrl) {
     return answers.get(pageUrl);
 }
 
+function startChecks() {
+    timer = null;
+    while (running < AT_ONCE && waiting.length) {
+        const {pageUrl, done} = waiting.shift();
+        running++;
+        check(pageUrl).then(done).finally(() => {
+            running--;
+            startChecks();
+        });
+    }
+}
+
 /** Chrome's icon for the page as an image address, or null when Chrome only has its grey globe for it */
 export function chromeIcon(pageUrl) {
     if (!asked.has(pageUrl)) {
-        asked.set(pageUrl, check(pageUrl).then((answer) => {
+        asked.set(pageUrl, new Promise((done) => {
+            waiting.push({pageUrl, done});
+            timer = timer || setTimeout(startChecks);
+        }).then((answer) => {
             answers.set(pageUrl, answer);
             return answer;
         }));
