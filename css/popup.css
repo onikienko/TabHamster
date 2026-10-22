@@ -277,8 +277,13 @@ body.keyboard .row:has(> .name:focus) {
 }
 
 /* each column is as wide as its widest entry in the list (fitColumns in js/popup/main.js) */
+/* the tab count in a pill: "12  Oct 19" read as one date */
 .meta.count {
     width: var(--w-count, auto);
+    padding: 1px 6px;
+    border-radius: 9px;
+    background: var(--seg);
+    text-align: center;
 }
 
 .meta.date {
