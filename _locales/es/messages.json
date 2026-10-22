@@ -1471,12 +1471,12 @@
         }
     },
     "s_help_shiftKey": {
-        "message": "$KEY$ + clic",
-        "description": "Settings page. Help, key list. Left column. KEY is Shift, or ⇧ on a Mac",
+        "message": "$KEY$clic",
+        "description": "Settings page. Help, key list. Left column. KEY is \"Shift + \", or \"⇧ \" on a Mac: it has its own spacing, so no space after $KEY$",
         "placeholders": {
             "key": {
                 "content": "$1",
-                "example": "Shift"
+                "example": "Shift + "
             }
         }
     },
@@ -1489,12 +1489,12 @@
         "description": "Settings page. Help, key list. After → ←"
     },
     "s_help_moveKey": {
-        "message": "Arrastrar, o $KEY$ + ↑ ↓",
-        "description": "Settings page. Help, key list. Left column. KEY is Alt, or ⌥ on a Mac",
+        "message": "Arrastrar, o $KEY$↑ ↓",
+        "description": "Settings page. Help, key list. Left column. KEY is \"Alt + \", or \"⌥ \" on a Mac: it has its own spacing, so no space after $KEY$",
         "placeholders": {
             "key": {
                 "content": "$1",
-                "example": "Alt"
+                "example": "Alt + "
             }
         }
     },

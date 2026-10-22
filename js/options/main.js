@@ -5,7 +5,7 @@
 import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
-import {keyLabel} from '../ui/platform.js';
+import {isMac, keyLabel} from '../ui/platform.js';
 import {keyTime, numericDate, dayTime, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
@@ -311,14 +311,16 @@ function renderTrash() {
 
 function help() {
     const enter = keyLabel('enter');
+    // a modifier before a click or a key: "⇧ click" on a Mac, "Shift + click" elsewhere
+    const modifier = (key) => keyLabel(key) + (isMac() ? ' ' : ' + ');
     const tips = [
         [enter, t('s_help_enter')],
         [t('s_help_typeKey'), t('s_help_type')],
         [t('s_help_downKey', enter), t('s_help_down')],
         [t('s_help_clickKey'), t('s_help_click', enter)],
-        [t('s_help_shiftKey', keyLabel('shift')), t('s_help_shift')],
+        [t('s_help_shiftKey', modifier('shift')), t('s_help_shift')],
         ['→ ←', t('s_help_arrows')],
-        [t('s_help_moveKey', keyLabel('alt')), t('s_help_move')],
+        [t('s_help_moveKey', modifier('alt')), t('s_help_move')],
         [keyLabel('esc'), t('s_help_esc')],
         ['⋯', t('s_help_more')],
         [keyLabel('delete'), t('s_help_delete')],
