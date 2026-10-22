@@ -612,10 +612,15 @@ test('moveTabTo: the tab goes to the other group with an id of its own; Undo put
         tg_2: {name: 'b', index: 1, tabs: b},
     });
 
-    // an address the other group has, a tab that is gone, a group that is gone: nothing done
-    const twin = await store.save('tg_3', {name: 'c', index: 3, tabs: [Object.assign({}, a[0], {id: 0})]});
-    assert.equal(twin.synced, true);
-    assert.deepEqual(await store.moveTabTo('tg_1', a[0], 0, 'tg_3', 0), {unchanged: true, exists: true});
+    // an address the other group has: the tab goes there all the same, with an id of its own
+    const twin = Object.assign({}, a[0], {id: 0});
+    await store.save('tg_3', {name: 'c', index: 3, tabs: [twin]});
+    const dup = await store.moveTabTo('tg_1', a[0], 0, 'tg_3', 1);
+    assert.deepEqual((await store.list()).tg_3.tabs, [twin, Object.assign({}, a[0], {id: 1})]);
+    await store.setTabs('tg_1', dup.from.before, dup.from.h);
+    await store.setTabs('tg_3', dup.to.before, dup.to.h);
+
+    // a tab that is gone, a group that is gone: nothing done
     assert.deepEqual(await store.moveTabTo('tg_1', {url: 'https://gone.example/', id: 9}, 0, 'tg_2', 0), {unchanged: true});
     assert.deepEqual(await store.moveTabTo('tg_1', a[0], 0, 'tg_9', 0), {synced: false, error: 'Group not found'});
     await store.remove('tg_3');

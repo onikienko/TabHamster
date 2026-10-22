@@ -60,7 +60,7 @@ var groupStoreClient = (function () {
         },
         /**
          * The tab goes from group `key` to group `to`, at `pos` among its tabs: {from, to} (each like removeTab's
-         * answer; from.removed: it was the last tab, the group went to Recently deleted) or {unchanged, exists?}
+         * answer; from.removed: it was the last tab, the group went to Recently deleted) or {unchanged} (it is gone)
          */
         moveTabTo: function (key, seen, index, to, pos) {
             return call('moveTabTo', [key, seen, index, to, pos]);

@@ -603,8 +603,9 @@ function moveTab(at, pos) {
 }
 
 /**
- * Moves a saved tab (`at`) into another group, at `pos` among its tabs (null: at the end). A group left without tabs
- * is deleted; Undo brings back both. Not when the other group has the address already (as Add current tab).
+ * Moves a saved tab (`at`) into another group, at `pos` among its tabs (null: at the end), also when that group has
+ * its address already (a drag is meant; Add current tab says so instead). A group left without tabs is deleted; Undo
+ * brings back both.
  */
 async function moveTabTo(at, to, pos) {
     const from = state.groups[at.key];
@@ -616,18 +617,14 @@ async function moveTabTo(at, to, pos) {
     }
     const toName = groupName(to, dest);
     const fromName = groupName(at.key, from);
-    if (dest.tabs.some((tab) => tab.url === at.tab.url)) {
-        render();
-        showBar(t('p_alreadyInGroup', toName));
-        return;
-    }
     hideBarAbout(at.key);
     hideBarAbout(to);
     const index = pos === null ? dest.tabs.length : pos;
-    // shown at once; a group left without tabs goes from the list until the groups are read again
+    // shown at once; a group left without tabs goes from the list until the groups are read again. Groups read
+    // meanwhile get the tab only while the group it leaves still has it (not moved yet): this change comes first
+    const moving = () => !!state.groups[at.key] && tabIndexIn(state.groups[at.key].tabs, at) !== -1;
     const saved = [
-        showTabChange(to, (tabs) => (tabs.some((tab) => tab.url === at.tab.url) ? tabs :
-            tabs.slice(0, index).concat(at.tab, tabs.slice(index)))),
+        showTabChange(to, (tabs) => (moving() ? tabs.slice(0, index).concat(at.tab, tabs.slice(index)) : tabs)),
         showTabChange(at.key, (tabs) => {
             const j = tabIndexIn(tabs, at);
             return j === -1 ? tabs : tabs.filter((tab, k) => k !== j);
@@ -646,7 +643,7 @@ async function moveTabTo(at, to, pos) {
     }
     if (res.unchanged) {
         await afterChange(null);
-        showBar(res.exists ? t('p_alreadyInGroup', toName) : t('p_tabGone', fromName));
+        showBar(t('p_tabGone', fromName));
         return;
     }
     if (!res.to) {

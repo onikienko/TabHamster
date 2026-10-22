@@ -866,7 +866,7 @@ var groupStore = (function () {
         // A tab moved from one group to another, both as they are now. pos: its place among the other group's tabs.
         // The answer: {from, to}, each like changeTabsNow's; `from` is {synced, removed: true} when the tab was the
         // group's last one (the group went to trash with the tab, a restore brings it back). {unchanged: true}: the tab
-        // is gone, or (exists) the other group has its address.
+        // is gone. The other group may have its address already: it gets the tab all the same.
         async function moveTabToNow(key, seen, index, to, pos) {
             const records = await readRecords();
             const rec = records[key];
@@ -879,9 +879,6 @@ var groupStore = (function () {
                 return {unchanged: true};
             }
             const tab = rec.g.tabs[i];
-            if (dest.g.tabs.some(other => other && other.url === tab.url)) {
-                return {unchanged: true, exists: true};
-            }
             const dest_tabs = dest.g.tabs.slice();
             dest_tabs.splice(Math.max(0, Math.min(pos, dest_tabs.length)), 0,
                 Object.assign({}, tab, {id: nextTabId(dest.g.tabs)}));
@@ -1190,11 +1187,10 @@ var groupStore = (function () {
             }), [key]),
             /**
              * The tab goes from group `key` to group `to`, at `pos` among its tabs (0 = first), with an id of its own
-             * there; one call for both groups.
-             * @returns {Promise<{from?: Object, to?: Object, unchanged?: boolean, exists?: boolean, synced?: boolean,
-             *   error?: string}>} from, to: like removeTab's answer for each group; `from.removed`: it was the group's
-             *   last tab, the group went to trash with it (restore brings it back); `unchanged`: the tab is gone, or
-             *   (`exists`) `to` has its address, nothing was done
+             * there (also when `to` has its address already); one call for both groups.
+             * @returns {Promise<{from?: Object, to?: Object, unchanged?: boolean, synced?: boolean, error?: string}>}
+             *   from, to: like removeTab's answer for each group; `from.removed`: it was the group's last tab, the
+             *   group went to trash with it (restore brings it back); `unchanged`: the tab is gone, nothing was done
              */
             moveTabTo: (key, seen, index, to, pos) => change(() => moveTabToNow(key, seen, index, to, pos), [key, to]),
             /** @returns {Promise<{synced: boolean, error?: string}>} new name, tabs and place stay */
