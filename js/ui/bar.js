@@ -106,4 +106,9 @@ export function hideBarAbout(what) {
     }
 }
 
+/** a message is on the bar (a question can wait for it instead of replacing it and its Undo) */
+export function barShown() {
+    return !!bar && !bar.hidden;
+}
+
 export {hide as hideBar};

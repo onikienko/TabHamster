@@ -8,7 +8,7 @@ import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel, keyCombo, isMac} from '../ui/platform.js';
 import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, withScheme, kilobytes} from '../ui/format.js';
 import {knownIcon, chromeIcon, siteIcon, siteIconFailed} from '../ui/favicons.js';
-import {showBar, hideBarAbout} from '../ui/bar.js';
+import {showBar, hideBarAbout, barShown} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
@@ -1105,7 +1105,8 @@ async function setSiteIcons(value) {
 }
 
 function askSiteIcons() {
-    if (iconsAsked) {
+    // not over another message: it would take its Undo away; a later drawing of the list asks
+    if (iconsAsked || barShown()) {
         return;
     }
     iconsAsked = true;
