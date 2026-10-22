@@ -1496,7 +1496,7 @@
         }
     },
     "s_help_move": {
-        "message": "Átrendezi a csoportokat és a csoporton belüli füleket. Egy fület másik csoportra húzva oda helyezheti át.",
+        "message": "Átrendezi a csoportokat és a füleiket. A csoport első vagy utolsó fülén túl a fül a szomszédos csoportba kerül.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_esc": {

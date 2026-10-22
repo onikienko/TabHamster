@@ -646,11 +646,13 @@ async function moveTabTo(at, to, pos) {
     hideBarAbout(at.key);
     hideBarAbout(to);
     const index = pos === null ? dest.tabs.length : pos;
+    // with the id the store gives it there (as its addTab): a move right after this one finds it by that id
+    const moved = Object.assign({}, at.tab, {id: groupStore.nextTabId(dest.tabs)});
     // shown at once; a group left without tabs is left out of the list (it is being deleted). Groups read meanwhile
     // get the tab only while the group it leaves still has it (not moved yet): this change comes first
     const moving = () => !!state.groups[at.key] && tabIndexIn(state.groups[at.key].tabs, at) !== -1;
     const saved = [
-        showTabChange(to, (tabs) => (moving() ? tabs.slice(0, index).concat(at.tab, tabs.slice(index)) : tabs)),
+        showTabChange(to, (tabs) => (moving() ? tabs.slice(0, index).concat(moved, tabs.slice(index)) : tabs)),
         showTabChange(at.key, (tabs) => {
             const j = tabIndexIn(tabs, at);
             return j === -1 ? tabs : tabs.filter((tab, k) => k !== j);
@@ -689,6 +691,31 @@ async function moveTabTo(at, to, pos) {
         await (res.from.removed ? groupStoreClient.restore(at.key) :
             undoTabs(at.key, {tabs: res.from.before}, res.from)());
     }, [to, at.key]));
+}
+
+/**
+ * Alt+↑ ↓ on a saved tab (`at`): a place up or down in its group; past its first or last tab into the group above (at
+ * its end) or below (at its top), as a drag goes. That group opens, so the tab and the focus stay in sight.
+ */
+function moveTabByKey(at, up) {
+    const group = state.groups[at.key];
+    if (!group) {
+        return;
+    }
+    const pos = at.index + (up ? -1 : 1);
+    if (pos >= 0 && pos < group.tabs.length) {
+        moveTab(at, pos);
+        return;
+    }
+    const keys = sortedGroupKeys();
+    const to = keys[keys.indexOf(at.key) + (up ? -1 : 1)];
+    if (!to) {
+        return;
+    }
+    state.expanded.add('saved:' + to);
+    // drawn at once, before the background answers
+    act(() => moveTabTo(at, to, up ? null : 0))();
+    focusTab(to, up ? state.groups[to].tabs.length - 1 : 0);
 }
 
 /** a tab row dropped (js/popup/drag.js): into group `to` at `pos` among its other tabs, null at the end */
@@ -1868,11 +1895,7 @@ el.list.addEventListener('keydown', (e) => {
         }
         e.preventDefault();
         if (tabAt) {
-            const group = state.groups[tabAt.key];
-            const pos = tabAt.index + (e.key === 'ArrowUp' ? -1 : 1);
-            if (group && pos >= 0 && pos < group.tabs.length) {
-                moveTab(tabAt, pos);
-            }
+            moveTabByKey(tabAt, e.key === 'ArrowUp');
             return;
         }
         const keys = sortedGroupKeys();

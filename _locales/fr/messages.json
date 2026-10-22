@@ -1499,7 +1499,7 @@
         }
     },
     "s_help_move": {
-        "message": "Réorganise les groupes et les onglets d’un groupe. Faites glisser un onglet sur un autre groupe pour l’y déplacer.",
+        "message": "Réorganise les groupes et leurs onglets. Au-delà du premier ou du dernier onglet d’un groupe, l’onglet passe dans le groupe voisin.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_esc": {

@@ -1499,7 +1499,7 @@
         }
     },
     "s_help_move": {
-        "message": "Cambia el orden de los grupos y de las pestañas dentro de un grupo. Arrastre una pestaña a otro grupo para moverla allí.",
+        "message": "Cambia el orden de los grupos y de sus pestañas. Más allá de la primera o la última pestaña de un grupo, la pestaña pasa al grupo de al lado.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_esc": {

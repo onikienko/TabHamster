@@ -1499,7 +1499,7 @@
         }
     },
     "s_help_move": {
-        "message": "Reorders groups, and tabs inside a group. Drag a tab onto another group to move it there.",
+        "message": "Reorders groups and their tabs. Past a group's first or last tab, a tab moves on into the next group.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_esc": {
