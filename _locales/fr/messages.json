@@ -1746,5 +1746,15 @@
                 "example": "Trip to Tofino"
             }
         }
+    },
+    "p_tabRemovedDeleted": {
+        "message": "Onglet retiré. « $NAME$ » n’avait pas d’autre onglet et a été supprimé.",
+        "description": "Bar after removing the last tab of a saved group: the group is deleted too (Recently deleted). With Undo, which brings it back",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
     }
 }

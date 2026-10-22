@@ -565,6 +565,22 @@ test('removeTab, editTab, addTab from an old view work on the tabs as they are n
     assert.deepEqual(await store.removeTab('tg_9', t[0], 0), {synced: false, error: 'Group not found'});
 });
 
+test('removeTab of the last tab: the group goes to Recently deleted with it, restore brings it back', async () => {
+    const {store} = makeDevice();
+    const only = {url: 'https://only.example/', title: 'Only', id: 0};
+    await store.save('tg_1', {name: 'a', index: 1, tabs: [only]});
+    await store.save('tg_2', {name: 'b', index: 2, tabs: makeTabs(2, 2)});
+
+    // a tab that isn't there: nothing done, the group stays
+    assert.equal((await store.removeTab('tg_1', {url: 'https://other.example/', id: 0}, 0)).unchanged, true);
+    assert.deepEqual(await store.removeTab('tg_1', only, 0), {synced: true, removed: true});
+    assert.deepEqual(Object.keys(await store.list()), ['tg_2']);
+    assert.deepEqual((await store.listTrash()).map(g => [g.key, g.tabs]), [['tg_1', [only]]]);
+    // the popup's Undo
+    await store.restore('tg_1');
+    assert.deepEqual(plainList(await store.list()).tg_1, {name: 'a', index: 1, tabs: [only]});
+});
+
 test('moveTab: to a place among the other tabs, made to the tabs as they are now', async () => {
     const {store} = makeDevice();
     const t = makeTabs(4, 1).map((tab, i) => Object.assign(tab, {id: i}));

@@ -966,7 +966,7 @@ function renameRow(key) {
 
 /* ---------- tab actions (saved groups only) ---------- */
 
-/** at: {key, index, tab}, a row's tab (tabRow) */
+/** at: {key, index, tab}, a row's tab (tabRow). Its last tab: the group is deleted too (as when it is dragged out) */
 async function removeTab(at) {
     const group = state.groups[at.key];
     const i = group ? tabIndexIn(group.tabs, at) : -1;
@@ -978,14 +978,28 @@ async function removeTab(at) {
     const saved = showTabChange(at.key, (tabs) => {
         const j = tabIndexIn(tabs, at);
         return j === -1 ? tabs : tabs.filter((tab, k) => k !== j);
-    });
-    redrawItem(at.key);
+    }, true);
+    if (state.groups[at.key]) {
+        redrawItem(at.key);
+    } else {
+        state.expanded.delete('saved:' + at.key);
+        render();
+    }
     const name = groupName(at.key, group);
     let res;
     try {
         res = await groupStoreClient.removeTab(at.key, at.tab, at.index);
     } finally {
         saved();
+    }
+    if (res.removed) {
+        await afterChange(null);
+        // its row (and the focus with it) is gone
+        if (document.activeElement === document.body) {
+            el.field.focus();
+        }
+        showBar(t('p_tabRemovedDeleted', name), undoAction(() => groupStoreClient.restore(at.key), at.key));
+        return;
     }
     await tabChanged(at.key, name, res, t('p_tabRemoved'), t('p_tabGone', name));
 }

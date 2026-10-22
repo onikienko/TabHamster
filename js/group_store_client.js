@@ -41,7 +41,8 @@ var groupStoreClient = (function () {
         /**
          * Tab changes to the tabs as they are now (an earlier change still saving, or one from another computer,
          * stays): {synced, error?, copy?, h, before?, unchanged?}. seen: the tab as the page showed it, index: its
-         * place there. before: the tabs it changed, for an undo (setTabs); unchanged: the tab is gone, nothing done
+         * place there. before: the tabs it changed, for an undo (setTabs); unchanged: the tab is gone, nothing done;
+         * removed (removeTab): it was the last tab, the group went to Recently deleted with it (restore)
          */
         removeTab: function (key, seen, index) {
             return call('removeTab', [key, seen, index]);

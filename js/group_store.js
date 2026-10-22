@@ -863,6 +863,20 @@ var groupStore = (function () {
             return Object.assign(res, {h: now_rec.h, before: rec.g.tabs});
         }
 
+        // A tab removed from the group's tabs as they are now; its last one: the group goes to trash with it (a restore
+        // brings it back), the answer is {synced, removed: true}
+        async function removeTabNow(key, seen, index) {
+            const rec = (await readRecords())[key];
+            const last = rec && !rec.discarded && !rec.trashed && rec.g.tabs.length === 1;
+            if (last && findTab(rec.g.tabs, seen, index) === 0) {
+                return Object.assign(await removeNow(key), {removed: true});
+            }
+            return changeTabsNow(key, function (tabs) {
+                const i = findTab(tabs, seen, index);
+                return i === -1 ? null : tabs.filter((tab, j) => j !== i);
+            });
+        }
+
         // A tab moved from one group to another, both as they are now. pos: its place among the other group's tabs.
         // The answer: {from, to}, each like changeTabsNow's; `from` is {synced, removed: true} when the tab was the
         // group's last one (the group went to trash with the tab, a restore brings it back). {unchanged: true}: the tab
@@ -1157,13 +1171,11 @@ var groupStore = (function () {
              * Tab changes made to the tabs as they are now, so changes made meanwhile (by an earlier call or on
              * another device) stay. `seen`: the tab as the caller saw it, `index`: where it was (see findTab).
              * @returns {Promise<{synced: boolean, error?: string, copy?: string, h: string, before?: Array,
-             *   unchanged?: boolean}>} like setTabs, `before`: the tabs it changed (an undo puts them back with
-             *   setTabs); `unchanged`: the tab isn't in the group any more, nothing was done
+             *   unchanged?: boolean, removed?: boolean}>} like setTabs, `before`: the tabs it changed (an undo puts
+             *   them back with setTabs); `unchanged`: the tab isn't in the group any more, nothing was done;
+             *   `removed`: it was the group's last tab, the group went to trash with it (restore brings it back)
              */
-            removeTab: (key, seen, index) => change(() => changeTabsNow(key, function (tabs) {
-                const i = findTab(tabs, seen, index);
-                return i === -1 ? null : tabs.filter((tab, j) => j !== i);
-            }), [key]),
+            removeTab: (key, seen, index) => change(() => removeTabNow(key, seen, index), [key]),
             /** like removeTab; `edit`: {url, title}, the tab's other fields (id, pinned) stay */
             editTab: (key, seen, index, edit) => change(() => changeTabsNow(key, function (tabs) {
                 const i = findTab(tabs, seen, index);
