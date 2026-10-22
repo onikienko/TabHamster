@@ -88,9 +88,17 @@ async function loadOptions() {
 }
 
 async function loadGroups() {
+    const read = ++reads;
     try {
         state.groups = await groupStoreClient.list();
-        pendingTabChanges.forEach(applyTabChange);
+        for (const entry of pendingChanges) {
+            // made before this read began: the groups read have it
+            if (entry.answered !== undefined && entry.answered < read) {
+                pendingChanges.delete(entry);
+            } else {
+                applyChange(entry);
+            }
+        }
         state.groupsError = null;
     } catch (e) {
         state.groups = {};
@@ -98,26 +106,45 @@ async function loadGroups() {
     }
 }
 
-// tab changes shown before the background has made them: {key, change(tabs) -> tabs} (showTabChange)
-const pendingTabChanges = new Set();
+// changes shown before the background has made them: {key, change(group) -> group, null to leave it out, answered}
+// (showChange)
+const pendingChanges = new Set();
+// reads of the groups begun so far
+let reads = 0;
 
-function applyTabChange(entry) {
+function applyChange(entry) {
     const group = state.groups[entry.key];
     if (group) {
-        state.groups[entry.key] = Object.assign({}, group, {tabs: entry.change(group.tabs)});
+        const changed = entry.change(group);
+        if (changed) {
+            state.groups[entry.key] = changed;
+        } else {
+            delete state.groups[entry.key];
+        }
     }
 }
 
 /**
- * Shows a tab change at once, so a click or key right after it is about the tabs as they will be. Until the
- * background answers, groups read meanwhile (an earlier change's reload) get it too. Returns a function to call
- * once it has answered.
+ * Shows a change at once, so a click, key or drag right after it is about the groups as they will be. Groups read
+ * meanwhile get it too (an earlier change's reload may have read them before this change was made): else the list
+ * would go back to how it was. Returns a function to call once the background has made it; from then on a read that
+ * begins has it, and the change is dropped.
  */
-function showTabChange(key, change) {
+function showChange(key, change) {
     const entry = {key, change};
-    pendingTabChanges.add(entry);
-    applyTabChange(entry);
-    return () => pendingTabChanges.delete(entry);
+    pendingChanges.add(entry);
+    applyChange(entry);
+    return () => {
+        entry.answered = reads;
+    };
+}
+
+/** showChange for a group's tabs; a group left without tabs is left out (`dropEmpty`: it is being deleted) */
+function showTabChange(key, change, dropEmpty = false) {
+    return showChange(key, (group) => {
+        const tabs = change(group.tabs);
+        return dropEmpty && !tabs.length ? null : Object.assign({}, group, {tabs});
+    });
 }
 
 /** local storage also holds copies of saved groups (lg_) and store records; sessions are tg_ keys */
@@ -557,9 +584,8 @@ function moveDone() {
 function moveGroup(key, pos) {
     const changes = moveTo(sortedGroupKeys(), state.groups, key, pos);
     hideBarAbout(key);
-    for (const [k, index] of Object.entries(changes)) {
-        state.groups[k] = Object.assign({}, state.groups[k], {index});
-    }
+    const saved = Object.entries(changes).map(([k, index]) =>
+        showChange(k, (group) => Object.assign({}, group, {index})));
     render();
     movesLeft++;
     // sent at once, not after the previous one: the background does them in order, and a popup closed right after
@@ -567,7 +593,7 @@ function moveGroup(key, pos) {
     groupStoreClient.setIndex(changes).catch((e) => {
         console.error('TabHamster: move failed', e);
         showBar(t('p_syncStorageDefault_error'));
-    }).then(moveDone);
+    }).finally(() => saved.forEach((done) => done())).then(moveDone);
 }
 
 /** tabs with the one at `i` put at `pos` among the others; the same tabs if it is gone (-1) */
@@ -620,18 +646,17 @@ async function moveTabTo(at, to, pos) {
     hideBarAbout(at.key);
     hideBarAbout(to);
     const index = pos === null ? dest.tabs.length : pos;
-    // shown at once; a group left without tabs goes from the list until the groups are read again. Groups read
-    // meanwhile get the tab only while the group it leaves still has it (not moved yet): this change comes first
+    // shown at once; a group left without tabs is left out of the list (it is being deleted). Groups read meanwhile
+    // get the tab only while the group it leaves still has it (not moved yet): this change comes first
     const moving = () => !!state.groups[at.key] && tabIndexIn(state.groups[at.key].tabs, at) !== -1;
     const saved = [
         showTabChange(to, (tabs) => (moving() ? tabs.slice(0, index).concat(at.tab, tabs.slice(index)) : tabs)),
         showTabChange(at.key, (tabs) => {
             const j = tabIndexIn(tabs, at);
             return j === -1 ? tabs : tabs.filter((tab, k) => k !== j);
-        }),
+        }, true),
     ];
-    if (from.tabs.length === 1) {
-        delete state.groups[at.key];
+    if (!state.groups[at.key]) {
         state.expanded.delete('saved:' + at.key);
     }
     render();
@@ -1279,8 +1304,6 @@ function tabRow(tab, at) {
         class: 'tab-row', href: tab.url, target: '_blank',
         dataset: at ? {key: at.key, index: String(at.index)} : {},
         'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
-        // a saved tab is dragged to another place (js/popup/drag.js), not as a link
-        draggable: at ? 'false' : null,
     },
     favicon(tab.url),
     tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,

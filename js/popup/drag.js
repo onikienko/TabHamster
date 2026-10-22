@@ -192,6 +192,27 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
         }
     }
 
+    // While dragging, the pointer is followed on the whole window, not only while the list has it captured: Chrome
+    // can take the capture away (the pointer leaving the popup sideways), and that must not end the drag. Letting go
+    // drops the row where it is shown, also when Chrome cancels the pointer or the button came up outside the popup
+    // (the next move has no button down). Only Esc puts it back.
+    function onDragMove(e) {
+        if (e.pointerId !== drag.pointerId) {
+            return;
+        }
+        if (!(e.buttons & 1)) {
+            finish(true);
+            return;
+        }
+        move(e.clientY);
+    }
+
+    function onDragEnd(e) {
+        if (e.pointerId === drag.pointerId) {
+            finish(true);
+        }
+    }
+
     // the click that ends a drag on a group's name must not open the group, on a tab must not open the tab
     function swallow(e) {
         e.preventDefault();
@@ -236,6 +257,10 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
         document.body.classList.add('dragging');
         // on the list, not the row: moving the row in the list would end a capture on it
         list.setPointerCapture(e.pointerId);
+        // last on the way up, as the list's own listeners were: the popup sees the button come up first
+        window.addEventListener('pointermove', onDragMove);
+        window.addEventListener('pointerup', onDragEnd);
+        window.addEventListener('pointercancel', onDragEnd);
         document.addEventListener('keydown', onKey, true);
         move(e.clientY);
         drag.frame = requestAnimationFrame(tick);
@@ -246,10 +271,12 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
         if (!drag) {
             return;
         }
-        // cleared first: releasing the capture can come back here through lostpointercapture
         const d = drag;
         drag = null;
         cancelAnimationFrame(d.frame);
+        window.removeEventListener('pointermove', onDragMove);
+        window.removeEventListener('pointerup', onDragEnd);
+        window.removeEventListener('pointercancel', onDragEnd);
         document.removeEventListener('keydown', onKey, true);
         if (list.hasPointerCapture(d.pointerId)) {
             list.releasePointerCapture(d.pointerId);
@@ -313,13 +340,8 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
         press = Object.assign(at, {tab: false, item: row.parentElement, key: row.parentElement.dataset.key});
     });
     list.addEventListener('pointermove', (e) => {
-        if (drag) {
-            if (e.pointerId === drag.pointerId) {
-                move(e.clientY);
-            }
-            return;
-        }
-        if (!press || e.pointerId !== press.pointerId) {
+        // a drag follows the pointer on the window (onDragMove)
+        if (drag || !press || e.pointerId !== press.pointerId) {
             return;
         }
         // released outside the list (no pointerup here): the press is over
@@ -331,8 +353,19 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
             start(e);
         }
     });
-    list.addEventListener('pointerup', () => finish(true));
-    list.addEventListener('pointercancel', () => finish(false));
-    // e.g. the list was drawn again under the pointer
-    list.addEventListener('lostpointercapture', () => finish(false));
+    // Chrome's own drag (a tab's icon is an image, or a link, or selected text) would cancel this one: the row would
+    // go back where it was
+    list.addEventListener('dragstart', (e) => {
+        if (press || drag) {
+            e.preventDefault();
+        }
+    });
+    // a press that didn't become a drag is over
+    for (const type of ['pointerup', 'pointercancel']) {
+        list.addEventListener(type, () => {
+            if (!drag) {
+                press = null;
+            }
+        });
+    }
 }
