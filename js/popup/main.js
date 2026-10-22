@@ -545,8 +545,13 @@ async function groupMenu(key, button) {
 
 /* ---------- order ---------- */
 
-// moves show at once; the background writes them in the order they come; the groups are read back after the last one
+// moves (of groups, and of tabs inside a group) show at once; the background writes them in the order they come; the
+// groups are read back after the last one
 let movesLeft = 0;
+
+function moveDone() {
+    return --movesLeft === 0 ? afterChange(null) : null;
+}
 
 /** puts a group at `pos` among the others (0 = top); usually only its own index changes (js/order.js) */
 function moveGroup(key, pos) {
@@ -562,7 +567,118 @@ function moveGroup(key, pos) {
     groupStoreClient.setIndex(changes).catch((e) => {
         console.error('TabHamster: move failed', e);
         showBar(t('p_syncStorageDefault_error'));
-    }).then(() => (--movesLeft === 0 ? afterChange(null) : null));
+    }).then(moveDone);
+}
+
+/** tabs with the one at `i` put at `pos` among the others; the same tabs if it is gone (-1) */
+function withTabAt(tabs, i, pos) {
+    if (i === -1) {
+        return tabs;
+    }
+    const rest = tabs.filter((tab, k) => k !== i);
+    rest.splice(pos, 0, tabs[i]);
+    return rest;
+}
+
+/** puts a saved tab (`at`: a row's tab, see tabRow) at `pos` among its group's other tabs; no bar (as group moves) */
+function moveTab(at, pos) {
+    const group = state.groups[at.key];
+    if (!group || tabIndexIn(group.tabs, at) === -1) {
+        return;
+    }
+    // an Undo for the group's tabs as they were would undo this move too
+    hideBarAbout(at.key);
+    const saved = showTabChange(at.key, (tabs) => withTabAt(tabs, tabIndexIn(tabs, at), pos));
+    render();
+    movesLeft++;
+    groupStoreClient.moveTab(at.key, at.tab, at.index, pos).then((res) => {
+        if (res.error) {
+            throw new Error(res.error);
+        }
+        keepHash(at.key, res);
+    }).catch((e) => {
+        console.error('TabHamster: tab move failed', e);
+        showBar(t('p_syncStorageDefault_error'));
+    }).finally(saved).then(moveDone);
+}
+
+/**
+ * Moves a saved tab (`at`) into another group, at `pos` among its tabs (null: at the end). A group left without tabs
+ * is deleted; Undo brings back both. Not when the other group has the address already (as Add current tab).
+ */
+async function moveTabTo(at, to, pos) {
+    const from = state.groups[at.key];
+    const dest = state.groups[to];
+    const i = from ? tabIndexIn(from.tabs, at) : -1;
+    if (i === -1 || !dest) {
+        render();
+        return;
+    }
+    const toName = groupName(to, dest);
+    const fromName = groupName(at.key, from);
+    if (dest.tabs.some((tab) => tab.url === at.tab.url)) {
+        render();
+        showBar(t('p_alreadyInGroup', toName));
+        return;
+    }
+    hideBarAbout(at.key);
+    hideBarAbout(to);
+    const index = pos === null ? dest.tabs.length : pos;
+    // shown at once; a group left without tabs goes from the list until the groups are read again
+    const saved = [
+        showTabChange(to, (tabs) => (tabs.some((tab) => tab.url === at.tab.url) ? tabs :
+            tabs.slice(0, index).concat(at.tab, tabs.slice(index)))),
+        showTabChange(at.key, (tabs) => {
+            const j = tabIndexIn(tabs, at);
+            return j === -1 ? tabs : tabs.filter((tab, k) => k !== j);
+        }),
+    ];
+    if (from.tabs.length === 1) {
+        delete state.groups[at.key];
+        state.expanded.delete('saved:' + at.key);
+    }
+    render();
+    let res;
+    try {
+        res = await groupStoreClient.moveTabTo(at.key, at.tab, at.index, to, index);
+    } finally {
+        saved.forEach((done) => done());
+    }
+    if (res.unchanged) {
+        await afterChange(null);
+        showBar(res.exists ? t('p_alreadyInGroup', toName) : t('p_tabGone', fromName));
+        return;
+    }
+    if (!res.to) {
+        // a group is gone (deleted on another computer)
+        await afterChange(null);
+        throw new Error(res.error);
+    }
+    keepHash(to, res.to);
+    if (!res.from.removed) {
+        keepHash(at.key, res.from);
+    }
+    await afterChange(res.to.copy || to);
+    const copy = res.to.copy ? toName : res.from.copy ? fromName : null;
+    const text = copy ? t('p_savedAsCopy', copy) :
+        res.from.removed ? t('p_movedDeleted', [toName, fromName]) : t('p_movedTo', toName);
+    showBar(text + notSyncedNote(res.to), undoAction(async () => {
+        await undoTabs(to, {tabs: res.to.before}, res.to)();
+        await (res.from.removed ? groupStoreClient.restore(at.key) :
+            undoTabs(at.key, {tabs: res.from.before}, res.from)());
+    }, [to, at.key]));
+}
+
+/** a tab row dropped (js/popup/drag.js): into group `to` at `pos` among its other tabs, null at the end */
+function dropTab(link, to, pos) {
+    const at = rowTabs.get(link);
+    if (!at) {
+        render();
+    } else if (to === at.key) {
+        moveTab(at, pos);
+    } else {
+        act(() => moveTabTo(at, to, pos))();
+    }
 }
 
 /** the saved groups are shown (not sessions) and not filtered: only then can they be reordered */
@@ -1166,6 +1282,8 @@ function tabRow(tab, at) {
         class: 'tab-row', href: tab.url, target: '_blank',
         dataset: at ? {key: at.key, index: String(at.index)} : {},
         'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
+        // a saved tab is dragged to another place (js/popup/drag.js), not as a link
+        draggable: at ? 'false' : null,
     },
     favicon(tab.url),
     tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
@@ -1692,7 +1810,7 @@ el.clear.addEventListener('click', () => clearSearch());
 
 // ↑ ↓ between group names and tabs (Enter opens the focused one), ↑ from the first goes back to the field;
 // → ← show and hide a group's tabs.
-// Alt (Option) + ↑ ↓ moves the focused group.
+// Alt (Option) + ↑ ↓ moves the focused group, or the focused tab inside its group.
 el.list.addEventListener('keydown', (e) => {
     // a saved group's tab: Delete (⌫ on a Mac) removes it, F2 edits it
     const tabAt = rowTabs.get(e.target);
@@ -1711,6 +1829,14 @@ el.list.addEventListener('keydown', (e) => {
             return;
         }
         e.preventDefault();
+        if (tabAt) {
+            const group = state.groups[tabAt.key];
+            const pos = tabAt.index + (e.key === 'ArrowUp' ? -1 : 1);
+            if (group && pos >= 0 && pos < group.tabs.length) {
+                moveTab(tabAt, pos);
+            }
+            return;
+        }
         const keys = sortedGroupKeys();
         const pos = keys.indexOf(item.dataset.key) + (e.key === 'ArrowUp' ? -1 : 1);
         if (pos >= 0 && pos < keys.length) {
@@ -1857,6 +1983,9 @@ async function start() {
             return row;
         },
         drop: moveGroup,
+        // the floating copy of a tab: its row without Edit and Remove
+        tabGhost: (item) => item.querySelector('.tab-row').cloneNode(true),
+        dropTab,
         ended: renderIfWaiting,
     });
     chrome.runtime.onMessage.addListener((msg) => {

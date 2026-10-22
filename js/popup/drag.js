@@ -1,7 +1,7 @@
-// Reordering saved groups by dragging a row. Pointer events, not HTML drag and drop (its ghost image and drop
-// effects don't suit a popup). A floating copy of the row follows the pointer while the row itself (dimmed) moves
-// to where it will land and the other rows slide out of its way. The list scrolls while the pointer is near its
-// top or bottom edge. Esc puts the row back.
+// Reordering by dragging: saved groups (a group's row), and their tabs (a tab's row), inside the group or into another
+// one. Pointer events, not HTML drag and drop (its ghost image and drop effects don't suit a popup). A floating copy
+// of the row follows the pointer while the row itself (dimmed) moves to where it will land and the other rows slide
+// out of its way. The list scrolls while the pointer is near its top or bottom edge. Esc puts the row back.
 
 import {h} from '../ui/dom.js';
 
@@ -15,14 +15,18 @@ const SLIDE_MS = 120;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /**
- * @param {HTMLElement} list holds `.item` elements with `data-key`, each with a `.row`
+ * @param {HTMLElement} list holds `.item` elements with `data-key`, each with a `.row` and, while open, a `.tab-list`
+ *   of `.tab-item` elements (a saved group's tab has an `a.tab-row` with `data-key` and `data-index`)
  * @param {Object} options
  * @param {function(): boolean} options.enabled checked when a press starts
  * @param {function(HTMLElement): Node[]} options.ghost content of the floating copy of an item
  * @param {function(string, number): void} options.drop key and new place among the other items (0 = top)
+ * @param {function(HTMLElement): Node[]} options.tabGhost content of the floating copy of a tab item
+ * @param {function(HTMLElement, string, ?number): void} options.dropTab the tab's `a.tab-row`, the key of the group it
+ *   goes to, and its new place among that group's other tabs (0 = first; null: the group is closed, at the end)
  * @param {function(): void} [options.ended] a drag ended (dropped or not), after `drop`
  */
-export function enableDrag(list, {enabled, ghost, drop, ended}) {
+export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended}) {
     let press = null;
     let drag = null;
 
@@ -30,46 +34,128 @@ export function enableDrag(list, {enabled, ghost, drop, ended}) {
         return Array.from(list.querySelectorAll(':scope > .item'));
     }
 
-    // Moves an item in the list; the items whose place changed slide from where they were (FLIP)
-    function place(moved, before) {
-        const all = items();
-        const from = reducedMotion.matches ? null : new Map(all.map((item) => [item, item.getBoundingClientRect().top]));
-        list.insertBefore(moved, before);
-        if (!from) {
-            return;
+    // the next (step 1) or previous (-1) item
+    function sibling(item, step) {
+        let node = item;
+        do {
+            node = step > 0 ? node.nextElementSibling : node.previousElementSibling;
+        } while (node && !node.classList.contains('item'));
+        return node;
+    }
+
+    function rowOf(item) {
+        return item.querySelector(':scope > .row');
+    }
+
+    // Runs `change` (it moves the dragged row); what changed place slides from where it was (FLIP): group rows, open
+    // tab lists, and tabs inside them (a tab's own slide is on top of its list's). Reads after writes: one layout,
+    // also with a few hundred tabs open
+    function place(change) {
+        const parts = reducedMotion.matches ? [] :
+            Array.from(list.querySelectorAll(':scope > .item > .row, :scope > .item > .tab-list, .tab-item'));
+        const from = new Map(parts.map((part) => [part, part.getBoundingClientRect().top]));
+        change();
+        // a tab list made for the dragged tab has nothing to slide from; one it left is gone
+        const shown = parts.filter((part) => part.isConnected);
+        for (const part of shown) {
+            part.style.transition = 'none';
+            part.style.transform = '';
         }
-        for (const item of all) {
-            item.style.transition = 'none';
-            item.style.transform = '';
-            const dy = from.get(item) - item.getBoundingClientRect().top;
-            if (dy) {
-                item.style.transform = 'translateY(' + dy + 'px)';
+        const moved = new Map(shown.map((part) => [part, from.get(part) - part.getBoundingClientRect().top]));
+        for (const [part, dy] of moved) {
+            const own = dy - (part.classList.contains('tab-item') ? moved.get(part.parentElement) || 0 : 0);
+            if (own) {
+                part.style.transform = 'translateY(' + own + 'px)';
             }
         }
         // the start positions take effect before the slide begins
         list.getBoundingClientRect();
-        for (const item of all) {
-            item.style.transition = 'transform ' + SLIDE_MS + 'ms ease-out';
-            item.style.transform = '';
+        for (const part of shown) {
+            part.style.transition = 'transform ' + SLIDE_MS + 'ms ease-out';
+            part.style.transform = '';
         }
     }
 
-    // The row swaps with a neighbour once the floating copy's middle passes the neighbour's middle. Measured on
-    // the layout (offsetTop), not on rows that are still sliding; after a swap the way back needs the copy to
-    // pass the neighbour's new middle, so the rows don't flicker at the boundary.
+    // top of an element in the list's content, from the layout (offsetTop), not from rows that are still sliding
+    function top(el) {
+        let y = 0;
+        for (let node = el; node && node !== list; node = node.offsetParent) {
+            y += node.offsetTop;
+        }
+        return y;
+    }
+
+    function mid(el) {
+        return top(el) + el.offsetHeight / 2;
+    }
+
+    // The tab goes into another item's tab list, first or last. A closed group gets a list for it alone (it goes at
+    // the end there); a list made that way goes again when the tab leaves it
+    function intoGroup(item, first) {
+        const tab = drag.item;
+        place(() => {
+            const left = tab.parentElement;
+            let tabs = item.querySelector(':scope > .tab-list');
+            if (!tabs) {
+                tabs = h('div', {class: 'tab-list drop-only'});
+                item.append(tabs);
+            }
+            tabs.insertBefore(tab, first ? tabs.firstChild : null);
+            if (left.classList.contains('drop-only')) {
+                left.remove();
+            }
+        });
+    }
+
+    // A dragged group swaps with a neighbour once the floating copy's middle passes the neighbour's middle; a dragged
+    // tab the same with the tabs of its list. Past its group's first or last tab it goes on into the group above or
+    // below: a group's row is that group's, from its top edge (over a closed group's row it goes into that group).
+    // After a move the way back needs the copy to pass the neighbour's new middle (or edge), so the rows don't flicker
+    // at the boundary.
     function update() {
         const listTop = list.getBoundingClientRect().top;
         const middle = drag.y - drag.offset + drag.ghost.offsetHeight / 2 - listTop + list.scrollTop;
-        const mid = (item) => item.offsetTop + item.offsetHeight / 2;
-        let next = drag.item.nextElementSibling;
-        while (next && next.classList.contains('item') && middle > mid(next)) {
-            place(drag.item, next.nextElementSibling);
-            next = drag.item.nextElementSibling;
+        const it = drag.item;
+        if (!drag.tab) {
+            let next = sibling(it, 1);
+            while (next && middle > mid(next)) {
+                place(() => list.insertBefore(it, next.nextSibling));
+                next = sibling(it, 1);
+            }
+            let prev = sibling(it, -1);
+            while (prev && middle < mid(prev)) {
+                place(() => list.insertBefore(it, prev));
+                prev = sibling(it, -1);
+            }
+            return;
         }
-        let prev = drag.item.previousElementSibling;
-        while (prev && prev.classList.contains('item') && middle < mid(prev)) {
-            place(drag.item, prev);
-            prev = drag.item.previousElementSibling;
+        for (;;) {
+            const next = it.nextElementSibling;
+            const below = next ? null : sibling(it.closest('.item'), 1);
+            if (next && middle > mid(next)) {
+                place(() => it.parentElement.insertBefore(it, next.nextSibling));
+            } else if (below && middle > top(rowOf(below))) {
+                intoGroup(below, true);
+            } else {
+                break;
+            }
+        }
+        for (;;) {
+            const prev = it.previousElementSibling;
+            const own = it.closest('.item');
+            const above = prev ? null : sibling(own, -1);
+            if (prev && middle < mid(prev)) {
+                place(() => it.parentElement.insertBefore(it, prev));
+            } else if (above && middle < top(rowOf(own))) {
+                intoGroup(above, false);
+            } else {
+                break;
+            }
+        }
+        // the group it would go to, if not its own
+        const target = it.closest('.item');
+        for (const item of items()) {
+            item.classList.toggle('drop-target', item === target && item !== drag.home.item);
         }
     }
 
@@ -106,30 +192,46 @@ export function enableDrag(list, {enabled, ghost, drop, ended}) {
         }
     }
 
-    // the click that ends a drag on the group's name must not open the group
+    // the click that ends a drag on a group's name must not open the group, on a tab must not open the tab
     function swallow(e) {
         e.preventDefault();
         e.stopPropagation();
     }
 
+    // what the press is on: the list may have been drawn again since (a save finishing), then the same group's or
+    // tab's new row
+    function pressed() {
+        if (press.item.isConnected) {
+            return press.item;
+        }
+        if (press.tab) {
+            const link = list.querySelector('a.tab-row[data-key="' + CSS.escape(press.key) + '"][data-index="' +
+                press.index + '"]');
+            return link && link.href === press.href ? link.parentElement : null;
+        }
+        return items().find((other) => other.dataset.key === press.key) || null;
+    }
+
     function start(e) {
-        // the list may have been drawn again since the press (a save finishing): the same group's new row
-        const item = press.item.isConnected ? press.item :
-            items().find((other) => other.dataset.key === press.item.dataset.key);
+        const item = pressed();
         if (!item) {
             press = null;
             return;
         }
-        const rect = item.querySelector('.row').getBoundingClientRect();
-        const copy = h('div', {class: 'drag-ghost', 'aria-hidden': 'true'}, ghost(item));
+        const tab = press.tab;
+        const rect = (tab ? item : rowOf(item)).getBoundingClientRect();
+        const copy = h('div', {class: ['drag-ghost', tab && 'tab-ghost'], 'aria-hidden': 'true'},
+            (tab ? tabGhost : ghost)(item));
         copy.style.left = Math.round(rect.left) + 'px';
         copy.style.width = Math.round(rect.width) + 'px';
         document.body.append(copy);
         drag = {
-            item, key: item.dataset.key, ghost: copy, y: e.clientY, offset: press.y - rect.top,
-            from: items().indexOf(item), home: item.nextSibling, pointerId: e.pointerId,
+            tab, item, key: press.key, ghost: copy, y: e.clientY, offset: press.y - rect.top, pointerId: e.pointerId,
+            // where it was: a group's place among the items; a tab's group and place in its list
+            home: {parent: item.parentElement, next: item.nextSibling, item: tab ? item.closest('.item') : null},
+            from: tab ? Array.from(item.parentElement.children).indexOf(item) : items().indexOf(item),
         };
-        // the row moves, not its open tab list (class `dragging` hides it)
+        // a group moves as its row, not with its open tab list (class `dragging` hides it)
         item.classList.add('dragging');
         document.body.classList.add('dragging');
         // on the list, not the row: moving the row in the list would end a capture on it
@@ -152,18 +254,39 @@ export function enableDrag(list, {enabled, ghost, drop, ended}) {
         if (list.hasPointerCapture(d.pointerId)) {
             list.releasePointerCapture(d.pointerId);
         }
-        if (!commit) {
-            place(d.item, d.home);
+        if (!commit && d.home.parent.isConnected) {
+            place(() => {
+                const left = d.item.parentElement;
+                d.home.parent.insertBefore(d.item, d.home.next);
+                if (left && left !== d.home.parent && left.classList.contains('drop-only')) {
+                    left.remove();
+                }
+            });
         }
         d.ghost.remove();
         d.item.classList.remove('dragging');
         document.body.classList.remove('dragging');
+        for (const item of list.querySelectorAll('.drop-target')) {
+            item.classList.remove('drop-target');
+        }
         window.addEventListener('click', swallow, true);
         setTimeout(() => window.removeEventListener('click', swallow, true), 0);
-        const pos = items().indexOf(d.item);
         // the row is gone if the list was drawn again meanwhile: nothing to drop
-        if (commit && d.item.isConnected && pos >= 0 && pos !== d.from) {
-            drop(d.key, pos);
+        if (commit && d.item.isConnected) {
+            if (d.tab) {
+                const tabs = d.item.parentElement;
+                const to = d.item.closest('.item');
+                const pos = Array.from(tabs.children).indexOf(d.item);
+                if (to && (to !== d.home.item || pos !== d.from)) {
+                    dropTab(d.item.querySelector('a.tab-row'), to.dataset.key,
+                        tabs.classList.contains('drop-only') ? null : pos);
+                }
+            } else {
+                const pos = items().indexOf(d.item);
+                if (pos >= 0 && pos !== d.from) {
+                    drop(d.key, pos);
+                }
+            }
         }
         if (ended) {
             ended();
@@ -174,12 +297,20 @@ export function enableDrag(list, {enabled, ghost, drop, ended}) {
         if (e.button !== 0 || drag || !enabled()) {
             return;
         }
+        const at = {x: e.clientX, y: e.clientY, pointerId: e.pointerId};
+        // a saved group's tab (its Edit and Remove buttons are next to the link, not in it)
+        const link = e.target.closest('a.tab-row[data-key]');
+        if (link && list.contains(link)) {
+            press = Object.assign(at, {tab: true, item: link.parentElement, key: link.dataset.key,
+                index: link.dataset.index, href: link.href});
+            return;
+        }
         const row = e.target.closest('.item > .row');
         // the row's buttons (chevron, Open, new window, ⋯) are for clicking; the name can be dragged
         if (!row || !list.contains(row) || (e.target.closest('button') && !e.target.closest('.name'))) {
             return;
         }
-        press = {item: row.parentElement, x: e.clientX, y: e.clientY, pointerId: e.pointerId};
+        press = Object.assign(at, {tab: false, item: row.parentElement, key: row.parentElement.dataset.key});
     });
     list.addEventListener('pointermove', (e) => {
         if (drag) {

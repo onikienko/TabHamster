@@ -440,6 +440,8 @@ body.keyboard .row:has(:focus) .end-meta {
     color: var(--text);
     font-size: 13px;
     text-decoration: none;
+    /* a press that moves drags the tab (js/popup/drag.js), it doesn't select its title */
+    user-select: none;
 }
 
 /* a row, not a link: no link colour under the pointer either */
@@ -1051,6 +1053,24 @@ body.keyboard .item.target > .row:has(:focus) {
 /* a dragged group moves as one row, its open tab list comes back after the drop */
 .item.dragging > .tab-list {
     display: none;
+}
+
+/* a dragged tab: its row stays in the list, dimmed, without Edit and Remove */
+.tab-item.dragging {
+    opacity: .35;
+}
+
+.tab-item.dragging > .tab-row {
+    background: transparent;
+}
+
+.tab-item.dragging .tab-actions {
+    opacity: 0;
+}
+
+/* the group a dragged tab will go to (a closed one shows the tab alone under its row) */
+.item.drop-target > .row {
+    background: var(--fresh);
 }
 
 .drag-ghost {

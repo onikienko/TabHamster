@@ -54,6 +54,17 @@ var groupStoreClient = (function () {
         addTab: function (key, tab) {
             return call('addTab', [key, tab]);
         },
+        /** like removeTab; the tab goes to `pos` among the group's other tabs (0 = first) */
+        moveTab: function (key, seen, index, pos) {
+            return call('moveTab', [key, seen, index, pos]);
+        },
+        /**
+         * The tab goes from group `key` to group `to`, at `pos` among its tabs: {from, to} (each like removeTab's
+         * answer; from.removed: it was the last tab, the group went to Recently deleted) or {unchanged, exists?}
+         */
+        moveTabTo: function (key, seen, index, to, pos) {
+            return call('moveTabTo', [key, seen, index, to, pos]);
+        },
         /** {synced, error?}: new name, tabs and place as they are now */
         rename: function (key, name) {
             return call('rename', [key, name]);

@@ -1499,7 +1499,7 @@
         }
     },
     "s_help_move": {
-        "message": "Reorders groups.",
+        "message": "Reorders groups, and tabs inside a group. Drag a tab onto another group to move it there.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_esc": {
@@ -1722,5 +1722,29 @@
     "s_help_welcome": {
         "message": "How to pin TabHamster to the toolbar",
         "description": "Settings page, Help. Link to the welcome page, under the list of keys"
+    },
+    "p_movedTo": {
+        "message": "Tab moved to “$NAME$”",
+        "description": "Bar after dragging a tab into another saved group, with Undo",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            }
+        }
+    },
+    "p_movedDeleted": {
+        "message": "Tab moved to “$NAME$”. “$OLD$” had no other tabs and was deleted.",
+        "description": "Bar after dragging the last tab of a group into another group: the group it left is deleted (Recently deleted). With Undo, which brings back both",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Extensions dev"
+            },
+            "old": {
+                "content": "$2",
+                "example": "Trip to Tofino"
+            }
+        }
     }
 }

@@ -863,6 +863,41 @@ var groupStore = (function () {
             return Object.assign(res, {h: now_rec.h, before: rec.g.tabs});
         }
 
+        // A tab moved from one group to another, both as they are now. pos: its place among the other group's tabs.
+        // The answer: {from, to}, each like changeTabsNow's; `from` is {synced, removed: true} when the tab was the
+        // group's last one (the group went to trash with the tab, a restore brings it back). {unchanged: true}: the tab
+        // is gone, or (exists) the other group has its address.
+        async function moveTabToNow(key, seen, index, to, pos) {
+            const records = await readRecords();
+            const rec = records[key];
+            const dest = records[to];
+            if (!rec || rec.discarded || rec.trashed || !dest || dest.discarded || dest.trashed) {
+                return {synced: false, error: NOT_FOUND};
+            }
+            const i = findTab(rec.g.tabs, seen, index);
+            if (i === -1) {
+                return {unchanged: true};
+            }
+            const tab = rec.g.tabs[i];
+            if (dest.g.tabs.some(other => other && other.url === tab.url)) {
+                return {unchanged: true, exists: true};
+            }
+            const dest_tabs = dest.g.tabs.slice();
+            dest_tabs.splice(Math.max(0, Math.min(pos, dest_tabs.length)), 0,
+                Object.assign({}, tab, {id: nextTabId(dest.g.tabs)}));
+            const tabs = rec.g.tabs.filter((other, j) => j !== i);
+            const groups = {[to]: {name: dest.g.name, index: dest.g.index, tabs: dest_tabs}};
+            if (tabs.length) {
+                groups[key] = {name: rec.g.name, index: rec.g.index, tabs};
+            }
+            const res = await saveNow(groups);
+            const after = await local.get([localKey(key), localKey(to)]);
+            const out = {to: Object.assign(res[to], {h: after[localKey(to)].h, before: dest.g.tabs})};
+            out.from = tabs.length ? Object.assign(res[key], {h: after[localKey(key)].h, before: rec.g.tabs}) :
+                Object.assign(await removeNow(key), {removed: true});
+            return out;
+        }
+
         async function removeNow(key) {
             const records = await readRecords();
             const rec = records[key];
@@ -1142,6 +1177,26 @@ var groupStore = (function () {
                 return tabs.some(saved => saved && saved.url === tab.url) ? null :
                     tabs.concat(Object.assign({}, tab, {id: nextTabId(tabs)}));
             }), [key]),
+            /** like removeTab; the tab goes to `pos` among the group's other tabs (0 = first) */
+            moveTab: (key, seen, index, pos) => change(() => changeTabsNow(key, function (tabs) {
+                const i = findTab(tabs, seen, index);
+                const rest = tabs.filter((tab, j) => j !== i);
+                const at = Math.max(0, Math.min(pos, rest.length));
+                if (i === -1 || at === i) {
+                    return null;
+                }
+                rest.splice(at, 0, tabs[i]);
+                return rest;
+            }), [key]),
+            /**
+             * The tab goes from group `key` to group `to`, at `pos` among its tabs (0 = first), with an id of its own
+             * there; one call for both groups.
+             * @returns {Promise<{from?: Object, to?: Object, unchanged?: boolean, exists?: boolean, synced?: boolean,
+             *   error?: string}>} from, to: like removeTab's answer for each group; `from.removed`: it was the group's
+             *   last tab, the group went to trash with it (restore brings it back); `unchanged`: the tab is gone, or
+             *   (`exists`) `to` has its address, nothing was done
+             */
+            moveTabTo: (key, seen, index, to, pos) => change(() => moveTabToNow(key, seen, index, to, pos), [key, to]),
             /** @returns {Promise<{synced: boolean, error?: string}>} new name, tabs and place stay */
             rename: (key, name) => change(() => editNow({[key]: g => ({name, index: g.index, tabs: g.tabs})}), [key])
                 .then(res => res[key]),

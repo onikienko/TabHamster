@@ -224,6 +224,16 @@ test('page client: tab changes, add, discard and their arguments reach the store
         {url: 'https://x.example/', title: 'X', id: 2}, {url: 'https://new.example/', title: 'New', id: 3, pinned: true}]);
     assert.deepEqual(await client.removeTab('tg_9', t[0], 0), {synced: false, error: 'Group not found'});
 
+    // moves inside a group and to another one
+    const moved = await client.moveTab('tg_1', t[0], 0, 2);
+    assert.equal(moved.synced, true);
+    await client.save('tg_3', {name: 'other', index: 3, tabs: makeTabs(1, 6)});
+    const across = await client.moveTabTo('tg_1', t[0], 2, 'tg_3', 0);
+    assert.equal(across.to.synced, true);
+    assert.deepEqual(JSON.parse(JSON.stringify((await client.list()).tg_3.tabs[0])), Object.assign({}, t[0], {id: 1}));
+    await client.setTabs('tg_1', across.from.before, across.from.h);
+    await client.discard('tg_3');
+
     // Undo of a new save: the group goes and isn't kept in Recently deleted
     const group = {name: 'new', index: 2, tabs: makeTabs(2, 5)};
     await client.save('tg_2', group);

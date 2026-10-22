@@ -12,12 +12,12 @@ let bar = null;
 let timer = null;
 let held = false;
 let stays = false;
-// what the bar's action is about (a group key), for hideBarAbout
-let about = null;
+// what the bar's action is about (group keys), for hideBarAbout
+let about = [];
 
 function hide() {
     clearTimeout(timer);
-    about = null;
+    about = [];
     stays = false;
     if (bar) {
         bar.hidden = true;
@@ -69,14 +69,14 @@ ensure();
 /**
  * showBar('Saved 12 tabs as "x"', {label: 'Undo', run: async () => {...}, about: 'tg_1'})
  * The text can be a list of strings and elements (a ? button with a tooltip).
- * One of the actions runs, once; the bar hides when one is pressed. `about` (optional): what the action is about, see
- * hideBarAbout. A list of actions makes buttons in that order; `stay` keeps the bar until one is pressed (or another
- * message replaces it).
+ * One of the actions runs, once; the bar hides when one is pressed. `about` (optional): what the action is about (a
+ * group key or a list of them), see hideBarAbout. A list of actions makes buttons in that order; `stay` keeps the bar
+ * until one is pressed (or another message replaces it).
  */
 export function showBar(text, action, {stay = false} = {}) {
     const el = ensure();
     const actions = [action || []].flat();
-    about = (actions[0] && actions[0].about) || null;
+    about = [(actions[0] && actions[0].about) || []].flat();
     stays = stay;
     el.replaceChildren(h('span', {class: 'bar-text'}, text));
     let done = false;
@@ -101,7 +101,7 @@ export function showBar(text, action, {stay = false} = {}) {
 
 /** hides the bar if its action is about `what` (an Undo that a later change to the same group would make wrong) */
 export function hideBarAbout(what) {
-    if (what && what === about) {
+    if (what && about.includes(what)) {
         hide();
     }
 }
