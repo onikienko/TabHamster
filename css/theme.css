@@ -8,6 +8,8 @@
     --field-text: #0E2633;
     --field-ph: #5B6B78;
     --field-line: transparent;
+    /* the field is focused while the popup is open: the Save blue, not a near-black frame on the cyan band */
+    --field-ring: #0079AC;
     --save: #0079AC;
     --on-save: #FFFFFF;
     --bg: #F6F9FB;
@@ -56,6 +58,7 @@
     --field-text: #E6F4FA;
     --field-ph: #89A9B8;
     --field-line: #1F5A70;
+    --field-ring: #8FDDF7;
     --save: #00B6E8;
     --on-save: #00222F;
     --bg: #10181D;
@@ -102,6 +105,7 @@
         --field-text: #E6F4FA;
         --field-ph: #89A9B8;
         --field-line: #1F5A70;
+        --field-ring: #8FDDF7;
         --save: #00B6E8;
         --on-save: #00222F;
         --bg: #10181D;

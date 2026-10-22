@@ -44,7 +44,7 @@ button {
 }
 
 .field:focus-within {
-    box-shadow: 0 0 0 2px var(--on-tonal);
+    box-shadow: 0 0 0 2px var(--field-ring);
 }
 
 .field-icon {
