@@ -100,12 +100,17 @@ p {
 }
 
 section {
-    padding-bottom: 40px;
+    padding-bottom: 28px;
     scroll-margin-top: 20px;
 }
 
+section + section {
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+}
+
 h2 {
-    margin: 0 0 6px;
+    margin: 0 0 4px;
     font-size: 17px;
     font-weight: 600;
     line-height: 24px;
@@ -134,8 +139,7 @@ h2 {
     flex-wrap: wrap;
     align-items: center;
     gap: 12px 24px;
-    padding: 14px 0;
-    border-top: 1px solid var(--line);
+    padding: 12px 0;
 }
 
 .row-label {
@@ -307,7 +311,6 @@ h2 {
     flex-direction: column;
     gap: 10px;
     padding-top: 14px;
-    border-top: 1px solid var(--line);
 }
 
 .usage {
@@ -434,7 +437,7 @@ h2 {
 .keys .row {
     flex-wrap: nowrap;
     align-items: baseline;
-    padding: 10px 0;
+    padding: 8px 0;
 }
 
 .keys dt {
@@ -452,7 +455,6 @@ h2 {
 
 .welcome-link {
     padding-top: 14px;
-    border-top: 1px solid var(--line);
     font-size: 13px;
 }
 
@@ -465,7 +467,6 @@ h2 {
 
 .about-text {
     padding-top: 14px;
-    border-top: 1px solid var(--line);
 }
 
 .credits {
