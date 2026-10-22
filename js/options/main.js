@@ -190,7 +190,6 @@ function general() {
     return [
         row('theme_label', t('s_theme'), t('s_theme_text'), themeControl('theme_label')),
         row('date_label', t('o_dateFormat_text'), t('s_dateFormat_text'), dateFormatControl('date_format'), 'date_format'),
-        row('sessions_label', t('s_sessions'), t('s_sessions_text'), switchControl('session_watcher', 'sessions_label')),
         // not asked yet ('ask') is off
         row('site_icons_label', t('s_siteIcons'), t('s_siteIcons_text'),
             switchControl('site_icons', 'site_icons_label', 'load', 'off')),
@@ -201,6 +200,7 @@ function saving() {
     return [
         row('cur_win_label', t('s_curWin'), t('s_curWin_text'), switchControl('cur_win', 'cur_win_label')),
         row('pinned_label', t('o_savedTabs_pinned'), t('s_pinned_text'), switchControl('pinned', 'pinned_label')),
+        row('sessions_label', t('s_sessions'), t('s_sessions_text'), switchControl('session_watcher', 'sessions_label')),
     ];
 }
 
@@ -309,26 +309,41 @@ function renderTrash() {
     box.append(h('ul', {class: 'rows'}, state.trash.map(trashRow)));
 }
 
+// a key marked in a text, drawn as a key cap by keyCaps(); private use characters, never in translations
+const cap = (key) => '\uE000' + key + '\uE001';
+
+/** text with a <kbd> for each cap() and each arrow: "↓, then [Return]" */
+function keyCaps(text) {
+    const parts = [];
+    let at = 0;
+    for (const m of text.matchAll(/\uE000([^\uE001]*)\uE001|[←↑→↓]/g)) {
+        parts.push(text.slice(at, m.index), h('kbd', null, m[1] === undefined ? m[0] : m[1]));
+        at = m.index + m[0].length;
+    }
+    parts.push(text.slice(at));
+    return parts;
+}
+
 function help() {
-    const enter = keyLabel('enter');
+    const enter = cap(keyLabel('enter'));
     // a modifier before a click or a key: "⇧ click" on a Mac, "Shift + click" elsewhere
-    const modifier = (key) => keyLabel(key) + (isMac() ? ' ' : ' + ');
+    const modifier = (key) => cap(keyLabel(key)) + (isMac() ? ' ' : ' + ');
     const tips = [
         [enter, t('s_help_enter')],
         [t('s_help_typeKey'), t('s_help_type')],
         [t('s_help_downKey', enter), t('s_help_down')],
-        [t('s_help_clickKey'), t('s_help_click', enter)],
+        [t('s_help_clickKey'), t('s_help_click', keyLabel('enter'))],
         [t('s_help_shiftKey', modifier('shift')), t('s_help_shift')],
         ['→ ←', t('s_help_arrows')],
         [t('s_help_moveKey', modifier('alt')), t('s_help_move')],
-        [keyLabel('esc'), t('s_help_esc')],
+        [cap(keyLabel('esc')), t('s_help_esc')],
         ['⋯', t('s_help_more')],
-        [keyLabel('delete'), t('s_help_delete')],
-        ['F2', t('s_help_f2')],
+        [cap(keyLabel('delete')), t('s_help_delete')],
+        [cap('F2'), t('s_help_f2')],
         [t('s_help_sessionsKey'), t('s_help_sessions')],
     ];
     return [h('dl', {class: 'keys'}, tips.map(([key, text]) => h('div', {class: 'row'},
-        h('dt', null, key), h('dd', null, text)))),
+        h('dt', null, keyCaps(key)), h('dd', null, text)))),
     h('p', {class: 'welcome-link'}, h('a', {href: 'welcome.html'}, t('s_help_welcome')))];
 }
 

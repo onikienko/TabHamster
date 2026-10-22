@@ -453,6 +453,19 @@ h2 {
     line-height: 19px;
 }
 
+.keys kbd {
+    display: inline-block;
+    min-width: 22px;
+    padding: 0 6px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: var(--surface);
+    font: 600 12px/18px var(--font);
+    text-align: center;
+    white-space: nowrap;
+}
+
 .welcome-link {
     padding-top: 14px;
     font-size: 13px;
@@ -563,6 +576,8 @@ h2 {
 
     .keys .row {
         flex-wrap: wrap;
+        row-gap: 4px;
+        padding: 10px 0;
     }
 
     .keys dt {
