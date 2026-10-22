@@ -22,9 +22,9 @@ export function keyLabel(key, mac) {
     const m = mac === undefined ? isMac() : mac;
     const labels = {
         enter: m ? keyName('return', 'Return') : keyName('enter', 'Enter'),
-        alt: m ? '⌥ ' + keyName('option', 'Option') : keyName('alt', 'Alt'),
+        alt: m ? '⌥' : keyName('alt', 'Alt'),
         mod: m ? '⌘' : keyName('ctrl', 'Ctrl'),
-        shift: '⇧ ' + keyName('shift', 'Shift'),
+        shift: m ? '⇧' : keyName('shift', 'Shift'),
         esc: keyName('esc', 'Esc'),
         delete: m ? '⌫' : keyName('delete', 'Delete'),
     };

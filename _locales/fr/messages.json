@@ -1472,11 +1472,11 @@
     },
     "s_help_shiftKey": {
         "message": "$KEY$ + clic",
-        "description": "Settings page. Help, key list. Left column. KEY is ⇧ Shift",
+        "description": "Settings page. Help, key list. Left column. KEY is Shift, or ⇧ on a Mac",
         "placeholders": {
             "key": {
                 "content": "$1",
-                "example": "⇧ Shift"
+                "example": "Shift"
             }
         }
     },
@@ -1490,7 +1490,7 @@
     },
     "s_help_moveKey": {
         "message": "Glisser, ou $KEY$ + ↑ ↓",
-        "description": "Settings page. Help, key list. Left column. KEY is Alt, or ⌥ Option on a Mac",
+        "description": "Settings page. Help, key list. Left column. KEY is Alt, or ⌥ on a Mac",
         "placeholders": {
             "key": {
                 "content": "$1",
@@ -1561,10 +1561,6 @@
     "key_shift": {
         "message": "Maj",
         "description": "Key name (Shift), as Chrome's menus write it in this language"
-    },
-    "key_option": {
-        "message": "Option",
-        "description": "Key name on a Mac keyboard (Option), as macOS calls it in this language"
     },
     "key_esc": {
         "message": "Échap",

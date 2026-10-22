@@ -12,7 +12,9 @@ test('isMac from userAgentData, then platform', () => {
 test('keyLabel per platform', () => {
     assert.equal(keyLabel('enter', true), 'Return');
     assert.equal(keyLabel('enter', false), 'Enter');
-    assert.equal(keyLabel('alt', true), '⌥ Option');
+    assert.equal(keyLabel('alt', true), '⌥');
+    assert.equal(keyLabel('shift', true), '⇧');
+    assert.equal(keyLabel('shift', false), 'Shift');
     assert.throws(() => keyLabel('nope', true));
 });
 

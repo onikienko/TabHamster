@@ -1831,11 +1831,11 @@
     },
     "s_help_shiftKey": {
         "message": "$KEY$ + клацання",
-        "description": "Settings page. Help, key list. Left column. KEY is ⇧ Shift",
+        "description": "Settings page. Help, key list. Left column. KEY is Shift, or ⇧ on a Mac",
         "placeholders": {
             "key": {
                 "content": "$1",
-                "example": "⇧ Shift"
+                "example": "Shift"
             }
         }
     },
@@ -1849,7 +1849,7 @@
     },
     "s_help_moveKey": {
         "message": "Перетягування або $KEY$ + ↑ ↓",
-        "description": "Settings page. Help, key list. Left column. KEY is Alt, or ⌥ Option on a Mac",
+        "description": "Settings page. Help, key list. Left column. KEY is Alt, or ⌥ on a Mac",
         "placeholders": {
             "key": {
                 "content": "$1",
@@ -1920,10 +1920,6 @@
     "key_shift": {
         "message": "Shift",
         "description": "Key name (Shift), as Chrome's menus write it in this language"
-    },
-    "key_option": {
-        "message": "Option",
-        "description": "Key name on a Mac keyboard (Option), as macOS calls it in this language"
     },
     "key_esc": {
         "message": "Esc",
