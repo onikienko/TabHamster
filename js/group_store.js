@@ -904,6 +904,9 @@ var groupStore = (function () {
         // group's last one (the group went to trash with the tab, a restore brings it back). {unchanged: true}: the tab
         // is gone. The other group may have its address already: it gets the tab all the same.
         async function moveTabToNow(key, seen, index, to, pos) {
+            if (to === key) {
+                return {unchanged: true};
+            }
             const records = await readRecords();
             const rec = records[key];
             const dest = records[to];
@@ -1230,7 +1233,8 @@ var groupStore = (function () {
              * there (also when `to` has its address already); one call for both groups.
              * @returns {Promise<{from?: Object, to?: Object, unchanged?: boolean, synced?: boolean, error?: string}>}
              *   from, to: like removeTab's answer for each group; `from.removed`: it was the group's last tab, the
-             *   group went to trash with it (restore brings it back); `unchanged`: the tab is gone, nothing was done
+             *   group went to trash with it (restore brings it back); `unchanged`: the tab is gone, or `to` is `key`
+             *   (moveTab is for that), nothing was done
              */
             moveTabTo: (key, seen, index, to, pos) => change(() => moveTabToNow(key, seen, index, to, pos), [key, to]),
             /** @returns {Promise<{synced: boolean, error?: string}>} new name, tabs and place stay */

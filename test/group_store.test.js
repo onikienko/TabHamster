@@ -662,6 +662,8 @@ test('moveTabTo: the tab goes to the other group with an id of its own; Undo put
     // a tab that is gone, a group that is gone: nothing done
     assert.deepEqual(await store.moveTabTo('tg_1', {url: 'https://gone.example/', id: 9}, 0, 'tg_2', 0), {unchanged: true});
     assert.deepEqual(await store.moveTabTo('tg_1', a[0], 0, 'tg_9', 0), {synced: false, error: 'Group not found'});
+    // into its own group: refused (moveTab is for that)
+    assert.deepEqual(await store.moveTabTo('tg_1', a[0], 0, 'tg_1', 2), {unchanged: true});
     await store.remove('tg_3');
     assert.deepEqual(await store.moveTabTo('tg_1', a[0], 0, 'tg_3', 0), {synced: false, error: 'Group not found'});
     assert.deepEqual(await store.moveTabTo('tg_3', a[0], 0, 'tg_1', 0), {synced: false, error: 'Group not found'});
