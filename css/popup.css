@@ -240,17 +240,12 @@ body.keyboard .row:has(> .name:focus) {
     box-shadow: inset 3px 0 0 var(--focus);
 }
 
+/* the current session's dot, before its name */
 .live {
     flex: none;
-    display: grid;
-    place-items: center;
-    width: 24px;
-}
-
-.live::before {
-    content: '';
     width: 8px;
     height: 8px;
+    margin-left: 3px;
     border-radius: 4px;
     background: var(--meter);
     box-shadow: 0 0 0 3px var(--tonal);
@@ -284,12 +279,21 @@ body.keyboard .row:has(> .name:focus) {
     width: var(--w-date, auto);
 }
 
-.meta.wins {
+/* windows of a session; the current session's closed tabs */
+.meta.wins,
+.meta.closed {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 3px;
+}
+
+.meta.wins {
     width: var(--w-wins, auto);
+}
+
+.meta.closed {
+    width: var(--w-closed, auto);
 }
 
 /* space in sync storage ("Biggest first"); also next to the row's buttons */

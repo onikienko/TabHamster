@@ -778,6 +778,10 @@
             }
         }
     },
+    "p_nothingClosed": {
+        "message": "Aquí aparecerán las pestañas y ventanas cerradas.",
+        "description": "Sessions tab: the current session expanded while nothing in it was closed yet"
+    },
     "p_closedTabs_one": {
         "message": "$COUNT$ pestaña cerrada",
         "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",

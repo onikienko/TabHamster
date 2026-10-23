@@ -1545,7 +1545,7 @@ function rowEnd(details, actions) {
 }
 
 // columns of the row details; fitColumns sets --w-<column> on the list
-const COLUMNS = ['count', 'date', 'size', 'wins'];
+const COLUMNS = ['closed', 'count', 'date', 'size', 'wins'];
 
 /**
  * Sets the column widths for the list's new content, before it goes in. Measured on a copy of each different entry,
@@ -1648,8 +1648,6 @@ function sessionItem(result) {
     const ends = windows.filter(isEnd);
     const tabs = ends.flatMap((win) => win.tabs);
     const closed = session.tabs.length - tabs.length;
-    // the live session shows only what was closed: with nothing closed it has nothing to show
-    const expandable = !current || closed > 0;
     const id = 'sessions:' + key;
     const name = sessionName(key);
     // the row counts the tabs at the end (what Restore opens); while searching, the found ones of those searched (all,
@@ -1664,16 +1662,19 @@ function sessionItem(result) {
     ].filter(Boolean);
     const item = h('div', {class: 'item', dataset: {key}},
         h('div', {class: 'row'},
-            current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron(id, partial),
-            expandable ? nameButton(id, partial, name, words.join(' · '),
+            chevron(id, partial),
+            current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : null,
+            nameButton(id, partial, name, words.join(' · '),
                 current ? () => toggleItem(id, partial) : () => restoreSession(session), null, [
                     ends.length > 1 && plural('p_windowsCount', ends.length),
                     !nothingOpen && tabCount(total, result, partial),
                     closed > 0 && plural('p_closedTabs', closed),
-                ]) :
-                setTip(h('span', {class: 'name ellipsis'}, marked(name)),
-                    {text: name, align: 'start', focus: false, quiet: true, when: isCut}),
+                ]),
             rowEnd([
+                // the live session's tabs are open: what it has to show is what was closed (while searching, the
+                // count is of those already)
+                current && closed > 0 && !partial ? countMeta('closed', numbers.format(closed),
+                    plural('p_closedTabs', closed), icon('closedTab', 13)) : null,
                 // one window is the usual case: only the tabs then
                 ends.length > 1 ? countMeta('wins', numbers.format(ends.length),
                     plural('p_windowsCount', ends.length), icon('window', 13)) : null,
@@ -1683,11 +1684,14 @@ function sessionItem(result) {
                 setTip(h('button', {class: 'open', type: 'button', onClick: single(() => restoreSession(session))}, t('p_restore')),
                     {text: t('p_restore_tip'), keys: [ENTER]}),
                 moreButton((button) => sessionMenu(key, button))))));
-    if (expandable && isExpanded(id, partial)) {
+    if (isExpanded(id, partial)) {
         const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
-        // the live session lists only windows with something closed, numbered among those
+        // the live session lists only windows with something closed, numbered among those; with nothing closed yet,
+        // what it will show
         const listed = current ? windows.filter((win) => win.closed || win.closedTabs.length) : windows;
-        item.append(h('div', {class: 'tab-list'}, listed.map((win, i) => sessionWindowRows(key, win, i, current, found))));
+        item.append(h('div', {class: 'tab-list'}, listed.length ?
+            listed.map((win, i) => sessionWindowRows(key, win, i, current, found)) :
+            h('p', {class: 'hint'}, t('p_nothingClosed'))));
     }
     return item;
 }
