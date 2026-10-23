@@ -51,6 +51,8 @@ const state = {
     results: {saved: [], sessions: []},
     // groups found through their tabs open by themselves while searching; these were closed by hand
     searchClosed: new Set(),
+    // groups and sessions ('saved:<key>', 'sessions:<key>') that show all their found tabs, not the first ones
+    searchMore: new Set(),
     ready: false,
     // Enter pressed before the data has loaded still saves (once it has)
     pendingSave: false,
@@ -1295,6 +1297,7 @@ function clearSearch() {
 function onQuery() {
     if (!parseQuery(el.field.value).length) {
         state.searchClosed.clear();
+        state.searchMore.clear();
     }
     if (!state.ready) {
         return;
@@ -1522,6 +1525,31 @@ function tabRow(tab, at, opts = {}) {
 
 // saved groups and sessions both use tg_<ms> keys, so an id includes the view.
 // `auto`: found through its tabs while searching, so open unless closed by hand
+// a group or session found through its tabs shows the first ones found, then a row with the rest (sessions can have
+// tens of thousands of matching tabs and pages: drawing them all took seconds on every key)
+const FOUND_SHOWN = 5;
+
+/** the found tabs shown of an item (`id`) of `count` found: all, or the first ones when there are more than one more */
+function foundShown(id, count) {
+    return count > FOUND_SHOWN + 1 && !state.searchMore.has(id) ? FOUND_SHOWN : count;
+}
+
+/** "12 more tabs" under the first found tabs of an item (`id`): shows the rest, the focus goes to the first of them */
+function moreFound(id, count) {
+    const button = h('button', {class: 'fold', type: 'button', onClick: () => {
+        const key = button.closest('.item').dataset.key;
+        const before = button.closest('.item').querySelectorAll('a.tab-row').length;
+        state.searchMore.add(id);
+        renderList();
+        const item = el.list.querySelector('.item[data-key="' + CSS.escape(key) + '"]');
+        const row = item && item.querySelectorAll('a.tab-row')[before];
+        if (row) {
+            row.focus();
+        }
+    }}, icon('chevronRight', 14), plural('p_moreFound', count));
+    return button;
+}
+
 function isExpanded(id, auto) {
     return auto ? !state.searchClosed.has(id) : state.expanded.has(id);
 }
@@ -1680,12 +1708,17 @@ function groupItem(result, target) {
                 moreButton((button) => groupMenu(key, button))))));
     const editing = state.editingTab && state.editingTab.key === key ? state.editingTab : null;
     if (isExpanded('saved:' + key, partial) || editing) {
-        const indexes = partial ? result.tabIndexes : group.tabs.map((tab, i) => i);
+        const found = partial ? result.tabIndexes : group.tabs.map((tab, i) => i);
+        // while searching, the first ones found (all while a tab of the group is being edited)
+        const indexes = partial && !editing ? found.slice(0, foundShown('saved:' + key, found.length)) : found;
         // the tab may have another place than when its editor was opened (an earlier change shown meanwhile)
         const edited = editing && editing.tab ? tabIndexIn(group.tabs, editing) : -1;
         const rows = indexes.map((i) => (i === edited ? tabEditor(key, editing) : tabRow(group.tabs[i], {key, index: i})));
         if (editing && !editing.tab) {
             rows.push(tabEditor(key, editing));
+        }
+        if (indexes.length < found.length) {
+            rows.push(moreFound('saved:' + key, found.length - indexes.length));
         }
         item.append(h('div', {class: 'tab-list'}, rows));
     }
@@ -1738,12 +1771,21 @@ function sessionItem(result) {
                     {text: t('p_restore_tip'), keys: [ENTER]}),
                 moreButton((button) => sessionMenu(key, button))))));
     if (isExpanded(id, partial)) {
-        const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
         // the live session lists only windows with something closed, numbered among those; with nothing closed yet,
         // what it will show
         const listed = current ? windows.filter((win) => win.closed || win.closedTabs.length) : windows;
+        let found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
+        let more = 0;
+        if (found) {
+            // the first ones in the order they are shown: each window's tabs, then its closed ones
+            const order = listed.flatMap((win) => (current && !win.closed ? [] : win.tabs).concat(win.closedTabs))
+                .filter((tab) => found.has(tab));
+            const shown = foundShown(id, order.length);
+            found = new Set(order.slice(0, shown));
+            more = order.length - shown;
+        }
         item.append(h('div', {class: 'tab-list'}, listed.length ?
-            listed.map((win, i) => sessionWindowRows(key, win, i, current, found)) :
+            [listed.map((win, i) => sessionWindowRows(key, win, i, current, found)), more ? moreFound(id, more) : null] :
             h('p', {class: 'hint'}, t('p_nothingClosed'))));
     }
     return item;

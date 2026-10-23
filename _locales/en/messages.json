@@ -806,6 +806,26 @@
             }
         }
     },
+    "p_moreFound_one": {
+        "message": "$COUNT$ more tab",
+        "description": "Search results: a row under the first found tabs of a group or session that shows the rest (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            }
+        }
+    },
+    "p_moreFound_other": {
+        "message": "$COUNT$ more tabs",
+        "description": "Search results: a row under the first found tabs of a group or session that shows the rest (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "12"
+            }
+        }
+    },
     "p_windowClosedTitle_one": {
         "message": "Window $NUMBER$, closed $TIME$, $COUNT$ tab",
         "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
