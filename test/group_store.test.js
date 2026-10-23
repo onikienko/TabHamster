@@ -894,6 +894,52 @@ test('replaceAll: a version the backup changes is kept in trash; one it has as i
     assert.deepEqual(Object.keys(await syncGroups(sync)).sort(), ['tg_100', 'tg_200', 'tg_300', 'tg_301']);
 });
 
+test('replaceAll: a version in Recently deleted that the backup changes is kept there, with its own time', async () => {
+    const {store, clock} = makeDevice();
+    await store.save('tg_100', makeGroup(5, 1, 'Work'));
+    clock.advance(1000);
+    // the wrong file, without tg_100: it goes to Recently deleted
+    await store.replaceAll({tg_200: makeGroup(2, 2)});
+    const first = (await store.listTrash()).find(g => g.key === 'tg_100');
+    clock.advance(1000);
+    // an older file, with tg_100 at an older version
+    const older = makeGroup(3, 1, 'Work');
+    assert.equal((await store.replaceAll({tg_100: older})).removed, 1, 'only tg_200 was in the list');
+    assert.deepEqual(plainList(await store.list()), {tg_100: older});
+    const kept = (await store.listTrash()).filter(g => g.tabs.length === 5);
+    assert.equal(kept.length, 1, 'the 5-tab version is still in Recently deleted');
+    assert.deepEqual([kept[0].key, kept[0].trashed, kept[0].by], ['tg_101', first.trashed, 'restore']);
+
+    // deleted by hand before the restore
+    await store.save('tg_300', makeGroup(4, 3));
+    clock.advance(1000);
+    await store.remove('tg_300');
+    const deleted = (await store.listTrash()).find(g => g.key === 'tg_300');
+    clock.advance(1000);
+    await store.replaceAll({tg_100: older, tg_300: makeGroup(2, 3)});
+    const copy = (await store.listTrash()).find(g => g.key === 'tg_301');
+    assert.deepEqual([copy.tabs, copy.trashed, copy.by], [makeTabs(4, 3), deleted.trashed, 'here']);
+
+    // the same content in Recently deleted: back in the list, no copy
+    await store.remove('tg_300');
+    const before = (await store.listTrash()).length;
+    await store.replaceAll({tg_100: older, tg_300: makeGroup(2, 3)});
+    assert.equal((await store.listTrash()).length, before - 1);
+});
+
+test('setTabs keep_old on a group deleted meanwhile: the deleted version stays in Recently deleted', async () => {
+    const {store, clock} = makeDevice();
+    await store.save('tg_100', makeGroup(5, 1));
+    await store.remove('tg_100');
+    const deleted = (await store.listTrash())[0];
+    clock.advance(1000);
+    const res = await store.setTabs('tg_100', makeTabs(2, 9), undefined, true);
+    assert.equal(res.kept, 'tg_101');
+    assert.deepEqual(plain((await store.list()).tg_100).tabs, makeTabs(2, 9));
+    const copy = (await store.listTrash())[0];
+    assert.deepEqual([copy.key, copy.tabs, copy.trashed, copy.by], ['tg_101', makeTabs(5, 1), deleted.trashed, 'here']);
+});
+
 test('replaceAll with a nearly full sync: the backup still ends up in sync', async () => {
     const {store, sync} = makeDevice();
     for (let i = 1; i <= 6; i++) {

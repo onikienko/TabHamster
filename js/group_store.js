@@ -810,13 +810,22 @@ var groupStore = (function () {
         }
 
         // A version of a group that is about to be replaced, kept in trash under a key of its own next to the original's
-        // time, so an unnamed group shows about the same date (only on this computer, never in sync).
-        // taken: more keys it must not use. Returns the key.
+        // time, so an unnamed group shows about the same date (only on this computer, never in sync). One in trash
+        // already keeps its time (its 30 days) and why it went. taken: more keys it must not use. Returns the key.
         async function keepInTrash(records, sync_items, key, trashed_by, taken = {}) {
             const time = parseInt(key.slice(GROUP_PREFIX.length), 10);
             const copy_key = freeKey(Object.assign({}, taken, records), sync_items, Number.isFinite(time) ? time + 1 : now());
             const rec = records[key];
-            await putRecord(records, copy_key, {g: rec.g, h: rec.h, synced: false, base: null, trashed: now(), trashed_by});
+            const copy = {g: rec.g, h: rec.h, synced: false, base: null, trashed: now(), trashed_by};
+            if (rec.trashed) {
+                copy.trashed = rec.trashed;
+                if (rec.trashed_by) {
+                    copy.trashed_by = rec.trashed_by;
+                } else {
+                    delete copy.trashed_by;
+                }
+            }
+            await putRecord(records, copy_key, copy);
             return copy_key;
         }
 
@@ -837,7 +846,7 @@ var groupStore = (function () {
                 return Object.assign(res, {copy: copy_key, h: rec.h});
             }
             let kept = null;
-            if (keep_old && !rec.trashed && !sameContent(rec.g, g)) {
+            if (keep_old && !sameContent(rec.g, g)) {
                 kept = await keepInTrash(records, await sync.get(null), key, 'replace');
             }
             // a copy can still be made here: sync may have a newer version this computer hasn't seen yet
@@ -961,12 +970,15 @@ var groupStore = (function () {
 
         // Restore from a backup: the given groups replace all current ones. Writes before it deletes, so an
         // interruption leaves old and new groups, never neither. Replaced groups go to trash; so does the current
-        // version of a group the backup changes, under a key of its own (only on this computer, never in sync).
+        // version of a group the backup changes, under a key of its own (only on this computer, never in sync), also
+        // when that version is in trash.
         async function replaceAllNow(groups) {
             const records = await readRecords();
+            // also a version in trash already (deleted, or left out by an earlier restore): not lost to an older one
             const changed = Object.keys(groups).filter(function (key) {
-                return records[key] && !records[key].trashed && !sameContent(records[key].g, groups[key]);
+                return records[key] && !records[key].discarded && !sameContent(records[key].g, groups[key]);
             });
+            const shown = changed.filter(key => !records[key].trashed).length;
             if (changed.length) {
                 const sync_items = await sync.get(null);
                 for (const key of changed) {
@@ -998,7 +1010,7 @@ var groupStore = (function () {
             }
             // backup groups that didn't fit in sync next to the old ones can go there now
             const done = await syncKeys(await readRecords());
-            return {saved: Object.keys(groups).length, removed: others.length + changed.length, errors: done.errors};
+            return {saved: Object.keys(groups).length, removed: others.length + shown, errors: done.errors};
         }
 
         async function restoreNow(key) {
@@ -1230,7 +1242,8 @@ var groupStore = (function () {
             restore: (key) => change(() => restoreNow(key), [key]),
             /**
              * @returns {Promise<{saved: number, removed: number, errors: Object}>} groups not given go to trash, and
-             *   the current versions of groups given with another name or tabs (removed counts both)
+             *   the current versions of groups given with another name or tabs, also those in trash already (they keep
+             *   their time there); removed: how many of these were in the list
              */
             replaceAll: (groups) => change(() => replaceAllNow(groups), Object.keys(groups)),
             /** @returns {Promise<{errors: Object, copies: Object}>} */
