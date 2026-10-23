@@ -356,9 +356,11 @@ function inSessionQueue(fn) {
 }
 
 // What happened since the last write, for the next one to take: addresses a tab went through ({url, title, at} by
-// tab id), windows closing (their tabs go with them, not one by one), tab ids Chrome replaced (old id -> new id).
+// tab id), the last title a tab got and for which address ({url, title} by tab id: the page it belongs to may have
+// been written without it), windows closing (their tabs go with them, not one by one), tab ids Chrome replaced
+// (old id -> new id).
 function newNotes() {
-    return {steps: new Map(), closing: new Set(), replaced: new Map()};
+    return {steps: new Map(), titles: new Map(), closing: new Set(), replaced: new Map()};
 }
 
 let session_notes = newNotes();
@@ -436,15 +438,17 @@ function sameRun(stored, open) {
 /**
  * An open tab as stored: where it was at the last write (`before`), the addresses it went through since (`steps`)
  * and where it is now. A new address puts the one before into the trail (not a new tab page); the same address
- * again (a reload) adds nothing.
+ * again (a reload) adds nothing. `seen`: the last title the tab got since the last write, {url, title}; it goes to the
+ * page it came for (written before it came, when the tab went on at once).
  */
-function sessionTab(tab, before, steps, now) {
+function sessionTab(tab, before, steps, now, seen) {
     const url = tab.url || tab.pendingUrl || '';
-    // a tab still loading a new address can have the page before's title: none is better than a wrong one (its load
-    // ending writes again, onUpdated). A page of a single-page app keeps the title it has: it may well be the same.
-    const title = before && url !== before.url && tab.status === 'loading' && tab.title === before.title ? '' : tab.title;
-    const path = (before ? [{url: before.url, title: before.title, at: before.at}] : [])
-        .concat(steps, [{url, title, at: now}]);
+    const was = before && {url: before.url, title: seen && seen.url === before.url ? seen.title : before.title, at: before.at};
+    // a loading tab's title can still be the page before's: while it loads, the title its address already has (a
+    // reload), none for a new one; the load ending writes again (onUpdated). A page of a single-page app (no load)
+    // takes the title it has, even the same one.
+    const title = before && tab.status === 'loading' ? (url === before.url ? was.title : '') : tab.title;
+    const path = (was ? [was] : []).concat(steps, [{url, title, at: now}]);
     const trail = before && before.trail ? before.trail.slice() : [];
     let here = null;
     path.forEach(function (step) {
@@ -487,7 +491,7 @@ function mergeSession(stored, open, window_ids, notes, now) {
         before.delete(tab.id);
         // a window with open tabs isn't closed (a close that was cancelled)
         delete windows[tab.windowId];
-        return sessionTab(tab, was, notes.steps.get(tab.id) || [], now);
+        return sessionTab(tab, was, notes.steps.get(tab.id) || [], now, notes.titles.get(tab.id));
     });
     before.forEach(function (tab) {
         if (tab.closed || windows[tab.windowId]) {
@@ -574,17 +578,22 @@ function updateCurrentSession() {
 }
 
 // A new address goes into the tab's notes at once: two in one burst both reach the trail. Its title comes later
-// (at this point the tab still has the page before's).
-function onUpdated(tab_id, change_info) {
+// (at this point the tab still has the page before's): it goes to that address's note, and is kept with its address
+// for the next write, which may come after the tab went on (the page was written without it).
+function onUpdated(tab_id, change_info, tab) {
     const steps = session_notes.steps;
     if (change_info.url) {
         if (!steps.has(tab_id)) {
             steps.set(tab_id, []);
         }
         steps.get(tab_id).push({url: change_info.url, title: '', at: Date.now()});
-    } else if (change_info.title && steps.has(tab_id)) {
+    } else if (change_info.title) {
         const list = steps.get(tab_id);
-        list[list.length - 1].title = change_info.title;
+        if (list) {
+            list[list.length - 1].title = change_info.title;
+        }
+        const url = list ? list[list.length - 1].url : tab && (tab.url || tab.pendingUrl);
+        session_notes.titles.set(tab_id, {url, title: change_info.title});
     }
     if (change_info.url || 'pinned' in change_info || 'groupId' in change_info) {
         updateCurrentSession();
@@ -612,9 +621,11 @@ function onWindowRemoved(window_id) {
 // prerendered pages and discarded tabs come back under a new id: the session keeps the tab
 function onReplaced(added_id, removed_id) {
     session_notes.replaced.set(removed_id, added_id);
-    if (session_notes.steps.has(removed_id)) {
-        session_notes.steps.set(added_id, session_notes.steps.get(removed_id));
-        session_notes.steps.delete(removed_id);
+    for (const notes of [session_notes.steps, session_notes.titles]) {
+        if (notes.has(removed_id)) {
+            notes.set(added_id, notes.get(removed_id));
+            notes.delete(removed_id);
+        }
     }
     updateCurrentSession();
 }

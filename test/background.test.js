@@ -737,10 +737,11 @@ test('sessions: a burst of tab events makes a few writes, and the last one has e
 });
 
 // mergeSession runs in the background's sandbox (its objects have their own prototypes: compared as JSON).
-// notes: {steps: {tabId: [{url, title, at}]}, closing: [windowId], replaced: [[oldId, newId]]}
+// notes: {steps: {tabId: [{url, title, at}]}, titles: {tabId: {url, title}}, closing: [windowId], replaced: [[oldId, newId]]}
 function merge(bg, stored, open, window_ids, notes = {}, now = 1000) {
     const n = bg.context.newNotes();
     Object.entries(notes.steps || {}).forEach(([id, steps]) => n.steps.set(Number(id), steps));
+    Object.entries(notes.titles || {}).forEach(([id, seen]) => n.titles.set(Number(id), seen));
     (notes.closing || []).forEach(id => n.closing.add(id));
     (notes.replaced || []).forEach(([from, to]) => n.replaced.set(from, to));
     const session = bg.context.mergeSession(stored, open, new Set(window_ids), n, now);
@@ -907,12 +908,42 @@ test('session tabs: a tab still loading a new address doesn\'t get the page befo
     // still loading: Chrome gives the old title with the new address
     s = merge(bg, s, [{...openTab(1, 'https://b.com/'), title: 'T https://a.com/', status: 'loading'}], [1], {}, 200);
     assert.equal(s.tabs[0].title, '');
+    // a title that came for the new address while it loads (not the same as the page before's): still none until loaded
+    s = merge(bg, s, [{...openTab(1, 'https://b.com/'), title: 'Half', status: 'loading'}], [1], {}, 220);
+    assert.equal(s.tabs[0].title, '');
     // loaded, with the same title (the load ending writes again)
     s = merge(bg, s, [{...openTab(1, 'https://b.com/'), title: 'T https://a.com/', status: 'complete'}], [1], {}, 250);
     assert.equal(s.tabs[0].title, 'T https://a.com/');
     // a single-page app: a new address, loaded, the same title: kept
     s = merge(bg, s, [{...openTab(1, 'https://b.com/#2'), title: 'T https://a.com/', status: 'complete'}], [1], {}, 300);
     assert.deepEqual([s.tabs[0].title, s.tabs[0].trail.map(step => step.title)], ['T https://a.com/', ['T https://a.com/', 'T https://a.com/']]);
+});
+
+test('sessions: going on before a page\'s title was written keeps the title with that page', async () => {
+    const local = createStorageArea();
+    let open = [{...openTab(1, 'https://a.com/'), title: 'Page A', status: 'complete'}];
+    const browser = fakeBrowser();
+    browser.tabs.query = async () => open.map(tab => ({...tab}));
+    browser.windows.getAll = async () => [{id: 1}];
+    const bg = startBackground({local, browser});
+    vm.runInContext('session_config.title_wait = 5000', bg.context);
+    await waitFor(async () => (await sessionKeys(local)).length === 1);
+    const update = (change, tab) => bg.chrome.tabs.onUpdated.listeners.forEach(fn => fn(1, change, tab));
+    const stored = async () => Object.values(await local.get(await sessionKeys(local)))[0].tabs[0];
+    // A -> B: written at once, while B loads with A's title
+    open = [{...openTab(1, 'https://b.com/'), title: 'Page A', status: 'loading'}];
+    update({url: 'https://b.com/', status: 'loading'}, open[0]);
+    await settle();
+    assert.deepEqual([(await stored()).url, (await stored()).title], ['https://b.com/', '']);
+    // B's title comes (the write for it waits), then B -> C before that write
+    open = [{...openTab(1, 'https://b.com/'), title: 'Page B', status: 'complete'}];
+    update({title: 'Page B'}, open[0]);
+    open = [{...openTab(1, 'https://c.com/'), title: 'Page B', status: 'loading'}];
+    update({url: 'https://c.com/', status: 'loading'}, open[0]);
+    await settle();
+    const tab = await stored();
+    assert.deepEqual(tab.trail.map(step => [step.url, step.title]), [['https://a.com/', 'Page A'], ['https://b.com/', 'Page B']]);
+    assert.deepEqual([tab.url, tab.title], ['https://c.com/', '']);
 });
 
 test('sessions: a title change alone writes once after a while, not each time', async () => {
