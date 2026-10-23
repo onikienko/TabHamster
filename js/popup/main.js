@@ -617,13 +617,46 @@ function moveDone() {
     return --movesLeft === 0 ? afterChange(null) : null;
 }
 
-/** puts a group at `pos` among the others (0 = top); usually only its own index changes (js/order.js) */
-function moveGroup(key, pos) {
+// A held Alt+↑ ↓ (key repeats, about 30 a second): each step shows at once, the steps are saved as one move when the
+// key is let go. Each save writes the whole group to sync, up to 3 writes for a big one, and Chrome allows 120 a minute.
+// {group: key, changes} or {at, pos} (a tab), with `saved`: the showChange answers
+let held = null;
+
+/** saves the held steps, if any; before any other move, so the background gets them in order */
+function saveHeld() {
+    const steps = held;
+    held = null;
+    if (steps && steps.group) {
+        saveGroupMove(steps.changes, steps.saved);
+    } else if (steps) {
+        saveTabMove(steps.at, steps.pos, steps.saved);
+    }
+}
+
+/**
+ * puts a group at `pos` among the others (0 = top); usually only its own index changes (js/order.js).
+ * hold: a key repeat, saved with the steps before it (see `held`)
+ */
+function moveGroup(key, pos, hold = false) {
     const changes = moveTo(sortedGroupKeys(), state.groups, key, pos);
     hideBarAbout(key);
     const saved = Object.entries(changes).map(([k, index]) =>
         showChange(k, (group) => Object.assign({}, group, {index})));
     render();
+    if (hold && held && held.group === key) {
+        Object.assign(held.changes, changes);
+        held.saved.push(...saved);
+        return;
+    }
+    saveHeld();
+    if (hold) {
+        held = {group: key, changes, saved};
+        return;
+    }
+    saveGroupMove(changes, saved);
+}
+
+function saveGroupMove(changes, saved) {
     movesLeft++;
     // sent at once, not after the previous one: the background does them in order, and a popup closed right after
     // a few quick moves still gets them all saved
@@ -643,8 +676,11 @@ function withTabAt(tabs, i, pos) {
     return rest;
 }
 
-/** puts a saved tab (`at`: a row's tab, see tabRow) at `pos` among its group's other tabs; no bar (as group moves) */
-function moveTab(at, pos) {
+/**
+ * puts a saved tab (`at`: a row's tab, see tabRow) at `pos` among its group's other tabs; no bar (as group moves).
+ * hold: a key repeat, saved with the steps before it (see `held`)
+ */
+function moveTab(at, pos, hold = false) {
     const group = state.groups[at.key];
     if (!group || tabIndexIn(group.tabs, at) === -1) {
         return;
@@ -653,6 +689,21 @@ function moveTab(at, pos) {
     hideBarAbout(at.key);
     const saved = showTabChange(at.key, (tabs) => withTabAt(tabs, tabIndexIn(tabs, at), pos));
     render();
+    if (hold && held && held.at && held.at.key === at.key && sameTab(held.at.tab, at.tab)) {
+        // from where the first held step found it: the background hasn't moved it since
+        held.pos = pos;
+        held.saved.push(saved);
+        return;
+    }
+    saveHeld();
+    if (hold) {
+        held = {at, pos, saved: [saved]};
+        return;
+    }
+    saveTabMove(at, pos, [saved]);
+}
+
+function saveTabMove(at, pos, saved) {
     movesLeft++;
     groupStoreClient.moveTab(at.key, at.tab, at.index, pos).then((res) => {
         // no hash: the group is gone. An error with a hash is only sync failing: the move is saved on this computer
@@ -663,7 +714,7 @@ function moveTab(at, pos) {
     }).catch((e) => {
         console.error('TabHamster: tab move failed', e);
         showBar(t('p_syncStorageDefault_error'));
-    }).finally(saved).then(moveDone);
+    }).finally(() => saved.forEach((done) => done())).then(moveDone);
 }
 
 /**
@@ -738,15 +789,16 @@ async function moveTabTo(at, to, pos) {
 /**
  * Alt+↑ ↓ on a saved tab (`at`): a place up or down in its group; past its first or last tab into the group above (at
  * its end) or below (at its top), as a drag goes. That group opens, so the tab and the focus stay in sight.
+ * hold: a key repeat (see `held`)
  */
-function moveTabByKey(at, up) {
+function moveTabByKey(at, up, hold) {
     const group = state.groups[at.key];
     if (!group) {
         return;
     }
     const pos = at.index + (up ? -1 : 1);
     if (pos >= 0 && pos < group.tabs.length) {
-        moveTab(at, pos);
+        moveTab(at, pos, hold);
         return;
     }
     const keys = sortedGroupKeys();
@@ -754,6 +806,7 @@ function moveTabByKey(at, up) {
     if (!to) {
         return;
     }
+    saveHeld();
     state.expanded.add('saved:' + to);
     // drawn at once, before the background answers
     act(() => moveTabTo(at, to, up ? null : 0))();
@@ -2105,13 +2158,13 @@ el.list.addEventListener('keydown', (e) => {
         }
         e.preventDefault();
         if (tabAt) {
-            moveTabByKey(tabAt, e.key === 'ArrowUp');
+            moveTabByKey(tabAt, e.key === 'ArrowUp', e.repeat);
             return;
         }
         const keys = sortedGroupKeys();
         const pos = keys.indexOf(item.dataset.key) + (e.key === 'ArrowUp' ? -1 : 1);
         if (pos >= 0 && pos < keys.length) {
-            moveGroup(item.dataset.key, pos);
+            moveGroup(item.dataset.key, pos, e.repeat);
         }
     } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         const stops = listStops();
@@ -2268,6 +2321,10 @@ document.addEventListener('keydown', (e) => {
         pointerAt = null;
     }
 }, true);
+// a held Alt+↑ ↓ is let go (Alt or the arrow), or the popup loses the keys or closes meanwhile: its steps are saved
+document.addEventListener('keyup', saveHeld, true);
+window.addEventListener('blur', saveHeld);
+window.addEventListener('pagehide', saveHeld);
 document.addEventListener('pointermove', () => document.body.classList.remove('keyboard'), true);
 document.addEventListener('pointerdown', () => document.body.classList.remove('keyboard'), true);
 // render() waits while a button is down; drawn after the click (it comes right after pointerup)
