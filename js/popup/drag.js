@@ -292,9 +292,6 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
                 }
             });
         }
-        if (!commit && d.focused && d.focused.isConnected && d.focused !== document.activeElement) {
-            d.focused.focus({preventScroll: true});
-        }
         d.ghost.remove();
         d.item.classList.remove('dragging');
         document.body.classList.remove('dragging');
@@ -303,25 +300,36 @@ export function enableDrag(list, {enabled, ghost, drop, tabGhost, dropTab, ended
         }
         window.addEventListener('click', swallow, true);
         setTimeout(() => window.removeEventListener('click', swallow, true), 0);
-        // the row is gone if the list was drawn again meanwhile: nothing to drop
-        if (commit && d.item.isConnected) {
-            if (d.tab) {
-                const tabs = d.item.parentElement;
-                const to = d.item.closest('.item');
-                const pos = Array.from(tabs.children).indexOf(d.item);
-                if (to && (to !== d.home.item || pos !== d.from)) {
-                    dropTab(d.item.querySelector('a.tab-row'), to.dataset.key,
-                        tabs.classList.contains('drop-only') ? null : pos);
-                }
-            } else {
-                const pos = items().indexOf(d.item);
-                if (pos >= 0 && pos !== d.from) {
-                    drop(d.key, pos);
+        let dropped = false;
+        try {
+            // the row is gone if the list was drawn again meanwhile: nothing to drop
+            if (commit && d.item.isConnected) {
+                if (d.tab) {
+                    const tabs = d.item.parentElement;
+                    const to = d.item.closest('.item');
+                    const pos = Array.from(tabs.children).indexOf(d.item);
+                    if (to && (to !== d.home.item || pos !== d.from)) {
+                        dropped = true;
+                        dropTab(d.item.querySelector('a.tab-row'), to.dataset.key,
+                            tabs.classList.contains('drop-only') ? null : pos);
+                    }
+                } else {
+                    const pos = items().indexOf(d.item);
+                    if (pos >= 0 && pos !== d.from) {
+                        dropped = true;
+                        drop(d.key, pos);
+                    }
                 }
             }
-        }
-        if (ended) {
-            ended();
+            // nothing dropped (cancelled, or let go where it started): the focus goes back where it was
+            if (!dropped && d.focused && d.focused.isConnected && d.focused !== document.activeElement) {
+                d.focused.focus({preventScroll: true});
+            }
+        } finally {
+            // the list draws again what waited for the drag, whatever happened above
+            if (ended) {
+                ended();
+            }
         }
     }
 

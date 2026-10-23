@@ -1114,7 +1114,7 @@
         }
     },
     "p_restore_tip": {
-        "message": "Врати прозоре какви су били",
+        "message": "Врати прозоре отворене на крају сесије",
         "description": "Tooltip of the Restore button on a session row"
     },
     "p_allTabsOneWindow_one": {
@@ -1988,7 +1988,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Ваших последњих 30 сесија прегледача, са картицама и прозорима које сте затворили и страницама кроз које је свака картица прошла. Врати враћа прозоре који су били отворени на крају.",
+        "message": "Ваших последњих 30 сесија прегледача, са картицама и прозорима које сте затворили и страницама кроз које је свака картица прошла. Врати враћа прозоре који су били отворени на крају сесије.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

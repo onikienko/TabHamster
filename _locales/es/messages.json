@@ -871,7 +871,7 @@
         }
     },
     "p_restore_tip": {
-        "message": "Restaurar las ventanas tal como estaban",
+        "message": "Restaurar las ventanas abiertas al terminar la sesión",
         "description": "Tooltip of the Restore button on a session row"
     },
     "p_allTabsOneWindow_one": {
@@ -1595,7 +1595,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Sus últimas 30 sesiones del navegador, con las pestañas y ventanas que cerró y las páginas por las que pasó cada pestaña. Restaurar recupera las ventanas que estaban abiertas al final.",
+        "message": "Sus últimas 30 sesiones del navegador, con las pestañas y ventanas que cerró y las páginas por las que pasó cada pestaña. Restaurar recupera las ventanas que estaban abiertas al terminar la sesión.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

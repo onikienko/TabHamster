@@ -235,9 +235,11 @@ const open_ops = {
 const session_config = {
     session_numbers: 30,
     prefix: 'tg_',
-    // pages kept per tab, tabs closed one by one kept per session (the oldest go first)
+    // pages kept per tab; closed tabs kept per session, by themselves or with their window (the oldest go first)
     trail: 10,
     closed: 500,
+    // a title change alone writes at most this often (some titles change every second: timers, "(3) Inbox")
+    title_wait: 10000,
     // how long after the worker starts a new session waits to know why it started (startEvents)
     start_wait: 1000,
 };
@@ -403,19 +405,32 @@ async function sessionsOn() {
 async function currentSessionId(fresh) {
     const session_storage = await chrome.storage.session.get('session_id');
     if (session_storage.session_id) {
-        return session_storage.session_id;
+        return {session_id: session_storage.session_id, continued: false};
     }
-    let session_id = null;
     if (!fresh) {
         const events = await startEvents();
-        if (events.has('update') && !events.has('browser')) {
-            session_id = (await chrome.storage.local.get('session_last')).session_last || null;
+        const last = events.has('update') && !events.has('browser') &&
+            (await chrome.storage.local.get('session_last')).session_last;
+        if (last) {
+            await chrome.storage.session.set({session_id: last});
+            return {session_id: last, continued: true};
         }
     }
-    session_id = session_id || session_config.prefix + Date.now();
+    return {session_id: await startSession(), continued: false};
+}
+
+async function startSession() {
+    const session_id = session_config.prefix + Date.now();
     await chrome.storage.session.set({session_id});
     await chrome.storage.local.set({session_last: session_id});
     return session_id;
+}
+
+// A session goes on after an update only in the same browser run: some tab still open with its id and address.
+// (Tab ids start again in a new run; an update at browser start could come without onStartup.)
+function sameRun(stored, open) {
+    return !!stored && stored.v === 2 && stored.tabs.some(tab => !tab.closed && !(stored.windows || {})[tab.windowId] &&
+        open.some(now => now.id === tab.id && (now.url || now.pendingUrl) === tab.url));
 }
 
 /**
@@ -425,8 +440,10 @@ async function currentSessionId(fresh) {
  */
 function sessionTab(tab, before, steps, now) {
     const url = tab.url || tab.pendingUrl || '';
+    // a tab just sent to a new address can still have the page before's title: none is better than a wrong one
+    const title = before && url !== before.url && tab.title === before.title ? '' : tab.title;
     const path = (before ? [{url: before.url, title: before.title, at: before.at}] : [])
-        .concat(steps, [{url, title: tab.title, at: now}]);
+        .concat(steps, [{url, title, at: now}]);
     const trail = before && before.trail ? before.trail.slice() : [];
     let here = null;
     path.forEach(function (step) {
@@ -481,7 +498,9 @@ function mergeSession(stored, open, window_ids, notes, now) {
             tabs.push(tab);
         }
     });
-    const closed = tabs.filter(tab => tab.closed).sort((a, b) => a.closed - b.closed);
+    // closed by themselves or with their window: only the newest are kept
+    const closedAt = tab => tab.closed || (windows[tab.windowId] ? windows[tab.windowId].closed : 0);
+    const closed = tabs.filter(closedAt).sort((a, b) => closedAt(a) - closedAt(b));
     if (closed.length > session_config.closed) {
         const dropped = new Set(closed.slice(0, closed.length - session_config.closed));
         tabs = tabs.filter(tab => !dropped.has(tab));
@@ -505,12 +524,15 @@ function recorded(tab) {
 
 // writes the current session (starts one if there is none; a session without tabs isn't stored); only in the queue
 async function writeSession(fresh) {
-    const session_id = await currentSessionId(fresh);
+    let {session_id, continued} = await currentSessionId(fresh);
     // what came in so far; what comes during this write is for the next one
     const notes = session_notes;
     session_notes = newNotes();
     const [tabs, wins, items] = await Promise.all([
         chrome.tabs.query({}), chrome.windows.getAll(), chrome.storage.local.get(session_id)]);
+    if (continued && !sameRun(items[session_id], tabs)) {
+        session_id = await startSession();
+    }
     const window_ids = new Set(wins.filter(win => !win.incognito).map(win => win.id));
     // a window still closing is closing at the next write too
     notes.closing.forEach(function (id) {
@@ -532,6 +554,7 @@ async function writeSession(fresh) {
 // not started yet covers every event before it. The flag drops when the write starts: an event during a write
 // queues one more, which reads the tabs again and so sees that event's change.
 let session_write_waiting = null;
+let title_timer = null;
 
 function updateCurrentSession() {
     if (session_write_waiting) {
@@ -539,6 +562,9 @@ function updateCurrentSession() {
     }
     session_write_waiting = inSessionQueue(async function () {
         session_write_waiting = null;
+        // this write takes the titles too
+        clearTimeout(title_timer);
+        title_timer = null;
         if (await sessionsOn()) {
             await writeSession(false);
         }
@@ -559,8 +585,13 @@ function onUpdated(tab_id, change_info) {
         const list = steps.get(tab_id);
         list[list.length - 1].title = change_info.title;
     }
-    if (change_info.url || change_info.title || 'pinned' in change_info || 'groupId' in change_info) {
+    if (change_info.url || 'pinned' in change_info || 'groupId' in change_info) {
         updateCurrentSession();
+    } else if (change_info.title && !title_timer) {
+        title_timer = setTimeout(function () {
+            title_timer = null;
+            updateCurrentSession();
+        }, session_config.title_wait);
     }
 }
 

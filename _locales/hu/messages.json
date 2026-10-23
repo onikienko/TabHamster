@@ -786,7 +786,7 @@
         }
     },
     "p_windowClosedTitle_one": {
-        "message": "$NUMBER$. ablak, bezárva: $TIME$, $COUNT$ fül",
+        "message": "$NUMBER$. ablak, $TIME$-kor bezárva, $COUNT$ fül",
         "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
         "placeholders": {
             "count": {
@@ -804,7 +804,7 @@
         }
     },
     "p_windowClosedTitle_other": {
-        "message": "$NUMBER$. ablak, bezárva: $TIME$, $COUNT$ fül",
+        "message": "$NUMBER$. ablak, $TIME$-kor bezárva, $COUNT$ fül",
         "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'other', by the tab count)",
         "placeholders": {
             "count": {
@@ -868,7 +868,7 @@
         }
     },
     "p_restore_tip": {
-        "message": "Az ablakok visszaállítása úgy, ahogy voltak",
+        "message": "A munkamenet végén nyitva lévő ablakok visszaállítása",
         "description": "Tooltip of the Restore button on a session row"
     },
     "p_allTabsOneWindow_one": {
@@ -1592,7 +1592,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Az utolsó 30 böngészési munkamenet, a bezárt fülekkel és ablakokkal, és az egyes fülekben megnyitott korábbi oldalakkal. A Visszaállítás a végén nyitva lévő ablakokat hozza vissza.",
+        "message": "Az utolsó 30 böngészési munkamenet, a bezárt fülekkel és ablakokkal, és az egyes fülekben megnyitott korábbi oldalakkal. A Visszaállítás a munkamenet végén nyitva lévő ablakokat hozza vissza.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

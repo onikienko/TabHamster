@@ -253,13 +253,18 @@ function openInNewWindow(tabs) {
     openElsewhere('window', tabs);
 }
 
+// windows closed this close to the last one are closed with it: Chrome quitting closes them one by one
+const SESSION_END_SPAN = 5000;
+
 /**
  * A session's windows (format: js/background.js, SESSION WATCHER): {id, tabs, closedTabs (closed one by one, newest
  * first), closed (when the window closed)}. The windows at the session's end come first, with `closed` null: those
- * still open, or the ones closed last when every window was closed (the last window, or Chrome quit). Then the windows
- * closed before, the latest first. Sessions from before (no v) have every tab open at the end.
+ * still open, or, when every window was closed (the last window, or Chrome quit), the ones closed last. Then the
+ * windows closed before, the latest first, then windows left with only closed tabs (their last tab was moved to
+ * another window): nothing of them is at the end. Sessions from before (no v) have every tab open at the end.
+ * `live`: the current session goes on, so a closed window is closed even if it was the last one.
  */
-function sessionWindows(session) {
+function sessionWindows(session, live) {
     const windows = new Map();
     for (const tab of session.tabs) {
         const id = tab.windowId === undefined ? 0 : tab.windowId;
@@ -274,22 +279,29 @@ function sessionWindows(session) {
     for (const win of list) {
         win.closedTabs.sort((a, b) => b.closed - a.closed);
     }
-    if (list.length && list.every((win) => win.closed)) {
-        const last = Math.max(...list.map((win) => win.closed));
-        list.forEach((win) => {
-            win.closed = win.closed === last ? null : win.closed;
+    const kept = list.filter((win) => win.tabs.length);
+    if (!live && kept.length && kept.every((win) => win.closed)) {
+        const last = Math.max(...kept.map((win) => win.closed));
+        kept.forEach((win) => {
+            win.closed = win.closed >= last - SESSION_END_SPAN ? null : win.closed;
         });
     }
-    return list.filter((win) => !win.closed).concat(list.filter((win) => win.closed).sort((a, b) => b.closed - a.closed));
+    return list.filter(isEnd).concat(list.filter((win) => win.closed).sort((a, b) => b.closed - a.closed),
+        list.filter((win) => !win.closed && !win.tabs.length));
+}
+
+/** a window at the session's end: not closed, and with tabs */
+function isEnd(win) {
+    return !win.closed && win.tabs.length > 0;
 }
 
 /** the tabs at a session's end: what Restore opens */
-function endTabs(session) {
-    return sessionWindows(session).filter((win) => !win.closed).flatMap((win) => win.tabs);
+function endTabs(session, live) {
+    return sessionWindows(session, live).filter(isEnd).flatMap((win) => win.tabs);
 }
 
 async function restoreSession(session) {
-    const windows = sessionWindows(session).filter((win) => !win.closed);
+    const windows = sessionWindows(session).filter(isEnd);
     // the first window may go into this one, if it is only a blank new tab
     const done = await Promise.all(windows.map((win, i) => openTabs(i === 0 ? 'blankOrWindow' : 'window', win.tabs)));
     if (done.every(Boolean)) {
@@ -761,8 +773,10 @@ function dropTab(link, to, pos) {
         // drawn at once, before the background answers
         act(() => moveTabTo(at, to, pos))();
     }
-    // the focus goes to the tab in its new place (a dragged row loses it: see dropGroup)
-    focusTab(to, pos === null ? state.groups[to].tabs.length - 1 : pos);
+    // the focus goes to the tab in its new place (a dragged row loses it: see dropGroup); the group may be gone
+    // (deleted on another computer during the drag)
+    const group = state.groups[to];
+    focusTab(to, pos === null ? (group ? group.tabs.length - 1 : 0) : pos);
 }
 
 /**
@@ -1212,7 +1226,7 @@ function sessionsShown() {
  */
 function searchTabs(key) {
     const session = state.sessions[key];
-    const open = new Set(key === state.currentSession ? endTabs(session) : []);
+    const open = new Set(key === state.currentSession ? endTabs(session, true) : []);
     return session.tabs.map((tab) => (open.has(tab) ? {} : {
         title: [tab.title].concat((tab.trail || []).map((step) => step.title)).join('\n'),
         url: [tab.url].concat((tab.trail || []).map((step) => step.url)).join('\n'),
@@ -1420,11 +1434,17 @@ function tabRow(tab, at, opts = {}) {
     title,
     trail ? setTip(h('span', {
         class: 'trail-count num', 'aria-hidden': 'true',
-        // not the link's own click: that would open the tab
+        // not the link's own click or middle click: they would open the tab; a double click toggles once
         onClick: (e) => {
             e.preventDefault();
             e.stopPropagation();
-            toggleItem(trail.id, trail.auto);
+            if (e.detail <= 1) {
+                toggleItem(trail.id, trail.auto);
+            }
+        },
+        onAuxclick: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
         },
     }, icon('history', 12), numbers.format(trail.count)), {text: plural('p_trailCount', trail.count), keys: ['→']}) : null,
     h('span', {class: ['domain', 'ellipsis', opts.right && 'num']}, opts.right || marked(hostOf(tab.url)))),
@@ -1624,16 +1644,17 @@ function sessionItem(result) {
     const session = state.sessions[key];
     const current = key === state.currentSession;
     const partial = state.words.length > 0 && !result.byName;
-    const windows = sessionWindows(session);
-    const ends = windows.filter((win) => !win.closed);
+    const windows = sessionWindows(session, current);
+    const ends = windows.filter(isEnd);
     const tabs = ends.flatMap((win) => win.tabs);
     const closed = session.tabs.length - tabs.length;
     // the live session shows only what was closed: with nothing closed it has nothing to show
     const expandable = !current || closed > 0;
     const id = 'sessions:' + key;
     const name = sessionName(key);
-    // the row counts the tabs at the end (what Restore opens); while searching, the found ones of all
-    const total = partial ? session.tabs.length : tabs.length;
+    // the row counts the tabs at the end (what Restore opens); while searching, the found ones of those searched (all,
+    // or for the live session the closed ones)
+    const total = partial ? (current ? closed : session.tabs.length) : tabs.length;
     const words = [
         ends.length > 1 && plural('p_windowsCount', ends.length),
         plural('p_tabsCount', tabs.length),
@@ -1662,21 +1683,20 @@ function sessionItem(result) {
                 moreButton((button) => sessionMenu(key, button))))));
     if (expandable && isExpanded(id, partial)) {
         const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
-        item.append(h('div', {class: 'tab-list'}, windows.map((win, i) => sessionWindowRows(key, win, i, current, found))));
+        // the live session lists only windows with something closed, numbered among those
+        const listed = current ? windows.filter((win) => win.closed || win.closedTabs.length) : windows;
+        item.append(h('div', {class: 'tab-list'}, listed.map((win, i) => sessionWindowRows(key, win, i, current, found))));
     }
     return item;
 }
 
 /**
  * A window of an expanded session: its title, its tabs, then "3 closed tabs" that shows the ones closed by themselves
- * (newest first, with the time). The live session's open windows show only that (their tabs are open anyway), and
- * only if something in them was closed.
+ * (newest first, with the time). The live session's open windows show only that: their tabs are open anyway.
+ * A window with nothing left at the end has no "Open window".
  * `found`: while searching, the session's tabs that were found (only those are shown, closed ones open by themselves).
  */
 function sessionWindowRows(key, win, i, live, found) {
-    if (live && !win.closed && !win.closedTabs.length) {
-        return null;
-    }
     const tabs = live && !win.closed ? [] : win.tabs;
     const shown = found ? tabs.filter((tab) => found.has(tab)) : tabs;
     const closedShown = found ? win.closedTabs.filter((tab) => found.has(tab)) : win.closedTabs;
@@ -1691,7 +1711,7 @@ function sessionWindowRows(key, win, i, live, found) {
             h('span', {class: 'spacer'}, win.closed ?
                 plural('p_windowClosedTitle', win.tabs.length, [i + 1, shortTime(win.closed, lang)]) :
                 plural('p_windowTitle', win.tabs.length, [i + 1])),
-            live && !win.closed ? null :
+            (live && !win.closed) || !win.tabs.length ? null :
                 h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', win.tabs))},
                     t('p_openWindow'))),
         shown.map((tab) => sessionTabRows(key, tab, found)),
@@ -1742,7 +1762,14 @@ function noMatches(sessions) {
         h('p', null, plural('p_noMatch_text', state.openTabs, [keyLabel('enter')])),
         // only the shown tab is searched: the words may be in a session
         !sessions && state.options.session_watcher ?
-            h('button', {class: 'link', type: 'button', onClick: () => switchView('sessions')}, t('p_searchSessions')) :
+            h('button', {
+                class: 'link', type: 'button',
+                // the field keeps the words: typing goes on there
+                onClick: async () => {
+                    await switchView('sessions');
+                    el.field.focus();
+                },
+            }, t('p_searchSessions')) :
             null);
 }
 
@@ -1999,14 +2026,15 @@ function renderIfWaiting() {
 /* ---------- start ---------- */
 
 async function switchView(view) {
+    // read first: a drawing meanwhile would show the Sessions tab without its sessions
+    if (view === 'sessions' && state.options.session_watcher && !state.sessionsLoaded) {
+        await loadSessions();
+    }
     state.view = view;
     if (view === 'sessions') {
         state.filter = null;
     }
     chrome.storage.sync.set({active_tab: view === 'sessions' ? '#sessions' : '#saved'});
-    if (sessionsShown() && !state.sessionsLoaded) {
-        await loadSessions();
-    }
     render();
 }
 
@@ -2152,16 +2180,32 @@ el.tabs.addEventListener('keydown', (e) => {
 // the list: that row keeps the keys, as the last one selected. Keys moving the focus forget it (the focused row is the
 // selected one then).
 let pointerAt = null;
+// where the pointer is over the list now, on a row or not
+let pointerNow = null;
 el.list.addEventListener('pointermove', (e) => {
+    pointerNow = {x: e.clientX, y: e.clientY};
     if (e.target.closest('.fold, .tab-item, .row')) {
-        pointerAt = {x: e.clientX, y: e.clientY};
+        pointerAt = pointerNow;
     }
 });
+el.list.addEventListener('pointerleave', () => {
+    pointerNow = null;
+});
+// the rows move under a resting pointer: the row it is on now, if any, is the selected one (the one it was on before
+// has moved away, and isn't highlighted)
+el.list.addEventListener('scroll', () => {
+    pointerAt = pointerNow && rowAt(pointerNow) ? pointerNow : null;
+}, {passive: true});
+
+/** the row at a point of the list: a group or session row, "3 closed tabs", a tab */
+function rowAt(point) {
+    const node = document.elementFromPoint(point.x, point.y);
+    return node && el.list.contains(node) ? node.closest('.fold, .tab-item, .row') : null;
+}
 
 /** the row the pointer is on, or was last on (pointerAt), by its stop: a group or session name, "3 closed tabs", a tab */
 function rowUnderPointer() {
-    const node = pointerAt && document.elementFromPoint(pointerAt.x, pointerAt.y);
-    const row = node && el.list.contains(node) && node.closest('.fold, .tab-item, .row');
+    const row = pointerAt && rowAt(pointerAt);
     if (!row) {
         return null;
     }
@@ -2184,7 +2228,8 @@ document.addEventListener('keydown', (e) => {
     if (e.isTrusted && isRowKey(e) && !document.body.classList.contains('keyboard') &&
         !document.body.classList.contains('dragging') && el.list.contains(focus) && focus.matches(STOPS + ', ' + ITEM_BUTTONS)) {
         const stop = rowUnderPointer();
-        if (stop && stop !== focus) {
+        // the focus already in that row (Open, Restore, ⋯ just clicked): the key is for it
+        if (stop && stop !== focus && !stop.closest('.fold, .tab-item, .row').contains(focus)) {
             e.preventDefault();
             e.stopImmediatePropagation();
             stop.focus();
@@ -2193,9 +2238,13 @@ document.addEventListener('keydown', (e) => {
                 repeat: e.repeat, bubbles: true, cancelable: true,
             });
             // a made-up key has no action of the browser's own: Return opens a tab (or presses "3 closed tabs"),
-            // Space presses a button, unless a handler took the key
+            // Space presses a button, unless a handler took the key. The click keeps Shift, Ctrl and ⌘ (a new
+            // window, a background tab).
             if (stop.dispatchEvent(again) && (e.key === 'Enter' || (e.key === ' ' && stop.matches('button')))) {
-                stop.click();
+                stop.dispatchEvent(new MouseEvent('click', {
+                    bubbles: true, cancelable: true, view: window,
+                    altKey: e.altKey, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey,
+                }));
             }
             return;
         }
@@ -2271,7 +2320,13 @@ async function start() {
         // the floating copy of a tab: its row without Edit and Remove
         tabGhost: (item) => item.querySelector('.tab-row').cloneNode(true),
         dropTab,
-        ended: renderIfWaiting,
+        // the dropped row (or the one put back) is the selected one: it has the focus, and keys go on from it until
+        // the pointer moves (the list held the pointer during the drag: the row it was on before is stale)
+        ended: () => {
+            pointerAt = null;
+            document.body.classList.add('keyboard');
+            renderIfWaiting();
+        },
     });
     chrome.runtime.onMessage.addListener((msg) => {
         if (msg && msg.msg === 'groupsSynced' && !state.busy) {

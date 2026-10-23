@@ -871,7 +871,7 @@
         }
     },
     "p_restore_tip": {
-        "message": "Restore the windows as they were",
+        "message": "Restore the windows open when the session ended",
         "description": "Tooltip of the Restore button on a session row"
     },
     "p_allTabsOneWindow_one": {
@@ -1595,7 +1595,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Your last 30 browser sessions, with the tabs and windows you closed and the pages each tab went through. Restore brings back the windows that were open at the end.",
+        "message": "Your last 30 browser sessions, with the tabs and windows you closed and the pages each tab went through. Restore brings back the windows that were open when the session ended.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

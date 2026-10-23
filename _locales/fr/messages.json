@@ -845,7 +845,7 @@
         }
     },
     "p_searchSessions": {
-        "message": "Chercher dans les sessions",
+        "message": "Rechercher dans les sessions",
         "description": "Link under 'No groups match': only the shown tab is searched, this shows the Sessions tab with the same words"
     },
     "p_saveAsGroup": {
@@ -871,7 +871,7 @@
         }
     },
     "p_restore_tip": {
-        "message": "Restaurer les fenêtres telles qu’elles étaient",
+        "message": "Restaurer les fenêtres ouvertes à la fin de la session",
         "description": "Tooltip of the Restore button on a session row"
     },
     "p_allTabsOneWindow_one": {
@@ -1595,7 +1595,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Vos 30 dernières sessions de navigation, avec les onglets et fenêtres fermés et les pages par lesquelles chaque onglet est passé. Restaurer rouvre les fenêtres ouvertes à la fin.",
+        "message": "Vos 30 dernières sessions de navigation, avec les onglets et fenêtres fermés et les pages par lesquelles chaque onglet est passé. Restaurer rouvre les fenêtres ouvertes à la fin de la session.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

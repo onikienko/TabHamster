@@ -856,32 +856,88 @@ test('sessions: incognito and DevTools tabs are not recorded; the Chrome tab gro
 
 test('sessions: after an update or reload of the extension the session goes on; a new browser run starts one', async () => {
     const old = 'tg_1700000000000';
-    for (const [reason, goesOn] of [['update', true], ['browser', false], ['install', false]]) {
+    // [why the worker started, the stored session's second tab, goes on]: tab 2 still open with its address = same run
+    for (const [reason, second, goesOn] of [['update', 'https://c.com/', true], ['browser', 'https://c.com/', false],
+        ['install', 'https://c.com/', false], ['update', 'https://other.com/', false]]) {
         const local = createStorageArea();
         local.rawSet({
-            [old]: {name: '', updated: 1, v: 2, windows: {},
-                tabs: [{id: 1, url: 'https://a.com/', title: 'A', pinned: false, windowId: 1, at: 1}]},
+            [old]: {name: '', updated: 1, v: 2, windows: {}, tabs: [
+                {id: 1, url: 'https://a.com/', title: 'A', pinned: false, windowId: 1, at: 1},
+                {id: 2, url: second, title: 'C', pinned: false, windowId: 1, at: 1}]},
             session_last: old,
         });
-        const bg = startBackground({local, browser: fakeBrowser({...ONE_TAB, url: 'https://b.com/'}), start_wait: 200});
+        const browser = fakeBrowser();
+        browser.tabs.query = async () => [openTab(1, 'https://b.com/'), openTab(2, 'https://c.com/')];
+        browser.windows.getAll = async () => [{id: 1}];
+        const bg = startBackground({local, browser, start_wait: 200});
         if (reason === 'browser') {
             bg.chrome.runtime.onStartup.listeners.forEach(fn => fn());
         } else {
             bg.chrome.runtime.onInstalled.listeners.forEach(fn => fn({reason}));
         }
-        await waitFor(async () => (await bg.chrome.storage.session.get('session_id')).session_id);
+        const what = reason + ' ' + second;
+        await waitFor(async () => (await sessionKeys(local)).length === (goesOn ? 1 : 2) &&
+            (await local.get(old))[old].tabs[0].url === (goesOn ? 'https://b.com/' : 'https://a.com/'));
         const id = (await bg.chrome.storage.session.get('session_id')).session_id;
-        assert.equal(id === old, goesOn, reason);
-        assert.equal((await local.get('session_last')).session_last, id);
-        await waitFor(async () => {
-            const session = (await local.get(id))[id];
-            return session && session.tabs[0].url === 'https://b.com/';
-        });
+        assert.equal(id === old, goesOn, what);
+        assert.equal((await local.get('session_last')).session_last, id, what);
+        await waitFor(async () => !!(await local.get(id))[id]);
         // the same tab (same id in the same browser run) went on to another page
         const trail = (await local.get(id))[id].tabs[0].trail;
-        assert.deepEqual(trail ? trail.map(step => step.url) : [], goesOn ? ['https://a.com/'] : [], reason);
-        assert.equal((await sessionKeys(local)).length, goesOn ? 1 : 2);
+        assert.deepEqual(trail ? trail.map(step => step.url) : [], goesOn ? ['https://a.com/'] : [], what);
     }
+});
+
+test('session tabs: tabs that closed with their window count toward the closed tabs kept', () => {
+    const bg = startBackground();
+    vm.runInContext('session_config.closed = 3', bg.context);
+    const open = [openTab(1, 'https://a.com/', 1), openTab(2, 'https://b.com/', 2), openTab(3, 'https://c.com/', 2),
+        openTab(4, 'https://d.com/', 3), openTab(5, 'https://e.com/', 3)];
+    let s = merge(bg, null, open, [1, 2, 3], {}, 100);
+    s = merge(bg, s, open.filter(tab => tab.windowId !== 2), [1, 3], {}, 200);
+    s = merge(bg, s, open.filter(tab => tab.windowId === 1), [1], {}, 300);
+    // 4 tabs closed with their windows, 3 kept: one of window 2 (closed first) went
+    assert.deepEqual(s.tabs.map(tab => tab.id).sort(), [1, 3, 4, 5]);
+    assert.deepEqual(s.windows, {2: {closed: 200}, 3: {closed: 300}});
+});
+
+test('session tabs: a tab that just went to a new address doesn\'t get the page before\'s title', () => {
+    const bg = startBackground();
+    let s = merge(bg, null, [openTab(1, 'https://a.com/')], [1], {}, 100);
+    // still loading: Chrome gives the old title with the new address
+    s = merge(bg, s, [{...openTab(1, 'https://b.com/'), title: 'T https://a.com/'}], [1], {}, 200);
+    assert.equal(s.tabs[0].title, '');
+    s = merge(bg, s, [openTab(1, 'https://c.com/')], [1], {}, 300);
+    assert.deepEqual(s.tabs[0].trail.map(step => [step.url, step.title]), [['https://a.com/', 'T https://a.com/'], ['https://b.com/', '']]);
+});
+
+test('sessions: a title change alone writes once after a while, not each time', async () => {
+    const local = createStorageArea();
+    const browser = fakeBrowser();
+    browser.tabs.query = async () => [openTab(1, 'https://a.com/')];
+    browser.windows.getAll = async () => [{id: 1}];
+    const bg = startBackground({local, browser});
+    vm.runInContext('session_config.title_wait = 150', bg.context);
+    await waitFor(async () => (await sessionKeys(local)).length === 1);
+    await settle();
+    let writes = 0;
+    const set = local.set.bind(local);
+    local.set = items => {
+        writes++;
+        return set(items);
+    };
+    for (let i = 0; i < 20; i++) {
+        bg.chrome.tabs.onUpdated.listeners.forEach(fn => fn(1, {title: '(' + i + ') Inbox'}));
+    }
+    await settle();
+    assert.equal(writes, 0, 'not at once');
+    await new Promise(resolve => setTimeout(resolve, 200));
+    await settle();
+    assert.equal(writes, 1, 'one write for all of them');
+    // an address change still writes at once
+    bg.chrome.tabs.onUpdated.listeners.forEach(fn => fn(1, {url: 'https://b.com/'}));
+    await settle();
+    assert.equal(writes, 2);
 });
 
 test('sessions: a window closing marks its window, not each of its tabs', async () => {
