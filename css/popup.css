@@ -588,6 +588,64 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     font-size: 12px;
 }
 
+/* a session window's "3 closed tabs": shows the tabs closed by themselves (js/popup/main.js sessionWindowRows) */
+.fold {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    height: 28px;
+    padding: 0 8px 0 1px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+body:not(.keyboard) .fold:hover,
+body.keyboard .fold:focus {
+    background: var(--hover);
+    color: var(--text);
+}
+
+/* a session tab's earlier pages: their number before the address (always shown, so it can be found), tonal while
+   the pages are shown under the tab */
+.trail-count {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+    margin-right: -2px;
+    padding: 0 5px;
+    border-radius: 5px;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.trail-count:hover {
+    color: var(--text);
+}
+
+.tab-row[aria-expanded="true"] .trail-count {
+    background: var(--tonal);
+    color: var(--on-tonal);
+}
+
+.trail {
+    margin-left: 7px;
+    padding-left: 12px;
+    border-left: 1px solid var(--guide);
+}
+
+.tab-row.step {
+    color: var(--muted);
+}
+
 .message {
     margin: 0;
     padding: 28px 24px;
@@ -894,6 +952,21 @@ body.keyboard .item.target > .row:has(:focus) {
     color: var(--muted);
     font-size: 13px;
     line-height: 19px;
+}
+
+/* "Search sessions": only the shown tab is searched */
+.no-match .link {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--link);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.no-match .link:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
 }
 
 /* group menu (js/ui/menu.js) */

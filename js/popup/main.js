@@ -13,7 +13,7 @@ import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName, freeName} from '../names.js';
-import {parseQuery, segments, search} from '../search.js';
+import {parseQuery, segments, search, matchesAll} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
 
@@ -31,6 +31,8 @@ const state = {
     groups: {},
     groupsError: null,
     sessions: {},
+    // sessions are read when their tab is shown (PLAN.md M11c): Saved groups needs nothing from them
+    sessionsLoaded: false,
     currentSession: null,
     // the saved tab being edited: {key, index, tab} (see tabIndexIn), tab and index null for a new link at the end
     editingTab: null,
@@ -73,7 +75,6 @@ const el = {
     tabSaved: document.getElementById('tab_saved'),
     tabSessions: document.getElementById('tab_sessions'),
     countSaved: document.getElementById('count_saved'),
-    countSessions: document.getElementById('count_sessions'),
     list: document.getElementById('list'),
     footer: document.getElementById('footer'),
     // screen readers hear what a search found (announceResults)
@@ -166,6 +167,7 @@ async function loadSessions() {
         }
     }
     state.currentSession = session.session_id || null;
+    state.sessionsLoaded = true;
 }
 
 async function loadUsage() {
@@ -251,22 +253,45 @@ function openInNewWindow(tabs) {
     openElsewhere('window', tabs);
 }
 
-/** tabs of a session, one list per window, in their order */
+/**
+ * A session's windows (format: js/background.js, SESSION WATCHER): {id, tabs, closedTabs (closed one by one, newest
+ * first), closed (when the window closed)}. The windows at the session's end come first, with `closed` null: those
+ * still open, or the ones closed last when every window was closed (the last window, or Chrome quit). Then the windows
+ * closed before, the latest first. Sessions from before (no v) have every tab open at the end.
+ */
 function sessionWindows(session) {
     const windows = new Map();
     for (const tab of session.tabs) {
         const id = tab.windowId === undefined ? 0 : tab.windowId;
         if (!windows.has(id)) {
-            windows.set(id, []);
+            const closed = session.windows && session.windows[id] ? session.windows[id].closed : null;
+            windows.set(id, {id, tabs: [], closedTabs: [], closed: closed || null});
         }
-        windows.get(id).push(tab);
+        const win = windows.get(id);
+        (tab.closed ? win.closedTabs : win.tabs).push(tab);
     }
-    return Array.from(windows.values());
+    const list = Array.from(windows.values());
+    for (const win of list) {
+        win.closedTabs.sort((a, b) => b.closed - a.closed);
+    }
+    if (list.length && list.every((win) => win.closed)) {
+        const last = Math.max(...list.map((win) => win.closed));
+        list.forEach((win) => {
+            win.closed = win.closed === last ? null : win.closed;
+        });
+    }
+    return list.filter((win) => !win.closed).concat(list.filter((win) => win.closed).sort((a, b) => b.closed - a.closed));
+}
+
+/** the tabs at a session's end: what Restore opens */
+function endTabs(session) {
+    return sessionWindows(session).filter((win) => !win.closed).flatMap((win) => win.tabs);
 }
 
 async function restoreSession(session) {
+    const windows = sessionWindows(session).filter((win) => !win.closed);
     // the first window may go into this one, if it is only a blank new tab
-    const done = await Promise.all(sessionWindows(session).map((tabs, i) => openTabs(i === 0 ? 'blankOrWindow' : 'window', tabs)));
+    const done = await Promise.all(windows.map((win, i) => openTabs(i === 0 ? 'blankOrWindow' : 'window', win.tabs)));
     if (done.every(Boolean)) {
         window.close();
     }
@@ -820,7 +845,7 @@ async function saveSessionAsGroup(key) {
     // the session's dates, not "Yesterday": the name stays
     const name = freeName(state.groups, session.updated ? interval(start, session.updated, lang, undefined, false) :
         dayTime(start, lang, undefined, false));
-    const tabs = session.tabs.map(savedTab);
+    const tabs = endTabs(session).map(savedTab);
     const groupKey = 'tg_' + Date.now();
     const group = {name, index: nextIndex(), tabs};
     const res = await groupStoreClient.save(groupKey, group);
@@ -853,16 +878,17 @@ function sessionMenu(key, button) {
         closeMenu(true);
         return;
     }
-    const session = state.sessions[key];
+    // the tabs at the session's end, as Restore
+    const tabs = endTabs(state.sessions[key]);
     const row = button.closest('.row');
     row.classList.add('menu-open');
     openMenu(button, [
         {icon: 'plus', label: t('p_saveAsGroup'), sub: t('p_saveAsGroup_sub'), run: act(() => saveSessionAsGroup(key))},
         {
-            icon: 'window', label: t('p_openInThisWindow'), sub: plural('p_allTabsOneWindow', session.tabs.length),
-            run: () => openInThisWindow(session.tabs),
+            icon: 'window', label: t('p_openInThisWindow'), sub: plural('p_allTabsOneWindow', tabs.length),
+            run: () => openInThisWindow(tabs),
         },
-        {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(session)},
+        {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks({tabs})},
         '-',
         {icon: 'trash', label: t('p_delete'), danger: true, run: act(() => deleteSession(key))},
     ], {label: sessionName(key), onClose: () => menuClosed(row)});
@@ -1170,12 +1196,27 @@ function runSearch() {
     state.results.saved = search(shownGroupKeys().map((key) => ({
         key, name: groupName(key, state.groups[key]), tabs: state.groups[key].tabs,
     })), query);
-    // the live session isn't searched: its tabs are open anyway, and a match there has nothing to show or do
-    const sessionKeys = state.words.length ? sortedSessionKeys().filter((key) => key !== state.currentSession) :
-        sortedSessionKeys();
-    state.results.sessions = search(sessionKeys.map((key) => ({
-        key, name: sessionName(key), tabs: state.sessions[key].tabs,
-    })), query);
+    // only the tab that is shown is searched; switching keeps the words (PLAN.md M11c)
+    state.results.sessions = sessionsShown() && state.sessionsLoaded ? search(sortedSessionKeys().map((key) => ({
+        key, name: sessionName(key), tabs: searchTabs(key),
+    })), query) : [];
+}
+
+function sessionsShown() {
+    return state.view === 'sessions' && !!state.options.session_watcher;
+}
+
+/**
+ * A session's tabs as search sees them, in the same order: a tab is found by the pages it went through too. The live
+ * session's open tabs are left out: they are open anyway, and a match there has nothing to show or do.
+ */
+function searchTabs(key) {
+    const session = state.sessions[key];
+    const open = new Set(key === state.currentSession ? endTabs(session) : []);
+    return session.tabs.map((tab) => (open.has(tab) ? {} : {
+        title: [tab.title].concat((tab.trail || []).map((step) => step.title)).join('\n'),
+        url: [tab.url].concat((tab.trail || []).map((step) => step.url)).join('\n'),
+    }));
 }
 
 function clearSearch() {
@@ -1206,7 +1247,7 @@ function announceResults() {
             el.found.textContent = '';
             return;
         }
-        const sessions = state.view === 'sessions' && !!state.options.session_watcher;
+        const sessions = sessionsShown();
         const count = state.results[sessions ? 'sessions' : 'saved'].length;
         el.found.textContent = count ? plural(sessions ? 'p_foundSessions' : 'p_foundGroups', count) :
             t(sessions ? 'p_noSessionsMatch' : 'p_noGroupsMatch', normalizeName(el.field.value));
@@ -1220,9 +1261,12 @@ function marked(text) {
         text;
 }
 
-/** group names and tab rows in the list, in order: ↑ ↓ move between them */
+// group and session names, "3 closed tabs" of a session's window and tab rows: ↑ ↓ move between them
+const STOPS = 'button.name, button.fold, .tab-row';
+
+/** the list's stops, in order */
 function listStops() {
-    return Array.from(el.list.querySelectorAll('button.name, .tab-row'));
+    return Array.from(el.list.querySelectorAll(STOPS));
 }
 
 // buttons of a row (Open, new window, ⋯, Restore) and "Open window" of a session's windows
@@ -1234,7 +1278,7 @@ const ITEM_BUTTONS = '.row button:not(.name):not(.chev), .win-title button';
  */
 function setStop(stop) {
     const item = stop && stop.closest('.item');
-    for (const node of el.list.querySelectorAll('button.name, .tab-row, ' + ITEM_BUTTONS)) {
+    for (const node of el.list.querySelectorAll(STOPS + ', ' + ITEM_BUTTONS)) {
         node.tabIndex = node === stop || (item && item.contains(node) && node.matches(ITEM_BUTTONS)) ? 0 : -1;
     }
 }
@@ -1356,19 +1400,34 @@ const rowTabs = new WeakMap();
 /**
  * A tab of a group or session: a link that opens it. A saved group's tab (`at`: {key, index}) also has Edit and
  * Remove, shown over the end of the row on hover or when the row has the focus with keys (Delete, F2).
+ * `opts`: `right`, a time instead of the address (closed tabs, trail pages); `step`, a page of a trail; `trail`,
+ * {id, auto, open, count} for a session's tab with earlier pages: their number shows before the address, a click on it
+ * (or → ←) shows and hides them.
  */
-function tabRow(tab, at) {
+function tabRow(tab, at, opts = {}) {
     const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
+    const trail = opts.trail;
     // only for a title the row cuts off: the full title and the address
     const link = setTip(h('a', {
-        class: 'tab-row', href: tab.url, target: '_blank',
-        dataset: at ? {key: at.key, index: String(at.index)} : {},
+        class: ['tab-row', opts.step && 'step'], href: tab.url, target: '_blank',
+        dataset: at ? {key: at.key, index: String(at.index)} : trail ? {toggle: trail.id, auto: trail.auto ? '1' : ''} : {},
         'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
+        'aria-expanded': trail ? String(trail.open) : null,
+        'aria-description': trail ? plural('p_trailCount', trail.count) : null,
     },
     favicon(tab.url),
     tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
     title,
-    h('span', {class: 'domain ellipsis'}, marked(hostOf(tab.url)))),
+    trail ? setTip(h('span', {
+        class: 'trail-count num', 'aria-hidden': 'true',
+        // not the link's own click: that would open the tab
+        onClick: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleItem(trail.id, trail.auto);
+        },
+    }, icon('history', 12), numbers.format(trail.count)), {text: plural('p_trailCount', trail.count), keys: ['→']}) : null,
+    h('span', {class: ['domain', 'ellipsis', opts.right && 'num']}, opts.right || marked(hostOf(tab.url)))),
     {text: tab.title || tab.url, sub: tab.title ? tab.url : null, align: 'start', focus: false, quiet: true,
         when: () => isCut(title)});
     if (!at) {
@@ -1566,42 +1625,104 @@ function sessionItem(result) {
     const current = key === state.currentSession;
     const partial = state.words.length > 0 && !result.byName;
     const windows = sessionWindows(session);
+    const ends = windows.filter((win) => !win.closed);
+    const tabs = ends.flatMap((win) => win.tabs);
+    const closed = session.tabs.length - tabs.length;
+    // the live session shows only what was closed: with nothing closed it has nothing to show
+    const expandable = !current || closed > 0;
+    const id = 'sessions:' + key;
     const name = sessionName(key);
+    // the row counts the tabs at the end (what Restore opens); while searching, the found ones of all
+    const total = partial ? session.tabs.length : tabs.length;
+    const words = [
+        ends.length > 1 && plural('p_windowsCount', ends.length),
+        plural('p_tabsCount', tabs.length),
+        closed > 0 && plural('p_closedTabs', closed),
+    ].filter(Boolean);
     const item = h('div', {class: 'item', dataset: {key}},
         h('div', {class: 'row'},
-            current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron('sessions:' + key, partial),
-            current ? setTip(h('span', {class: 'name ellipsis'}, marked(name)),
-                {text: name, align: 'start', focus: false, quiet: true, when: isCut}) :
-                nameButton('sessions:' + key, partial, name,
-                    (windows.length > 1 ? plural('p_windowsCount', windows.length) + ' · ' : '') +
-                    plural('p_tabsCount', session.tabs.length), () => restoreSession(session), null, [
-                        windows.length > 1 && plural('p_windowsCount', windows.length),
-                        tabCount(session.tabs.length, result, partial),
-                    ]),
+            current ? h('span', {class: 'live', 'aria-hidden': 'true'}) : chevron(id, partial),
+            expandable ? nameButton(id, partial, name, words.join(' · '),
+                current ? () => toggleItem(id, partial) : () => restoreSession(session), null, [
+                    ends.length > 1 && plural('p_windowsCount', ends.length),
+                    tabCount(total, result, partial),
+                    closed > 0 && plural('p_closedTabs', closed),
+                ]) :
+                setTip(h('span', {class: 'name ellipsis'}, marked(name)),
+                    {text: name, align: 'start', focus: false, quiet: true, when: isCut}),
             rowEnd([
                 // one window is the usual case: only the tabs then
-                windows.length > 1 ? countMeta('wins', numbers.format(windows.length),
-                    plural('p_windowsCount', windows.length), icon('window', 13)) : null,
-                tabsMeta(session.tabs.length, result, partial),
+                ends.length > 1 ? countMeta('wins', numbers.format(ends.length),
+                    plural('p_windowsCount', ends.length), icon('window', 13)) : null,
+                tabsMeta(total, result, partial),
             // the live session is open right now: nothing to restore
             ], current ? null : h('div', {class: 'actions'},
                 setTip(h('button', {class: 'open', type: 'button', onClick: single(() => restoreSession(session))}, t('p_restore')),
                     {text: t('p_restore_tip'), keys: [ENTER]}),
                 moreButton((button) => sessionMenu(key, button))))));
-    if (!current && isExpanded('sessions:' + key, partial)) {
+    if (expandable && isExpanded(id, partial)) {
         const found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
-        item.append(h('div', {class: 'tab-list'}, windows.map((tabs, i) => {
-            const shown = found ? tabs.filter((tab) => found.has(tab)) : tabs;
-            return shown.length ? [
-                h('div', {class: 'win-title'}, icon('window', 14),
-                    h('span', {class: 'spacer'}, plural('p_windowTitle', tabs.length, [i + 1])),
-                    h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', tabs))},
-                        t('p_openWindow'))),
-                shown.map((tab) => tabRow(tab)),
-            ] : null;
-        })));
+        item.append(h('div', {class: 'tab-list'}, windows.map((win, i) => sessionWindowRows(key, win, i, current, found))));
     }
     return item;
+}
+
+/**
+ * A window of an expanded session: its title, its tabs, then "3 closed tabs" that shows the ones closed by themselves
+ * (newest first, with the time). The live session's open windows show only that (their tabs are open anyway), and
+ * only if something in them was closed.
+ * `found`: while searching, the session's tabs that were found (only those are shown, closed ones open by themselves).
+ */
+function sessionWindowRows(key, win, i, live, found) {
+    if (live && !win.closed && !win.closedTabs.length) {
+        return null;
+    }
+    const tabs = live && !win.closed ? [] : win.tabs;
+    const shown = found ? tabs.filter((tab) => found.has(tab)) : tabs;
+    const closedShown = found ? win.closedTabs.filter((tab) => found.has(tab)) : win.closedTabs;
+    if (found && !shown.length && !closedShown.length) {
+        return null;
+    }
+    const foldId = 'fold:' + key + ':' + win.id;
+    const auto = !!found;
+    const foldOpen = isExpanded(foldId, auto);
+    return [
+        h('div', {class: 'win-title'}, icon('window', 14),
+            h('span', {class: 'spacer'}, win.closed ?
+                plural('p_windowClosedTitle', win.tabs.length, [i + 1, shortTime(win.closed, lang)]) :
+                plural('p_windowTitle', win.tabs.length, [i + 1])),
+            live && !win.closed ? null :
+                h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', win.tabs))},
+                    t('p_openWindow'))),
+        shown.map((tab) => sessionTabRows(key, tab, found)),
+        closedShown.length ? [
+            h('button', {
+                class: 'fold', type: 'button', 'aria-expanded': String(foldOpen),
+                dataset: {toggle: foldId, auto: auto ? '1' : ''}, onClick: single(() => toggleItem(foldId, auto)),
+            }, icon(foldOpen ? 'chevronDown' : 'chevronRight', 14), plural('p_closedTabs', closedShown.length)),
+            foldOpen ? h('div', {class: 'fold-list'},
+                closedShown.map((tab) => sessionTabRows(key, tab, found, shortTime(tab.closed, lang)))) : null,
+        ] : null,
+    ];
+}
+
+/**
+ * A session's tab, and under it the pages it went through (newest first) when its trail is shown. A tab found only
+ * through its trail shows it by itself. `right`: the time a closed tab closed.
+ */
+function sessionTabRows(key, tab, found, right) {
+    const trail = tab.trail || [];
+    if (!trail.length) {
+        return tabRow(tab, null, {right});
+    }
+    const id = 'trail:' + key + ':' + tab.id;
+    const auto = !!found && !matchesAll((tab.title || '') + '\n' + (tab.url || ''), state.words);
+    const open = isExpanded(id, auto);
+    return [
+        tabRow(tab, null, {right, trail: {id, auto, open, count: trail.length}}),
+        open ? h('div', {class: 'trail'},
+            trail.slice().reverse().map((step) => tabRow(step, null, {right: shortTime(step.at, lang), step: true}))) : null,
+    ];
 }
 
 function emptyState() {
@@ -1618,7 +1739,11 @@ function noMatches(sessions) {
     return h('div', {class: 'no-match'},
         icon('searchOff', 34),
         h('h2', null, t(sessions ? 'p_noSessionsMatch' : 'p_noGroupsMatch', query)),
-        h('p', null, plural('p_noMatch_text', state.openTabs, [keyLabel('enter')])));
+        h('p', null, plural('p_noMatch_text', state.openTabs, [keyLabel('enter')])),
+        // only the shown tab is searched: the words may be in a session
+        !sessions && state.options.session_watcher ?
+            h('button', {class: 'link', type: 'button', onClick: () => switchView('sessions')}, t('p_searchSessions')) :
+            null);
 }
 
 /** what Enter will do to a group with the typed name, above the list */
@@ -1648,7 +1773,6 @@ function renderTabs() {
     el.tabSessions.tabIndex = saved ? -1 : 0;
     el.list.setAttribute('aria-labelledby', saved ? 'tab_saved' : 'tab_sessions');
     el.countSaved.textContent = String(state.results.saved.length);
-    el.countSessions.textContent = String(state.results.sessions.length);
 }
 
 /**
@@ -1662,8 +1786,11 @@ function listFocus() {
         return null;
     }
     const shown = rowTabs.get(node);
-    return shown ? {key: item.dataset.key, shown, pos: Array.from(item.querySelectorAll('a.tab-row')).indexOf(node)} :
-        {key: item.dataset.key};
+    if (shown) {
+        return {key: item.dataset.key, shown, pos: Array.from(item.querySelectorAll('a.tab-row')).indexOf(node)};
+    }
+    // a session's "3 closed tabs" or a tab with a trail: what → ← show and hide
+    return node.dataset && node.dataset.toggle ? {key: item.dataset.key, toggle: node.dataset.toggle} : {key: item.dataset.key};
 }
 
 /** the same saved tab gets the focus again, or the one now in its place (it was removed), or the group's name */
@@ -1672,6 +1799,11 @@ function restoreFocus(was) {
         return;
     }
     const item = el.list.querySelector('.item[data-key="' + CSS.escape(was.key) + '"]');
+    const toggle = was.toggle && item && item.querySelector('[data-toggle="' + CSS.escape(was.toggle) + '"]');
+    if (toggle) {
+        toggle.focus();
+        return;
+    }
     const rows = was.shown && item ? Array.from(item.querySelectorAll('a.tab-row')) : [];
     const row = rows.find((node) => rowTabs.get(node) && sameTab(rowTabs.get(node).tab, was.shown.tab)) ||
         rows[Math.min(was.pos, rows.length - 1)];
@@ -1715,7 +1847,7 @@ function redrawItem(key) {
 /** the list's content, not yet in it */
 function drawList() {
     const list = document.createDocumentFragment();
-    if (state.view === 'sessions' && state.options.session_watcher) {
+    if (sessionsShown()) {
         const results = state.results.sessions;
         list.append(...(results.length || !state.words.length ? results.map(sessionItem) : [noMatches(true)]));
         return list;
@@ -1758,7 +1890,7 @@ function settingsButton() {
 
 function renderFooter() {
     clear(el.footer);
-    if (state.view === 'sessions' && state.options.session_watcher) {
+    if (sessionsShown()) {
         el.footer.append(icon('computer', 14), h('span', {class: 'spacer'}, t('p_sessionsFooter')), settingsButton());
         return;
     }
@@ -1866,12 +1998,15 @@ function renderIfWaiting() {
 
 /* ---------- start ---------- */
 
-function switchView(view) {
+async function switchView(view) {
     state.view = view;
     if (view === 'sessions') {
         state.filter = null;
     }
     chrome.storage.sync.set({active_tab: view === 'sessions' ? '#sessions' : '#saved'});
+    if (sessionsShown() && !state.sessionsLoaded) {
+        await loadSessions();
+    }
     render();
 }
 
@@ -1946,20 +2081,26 @@ el.list.addEventListener('keydown', (e) => {
         const next = stops[i + (e.key === 'ArrowDown' ? 1 : -1)];
         (next || (e.key === 'ArrowUp' ? el.field : stops[i])).focus();
     } else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.altKey) {
-        // as in a tree: → shows a group's tabs, ← hides them; ← on a tab goes back to its group
+        // as in a tree: → shows a group's tabs (a session window's closed tabs, a tab's trail), ← hides them; ← on a
+        // row that shows nothing goes back to what it is in: a trail page to its tab, a closed tab to "3 closed tabs",
+        // a tab to its group
         const target = document.activeElement;
-        if (target.dataset && target.dataset.toggle) {
+        const toggle = target.dataset && target.dataset.toggle;
+        const auto = !!(toggle && target.dataset.auto);
+        if (toggle && isExpanded(toggle, auto) !== (e.key === 'ArrowRight')) {
             e.preventDefault();
-            const auto = !!target.dataset.auto;
-            if (isExpanded(target.dataset.toggle, auto) !== (e.key === 'ArrowRight')) {
-                toggleItem(target.dataset.toggle, auto);
-            }
-        } else if (e.key === 'ArrowLeft' && target.classList.contains('tab-row')) {
-            const name = target.closest('.item').querySelector('button.name');
-            if (name) {
+            toggleItem(toggle, auto);
+        } else if (e.key === 'ArrowLeft' && target.matches('.tab-row, .fold')) {
+            const trail = target.closest('.trail');
+            const fold = target.closest('.fold-list');
+            const up = trail ? trail.previousElementSibling.querySelector('.tab-row') :
+                fold ? fold.previousElementSibling : target.closest('.item').querySelector('button.name');
+            if (up) {
                 e.preventDefault();
-                name.focus();
+                up.focus();
             }
+        } else if (toggle) {
+            e.preventDefault();
         }
     } else if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
         // the menu key (Shift+F10) opens the ⋯ menu of the focused group or session
@@ -1988,7 +2129,7 @@ el.list.addEventListener('contextmenu', (e) => {
     }
 });
 el.list.addEventListener('focusin', (e) => {
-    if (e.target.matches('button.name, .tab-row')) {
+    if (e.target.matches(STOPS)) {
         setStop(e.target);
     }
 });
@@ -2053,7 +2194,7 @@ async function start() {
     state.view = state.options.active_tab === '#sessions' ? 'sessions' : 'saved';
 
     const [tabs, win] = await Promise.all([
-        queryTabsToSave(), chrome.windows.getCurrent(), loadGroups(), loadSessions(), loadUsage()]);
+        queryTabsToSave(), chrome.windows.getCurrent(), loadGroups(), sessionsShown() ? loadSessions() : null, loadUsage()]);
     state.openTabs = tabs.length;
     state.windowId = win.id;
     render();

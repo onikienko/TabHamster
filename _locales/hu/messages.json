@@ -765,6 +765,86 @@
         "message": "Ablak megnyitása",
         "description": "Link next to a window of a session: opens that window's tabs in a new window"
     },
+    "p_closedTabs_one": {
+        "message": "$COUNT$ bezárt fül",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_other": {
+        "message": "$COUNT$ bezárt fül",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_windowClosedTitle_one": {
+        "message": "$NUMBER$. ablak, bezárva: $TIME$, $COUNT$ fül",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_other": {
+        "message": "$NUMBER$. ablak, bezárva: $TIME$, $COUNT$ fül",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'other', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_trailCount_one": {
+        "message": "$COUNT$ korábbi oldal",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_other": {
+        "message": "$COUNT$ korábbi oldal",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_searchSessions": {
+        "message": "Keresés a munkamenetekben",
+        "description": "Link under 'No groups match': only the shown tab is searched, this shows the Sessions tab with the same words"
+    },
     "p_saveAsGroup": {
         "message": "Mentés csoportként",
         "description": "Session menu: keeps the session's tabs as a saved group"
@@ -1078,7 +1158,7 @@
         "description": "Settings page. Setting name (switch)"
     },
     "s_sessions_text": {
-        "message": "Ezen a számítógépen megőrzi az utolsó 30 böngészési munkamenetet, így összeomlás vagy újraindítás után visszahozhatja az ablakait. Kikapcsolva a felugró ablakban nincs Munkamenetek lap.",
+        "message": "Ezen a számítógépen megőrzi az utolsó 30 böngészési munkamenetet: minden megnyitott fület, az egyes fülekben megnyitott korábbi oldalakat, és a bezárt füleket és ablakokat. A Visszaállítás összeomlás vagy újraindítás után visszahozza az ablakait. Kikapcsolva a felugró ablakban nincs Munkamenetek lap.",
         "description": "Settings page. Under Save sessions automatically"
     },
     "s_curWin": {
@@ -1512,7 +1592,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Az utolsó 30 böngészési munkamenet. A Visszaállítás úgy hozza vissza az ablakokat, ahogy voltak.",
+        "message": "Az utolsó 30 böngészési munkamenet, a bezárt fülekkel és ablakokkal, és az egyes fülekben megnyitott korábbi oldalakkal. A Visszaállítás a végén nyitva lévő ablakokat hozza vissza.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

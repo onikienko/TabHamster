@@ -973,6 +973,124 @@
         "message": "Отвори прозор",
         "description": "Link next to a window of a session: opens that window's tabs in a new window"
     },
+    "p_closedTabs_one": {
+        "message": "$COUNT$ затворена картица",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_few": {
+        "message": "$COUNT$ затворене картице",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'few')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_other": {
+        "message": "$COUNT$ затворених картица",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_windowClosedTitle_one": {
+        "message": "Прозор $NUMBER$, затворен у $TIME$, $COUNT$ картица",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_few": {
+        "message": "Прозор $NUMBER$, затворен у $TIME$, $COUNT$ картице",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'few', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_other": {
+        "message": "Прозор $NUMBER$, затворен у $TIME$, $COUNT$ картица",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'other', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_trailCount_one": {
+        "message": "$COUNT$ претходна страница",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_few": {
+        "message": "$COUNT$ претходне странице",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'few')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_other": {
+        "message": "$COUNT$ претходних страница",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_searchSessions": {
+        "message": "Претражи сесије",
+        "description": "Link under 'No groups match': only the shown tab is searched, this shows the Sessions tab with the same words"
+    },
     "p_saveAsGroup": {
         "message": "Сачувај као групу",
         "description": "Session menu: keeps the session's tabs as a saved group"
@@ -1358,7 +1476,7 @@
         "description": "Settings page. Setting name (switch)"
     },
     "s_sessions_text": {
-        "message": "Чува ваших последњих 30 сесија прегледача на овом рачунару, да бисте могли да вратите прозоре после пада или поновног покретања. Када је искључено, искачући прозор нема картицу Сесије.",
+        "message": "Чува ваших последњих 30 сесија прегледача на овом рачунару: сваку отворену картицу, странице кроз које је свака картица прошла и картице и прозоре које сте затворили. Врати враћа прозоре после пада или поновног покретања. Када је искључено, искачући прозор нема картицу Сесије.",
         "description": "Settings page. Under Save sessions automatically"
     },
     "s_curWin": {
@@ -1870,7 +1988,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Ваших последњих 30 сесија прегледача. Врати враћа њихове прозоре какви су били.",
+        "message": "Ваших последњих 30 сесија прегледача, са картицама и прозорима које сте затворили и страницама кроз које је свака картица прошла. Врати враћа прозоре који су били отворени на крају.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

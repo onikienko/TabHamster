@@ -6,7 +6,8 @@
 //   fakeChrome.reset()                                       // empty all storage and reload
 // URL parameters: ?tabs=N open tabs to save (default 8), ?lang=uk messages from _locales/uk,
 // ?delay=ms slow answers from the background (a service worker that is waking up),
-// ?sessions=N past sessions on a first start or after reset() (default 2: one with two windows, one from 0.4.0).
+// ?sessions=N past sessions on a first start or after reset() (default 2: the newest with closed tabs, a closed window
+// and tabs that went through other pages; the oldest from 0.4.0; any between with two windows).
 // window.close() (the popup closing after Open) only logs.
 (function () {
     'use strict';
@@ -216,8 +217,28 @@
         return tabs;
     }
 
-    // sessions the session watcher would have written before: {tg_<start>: {name, updated, tabs}}; the oldest has no
-    // `updated`, as sessions from 0.4.0
+    // A session as the session watcher writes it (js/background.js): window 11 open at the end with two tabs closed
+    // by themselves, window 13 closed after 4 hours; two tabs went through other pages.
+    function fullSession(start) {
+        var h = 36e5;
+        var tab = function (id, site, windowId, more) {
+            return Object.assign({id: id, url: SITES[site][0], title: SITES[site][1], pinned: false, windowId: windowId,
+                at: start + h}, more);
+        };
+        return {name: '', updated: start + 9 * h, v: 2, windows: {13: {closed: start + 4 * h}}, tabs: [
+            tab(1, 0, 11, {pinned: true, trail: [
+                {url: 'https://github.com/', title: 'GitHub', at: start},
+                {url: 'https://github.com/onikienko', title: 'onikienko (Mykhailo Onikiienko)', at: start + h / 2}]}),
+            tab(2, 1, 11),
+            tab(3, 2, 11, {closed: start + 3 * h}),
+            tab(6, 5, 11, {closed: start + 6 * h, trail: [{url: 'https://news.ycombinator.com/item?id=1', title: 'Ask HN', at: start}]}),
+            tab(4, 3, 13),
+            tab(5, 4, 13),
+        ]};
+    }
+
+    // sessions the session watcher would have written before: {tg_<start>: session}; the newest is a full one
+    // (fullSession), the oldest has no `updated`, as sessions from 0.4.0
     function pastSessions(n) {
         var sessions = {};
         var now = Date.now();
@@ -227,7 +248,7 @@
                 return {pinned: j === 0, title: site[1], url: site[0], windowId: j < 2 ? 11 + i * 2 : 12 + i * 2};
             });
             sessions['tg_' + start] = i === n - 1 && n > 1 ? {name: '', tabs: tabs} :
-                {name: '', updated: start + 9 * 36e5, tabs: tabs};
+                i === 0 ? fullSession(start) : {name: '', updated: start + 9 * 36e5, tabs: tabs};
         }
         return sessions;
     }
@@ -242,6 +263,7 @@
         runtime: {
             lastError: undefined,
             onInstalled: event(),
+            onStartup: event(),
             onMessage: event(),
             onUpdateAvailable: event(),
             reload: function () {
@@ -304,6 +326,10 @@
             getCurrent: function (callback) {
                 return finish(Promise.resolve({id: 1}), callback);
             },
+            getAll: function () {
+                return Promise.resolve([{id: 1}]);
+            },
+            onRemoved: event(),
         },
         i18n: {
             getMessage: getMessage,

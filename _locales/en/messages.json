@@ -768,6 +768,86 @@
         "message": "Open window",
         "description": "Link next to a window of a session: opens that window's tabs in a new window"
     },
+    "p_closedTabs_one": {
+        "message": "$COUNT$ closed tab",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_other": {
+        "message": "$COUNT$ closed tabs",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_windowClosedTitle_one": {
+        "message": "Window $NUMBER$, closed $TIME$, $COUNT$ tab",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_other": {
+        "message": "Window $NUMBER$, closed $TIME$, $COUNT$ tabs",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'other', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_trailCount_one": {
+        "message": "$COUNT$ earlier page",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_other": {
+        "message": "$COUNT$ earlier pages",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_searchSessions": {
+        "message": "Search sessions",
+        "description": "Link under 'No groups match': only the shown tab is searched, this shows the Sessions tab with the same words"
+    },
     "p_saveAsGroup": {
         "message": "Save as group",
         "description": "Session menu: keeps the session's tabs as a saved group"
@@ -1081,7 +1161,7 @@
         "description": "Settings page. Setting name (switch)"
     },
     "s_sessions_text": {
-        "message": "Keeps your last 30 browser sessions on this computer, so you can bring your windows back after a crash or restart. When it is off, the popup has no Sessions tab.",
+        "message": "Keeps your last 30 browser sessions on this computer: every tab you had open, the pages each tab went through, and the tabs and windows you closed. Restore brings your windows back after a crash or restart. When it is off, the popup has no Sessions tab.",
         "description": "Settings page. Under Save sessions automatically"
     },
     "s_curWin": {
@@ -1515,7 +1595,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Your last 30 browser sessions. Restore brings back their windows as they were.",
+        "message": "Your last 30 browser sessions, with the tabs and windows you closed and the pages each tab went through. Restore brings back the windows that were open at the end.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

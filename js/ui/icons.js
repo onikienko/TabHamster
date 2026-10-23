@@ -31,6 +31,8 @@ const ICONS = {
         ['path', {d: 'M13.5 8.5l-5 5'}]],
     chevronRight: [['path', {d: 'm9 18 6-6-6-6'}]],
     chevronDown: [['path', {d: 'm6 9 6 6 6-6'}]],
+    history: [['path', {d: 'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'}], ['path', {d: 'M3 3v5h5'}],
+        ['path', {d: 'M12 7v5l4 2'}]],
     newWindow: [['path', {d: 'M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6'}], ['path', {d: 'm21 3-9 9'}],
         ['path', {d: 'M15 3h6v6'}]],
     more: [['circle', {cx: 5, cy: 12, r: 1.8, fill: 'currentColor', stroke: 'none'}],

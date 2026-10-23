@@ -977,6 +977,124 @@
         "message": "Відкрити вікно",
         "description": "Link next to a window of a session: opens that window's tabs in a new window"
     },
+    "p_closedTabs_one": {
+        "message": "$COUNT$ закрита вкладка",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_few": {
+        "message": "$COUNT$ закриті вкладки",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'few')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_other": {
+        "message": "$COUNT$ закритих вкладок",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_windowClosedTitle_one": {
+        "message": "Вікно $NUMBER$, закрито о $TIME$, $COUNT$ вкладка",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_few": {
+        "message": "Вікно $NUMBER$, закрито о $TIME$, $COUNT$ вкладки",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'few', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_other": {
+        "message": "Вікно $NUMBER$, закрито о $TIME$, $COUNT$ вкладок",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'other', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_trailCount_one": {
+        "message": "$COUNT$ попередня сторінка",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_few": {
+        "message": "$COUNT$ попередні сторінки",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'few')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_other": {
+        "message": "$COUNT$ попередніх сторінок",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_searchSessions": {
+        "message": "Шукати в сесіях",
+        "description": "Link under 'No groups match': only the shown tab is searched, this shows the Sessions tab with the same words"
+    },
     "p_saveAsGroup": {
         "message": "Зберегти як групу",
         "description": "Session menu: keeps the session's tabs as a saved group"
@@ -1362,7 +1480,7 @@
         "description": "Settings page. Setting name (switch)"
     },
     "s_sessions_text": {
-        "message": "Зберігає останні 30 сесій браузера на цьому комп'ютері, щоб ви могли повернути свої вікна після збою чи перезапуску. Якщо вимкнено, у спливаючому вікні немає вкладки «Сесії».",
+        "message": "Зберігає останні 30 сесій браузера на цьому комп'ютері: кожну відкриту вкладку, сторінки, якими пройшла кожна вкладка, а також закриті вкладки й вікна. «Відновити» повертає ваші вікна після збою чи перезапуску. Якщо вимкнено, у спливаючому вікні немає вкладки «Сесії».",
         "description": "Settings page. Under Save sessions automatically"
     },
     "s_curWin": {
@@ -1874,7 +1992,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Ваші останні 30 сесій браузера. «Відновити» повертає їхні вікна такими, як вони були.",
+        "message": "Ваші останні 30 сесій браузера із закритими вкладками й вікнами та сторінками, якими пройшла кожна вкладка. «Відновити» повертає вікна, відкриті наприкінці.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

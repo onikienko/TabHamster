@@ -53,18 +53,22 @@ function fakeBrowser(active) {
                 }
                 return {id: 7, tabs: urls.map(() => ({id: next_id++, windowId: 7}))};
             },
+            getAll: async () => (active ? [{id: active.windowId}] : []),
         },
     };
 }
 
+// one open tab, for tests that need a session to be stored (a session without tabs isn't)
+const ONE_TAB = {id: 1, url: 'https://example.com/', title: 'Example', pinned: false, windowId: 1};
+
 function startBackground({sync = createSyncArea(), local = createStorageArea(), session = createStorageArea(),
-    browser = fakeBrowser()} = {}) {
+    browser = fakeBrowser(), start_wait = 0} = {}) {
     // messages the background sends to open pages; like Chrome, it fails when no page listens
     const sent = [];
     const chrome = {
         storage: {sync, local, session, onChanged: event()},
         runtime: {
-            onInstalled: event(), onMessage: event(), onUpdateAvailable: event(), reload() {},
+            onInstalled: event(), onStartup: event(), onMessage: event(), onUpdateAvailable: event(), reload() {},
             sendMessage(msg) {
                 sent.push(JSON.parse(JSON.stringify(msg)));
                 return Promise.reject(new Error('Could not establish connection. Receiving end does not exist.'));
@@ -81,7 +85,7 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
             onRemoved: event(),
             onReplaced: event(),
         },
-        windows: browser.windows,
+        windows: Object.assign({onRemoved: event()}, browser.windows),
         i18n: {getMessage: key => EN[key] ? EN[key].message : ''},
     };
     const context = vm.createContext({
@@ -95,6 +99,8 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
         });
     };
     vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/background.js'), 'utf8'), context, {filename: 'background.js'});
+    // a new session waits this long to learn why the worker started (onStartup, onInstalled)
+    vm.runInContext('session_config.start_wait = ' + start_wait, context);
 
     function send(msg) {
         return new Promise(function (resolve) {
@@ -374,7 +380,7 @@ test('a sync change from another device reaches the local copy', async () => {
 test('the current session is written with the time it last changed', async () => {
     const local = createStorageArea();
     const before = Date.now();
-    startBackground({local});
+    startBackground({local, browser: fakeBrowser(ONE_TAB)});
     let session;
     await waitFor(async function () {
         const items = await local.get(null);
@@ -382,7 +388,8 @@ test('the current session is written with the time it last changed', async () =>
         return !!session;
     });
     assert.ok(session.updated >= before && session.updated <= Date.now());
-    assert.deepEqual(session.tabs, []);
+    assert.equal(session.v, 2);
+    assert.deepEqual(session.tabs.map(tab => tab.url), [ONE_TAB.url]);
 });
 
 test('session rotation counts only sessions, not saved group copies', async () => {
@@ -395,7 +402,7 @@ test('session rotation counts only sessions, not saved group copies', async () =
         const g = makeGroup(1, i);
         local.rawSet({['lg_' + (t0 - 1000 + i)]: {g, h: 'x', synced: false, base: null}});
     }
-    const bg = startBackground({local});
+    const bg = startBackground({local, browser: fakeBrowser(ONE_TAB)});
 
     await waitFor(async function () {
         const keys = Object.keys(await local.get(null));
@@ -633,7 +640,7 @@ test('sessions: a start-up and a switch at the same time start one session', asy
         started += items.session_id ? 1 : 0;
         return set(items);
     };
-    const bg = startBackground({local, session});
+    const bg = startBackground({local, session, browser: fakeBrowser(ONE_TAB)});
     // the worker woke up because the option changed: start-up and the storage listener both see sessions on
     bg.chrome.storage.onChanged.listeners.forEach(fn => fn({session_watcher: {newValue: 1}}, 'sync'));
     bg.chrome.tabs.onRemoved.listeners.forEach(fn => fn(5, {}));
@@ -705,7 +712,7 @@ test('sessions: a burst of tab events makes a few writes, and the last one has e
     // restoring 100 tabs: an event for each
     const queries_before = queries;
     for (let i = 0; i < 100; i++) {
-        open.push({url: 'https://example.com/' + i, title: 'T' + i, pinned: false, windowId: 1});
+        open.push({id: i, url: 'https://example.com/' + i, title: 'T' + i, pinned: false, windowId: 1});
         fire();
     }
     await settle();
@@ -714,10 +721,10 @@ test('sessions: a burst of tab events makes a few writes, and the last one has e
 
     // an event while a write is running: one more write follows it, however many events come
     hold = true;
-    open.push({url: 'https://example.com/running', title: 'R', pinned: false, windowId: 1});
+    open.push({id: 200, url: 'https://example.com/running', title: 'R', pinned: false, windowId: 1});
     fire();
     await waitFor(() => !!release);
-    open.push({url: 'https://example.com/late', title: 'L', pinned: false, windowId: 1});
+    open.push({id: 201, url: 'https://example.com/late', title: 'L', pinned: false, windowId: 1});
     for (let i = 0; i < 20; i++) {
         fire();
     }
@@ -727,4 +734,203 @@ test('sessions: a burst of tab events makes a few writes, and the last one has e
     assert.equal(tabs.length, 102);
     assert.equal(tabs[101].url, 'https://example.com/late');
     assert.equal(queries - queries_before, 3, 'the running write and one more');
+});
+
+// mergeSession runs in the background's sandbox (its objects have their own prototypes: compared as JSON).
+// notes: {steps: {tabId: [{url, title, at}]}, closing: [windowId], replaced: [[oldId, newId]]}
+function merge(bg, stored, open, window_ids, notes = {}, now = 1000) {
+    const n = bg.context.newNotes();
+    Object.entries(notes.steps || {}).forEach(([id, steps]) => n.steps.set(Number(id), steps));
+    (notes.closing || []).forEach(id => n.closing.add(id));
+    (notes.replaced || []).forEach(([from, to]) => n.replaced.set(from, to));
+    const session = bg.context.mergeSession(stored, open, new Set(window_ids), n, now);
+    return session && JSON.parse(JSON.stringify(session));
+}
+
+const openTab = (id, url, windowId = 1) => ({id, url, title: 'T ' + url, pinned: false, windowId});
+
+test('session tabs: a new address puts the one before into the trail; a reload or a new tab page does not', () => {
+    const bg = startBackground();
+    let s = merge(bg, null, [openTab(1, 'chrome://newtab/')], [1], {}, 100);
+    assert.deepEqual(s.tabs, [{id: 1, url: 'chrome://newtab/', title: 'T chrome://newtab/', pinned: false, windowId: 1, at: 100}]);
+    s = merge(bg, s, [openTab(1, 'https://a.com/')], [1], {}, 200);
+    assert.equal(s.tabs[0].trail, undefined, 'a new tab page is not a page the tab went through');
+    assert.equal(s.tabs[0].at, 200);
+    // two addresses between writes, the second one reloaded
+    s = merge(bg, s, [openTab(1, 'https://c.com/')], [1], {steps: {1: [
+        {url: 'https://b.com/', title: 'B', at: 250}, {url: 'https://c.com/', title: '', at: 260},
+        {url: 'https://c.com/', title: '', at: 270}]}}, 300);
+    assert.deepEqual(s.tabs[0].trail, [
+        {url: 'https://a.com/', title: 'T https://a.com/', at: 200}, {url: 'https://b.com/', title: 'B', at: 250}]);
+    assert.equal(s.tabs[0].at, 260);
+    assert.equal(s.tabs[0].title, 'T https://c.com/');
+    assert.equal(s.v, 2);
+    assert.equal(s.updated, 300);
+});
+
+test('session tabs: a trail keeps the last 10 pages', () => {
+    const bg = startBackground();
+    let s = null;
+    for (let i = 0; i < 15; i++) {
+        s = merge(bg, s, [openTab(1, 'https://example.com/' + i)], [1], {}, i);
+    }
+    assert.equal(s.tabs[0].trail.length, 10);
+    assert.equal(s.tabs[0].trail[0].url, 'https://example.com/4');
+    assert.equal(s.tabs[0].trail[9].url, 'https://example.com/13');
+});
+
+test('session tabs: a tab closed by itself is marked; a closed window keeps its tabs as they were', () => {
+    const bg = startBackground();
+    const open = [openTab(1, 'https://a.com/', 1), openTab(2, 'https://b.com/', 1), openTab(3, 'https://c.com/', 2),
+        openTab(4, 'https://d.com/', 3)];
+    const first = merge(bg, null, open, [1, 2, 3], {}, 100);
+    // tab 2 closed in window 1; window 2 gone; window 3 still there but closing (its tabs went with it)
+    const s = merge(bg, first, [open[0]], [1, 3], {closing: [3]}, 200);
+    const byId = Object.fromEntries(s.tabs.map(tab => [tab.id, tab]));
+    assert.equal(byId[1].closed, undefined);
+    assert.equal(byId[2].closed, 200);
+    assert.deepEqual(byId[3], first.tabs[2]);
+    assert.deepEqual(byId[4], first.tabs[3]);
+    assert.deepEqual(s.windows, {2: {closed: 200}, 3: {closed: 200}});
+    // later writes leave them as they are
+    const again = merge(bg, s, [open[0]], [1], {}, 300);
+    assert.deepEqual(again.tabs, s.tabs);
+    assert.deepEqual(again.windows, s.windows);
+    // the last window closed: it is closed too (the popup shows the windows closed last as the end)
+    const last = merge(bg, again, [], [], {}, 400);
+    assert.deepEqual(last.windows, {1: {closed: 400}, 2: {closed: 200}, 3: {closed: 200}});
+    assert.equal(last.tabs.find(tab => tab.id === 1).closed, undefined);
+});
+
+test('session tabs: a tab Chrome gives a new id keeps its trail', () => {
+    const bg = startBackground();
+    let s = merge(bg, null, [openTab(1, 'https://a.com/')], [1], {}, 100);
+    s = merge(bg, s, [openTab(1, 'https://b.com/')], [1], {}, 200);
+    s = merge(bg, s, [openTab(9, 'https://b.com/')], [1], {replaced: [[1, 9]]}, 300);
+    assert.equal(s.tabs.length, 1);
+    assert.equal(s.tabs[0].id, 9);
+    assert.equal(s.tabs[0].at, 200);
+    assert.deepEqual(s.tabs[0].trail.map(step => step.url), ['https://a.com/']);
+});
+
+test('session tabs: only the newest closed tabs are kept; no tabs, no session; a 0.4.0 session starts again', () => {
+    const bg = startBackground();
+    vm.runInContext('session_config.closed = 2', bg.context);
+    const all = [1, 2, 3, 4].map(id => openTab(id, 'https://example.com/' + id));
+    let s = merge(bg, null, all, [1], {}, 100);
+    // tabs 2, 3 and 4 closed one after another
+    for (const id of [2, 3, 4]) {
+        s = merge(bg, s, all.filter(tab => tab.id === 1 || tab.id > id), [1], {}, 100 + id);
+    }
+    assert.deepEqual(s.tabs.map(tab => [tab.id, tab.closed]).sort((a, b) => a[0] - b[0]), [[1, undefined], [3, 103], [4, 104]]);
+
+    assert.equal(merge(bg, null, [], [], {}, 100), null);
+
+    const snapshot = {name: '', updated: 50, tabs: [{url: 'https://old.com/', title: 'Old', pinned: false, windowId: 1}]};
+    s = merge(bg, snapshot, [openTab(1, 'https://a.com/')], [1], {}, 100);
+    assert.deepEqual(s.tabs.map(tab => tab.url), ['https://a.com/']);
+});
+
+test('sessions: a session without tabs is not stored', async () => {
+    const bg = startBackground();
+    await waitFor(async () => (await bg.chrome.storage.session.get('session_id')).session_id);
+    await settle();
+    assert.deepEqual(await sessionKeys(bg.chrome.storage.local), []);
+});
+
+test('sessions: incognito and DevTools tabs are not recorded; the Chrome tab group of a tab is', async () => {
+    const local = createStorageArea();
+    const browser = fakeBrowser();
+    browser.tabs.query = async () => [
+        {id: 1, url: 'https://a.com/', title: 'A', pinned: false, windowId: 1, groupId: 4},
+        {id: 2, url: 'https://b.com/', title: 'B', pinned: true, windowId: 1, groupId: -1},
+        {id: 3, url: 'https://secret.com/', title: 'S', pinned: false, windowId: 2, incognito: true},
+        {id: 4, url: 'chrome-devtools://devtools/bundled/inspector.html', title: 'D', pinned: false, windowId: 3},
+    ];
+    browser.windows.getAll = async () => [{id: 1}, {id: 2, incognito: true}, {id: 3}];
+    startBackground({local, browser});
+    await waitFor(async () => (await sessionKeys(local)).length === 1);
+    const session = Object.values(await local.get(await sessionKeys(local)))[0];
+    assert.deepEqual(session.tabs.map(tab => [tab.id, tab.groupId, tab.pinned]), [[1, 4, false], [2, undefined, true]]);
+});
+
+test('sessions: after an update or reload of the extension the session goes on; a new browser run starts one', async () => {
+    const old = 'tg_1700000000000';
+    for (const [reason, goesOn] of [['update', true], ['browser', false], ['install', false]]) {
+        const local = createStorageArea();
+        local.rawSet({
+            [old]: {name: '', updated: 1, v: 2, windows: {},
+                tabs: [{id: 1, url: 'https://a.com/', title: 'A', pinned: false, windowId: 1, at: 1}]},
+            session_last: old,
+        });
+        const bg = startBackground({local, browser: fakeBrowser({...ONE_TAB, url: 'https://b.com/'}), start_wait: 200});
+        if (reason === 'browser') {
+            bg.chrome.runtime.onStartup.listeners.forEach(fn => fn());
+        } else {
+            bg.chrome.runtime.onInstalled.listeners.forEach(fn => fn({reason}));
+        }
+        await waitFor(async () => (await bg.chrome.storage.session.get('session_id')).session_id);
+        const id = (await bg.chrome.storage.session.get('session_id')).session_id;
+        assert.equal(id === old, goesOn, reason);
+        assert.equal((await local.get('session_last')).session_last, id);
+        await waitFor(async () => {
+            const session = (await local.get(id))[id];
+            return session && session.tabs[0].url === 'https://b.com/';
+        });
+        // the same tab (same id in the same browser run) went on to another page
+        const trail = (await local.get(id))[id].tabs[0].trail;
+        assert.deepEqual(trail ? trail.map(step => step.url) : [], goesOn ? ['https://a.com/'] : [], reason);
+        assert.equal((await sessionKeys(local)).length, goesOn ? 1 : 2);
+    }
+});
+
+test('sessions: a window closing marks its window, not each of its tabs', async () => {
+    const local = createStorageArea();
+    let open = [openTab(1, 'https://a.com/', 1), openTab(2, 'https://b.com/', 2), openTab(3, 'https://c.com/', 2)];
+    let windows = [{id: 1}, {id: 2}];
+    const browser = fakeBrowser();
+    browser.tabs.query = async () => open.map(tab => ({...tab}));
+    browser.windows.getAll = async () => windows.map(win => ({...win}));
+    const bg = startBackground({local, browser});
+    await waitFor(async () => (await sessionKeys(local)).length === 1);
+    const stored = async () => Object.values(await local.get(await sessionKeys(local)))[0];
+    // Chrome removes the window's tabs one by one (the window is still listed meanwhile), then the window
+    open = [open[0], open[2]];
+    bg.chrome.tabs.onRemoved.listeners.forEach(fn => fn(2, {windowId: 2, isWindowClosing: true}));
+    await settle();
+    open = [open[0]];
+    bg.chrome.tabs.onRemoved.listeners.forEach(fn => fn(3, {windowId: 2, isWindowClosing: true}));
+    windows = [{id: 1}];
+    bg.chrome.windows.onRemoved.listeners.forEach(fn => fn(2));
+    await settle();
+    const session = await stored();
+    assert.deepEqual(session.tabs.map(tab => [tab.id, tab.closed]), [[1, undefined], [2, undefined], [3, undefined]]);
+    assert.deepEqual(Object.keys(session.windows), ['2']);
+    // then a tab closed by itself
+    open = [openTab(4, 'https://d.com/', 1)];
+    bg.chrome.tabs.onRemoved.listeners.forEach(fn => fn(1, {windowId: 1, isWindowClosing: false}));
+    await settle();
+    assert.ok((await stored()).tabs.find(tab => tab.id === 1).closed);
+});
+
+test('sessions: addresses between two writes reach the trail, with the titles that came for them', async () => {
+    const local = createStorageArea();
+    let open = [openTab(1, 'https://a.com/')];
+    const browser = fakeBrowser();
+    browser.tabs.query = async () => open.map(tab => ({...tab}));
+    browser.windows.getAll = async () => [{id: 1}];
+    const bg = startBackground({local, browser});
+    await waitFor(async () => (await sessionKeys(local)).length === 1);
+    // hold the next write until all events came
+    const queue = bg.context.inSessionQueue(() => new Promise(resolve => setTimeout(resolve, 50)));
+    const fire = (change) => bg.chrome.tabs.onUpdated.listeners.forEach(fn => fn(1, change));
+    fire({url: 'https://b.com/'});
+    fire({title: 'Page B'});
+    fire({url: 'https://c.com/'});
+    open = [openTab(1, 'https://c.com/')];
+    await queue;
+    await settle();
+    const session = Object.values(await local.get(await sessionKeys(local)))[0];
+    assert.deepEqual(session.tabs[0].trail.map(step => [step.url, step.title]),
+        [['https://a.com/', 'T https://a.com/'], ['https://b.com/', 'Page B']]);
 });

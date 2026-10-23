@@ -144,9 +144,14 @@ const group_ops = {
 // Opening saved groups and sessions. Done here, not in the popup: a new window takes the focus and closes the popup,
 // and the opening has to finish anyway. tabs: [{url, pinned?}]. Answers {failed: number of tabs that didn't open}.
 
-// a new tab page that can take the first opened tab instead of staying empty next to them
+// a new tab page: it can take the first opened tab instead of staying empty next to them, and it isn't a page a
+// session's tab went through (Edge has its own)
+function isBlankUrl(url) {
+    return /^(chrome:\/\/(newtab|new-tab-page)\/?|edge:\/\/newtab\/?|about:blank)$/.test(url || '');
+}
+
 function isBlankTab(tab) {
-    return !!tab && /^(chrome:\/\/(newtab|new-tab-page)\/?|about:blank)$/.test(tab.pendingUrl || tab.url || '');
+    return !!tab && isBlankUrl(tab.pendingUrl || tab.url);
 }
 
 // one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others.
@@ -230,6 +235,11 @@ const open_ops = {
 const session_config = {
     session_numbers: 30,
     prefix: 'tg_',
+    // pages kept per tab, tabs closed one by one kept per session (the oldest go first)
+    trail: 10,
+    closed: 500,
+    // how long after the worker starts a new session waits to know why it started (startEvents)
+    start_wait: 1000,
 };
 
 chrome.runtime.onInstalled.addListener(function (details) {
@@ -324,6 +334,16 @@ groups.migrate().then(() => groups.reconcile()).catch(e => console.error('TabHam
 
 /*SESSION WATCHER*/
 
+// A session is one browser run and keeps every tab opened during it: where it is (or was when it closed), the pages
+// it went through (its trail), and what was closed. Events say that something happened, a query says what is true
+// now: a write merges the open tabs and windows into the stored session (mergeSession), so a missed event is put
+// right by the next write. Stored as (v: 2):
+//   {name: '', updated, v: 2, tabs: [{id, url, title, pinned, windowId, at, closed?, groupId?, trail?}],
+//    windows: {<windowId>: {closed}}}
+// at: when the tab got to its address. closed: when the tab was closed by itself; a window closed with its tabs is
+// in `windows` instead, its tabs aren't marked. trail: [{url, title, at}], oldest first. groupId: a Chrome tab group
+// (names and colours come with `tabGroups`, PLAN.md 1.1.0). Sessions from before (no v) are snapshots of the tabs.
+
 // Session writes and switching sessions on or off run one after another: two writes at once could each start a
 // session, and a write still running when sessions are turned off could start one again after the switch.
 let session_queue = Promise.resolve();
@@ -331,6 +351,26 @@ let session_queue = Promise.resolve();
 function inSessionQueue(fn) {
     session_queue = session_queue.then(fn).catch(e => console.error('TabHamster: session update failed', e));
     return session_queue;
+}
+
+// What happened since the last write, for the next one to take: addresses a tab went through ({url, title, at} by
+// tab id), windows closing (their tabs go with them, not one by one), tab ids Chrome replaced (old id -> new id).
+function newNotes() {
+    return {steps: new Map(), closing: new Set(), replaced: new Map()};
+}
+
+let session_notes = newNotes();
+
+// Why the worker started: a new browser run ('browser'), the extension installed or updated ('install', 'update';
+// reloading an unpacked extension is an update too). Chrome sends these right after the worker starts.
+const worker_start = Date.now();
+const start_events = new Set();
+chrome.runtime.onStartup.addListener(() => start_events.add('browser'));
+chrome.runtime.onInstalled.addListener(details => start_events.add(details.reason));
+
+function startEvents() {
+    const wait = worker_start + session_config.start_wait - Date.now();
+    return new Promise(resolve => setTimeout(resolve, Math.max(0, wait))).then(() => start_events);
 }
 
 // remove the oldest session from chrome.storage.local (if sessions numbers >= config.session_numbers).
@@ -355,27 +395,136 @@ async function sessionsOn() {
     return !!options.session_watcher;
 }
 
-// writes the current session (starts one if there is none); only in the queue
-async function writeSession() {
+/**
+ * The current session's key; starts one if there is none. Chrome clears session storage when the browser starts
+ * and when the extension is updated or reloaded: after an update (in the same browser run, so the same tab ids) the
+ * session goes on. `fresh`: sessions were just turned on, a new one starts.
+ */
+async function currentSessionId(fresh) {
     const session_storage = await chrome.storage.session.get('session_id');
-    let session_id = session_storage.session_id;
-    if (!session_id) {
-        session_id = session_config.prefix + (new Date()).getTime();
-        await chrome.storage.session.set({session_id});
-        await cleanupSessions();
+    if (session_storage.session_id) {
+        return session_storage.session_id;
     }
-    const tabs = await chrome.tabs.query({});
-    // updated: when the session last changed, so the popup can show "14:02–23:05" (sessions from 0.4.0 don't have it)
-    const session = {
-        name: '',
-        updated: Date.now(),
-        tabs: [],
-    };
-    tabs.forEach(function (tab) {
-        if (!tab.url.startsWith('chrome-devtools://')) {
-            session.tabs.push({pinned: tab.pinned, title: tab.title, url: tab.url, windowId: tab.windowId});
+    let session_id = null;
+    if (!fresh) {
+        const events = await startEvents();
+        if (events.has('update') && !events.has('browser')) {
+            session_id = (await chrome.storage.local.get('session_last')).session_last || null;
+        }
+    }
+    session_id = session_id || session_config.prefix + Date.now();
+    await chrome.storage.session.set({session_id});
+    await chrome.storage.local.set({session_last: session_id});
+    return session_id;
+}
+
+/**
+ * An open tab as stored: where it was at the last write (`before`), the addresses it went through since (`steps`)
+ * and where it is now. A new address puts the one before into the trail (not a new tab page); the same address
+ * again (a reload) adds nothing.
+ */
+function sessionTab(tab, before, steps, now) {
+    const url = tab.url || tab.pendingUrl || '';
+    const path = (before ? [{url: before.url, title: before.title, at: before.at}] : [])
+        .concat(steps, [{url, title: tab.title, at: now}]);
+    const trail = before && before.trail ? before.trail.slice() : [];
+    let here = null;
+    path.forEach(function (step) {
+        if (here && step.url !== here.url) {
+            if (!isBlankUrl(here.url)) {
+                trail.push(here);
+            }
+            here = null;
+        }
+        here = here ? {url: here.url, title: step.title || here.title, at: here.at} :
+            {url: step.url, title: step.title || '', at: step.at};
+    });
+    const stored = {id: tab.id, url, title: here.title, pinned: !!tab.pinned, windowId: tab.windowId, at: here.at};
+    if (tab.groupId >= 0) {
+        stored.groupId = tab.groupId;
+    }
+    if (trail.length) {
+        stored.trail = trail.slice(-session_config.trail);
+    }
+    return stored;
+}
+
+/**
+ * The session after a write: `stored` (null for a new one), the open tabs (in Chrome's order), the ids of the open
+ * windows, the notes since the last write. A stored tab that isn't open any more was closed by itself if its window
+ * is still open, else its window was closed (all its tabs stay, as they were). Null when there are no tabs.
+ */
+function mergeSession(stored, open, window_ids, notes, now) {
+    const before = new Map();
+    const windows = Object.assign({}, stored && stored.windows);
+    // a session from before (a snapshot, no tab ids) is not continued: it starts again from the open tabs
+    if (stored && stored.v === 2) {
+        stored.tabs.forEach(function (tab) {
+            before.set(notes.replaced.has(tab.id) ? notes.replaced.get(tab.id) : tab.id, tab);
+        });
+    }
+    // the tabs of a closing window stay as they were at the last write (Chrome removes them one by one)
+    let tabs = open.filter(tab => !notes.closing.has(tab.windowId)).map(function (tab) {
+        const was = before.get(tab.id);
+        before.delete(tab.id);
+        // a window with open tabs isn't closed (a close that was cancelled)
+        delete windows[tab.windowId];
+        return sessionTab(tab, was, notes.steps.get(tab.id) || [], now);
+    });
+    before.forEach(function (tab) {
+        if (tab.closed || windows[tab.windowId]) {
+            tabs.push(tab);
+        } else if (window_ids.has(tab.windowId) && !notes.closing.has(tab.windowId)) {
+            tabs.push(Object.assign({}, tab, {closed: now}));
+        } else {
+            windows[tab.windowId] = {closed: now};
+            tabs.push(tab);
         }
     });
+    const closed = tabs.filter(tab => tab.closed).sort((a, b) => a.closed - b.closed);
+    if (closed.length > session_config.closed) {
+        const dropped = new Set(closed.slice(0, closed.length - session_config.closed));
+        tabs = tabs.filter(tab => !dropped.has(tab));
+    }
+    if (!tabs.length) {
+        return null;
+    }
+    const used = new Set(tabs.map(tab => String(tab.windowId)));
+    Object.keys(windows).forEach(function (id) {
+        if (!used.has(id)) {
+            delete windows[id];
+        }
+    });
+    return {name: '', updated: now, v: 2, tabs, windows};
+}
+
+// not recorded: DevTools windows, and incognito tabs (seen only with "Allow in Incognito" on)
+function recorded(tab) {
+    return !tab.incognito && !(tab.url || '').startsWith('chrome-devtools://');
+}
+
+// writes the current session (starts one if there is none; a session without tabs isn't stored); only in the queue
+async function writeSession(fresh) {
+    const session_id = await currentSessionId(fresh);
+    // what came in so far; what comes during this write is for the next one
+    const notes = session_notes;
+    session_notes = newNotes();
+    const [tabs, wins, items] = await Promise.all([
+        chrome.tabs.query({}), chrome.windows.getAll(), chrome.storage.local.get(session_id)]);
+    const window_ids = new Set(wins.filter(win => !win.incognito).map(win => win.id));
+    // a window still closing is closing at the next write too
+    notes.closing.forEach(function (id) {
+        if (window_ids.has(id)) {
+            session_notes.closing.add(id);
+        }
+    });
+    const session = mergeSession(items[session_id] || null, tabs.filter(recorded), window_ids, notes, Date.now());
+    if (!session) {
+        return;
+    }
+    if (!items[session_id]) {
+        await cleanupSessions();
+    }
     await chrome.storage.local.set({[session_id]: session});
 }
 
@@ -391,29 +540,65 @@ function updateCurrentSession() {
     session_write_waiting = inSessionQueue(async function () {
         session_write_waiting = null;
         if (await sessionsOn()) {
-            await writeSession();
+            await writeSession(false);
         }
     });
     return session_write_waiting;
 }
 
+// A new address goes into the tab's notes at once: two in one burst both reach the trail. Its title comes later
+// (at this point the tab still has the page before's).
 function onUpdated(tab_id, change_info) {
+    const steps = session_notes.steps;
     if (change_info.url) {
+        if (!steps.has(tab_id)) {
+            steps.set(tab_id, []);
+        }
+        steps.get(tab_id).push({url: change_info.url, title: '', at: Date.now()});
+    } else if (change_info.title && steps.has(tab_id)) {
+        const list = steps.get(tab_id);
+        list[list.length - 1].title = change_info.title;
+    }
+    if (change_info.url || change_info.title || 'pinned' in change_info || 'groupId' in change_info) {
         updateCurrentSession();
     }
+}
+
+function onTabRemoved(tab_id, remove_info) {
+    if (remove_info && remove_info.isWindowClosing) {
+        session_notes.closing.add(remove_info.windowId);
+    }
+    updateCurrentSession();
+}
+
+function onWindowRemoved(window_id) {
+    session_notes.closing.add(window_id);
+    updateCurrentSession();
+}
+
+// prerendered pages and discarded tabs come back under a new id: the session keeps the tab
+function onReplaced(added_id, removed_id) {
+    session_notes.replaced.set(removed_id, added_id);
+    if (session_notes.steps.has(removed_id)) {
+        session_notes.steps.set(added_id, session_notes.steps.get(removed_id));
+        session_notes.steps.delete(removed_id);
+    }
+    updateCurrentSession();
 }
 
 const session_events = [
     [chrome.tabs.onUpdated, onUpdated],
     [chrome.tabs.onMoved, updateCurrentSession],
     [chrome.tabs.onAttached, updateCurrentSession],
-    [chrome.tabs.onRemoved, updateCurrentSession],
-    [chrome.tabs.onReplaced, updateCurrentSession],
+    [chrome.tabs.onRemoved, onTabRemoved],
+    [chrome.tabs.onReplaced, onReplaced],
+    [chrome.windows.onRemoved, onWindowRemoved],
 ];
 
 // Listeners are added when the service worker starts (Chrome wakes it only for those), then removed if sessions
-// are turned off. The Settings switch changes it at once. Turned off, the current session ends: on again starts a new one.
-function watchSessions(on) {
+// are turned off. The Settings switch changes it at once. Turned off, the current session ends: on again starts a new
+// one (`fresh`).
+function watchSessions(on, fresh) {
     return inSessionQueue(async function () {
         session_events.forEach(function ([event, listener]) {
             if (on && !event.hasListener(listener)) {
@@ -428,18 +613,18 @@ function watchSessions(on) {
         }
         const session_storage = await chrome.storage.session.get('session_id');
         if (!session_storage.session_id) {
-            await writeSession();
+            await writeSession(fresh);
         }
     });
 }
 
 session_events.forEach(([event, listener]) => event.addListener(listener));
 
-sessionsOn().then(watchSessions, e => console.error('TabHamster: reading the sessions option failed', e));
+sessionsOn().then(on => watchSessions(on, false), e => console.error('TabHamster: reading the sessions option failed', e));
 
 chrome.storage.onChanged.addListener(function (changes, area_name) {
     if (area_name === 'sync' && changes.session_watcher) {
         const value = changes.session_watcher.newValue;
-        watchSessions(!!(value === undefined ? storage.default_options.session_watcher : value));
+        watchSessions(!!(value === undefined ? storage.default_options.session_watcher : value), true);
     }
 });

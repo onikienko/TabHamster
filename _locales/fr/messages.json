@@ -768,6 +768,86 @@
         "message": "Ouvrir la fenêtre",
         "description": "Link next to a window of a session: opens that window's tabs in a new window"
     },
+    "p_closedTabs_one": {
+        "message": "$COUNT$ onglet fermé",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_other": {
+        "message": "$COUNT$ onglets fermés",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_windowClosedTitle_one": {
+        "message": "Fenêtre $NUMBER$, fermée à $TIME$, $COUNT$ onglet",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_other": {
+        "message": "Fenêtre $NUMBER$, fermée à $TIME$, $COUNT$ onglets",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'other', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_trailCount_one": {
+        "message": "$COUNT$ page précédente",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_other": {
+        "message": "$COUNT$ pages précédentes",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_searchSessions": {
+        "message": "Chercher dans les sessions",
+        "description": "Link under 'No groups match': only the shown tab is searched, this shows the Sessions tab with the same words"
+    },
     "p_saveAsGroup": {
         "message": "Enregistrer comme groupe",
         "description": "Session menu: keeps the session's tabs as a saved group"
@@ -1081,7 +1161,7 @@
         "description": "Settings page. Setting name (switch)"
     },
     "s_sessions_text": {
-        "message": "Conserve vos 30 dernières sessions de navigation sur cet ordinateur, pour retrouver vos fenêtres après un plantage ou un redémarrage. Si c’est désactivé, la fenêtre de TabHamster n’a pas d’onglet Sessions.",
+        "message": "Conserve vos 30 dernières sessions de navigation sur cet ordinateur : chaque onglet ouvert, les pages par lesquelles chaque onglet est passé, et les onglets et fenêtres que vous avez fermés. Restaurer rouvre vos fenêtres après un plantage ou un redémarrage. Si c’est désactivé, la fenêtre de TabHamster n’a pas d’onglet Sessions.",
         "description": "Settings page. Under Save sessions automatically"
     },
     "s_curWin": {
@@ -1515,7 +1595,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Vos 30 dernières sessions de navigation. Restaurer rouvre leurs fenêtres telles qu’elles étaient.",
+        "message": "Vos 30 dernières sessions de navigation, avec les onglets et fenêtres fermés et les pages par lesquelles chaque onglet est passé. Restaurer rouvre les fenêtres ouvertes à la fin.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {

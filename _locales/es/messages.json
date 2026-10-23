@@ -768,6 +768,86 @@
         "message": "Abrir ventana",
         "description": "Link next to a window of a session: opens that window's tabs in a new window"
     },
+    "p_closedTabs_one": {
+        "message": "$COUNT$ pestaña cerrada",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_closedTabs_other": {
+        "message": "$COUNT$ pestañas cerradas",
+        "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_windowClosedTitle_one": {
+        "message": "Ventana $NUMBER$, cerrada a las $TIME$, $COUNT$ pestaña",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'one', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_windowClosedTitle_other": {
+        "message": "Ventana $NUMBER$, cerrada a las $TIME$, $COUNT$ pestañas",
+        "description": "A window of a session that was closed while the browser went on; TIME is when it closed (plural form 'other', by the tab count)",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            },
+            "number": {
+                "content": "$2",
+                "example": "2"
+            },
+            "time": {
+                "content": "$3",
+                "example": "16:20"
+            }
+        }
+    },
+    "p_trailCount_one": {
+        "message": "$COUNT$ página anterior",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_trailCount_other": {
+        "message": "$COUNT$ páginas anteriores",
+        "description": "How many pages a session's tab went through before its address; a number before the address and its tooltip (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_searchSessions": {
+        "message": "Buscar en las sesiones",
+        "description": "Link under 'No groups match': only the shown tab is searched, this shows the Sessions tab with the same words"
+    },
     "p_saveAsGroup": {
         "message": "Guardar como grupo",
         "description": "Session menu: keeps the session's tabs as a saved group"
@@ -1081,7 +1161,7 @@
         "description": "Settings page. Setting name (switch)"
     },
     "s_sessions_text": {
-        "message": "Guarda sus últimas 30 sesiones del navegador en este dispositivo para que pueda recuperar sus ventanas tras un fallo o un reinicio. Si está desactivado, la ventana emergente no tiene la pestaña Sesiones.",
+        "message": "Guarda sus últimas 30 sesiones del navegador en este dispositivo: cada pestaña que tuvo abierta, las páginas por las que pasó cada pestaña y las pestañas y ventanas que cerró. Restaurar recupera sus ventanas tras un fallo o un reinicio. Si está desactivado, la ventana emergente no tiene la pestaña Sesiones.",
         "description": "Settings page. Under Save sessions automatically"
     },
     "s_curWin": {
@@ -1515,7 +1595,7 @@
         "description": "Settings page. Help, key list. Left column"
     },
     "s_help_sessions": {
-        "message": "Sus últimas 30 sesiones del navegador. Restaurar recupera sus ventanas tal como estaban.",
+        "message": "Sus últimas 30 sesiones del navegador, con las pestañas y ventanas que cerró y las páginas por las que pasó cada pestaña. Restaurar recupera las ventanas que estaban abiertas al final.",
         "description": "Settings page. Help, key list. "
     },
     "s_about_free": {
