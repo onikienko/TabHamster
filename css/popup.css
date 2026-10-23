@@ -465,6 +465,13 @@ body.keyboard .tab-row:focus {
     color: var(--text);
 }
 
+/* with the mouse in use the row under the pointer is the selected one (keys act on it, js/popup/main.js): a row
+   focused before shows no ring, as group names; keys bring it back */
+body:not(.keyboard) .tab-row:focus-visible,
+body:not(.keyboard) .fold:focus-visible {
+    outline: none;
+}
+
 /* a tab and, for a saved group, its Edit and Remove over the end of the row (the address) */
 .tab-item {
     position: relative;

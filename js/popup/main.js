@@ -2148,11 +2148,61 @@ el.tabs.addEventListener('keydown', (e) => {
     (view === 'saved' ? el.tabSaved : el.tabSessions).focus();
 });
 
+// Where the pointer last was on a row (rowUnderPointer). It stays when the pointer goes on to empty space or out of
+// the list: that row keeps the keys, as the last one selected. Keys moving the focus forget it (the focused row is the
+// selected one then).
+let pointerAt = null;
+el.list.addEventListener('pointermove', (e) => {
+    if (e.target.closest('.fold, .tab-item, .row')) {
+        pointerAt = {x: e.clientX, y: e.clientY};
+    }
+});
+
+/** the row the pointer is on, or was last on (pointerAt), by its stop: a group or session name, "3 closed tabs", a tab */
+function rowUnderPointer() {
+    const node = pointerAt && document.elementFromPoint(pointerAt.x, pointerAt.y);
+    const row = node && el.list.contains(node) && node.closest('.fold, .tab-item, .row');
+    if (!row) {
+        return null;
+    }
+    return row.matches('.fold') ? row : row.querySelector(row.matches('.tab-item') ? '.tab-row' : 'button.name');
+}
+
+// keys the list's keydown handler gives a row; Tab, Esc and typing are not about a row
+function isRowKey(e) {
+    return /^(ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Delete|Backspace|F2|Enter| |ContextMenu)$/.test(e.key) ||
+        (e.key === 'F10' && e.shiftKey);
+}
+
 // Keys in use: the focused row looks selected, not the one under a resting pointer; moving the pointer takes over.
 // Not :focus-visible: Chrome doesn't count focus that came from a click (Alt+↓ on a group just clicked).
+// With the pointer in use, the row under it (or the last row it was on) is the selected one, so a row key acts on it:
+// it gets the focus and the key, as if it had been focused with keys. The field, a rename or a tab editor keep their keys (focus not on a row),
+// so do menus (focus in the menu) and drags.
 document.addEventListener('keydown', (e) => {
+    const focus = document.activeElement;
+    if (e.isTrusted && isRowKey(e) && !document.body.classList.contains('keyboard') &&
+        !document.body.classList.contains('dragging') && el.list.contains(focus) && focus.matches(STOPS + ', ' + ITEM_BUTTONS)) {
+        const stop = rowUnderPointer();
+        if (stop && stop !== focus) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            stop.focus();
+            const again = new KeyboardEvent('keydown', {
+                key: e.key, code: e.code, altKey: e.altKey, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey,
+                repeat: e.repeat, bubbles: true, cancelable: true,
+            });
+            // a made-up key has no action of the browser's own: Return opens a tab (or presses "3 closed tabs"),
+            // Space presses a button, unless a handler took the key
+            if (stop.dispatchEvent(again) && (e.key === 'Enter' || (e.key === ' ' && stop.matches('button')))) {
+                stop.click();
+            }
+            return;
+        }
+    }
     if (/^(Arrow|Tab$|Home$|End$)/.test(e.key)) {
         document.body.classList.add('keyboard');
+        pointerAt = null;
     }
 }, true);
 document.addEventListener('pointermove', () => document.body.classList.remove('keyboard'), true);
