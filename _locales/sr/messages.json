@@ -74,6 +74,10 @@
         "message": "Враћање је опозвано.",
         "description": ""
     },
+    "s_settingsNotRestored": {
+        "message": "Подешавања нису враћена.",
+        "description": "Added to the bar after a restore when its groups were restored but its settings could not be written"
+    },
     "o_backup_error_notBackup": {
         "message": "Ово није резервна копија TabHamster-а. Ништа није промењено.",
         "description": ""

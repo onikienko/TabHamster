@@ -74,6 +74,10 @@
         "message": "Visszaállítás visszavonva.",
         "description": ""
     },
+    "s_settingsNotRestored": {
+        "message": "A beállítások nem lettek visszaállítva.",
+        "description": "Added to the bar after a restore when its groups were restored but its settings could not be written"
+    },
     "o_backup_error_notBackup": {
         "message": "Ez nem TabHamster biztonsági mentés. Semmi sem változott.",
         "description": ""

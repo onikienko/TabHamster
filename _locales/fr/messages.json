@@ -77,6 +77,10 @@
         "message": "Restauration annulée.",
         "description": ""
     },
+    "s_settingsNotRestored": {
+        "message": "Les paramètres n’ont pas été restaurés.",
+        "description": "Added to the bar after a restore when its groups were restored but its settings could not be written"
+    },
     "o_backup_error_notBackup": {
         "message": "Ce n’est pas une sauvegarde TabHamster. Rien n’a été modifié.",
         "description": ""

@@ -78,6 +78,10 @@
         "message": "Restore undone.",
         "description": ""
     },
+    "s_settingsNotRestored": {
+        "message": "Settings weren’t restored.",
+        "description": "Added to the bar after a restore when its groups were restored but its settings could not be written"
+    },
     "o_backup_error_notBackup": {
         "message": "This is not a TabHamster backup. Nothing was changed.",
         "description": ""

@@ -448,6 +448,25 @@ test('backup: export is readable JSON that restores the same groups and options'
     assert.equal((await other.chrome.storage.sync.get('date_format')).date_format, 'us');
 });
 
+test('backup: settings that can\'t be written after the groups are replaced: the answer says so, Undo stays', async () => {
+    const current = {tg_1700000000001: makeGroup(5, 1)};
+    const bg = await backgroundWithGroups(current);
+    const backup = {date_format: 'eu', tg_1600000000001: makeGroup(3, 2)};
+    bg.chrome.storage.sync.beforeWrite = function (op, keys) {
+        if (op === 'set' && keys.includes('date_format')) {
+            throw new Error('This request exceeds the MAX_WRITE_OPERATIONS_PER_MINUTE quota.');
+        }
+    };
+    assert.deepEqual(await bg.groups('importBackup', JSON.stringify(backup)),
+        {result: {groups: 1, errors: {}, options_failed: true}});
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), {tg_1600000000001: makeGroup(3, 2)});
+    assert.equal((await bg.groups('restoreInfo')).result.restored, 1);
+
+    bg.chrome.storage.sync.beforeWrite = null;
+    assert.deepEqual(await bg.groups('undoRestore'), {result: {groups: 1, errors: {}}});
+    assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), current);
+});
+
 test('backup: too big for 0.3.0 gets a first line 0.3.0 rejects, 0.4.0 skips it', async () => {
     const groups = {};
     for (let i = 1; i <= 4; i++) {

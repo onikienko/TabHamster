@@ -78,6 +78,10 @@
         "message": "Відновлення скасовано.",
         "description": ""
     },
+    "s_settingsNotRestored": {
+        "message": "Налаштування не відновлено.",
+        "description": "Added to the bar after a restore when its groups were restored but its settings could not be written"
+    },
     "o_backup_error_notBackup": {
         "message": "Це не резервна копія TabHamster. Нічого не змінено.",
         "description": ""

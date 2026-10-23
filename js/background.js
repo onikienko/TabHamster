@@ -22,6 +22,7 @@ function withoutSyncFlags(list) {
 
 // replace_groups: groups not in `data` go to trash; otherwise groups are left alone when `data` has none.
 // A changed session_watcher option is picked up by the storage listener (watchSessions).
+// The answer: replaceAll's, with `options_failed` when the settings couldn't be written (the groups are replaced already).
 async function applyBackup(data, replace_groups) {
     let result = {errors: {}};
 
@@ -29,9 +30,20 @@ async function applyBackup(data, replace_groups) {
         result = await groups.replaceAll(data.groups);
     }
     if (Object.keys(data.options).length) {
-        await chrome.storage.sync.set(data.options);
+        try {
+            await chrome.storage.sync.set(data.options);
+        } catch (e) {
+            // e.g. sync's write limit right after a big restore
+            console.error('TabHamster: settings not restored', e);
+            result = Object.assign({}, result, {options_failed: true});
+        }
     }
     return result;
+}
+
+// the answer to the page: how many groups, errors of groups that stayed on this computer, settings not written
+function restoreAnswer(count, result) {
+    return Object.assign({groups: count, errors: result.errors}, result.options_failed ? {options_failed: true} : {});
 }
 
 // parsed backup text, or {error} with the code from backup.parseText
@@ -112,8 +124,7 @@ const group_ops = {
             groups: withoutSyncFlags(await groups.list()),
             options: await chrome.storage.sync.get(storage.default_options),
         }});
-        const result = await applyBackup(read.data, false);
-        return {groups: plan.groups, errors: result.errors};
+        return restoreAnswer(plan.groups, await applyBackup(read.data, false));
     },
     // what undoRestore would do: {groups, tabs, options, current, trashed} (see restorePlan) or {error: 'nothing_to_undo'}
     previewUndoRestore: async function () {
@@ -127,7 +138,7 @@ const group_ops = {
         }
         const result = await applyBackup(snapshot, true);
         await chrome.storage.local.remove(RESTORE_UNDO_KEY);
-        return {groups: Object.keys(snapshot.groups).length, errors: result.errors};
+        return restoreAnswer(Object.keys(snapshot.groups).length, result);
     },
     // the restore that can be undone: {time, restored: groups from the backup, trashed: groups it sent to trash}
     // (counts are null for a restore made by 0.4.0), or null

@@ -157,6 +157,11 @@ async function preview(text, source) {
     restoreButton.focus();
 }
 
+/** the groups are restored, the settings couldn't be written (e.g. sync's write limit): the bar says so */
+function optionsNote(res) {
+    return res.options_failed ? ' ' + t('s_settingsNotRestored') : '';
+}
+
 async function restore(text, button) {
     button.disabled = true;
     let res;
@@ -182,7 +187,7 @@ async function restore(text, button) {
     const errors = Object.values(res.errors || {});
     const note = !errors.length ? '' :
         ' ' + t(errors.some((e) => /quota/i.test(e)) ? 'p_notSyncedYet' : 'p_savedLocally_later');
-    showBar((res.groups ? plural('s_restored', res.groups) : t('o_backup_restored')) + note,
+    showBar((res.groups ? plural('s_restored', res.groups) : t('o_backup_restored')) + note + optionsNote(res),
         {label: t('p_undo_btn'), run: undoRestore});
 }
 
@@ -195,7 +200,7 @@ async function undoRestore() {
             chooseButton.focus();
         }
         if (!res.error) {
-            showBar(t('o_backup_undone'));
+            showBar(t('o_backup_undone') + optionsNote(res));
         }
     } catch (e) {
         console.error('TabHamster: undo restore failed', e);

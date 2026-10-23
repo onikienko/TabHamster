@@ -77,6 +77,10 @@
         "message": "Restauración deshecha.",
         "description": ""
     },
+    "s_settingsNotRestored": {
+        "message": "La configuración no se restauró.",
+        "description": "Added to the bar after a restore when its groups were restored but its settings could not be written"
+    },
     "o_backup_error_notBackup": {
         "message": "Esto no es una copia de seguridad de TabHamster. No se ha cambiado nada.",
         "description": ""
