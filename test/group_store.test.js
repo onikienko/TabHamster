@@ -581,6 +581,25 @@ test('removeTab of the last tab: the group goes to Recently deleted with it, res
     assert.deepEqual(plainList(await store.list()).tg_1, {name: 'a', index: 1, tabs: [only]});
 });
 
+test('removeTab of the only tab of a group deleted on another computer: it stays deleted, not back with no tabs', async () => {
+    const {net, a, b} = await twoSyncedDevices();
+    const tabs = makeTabs(1, 4);
+    await a.store.save('tg_1', {name: 'One', index: 1, tabs});
+    net.syncAll();
+    await b.store.reconcile();
+    await b.store.remove('tg_1');
+    net.syncAll();
+    // a's popup, open all along, still shows it
+    await a.store.reconcile();
+    assert.deepEqual(await a.store.removeTab('tg_1', tabs[0], 0), {synced: true, removed: true});
+    net.syncAll();
+    await b.store.reconcile();
+    assert.deepEqual(await a.store.list(), {});
+    assert.deepEqual(await b.store.list(), {});
+    assert.deepEqual((await syncGroups(a.sync)), {});
+    assert.deepEqual((await a.store.listTrash()).map(g => [g.key, g.tabs]), [['tg_1', tabs]]);
+});
+
 test('moveTab: to a place among the other tabs, made to the tabs as they are now', async () => {
     const {store} = makeDevice();
     const t = makeTabs(4, 1).map((tab, i) => Object.assign(tab, {id: i}));

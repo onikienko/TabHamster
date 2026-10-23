@@ -871,6 +871,8 @@ var groupStore = (function () {
 
         // A tab change made to the group's tabs as they are now: fn(tabs) -> new tabs, or null when there is nothing
         // to do. The answer is like setTabs's, with `before` (the tabs it changed, for an undo), or {unchanged: true}.
+        // No tabs left: the group goes to trash with its last one (a restore brings it back), the answer is
+        // {synced, removed: true}.
         async function changeTabsNow(key, fn) {
             const records = await readRecords();
             const rec = records[key];
@@ -881,19 +883,16 @@ var groupStore = (function () {
             if (!tabs) {
                 return {synced: rec.synced, h: rec.h, unchanged: true};
             }
+            if (!tabs.length) {
+                return Object.assign(await removeNow(key), {removed: true});
+            }
             const res = (await saveNow({[key]: {name: rec.g.name, index: rec.g.index, tabs}}))[key];
             const now_rec = (await local.get(localKey(key)))[localKey(key)];
             return Object.assign(res, {h: now_rec.h, before: rec.g.tabs});
         }
 
-        // A tab removed from the group's tabs as they are now; its last one: the group goes to trash with it (a restore
-        // brings it back), the answer is {synced, removed: true}
-        async function removeTabNow(key, seen, index) {
-            const rec = (await readRecords())[key];
-            const last = rec && !rec.discarded && !rec.trashed && rec.g.tabs.length === 1;
-            if (last && findTab(rec.g.tabs, seen, index) === 0) {
-                return Object.assign(await removeNow(key), {removed: true});
-            }
+        // A tab removed from the group's tabs as they are now; its last one: the group goes to trash with it
+        function removeTabNow(key, seen, index) {
             return changeTabsNow(key, function (tabs) {
                 const i = findTab(tabs, seen, index);
                 return i === -1 ? null : tabs.filter((tab, j) => j !== i);
