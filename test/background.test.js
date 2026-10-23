@@ -901,14 +901,18 @@ test('session tabs: tabs that closed with their window count toward the closed t
     assert.deepEqual(s.windows, {2: {closed: 200}, 3: {closed: 300}});
 });
 
-test('session tabs: a tab that just went to a new address doesn\'t get the page before\'s title', () => {
+test('session tabs: a tab still loading a new address doesn\'t get the page before\'s title', () => {
     const bg = startBackground();
     let s = merge(bg, null, [openTab(1, 'https://a.com/')], [1], {}, 100);
     // still loading: Chrome gives the old title with the new address
-    s = merge(bg, s, [{...openTab(1, 'https://b.com/'), title: 'T https://a.com/'}], [1], {}, 200);
+    s = merge(bg, s, [{...openTab(1, 'https://b.com/'), title: 'T https://a.com/', status: 'loading'}], [1], {}, 200);
     assert.equal(s.tabs[0].title, '');
-    s = merge(bg, s, [openTab(1, 'https://c.com/')], [1], {}, 300);
-    assert.deepEqual(s.tabs[0].trail.map(step => [step.url, step.title]), [['https://a.com/', 'T https://a.com/'], ['https://b.com/', '']]);
+    // loaded, with the same title (the load ending writes again)
+    s = merge(bg, s, [{...openTab(1, 'https://b.com/'), title: 'T https://a.com/', status: 'complete'}], [1], {}, 250);
+    assert.equal(s.tabs[0].title, 'T https://a.com/');
+    // a single-page app: a new address, loaded, the same title: kept
+    s = merge(bg, s, [{...openTab(1, 'https://b.com/#2'), title: 'T https://a.com/', status: 'complete'}], [1], {}, 300);
+    assert.deepEqual([s.tabs[0].title, s.tabs[0].trail.map(step => step.title)], ['T https://a.com/', ['T https://a.com/', 'T https://a.com/']]);
 });
 
 test('sessions: a title change alone writes once after a while, not each time', async () => {
@@ -938,6 +942,13 @@ test('sessions: a title change alone writes once after a while, not each time', 
     bg.chrome.tabs.onUpdated.listeners.forEach(fn => fn(1, {url: 'https://b.com/'}));
     await settle();
     assert.equal(writes, 2);
+    // a load that ended writes the same way as a title change (its title may be the same as the page before's)
+    bg.chrome.tabs.onUpdated.listeners.forEach(fn => fn(1, {status: 'complete'}));
+    await settle();
+    assert.equal(writes, 2, 'not at once');
+    await new Promise(resolve => setTimeout(resolve, 200));
+    await settle();
+    assert.equal(writes, 3);
 });
 
 test('sessions: a window closing marks its window, not each of its tabs', async () => {

@@ -977,6 +977,16 @@
         "message": "Відкрити вікно",
         "description": "Link next to a window of a session: opens that window's tabs in a new window"
     },
+    "p_windowNumber": {
+        "message": "Вікно $NUMBER$",
+        "description": "A window of a session left with only closed tabs (its last open tab was moved to another window)",
+        "placeholders": {
+            "number": {
+                "content": "$1",
+                "example": "2"
+            }
+        }
+    },
     "p_closedTabs_one": {
         "message": "$COUNT$ закрита вкладка",
         "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",

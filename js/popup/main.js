@@ -1655,9 +1655,11 @@ function sessionItem(result) {
     // the row counts the tabs at the end (what Restore opens); while searching, the found ones of those searched (all,
     // or for the live session the closed ones)
     const total = partial ? (current ? closed : session.tabs.length) : tabs.length;
+    // the live session with nothing open in it (every window closed, the popup opened from an incognito one): no "0 tabs"
+    const nothingOpen = current && !tabs.length && !partial;
     const words = [
         ends.length > 1 && plural('p_windowsCount', ends.length),
-        plural('p_tabsCount', tabs.length),
+        !nothingOpen && plural('p_tabsCount', tabs.length),
         closed > 0 && plural('p_closedTabs', closed),
     ].filter(Boolean);
     const item = h('div', {class: 'item', dataset: {key}},
@@ -1666,7 +1668,7 @@ function sessionItem(result) {
             expandable ? nameButton(id, partial, name, words.join(' · '),
                 current ? () => toggleItem(id, partial) : () => restoreSession(session), null, [
                     ends.length > 1 && plural('p_windowsCount', ends.length),
-                    tabCount(total, result, partial),
+                    !nothingOpen && tabCount(total, result, partial),
                     closed > 0 && plural('p_closedTabs', closed),
                 ]) :
                 setTip(h('span', {class: 'name ellipsis'}, marked(name)),
@@ -1675,7 +1677,7 @@ function sessionItem(result) {
                 // one window is the usual case: only the tabs then
                 ends.length > 1 ? countMeta('wins', numbers.format(ends.length),
                     plural('p_windowsCount', ends.length), icon('window', 13)) : null,
-                tabsMeta(total, result, partial),
+                nothingOpen ? null : tabsMeta(total, result, partial),
             // the live session is open right now: nothing to restore
             ], current ? null : h('div', {class: 'actions'},
                 setTip(h('button', {class: 'open', type: 'button', onClick: single(() => restoreSession(session))}, t('p_restore')),
@@ -1710,7 +1712,8 @@ function sessionWindowRows(key, win, i, live, found) {
         h('div', {class: 'win-title'}, icon('window', 14),
             h('span', {class: 'spacer'}, win.closed ?
                 plural('p_windowClosedTitle', win.tabs.length, [i + 1, shortTime(win.closed, lang)]) :
-                plural('p_windowTitle', win.tabs.length, [i + 1])),
+                // only closed tabs left in it: no "0 tabs"
+                win.tabs.length ? plural('p_windowTitle', win.tabs.length, [i + 1]) : t('p_windowNumber', [i + 1])),
             (live && !win.closed) || !win.tabs.length ? null :
                 h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', win.tabs))},
                     t('p_openWindow'))),
@@ -2025,10 +2028,17 @@ function renderIfWaiting() {
 
 /* ---------- start ---------- */
 
+// switches asked for so far: the last one wins, also over an earlier one still reading the sessions
+let viewSwitches = 0;
+
 async function switchView(view) {
+    const asked = ++viewSwitches;
     // read first: a drawing meanwhile would show the Sessions tab without its sessions
     if (view === 'sessions' && state.options.session_watcher && !state.sessionsLoaded) {
         await loadSessions();
+        if (asked !== viewSwitches) {
+            return;
+        }
     }
     state.view = view;
     if (view === 'sessions') {

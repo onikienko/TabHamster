@@ -440,8 +440,9 @@ function sameRun(stored, open) {
  */
 function sessionTab(tab, before, steps, now) {
     const url = tab.url || tab.pendingUrl || '';
-    // a tab just sent to a new address can still have the page before's title: none is better than a wrong one
-    const title = before && url !== before.url && tab.title === before.title ? '' : tab.title;
+    // a tab still loading a new address can have the page before's title: none is better than a wrong one (its load
+    // ending writes again, onUpdated). A page of a single-page app keeps the title it has: it may well be the same.
+    const title = before && url !== before.url && tab.status === 'loading' && tab.title === before.title ? '' : tab.title;
     const path = (before ? [{url: before.url, title: before.title, at: before.at}] : [])
         .concat(steps, [{url, title, at: now}]);
     const trail = before && before.trail ? before.trail.slice() : [];
@@ -587,7 +588,8 @@ function onUpdated(tab_id, change_info) {
     }
     if (change_info.url || 'pinned' in change_info || 'groupId' in change_info) {
         updateCurrentSession();
-    } else if (change_info.title && !title_timer) {
+    } else if ((change_info.title || change_info.status === 'complete') && !title_timer) {
+        // a load that ended brings the title, also one the same as the page before's (no title change comes then)
         title_timer = setTimeout(function () {
             title_timer = null;
             updateCurrentSession();
