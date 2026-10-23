@@ -784,6 +784,59 @@ test('a header whose chunks never come is repaired from the local copy after a d
     assert.deepEqual(remote.tg_1.group, makeGroup(400, 1));
 });
 
+test('a big group written with its old chunks removed first: another computer waits for the rest, not pushing its copy', async () => {
+    const {clock, net, a, b} = await twoSyncedDevices(makeGroup(400, 1));
+    const old_chunks = await chunkKeys(a.sync);
+    const items = await a.sync.get(null);
+    const chunk_bytes = old_chunks.reduce((sum, k) => sum + gs.itemBytes(k, items[k]), 0);
+    // other data on a, so old and new chunks don't fit at once, but the new version alone does
+    await fill(a.sync, a.sync.QUOTA_BYTES - 1100 - Math.round(chunk_bytes / 2));
+
+    const ops = [];
+    for (const op of ['set', 'remove']) {
+        const real = a.sync[op].bind(a.sync);
+        a.sync[op] = (...args) => {
+            ops.push(op);
+            return real(...args);
+        };
+    }
+    const edited = makeTabs(400, 2);
+    assert.equal((await a.store.setTabs('tg_1', edited, (await a.store.list()).tg_1.h)).synced, true);
+    assert.equal(ops[0], 'remove', 'old chunks removed first');
+    net.upload(a.dev);
+    // only the removal of the old chunks has reached b
+    net.download(b.dev, k => old_chunks.includes(k));
+    assert.equal((await syncGroups(b.sync)).tg_1.status, 'incomplete');
+    clock.advance(MINUTE);
+    await b.store.reconcile();
+    assert.equal(b.dev.outbox.size, 0, 'b pushed nothing');
+
+    net.download(b.dev);
+    await b.store.reconcile();
+    net.syncAll();
+    await a.store.reconcile();
+    assert.deepEqual((await a.store.list()).tg_1.tabs, edited);
+    assert.deepEqual((await b.store.list()).tg_1.tabs, edited);
+    assert.equal(Object.keys(await a.store.list()).length, 1, 'no copy');
+});
+
+test('a synced group whose chunks are gone is pushed again from the local copy after a few minutes', async () => {
+    const {clock, net, b} = await twoSyncedDevices(makeGroup(400, 1));
+    Array.from(net.server.keys()).filter(gs.isChunkKey).forEach(k => net.server.delete(k));
+    net.download(b.dev);
+
+    await b.store.reconcile();
+    clock.advance(4 * MINUTE);
+    await b.store.reconcile();
+    assert.equal(b.dev.outbox.size, 0, 'not yet');
+    clock.advance(2 * MINUTE);
+    await b.store.reconcile();
+    const remote = await syncGroups(b.sync);
+    assert.equal(remote.tg_1.status, 'ok');
+    assert.deepEqual(remote.tg_1.group, makeGroup(400, 1));
+    assert.equal((await b.store.list()).tg_1.synced, true);
+});
+
 test('a rename racing a removal on another device: the edit wins, nothing breaks', async () => {
     const {net, a, b} = await twoSyncedDevices(makeGroup(400, 1));
     await b.store.remove('tg_1');

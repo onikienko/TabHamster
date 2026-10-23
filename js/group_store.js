@@ -13,7 +13,8 @@
 //   trashed: time it was deleted (hidden, purged after 30 days); trashed_by: 'here' (deleted on this computer),
 //   'sync' (gone from sync: deleted on another computer), 'restore' (not in a restored backup, or the version a restore
 //   replaced) or 'replace' (the version a Replace replaced), missing before 1.0.0;
-//   removing: sync removal not done yet.
+//   removing: sync removal not done yet; incomplete: {w, since} sync's version (write id w) has been seen without all
+//   its chunks since that time.
 // Only the background service worker writes groups (one store instance, all calls queued).
 var groupStore = (function () {
     'use strict';
@@ -318,6 +319,9 @@ var groupStore = (function () {
     const TRASH_KEEP_MS = 30 * DAY;
     // chunks can arrive before their header; a header can arrive before its chunks
     const CHUNK_GRACE_MS = DAY;
+    // how long a synced group may be seen without its chunks before it is pushed again from this computer's copy:
+    // another computer may be writing a new version right then (old chunks removed first, see writePlans)
+    const REPAIR_WAIT_MS = 5 * 60 * 1000;
     const NOT_FOUND = 'Group not found';
     // sync space groups leave free for settings (theme, date format...: about 150 bytes), so changing one never fails
     // because groups filled sync to the last byte
@@ -562,6 +566,7 @@ var groupStore = (function () {
                 const rec = records[plan.key];
                 rec.synced = true;
                 rec.base = sigOf(rec.g, rec.h);
+                delete rec.incomplete;
                 await putRecord(records, plan.key, rec);
             }
             return errors;
@@ -610,6 +615,9 @@ var groupStore = (function () {
                     case 'ok':
                         if (!sameSig(rec.base, sigOf(remote.group, remote.h))) {
                             await putRecord(records, key, recordFromRemote(remote));
+                        } else if (rec.incomplete) {
+                            delete rec.incomplete;
+                            await putRecord(records, key, rec);
                         }
                         return;
                     case 'missing':
@@ -619,8 +627,14 @@ var groupStore = (function () {
                         await putRecord(records, key, rec);
                         return;
                     case 'incomplete':
-                        // same content as ours, so nothing newer is on its way: its chunks are gone. Repair now.
-                        if (remote.h === rec.h || isStale(remote.w)) {
+                        // Same content as ours, or chunks that never came: they are gone, this copy repairs it. Not
+                        // at once: another computer may be writing a new version with the old chunks removed first
+                        // (writePlans), and a push now could win over it.
+                        if (!rec.incomplete || rec.incomplete.w !== remote.w) {
+                            rec.incomplete = {w: remote.w, since: now()};
+                            await putRecord(records, key, rec);
+                        } else if ((remote.h === rec.h || isStale(remote.w)) &&
+                            now() - rec.incomplete.since > REPAIR_WAIT_MS) {
                             await markUnsynced(records, key, rec);
                             todo.push.add(key);
                         }
