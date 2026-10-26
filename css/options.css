@@ -501,19 +501,15 @@ h2 {
     margin: 0;
 }
 
-.ukraine {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-}
-
+/* next to the developer's name */
 .flag {
-    flex: none;
-    width: 20px;
-    height: 14px;
+    display: inline-block;
+    width: 18px;
+    height: 12px;
+    margin-left: 2px;
     border-radius: 2px;
     background: linear-gradient(#0057B7 50%, #FFD700 50%);
+    vertical-align: -1px;
 }
 
 /* bar with Undo (js/ui/bar.js) */

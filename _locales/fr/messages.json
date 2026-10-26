@@ -1656,7 +1656,7 @@
     },
     "s_about_ukraine": {
         "message": "Gloire à l’Ukraine",
-        "description": "Settings page. About, next to the flag of Ukraine"
+        "description": "Settings page. About, the flag of Ukraine next to the developer's name: its tooltip and what screen readers say"
     },
     "key_enter": {
         "message": "Entrée",

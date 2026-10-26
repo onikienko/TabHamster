@@ -376,13 +376,14 @@ function about() {
             h('a', {href: GITHUB + '/issues', target: '_blank', rel: 'noopener'}, t('s_about_issues'))),
         h('dl', {class: 'credits'},
             h('dt', null, t('s_about_developer')),
-            h('dd', null, person(...DEVELOPER)),
+            // the flag says it in words to a screen reader and in its tooltip
+            h('dd', null, person(...DEVELOPER), ' ', setTip(h('span', {class: 'flag', role: 'img',
+                'aria-label': t('s_about_ukraine')}), {text: t('s_about_ukraine')})),
             h('dt', null, t('s_about_translations')),
             h('dd', null, TRANSLATORS.map(([code, name, url], i) =>
                 [i ? ', ' : '', t('s_languageLabel', languageName(code)) + ' ', person(name, url)])),
             h('dt', null, t('s_about_thanks')),
             h('dd', null, person('Ricardo J. Barberis', 'https://github.com/richarson'))),
-        h('p', {class: 'ukraine'}, h('span', {class: 'flag', 'aria-hidden': 'true'}), t('s_about_ukraine')),
     ];
 }
 
