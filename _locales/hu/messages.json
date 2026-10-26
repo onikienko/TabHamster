@@ -1117,16 +1117,6 @@
         "message": "TabHamster beállítások",
         "description": "Settings page. Title in the band at the top and in the browser tab"
     },
-    "s_version": {
-        "message": "$VERSION$ verzió",
-        "description": "Settings page. Next to the title",
-        "placeholders": {
-            "version": {
-                "content": "$1",
-                "example": "1.0.0"
-            }
-        }
-    },
     "s_nav": {
         "message": "Beállítások szakaszai",
         "description": "Settings page. Screen reader label of the side menu"

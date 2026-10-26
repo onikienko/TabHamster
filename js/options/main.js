@@ -493,12 +493,20 @@ function listenForChanges() {
     });
 }
 
+// The store this copy came from, by its ID, next to the version: copies from different stores keep separate groups in
+// sync (another ID). A brand name, not translated. The Edge Add-ons ID comes with its listing; an unpacked build has
+// none.
+const STORES = {
+    mkfjjmjmnplabnplceaekkjcmdddokee: 'Chrome Web Store',
+};
+
 async function start() {
     document.documentElement.lang = lang;
     document.title = t('s_title');
     document.getElementById('title').textContent = t('s_title');
     document.getElementById('logo').append(logo(46, 'TabHamster'));
-    document.getElementById('version').textContent = t('s_version', chrome.runtime.getManifest().version);
+    document.getElementById('version').textContent = ['v' + chrome.runtime.getManifest().version,
+        STORES[chrome.runtime.id]].filter(Boolean).join(' · ');
 
     await loadOptions();
     applyTheme(state.options.theme);

@@ -560,6 +560,25 @@ h2 {
     outline-color: var(--snack-action);
 }
 
+/* very narrow window: the version and store go under the title (the logo spans both lines) */
+
+@media (max-width: 579px) {
+    .band-inner {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 14px;
+        row-gap: 4px;
+    }
+
+    .band-logo {
+        grid-row: span 2;
+    }
+
+    .version {
+        justify-self: start;
+    }
+}
+
 /* narrow window: no side menu */
 
 @media (max-width: 720px) {

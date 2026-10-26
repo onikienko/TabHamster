@@ -1120,16 +1120,6 @@
         "message": "Configuración de TabHamster",
         "description": "Settings page. Title in the band at the top and in the browser tab"
     },
-    "s_version": {
-        "message": "Versión $VERSION$",
-        "description": "Settings page. Next to the title",
-        "placeholders": {
-            "version": {
-                "content": "$1",
-                "example": "1.0.0"
-            }
-        }
-    },
     "s_nav": {
         "message": "Secciones de la configuración",
         "description": "Settings page. Screen reader label of the side menu"
