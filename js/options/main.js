@@ -15,7 +15,7 @@ import {backupRows, renderRestoreInfo} from './backup.js';
 const lang = uiLanguage();
 const GITHUB = 'https://github.com/onikienko/TabHamster';
 const DEVELOPER = ['Mykhailo Onikiienko', 'https://github.com/onikienko'];
-const PRIVACY = 'https://onikienko.github.io/browser-extensions/privacy-policy';
+const PRIVACY = 'https://onikienko.github.io/browser-extensions/tabhamster-privacy';
 // waiting groups named in the sync section; the rest are counted
 const NAMES_SHOWN = 3;
 // "45%", "45 %" in French
