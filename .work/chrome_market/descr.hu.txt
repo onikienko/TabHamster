@@ -1,20 +1,26 @@
-► A megnyitott fülek csoportokba történő mentése.
-	✓ A fül csoportok a Chrome szinkronizációs adatbázisában tárolódnak. Ezeket a bejelentkezés után egy másik számítógépen is elérhetjük.
-	✓ Név hozzárendelése a csoportokhoz.
-	✓ Szerkesztés, új fülek hozzáadása, törlés és a csoportok mozgatása a listán.
-	✓ Akár több száz fül egy csoportban.
-	✓ Minden csoport a számítógépén is megmarad: ha a szinkronizációs tárhely megtelt, a csoport akkor is mentésre kerül.
-	✓ A törölt csoportok 30 napig visszaállíthatók.
+Ingyenes és nyílt forráskódú. Reklámok és követés nélkül.
+
+► Mentse a megnyitott füleket csoportba, és találja meg őket újra.
+	✓ Az Enter megnyomásával menti a megnyitott füleket. Előbb írjon be egy nevet, vagy hagyja üresen, és a csoport neve a dátum lesz.
+	✓ Gépeléssel kereshet a csoportnevekben, valamint a fülek címében és webcímében.
+	✓ A csoportok a Chrome szinkronizálási tárhelyén vannak. Jelentkezzen be a Chrome-ba bekapcsolt szinkronizálással, és a többi számítógépén is megjelennek.
+	✓ Akár több száz fül egy csoportban. Minden csoport a számítógépén is megmarad: ha a szinkronizálási tárhely megtelt, a csoport akkor is mentésre kerül.
+	✓ Húzással átrendezheti a csoportokat és füleket, vagy egy fület másik csoportba helyezhet.
+	✓ Fülek szerkesztése és eltávolítása, link vagy az aktuális fül hozzáadása, csoport cseréje a megnyitott fülekre, átnevezés, megnyitás inkognitóablakban, linkek másolása.
+	✓ A módosítások és törlések visszavonhatók. A törölt csoportok 30 napig visszaállíthatók.
 	✓ A csoportok és a beállítások biztonsági mentése fájlba.
 
-► A munkamenet-kezelő gyors és kényelmes hozzáférést biztosít a Chrome munkamenetekhez.
-	✓ Hozzáférés az éppen megnyitott (és a korábbi) böngészési munkamenetekhez.
-	✓ Egy kattintással visszaállítható bármelyik munkamenet.
-	✓! A munkamenetek nem szinkronizálódnak.
+► Munkamenetek: minden, ami az utolsó 30 böngészési munkamenetben nyitva volt.
+	✓ Minden fül és ablak, a bezártakkal együtt, és az egyes fülekben megnyitott korábbi oldalak.
+	✓ Egy kattintással visszaállíthatja egy munkamenet ablakait úgy, ahogy voltak.
+	✓ A munkamenetek a számítógépén maradnak: nem szinkronizálódnak.
 
+► Világos és sötét téma.
+► Minden működik billentyűzettel és képernyőolvasóval.
 
-☀ Tippek:
-	● Gyorsan el tudjuk menteni az összes megnyitott fület egy csoportba, ha a bővítmény ablakában megnyomjuk az "ENTER" billentyűt. A csoportot később tudjuk szerkeszteni.
-	● „Ctrl + klikk” a mentett csoport (vagy munkamenet) nevén új ablakba nyitja meg a füleket.
+► Tippek:
+	• Nyissa meg a TabHamstert, és nyomja meg az Entert: az összes megnyitott fül csoportba kerül.
+	• Egy csoportra kattintva megjelennek a fülei, a Megnyitás (vagy az Enter) megnyitja őket. Shift, Ctrl / ⌘ vagy középső kattintás esetén új ablakban nyílnak meg.
+	• Az Alt (Option) + ↑ ↓ áthelyezi a kijelölt csoportot vagy fület.
 
-Tab Hamster forráskód: https://github.com/onikienko/TabHamster
+Forráskód: https://github.com/onikienko/TabHamster

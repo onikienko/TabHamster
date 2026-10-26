@@ -1,21 +1,26 @@
-► Save open tabs as a group.
-	✓ Tab groups are stored in Chrome sync storage. Sign in to the browser to get them on your other computers.
-	✓ Hundreds of tabs per group.
-	✓ Every group is also kept on your computer: if sync storage is full, the group is still saved.
-	✓ Give groups names.
-	✓ Edit groups, add and delete tabs, delete and move groups in the list.
-	✓ Deleted groups can be restored for 30 days.
+Free and open source. No ads, no tracking.
+
+► Save open tabs as a group, and find them again.
+	✓ Press Enter to save the open tabs. Type a name first, or leave it empty and the group is named by the date.
+	✓ Type to search group names, tab titles and addresses.
+	✓ Groups are kept in Chrome sync storage. Sign in to Chrome with sync on to get them on your other computers.
+	✓ Hundreds of tabs per group. Every group is also kept on your computer: if sync storage is full, the group is still saved.
+	✓ Drag groups and tabs to reorder them, or drag a tab into another group.
+	✓ Edit and remove tabs, add a link or the current tab, replace a group with the open tabs, rename, open in an incognito window, copy links.
+	✓ Undo for changes and deletes. Deleted groups can be restored for 30 days.
 	✓ Back up your groups and settings to a file.
 
-► Session Manager gives quick and convenient access to your latest browser sessions.
-	✓ Access the current (and earlier) browser sessions.
-	✓ Restore any session in one click.
-	✓ !!! Sessions are not synced.
+► Sessions: everything that was open in your last 30 browser sessions.
+	✓ Every tab and window, with the ones you closed and the pages each tab went through.
+	✓ Restore a session's windows as they were, in one click.
+	✓ Sessions stay on your computer: they are not synced.
 
+► Light and dark themes.
+► Everything works with the keyboard and with screen readers.
 
-☀ Tips:
-	● To quickly save all open tabs as a group, open the extension window and press Enter. You can rename the group later.
-	● Ctrl + click on a group (or session) name opens its tabs in a new window.
+► Tips:
+	• Open TabHamster and press Enter to save all open tabs as a group.
+	• Click a group to see its tabs, Open (or Enter) opens them. Shift, Ctrl / ⌘ or a middle click opens them in a new window.
+	• Alt (Option) + ↑ ↓ moves the selected group or tab.
 
-
-Tab Hamster source code: https://github.com/onikienko/TabHamster
+Source code: https://github.com/onikienko/TabHamster
