@@ -1,3 +1,23 @@
+    FIRST COMPLETE OVERHAUL SINCE 2013
+    New look for the popup and the Settings page, with light and dark themes (as the system, or chosen in Settings)
+    A click on a group shows its tabs, Open (or Return) opens them. Shift, Ctrl / ⌘ or a middle click opens them in a new window
+    Type to search groups and their tabs. Return saves the open tabs, under the typed name if there is one; the name of an existing group replaces its tabs (with Undo)
+    Search shows 5 found tabs per group or session, a row shows the rest
+    Drag groups and tabs to reorder them, or use Alt / Option + up and down; drag a tab into another group
+    Tab actions: edit a saved tab's title and address (F2), remove it (Delete), add the current tab or a link to a group
+    Group menu: replace with the open tabs, rename, open in an incognito window, copy links, delete with Undo
+    Sessions keep every tab and window of the last 30 browser sessions, with what was closed and the pages each tab went through. Restore brings the windows back as they were. The current session's open tabs are not searched (they are open)
+    Groups that don't fit in sync storage: a "Not synced" filter, and "Biggest first" with the space each group takes
+    Icons for tabs of sites not opened in this browser, loaded from the sites if you allow it
+    Settings page: theme, date format, backup and restore with Undo, Recently deleted, Help with the keys, and what to check when groups don't show up on another computer. The store TabHamster came from is shown next to the version
+    The popup has no "?" link any more: tooltips show the keys, Settings has Help
+    Welcome page on install shows how to pin TabHamster to the toolbar
+    Every action works with the keyboard, with labels for screen readers
+    New icons and logo
+    Texts say "browser" instead of "Chrome"
+    Fix a restore overwriting a group kept in Recently deleted, and sync of big groups edited on two computers at once
+    Requires Chrome 105 or newer
+    Spanish, French, Hungarian, Serbian: new texts added (machine translated)
 0.4.0 (15.10.2026 15:59)
     Save groups with hundreds of tabs: groups are compressed and split across sync storage items
     Every group is also kept on this computer: when sync storage is full, a group is still saved, marked as not synced, and synced once there is room
