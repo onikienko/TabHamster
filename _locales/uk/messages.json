@@ -244,7 +244,7 @@
         }
     },
     "p_syncStorage_title": {
-        "message": "Сховище синхронізації Chrome: використано $USED$ з $QUOTA$ КБ. Ваші групи зберігаються там, тож вони з'являються на інших ваших комп'ютерах. Коли сховище заповнене, нові групи залишаються на цьому комп'ютері, доки не звільниться місце.",
+        "message": "Сховище синхронізації браузера: використано $USED$ з $QUOTA$ КБ. Ваші групи зберігаються там, тож вони з'являються на інших ваших комп'ютерах. Коли сховище заповнене, нові групи залишаються на цьому комп'ютері, доки не звільниться місце.",
         "description": "Tooltip of the sync storage meter in the popup footer",
         "placeholders": {
             "used": {
@@ -258,7 +258,7 @@
         }
     },
     "p_syncStorageUsed": {
-        "message": "Використано $PERCENT$ сховища синхронізації Chrome",
+        "message": "Використано $PERCENT$ сховища синхронізації браузера",
         "description": "Screen reader label of the usage meter",
         "placeholders": {
             "percent": {
@@ -412,7 +412,7 @@
         }
     },
     "p_notSyncedYet": {
-        "message": "Поки що збережено лише на цьому комп'ютері: сховище синхронізації Chrome заповнене.",
+        "message": "Поки що збережено лише на цьому комп'ютері: сховище синхронізації браузера заповнене.",
         "description": "Second line of the bar when a saved group didn't fit in sync storage"
     },
     "p_field_placeholder_first": {
@@ -434,7 +434,7 @@
         }
     },
     "p_empty_sync": {
-        "message": "Якщо синхронізацію Chrome увімкнено, ваші групи з'являться й на інших ваших комп'ютерах.",
+        "message": "Якщо синхронізацію браузера увімкнено, ваші групи з'являться й на інших ваших комп'ютерах.",
         "description": "Popup, no saved groups yet"
     },
     "p_empty_restore": {
@@ -1258,7 +1258,7 @@
         }
     },
     "p_unsyncedNote_full_one": {
-        "message": "Сховище синхронізації Chrome заповнене ($USED$ з $QUOTA$ КБ). Тут вона в безпеці й синхронізується сама, коли з'явиться місце.",
+        "message": "Сховище синхронізації браузера заповнене ($USED$ з $QUOTA$ КБ). Тут вона в безпеці й синхронізується сама, коли з'явиться місце.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1276,7 +1276,7 @@
         }
     },
     "p_unsyncedNote_full_few": {
-        "message": "Сховище синхронізації Chrome заповнене ($USED$ з $QUOTA$ КБ). Тут групи в безпеці й синхронізуються самі, коли з'явиться місце.",
+        "message": "Сховище синхронізації браузера заповнене ($USED$ з $QUOTA$ КБ). Тут групи в безпеці й синхронізуються самі, коли з'явиться місце.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'few', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1294,7 +1294,7 @@
         }
     },
     "p_unsyncedNote_full_other": {
-        "message": "Сховище синхронізації Chrome заповнене ($USED$ з $QUOTA$ КБ). Тут групи в безпеці й синхронізуються самі, коли з'явиться місце.",
+        "message": "Сховище синхронізації браузера заповнене ($USED$ з $QUOTA$ КБ). Тут групи в безпеці й синхронізуються самі, коли з'явиться місце.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1312,7 +1312,7 @@
         }
     },
     "p_unsyncedNote_later_one": {
-        "message": "Синхронізація Chrome її ще не прийняла. Тут вона в безпеці й синхронізується сама пізніше.",
+        "message": "Синхронізація браузера її ще не прийняла. Тут вона в безпеці й синхронізується сама пізніше.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1322,7 +1322,7 @@
         }
     },
     "p_unsyncedNote_later_few": {
-        "message": "Синхронізація Chrome їх ще не прийняла. Тут групи в безпеці й синхронізуються самі пізніше.",
+        "message": "Синхронізація браузера їх ще не прийняла. Тут групи в безпеці й синхронізуються самі пізніше.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'few', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1332,7 +1332,7 @@
         }
     },
     "p_unsyncedNote_later_other": {
-        "message": "Синхронізація Chrome їх ще не прийняла. Тут групи в безпеці й синхронізуються самі пізніше.",
+        "message": "Синхронізація браузера їх ще не прийняла. Тут групи в безпеці й синхронізуються самі пізніше.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1346,7 +1346,7 @@
         "description": "Link in the note above groups that are not synced"
     },
     "p_biggestHint": {
-        "message": "Скільки місця кожна група займає у сховищі синхронізації Chrome (використано $USED$ з $QUOTA$ КБ). Видалення групи звільняє її місце.",
+        "message": "Скільки місця кожна група займає у сховищі синхронізації браузера (використано $USED$ з $QUOTA$ КБ). Видалення групи звільняє її місце.",
         "description": "Above the groups sorted by size",
         "placeholders": {
             "used": {
@@ -1592,7 +1592,7 @@
         }
     },
     "s_sync_text": {
-        "message": "Ваші групи зберігаються у сховищі синхронізації Chrome, тож вони з'являються на кожному комп'ютері, де ви ввійшли в Chrome з увімкненою синхронізацією. Chrome надає там TabHamster $QUOTA$ КБ. Групи стиснуті: цього вистачає приблизно на тисячу вкладок. Кожна група також зберігається на цьому комп'ютері. Сесії ніколи не синхронізуються.",
+        "message": "Ваші групи зберігаються у сховищі синхронізації браузера, тож вони з'являються на кожному комп'ютері, де ви ввійшли в браузер з увімкненою синхронізацією. Браузер надає там TabHamster $QUOTA$ КБ. Групи стиснуті: цього вистачає приблизно на тисячу вкладок. Кожна група також зберігається на цьому комп'ютері. Сесії ніколи не синхронізуються.",
         "description": "Settings page. Sync and storage explanation",
         "placeholders": {
             "quota": {
@@ -2006,7 +2006,7 @@
         }
     },
     "s_help_shift": {
-        "message": "Відкриває групу в новому вікні, як посилання в Chrome. Те саме роблять кнопка вікна поруч із «Відкрити» та клацання середньою кнопкою.",
+        "message": "Відкриває групу в новому вікні, як і посилання. Те саме роблять кнопка вікна поруч із «Відкрити» та клацання середньою кнопкою.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_arrows": {

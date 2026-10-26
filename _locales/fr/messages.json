@@ -203,7 +203,7 @@
         }
     },
     "p_syncStorage_title": {
-        "message": "Stockage de synchronisation de Chrome : $USED$ Ko utilisés sur $QUOTA$. Vos groupes y sont conservés pour arriver sur vos autres ordinateurs. Quand il est plein, les nouveaux groupes restent sur cet ordinateur jusqu’à ce qu’il y ait de la place.",
+        "message": "Stockage de synchronisation du navigateur : $USED$ Ko utilisés sur $QUOTA$. Vos groupes y sont conservés pour arriver sur vos autres ordinateurs. Quand il est plein, les nouveaux groupes restent sur cet ordinateur jusqu’à ce qu’il y ait de la place.",
         "description": "Tooltip of the sync storage meter in the popup footer",
         "placeholders": {
             "used": {
@@ -217,7 +217,7 @@
         }
     },
     "p_syncStorageUsed": {
-        "message": "Stockage de synchronisation de Chrome utilisé : $PERCENT$",
+        "message": "Stockage de synchronisation du navigateur utilisé : $PERCENT$",
         "description": "Screen reader label of the usage meter",
         "placeholders": {
             "percent": {
@@ -343,7 +343,7 @@
         }
     },
     "p_notSyncedYet": {
-        "message": "Enregistré sur cet ordinateur uniquement pour l’instant : le stockage de synchronisation de Chrome est plein.",
+        "message": "Enregistré sur cet ordinateur uniquement pour l’instant : le stockage de synchronisation du navigateur est plein.",
         "description": "Second line of the bar when a saved group didn't fit in sync storage"
     },
     "p_field_placeholder_first": {
@@ -365,7 +365,7 @@
         }
     },
     "p_empty_sync": {
-        "message": "Avec la synchronisation Chrome activée, vos groupes apparaissent aussi sur vos autres ordinateurs.",
+        "message": "Avec la synchronisation du navigateur activée, vos groupes apparaissent aussi sur vos autres ordinateurs.",
         "description": "Popup, no saved groups yet"
     },
     "p_empty_restore": {
@@ -981,7 +981,7 @@
         }
     },
     "p_unsyncedNote_full_one": {
-        "message": "Le stockage de synchronisation de Chrome est plein ($USED$ Ko sur $QUOTA$). Le groupe est en sécurité ici et se synchronisera tout seul dès qu’il y aura de la place.",
+        "message": "Le stockage de synchronisation du navigateur est plein ($USED$ Ko sur $QUOTA$). Le groupe est en sécurité ici et se synchronisera tout seul dès qu’il y aura de la place.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -999,7 +999,7 @@
         }
     },
     "p_unsyncedNote_full_other": {
-        "message": "Le stockage de synchronisation de Chrome est plein ($USED$ Ko sur $QUOTA$). Les groupes sont en sécurité ici et se synchroniseront tout seuls dès qu’il y aura de la place.",
+        "message": "Le stockage de synchronisation du navigateur est plein ($USED$ Ko sur $QUOTA$). Les groupes sont en sécurité ici et se synchroniseront tout seuls dès qu’il y aura de la place.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1017,7 +1017,7 @@
         }
     },
     "p_unsyncedNote_later_one": {
-        "message": "La synchronisation Chrome ne l’a pas encore pris en charge. Le groupe est en sécurité ici et se synchronisera tout seul plus tard.",
+        "message": "La synchronisation du navigateur ne l’a pas encore pris en charge. Le groupe est en sécurité ici et se synchronisera tout seul plus tard.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1027,7 +1027,7 @@
         }
     },
     "p_unsyncedNote_later_other": {
-        "message": "La synchronisation Chrome ne les a pas encore pris en charge. Les groupes sont en sécurité ici et se synchroniseront tout seuls plus tard.",
+        "message": "La synchronisation du navigateur ne les a pas encore pris en charge. Les groupes sont en sécurité ici et se synchroniseront tout seuls plus tard.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1041,7 +1041,7 @@
         "description": "Link in the note above groups that are not synced"
     },
     "p_biggestHint": {
-        "message": "Espace occupé par chaque groupe dans le stockage de synchronisation de Chrome ($USED$ Ko utilisés sur $QUOTA$). Supprimer un groupe libère son espace.",
+        "message": "Espace occupé par chaque groupe dans le stockage de synchronisation du navigateur ($USED$ Ko utilisés sur $QUOTA$). Supprimer un groupe libère son espace.",
         "description": "Above the groups sorted by size",
         "placeholders": {
             "used": {
@@ -1253,7 +1253,7 @@
         }
     },
     "s_sync_text": {
-        "message": "Vos groupes sont conservés dans le stockage de synchronisation de Chrome, ils apparaissent donc sur chaque ordinateur où vous êtes connecté à Chrome avec la synchronisation activée. Chrome y accorde $QUOTA$ Ko à TabHamster. Les groupes sont compressés : il y a de la place pour environ mille onglets. Chaque groupe est aussi conservé sur cet ordinateur. Les sessions ne sont jamais synchronisées.",
+        "message": "Vos groupes sont conservés dans le stockage de synchronisation du navigateur, ils apparaissent donc sur chaque ordinateur où vous êtes connecté au navigateur avec la synchronisation activée. Le navigateur y accorde $QUOTA$ Ko à TabHamster. Les groupes sont compressés : il y a de la place pour environ mille onglets. Chaque groupe est aussi conservé sur cet ordinateur. Les sessions ne sont jamais synchronisées.",
         "description": "Settings page. Sync and storage explanation",
         "placeholders": {
             "quota": {
@@ -1599,7 +1599,7 @@
         }
     },
     "s_help_shift": {
-        "message": "Ouvre un groupe dans une nouvelle fenêtre, comme un lien dans Chrome. Le bouton fenêtre à côté d’Ouvrir et le clic du milieu font de même.",
+        "message": "Ouvre un groupe dans une nouvelle fenêtre, comme pour un lien. Le bouton fenêtre à côté d’Ouvrir et le clic du milieu font de même.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_arrows": {

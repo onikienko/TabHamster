@@ -240,7 +240,7 @@
         }
     },
     "p_syncStorage_title": {
-        "message": "Chrome складиште за синхронизацију: искоришћено $USED$ од $QUOTA$ KB. Ваше групе се чувају тамо да би стигле на ваше друге рачунаре. Када се попуни, нове групе остају на овом рачунару док се не ослободи место.",
+        "message": "Складиште за синхронизацију прегледача: искоришћено $USED$ од $QUOTA$ KB. Ваше групе се чувају тамо да би стигле на ваше друге рачунаре. Када се попуни, нове групе остају на овом рачунару док се не ослободи место.",
         "description": "Tooltip of the sync storage meter in the popup footer",
         "placeholders": {
             "used": {
@@ -254,7 +254,7 @@
         }
     },
     "p_syncStorageUsed": {
-        "message": "Искоришћено $PERCENT$ Chrome складишта за синхронизацију",
+        "message": "Искоришћено $PERCENT$ складишта за синхронизацију прегледача",
         "description": "Screen reader label of the usage meter",
         "placeholders": {
             "percent": {
@@ -408,7 +408,7 @@
         }
     },
     "p_notSyncedYet": {
-        "message": "За сада сачувано само на овом рачунару: Chrome складиште за синхронизацију је пуно.",
+        "message": "За сада сачувано само на овом рачунару: складиште за синхронизацију прегледача је пуно.",
         "description": "Second line of the bar when a saved group didn't fit in sync storage"
     },
     "p_field_placeholder_first": {
@@ -430,7 +430,7 @@
         }
     },
     "p_empty_sync": {
-        "message": "Када је Chrome синхронизација укључена, ваше групе се појављују и на вашим другим рачунарима.",
+        "message": "Када је синхронизација прегледача укључена, ваше групе се појављују и на вашим другим рачунарима.",
         "description": "Popup, no saved groups yet"
     },
     "p_empty_restore": {
@@ -1254,7 +1254,7 @@
         }
     },
     "p_unsyncedNote_full_one": {
-        "message": "Chrome складиште за синхронизацију је пуно ($USED$ од $QUOTA$ KB). Овде је безбедна и синхронизоваће се сама када буде места.",
+        "message": "Складиште за синхронизацију прегледача је пуно ($USED$ од $QUOTA$ KB). Овде је безбедна и синхронизоваће се сама када буде места.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1272,7 +1272,7 @@
         }
     },
     "p_unsyncedNote_full_few": {
-        "message": "Chrome складиште за синхронизацију је пуно ($USED$ од $QUOTA$ KB). Овде су безбедне и синхронизоваће се саме када буде места.",
+        "message": "Складиште за синхронизацију прегледача је пуно ($USED$ од $QUOTA$ KB). Овде су безбедне и синхронизоваће се саме када буде места.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'few', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1290,7 +1290,7 @@
         }
     },
     "p_unsyncedNote_full_other": {
-        "message": "Chrome складиште за синхронизацију је пуно ($USED$ од $QUOTA$ KB). Овде су безбедне и синхронизоваће се саме када буде места.",
+        "message": "Складиште за синхронизацију прегледача је пуно ($USED$ од $QUOTA$ KB). Овде су безбедне и синхронизоваће се саме када буде места.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1308,7 +1308,7 @@
         }
     },
     "p_unsyncedNote_later_one": {
-        "message": "Chrome синхронизација је још није преузела. Овде је безбедна и касније ће се сама синхронизовати.",
+        "message": "Синхронизација прегледача је још није преузела. Овде је безбедна и касније ће се сама синхронизовати.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1318,7 +1318,7 @@
         }
     },
     "p_unsyncedNote_later_few": {
-        "message": "Chrome синхронизација их још није преузела. Овде су безбедне и касније ће се саме синхронизовати.",
+        "message": "Синхронизација прегледача их још није преузела. Овде су безбедне и касније ће се саме синхронизовати.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'few', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1328,7 +1328,7 @@
         }
     },
     "p_unsyncedNote_later_other": {
-        "message": "Chrome синхронизација их још није преузела. Овде су безбедне и касније ће се саме синхронизовати.",
+        "message": "Синхронизација прегледача их још није преузела. Овде су безбедне и касније ће се саме синхронизовати.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1342,7 +1342,7 @@
         "description": "Link in the note above groups that are not synced"
     },
     "p_biggestHint": {
-        "message": "Простор који свака група заузима у Chrome складишту за синхронизацију (искоришћено $USED$ од $QUOTA$ KB). Брисање групе ослобађа њен простор.",
+        "message": "Простор који свака група заузима у складишту за синхронизацију прегледача (искоришћено $USED$ од $QUOTA$ KB). Брисање групе ослобађа њен простор.",
         "description": "Above the groups sorted by size",
         "placeholders": {
             "used": {
@@ -1588,7 +1588,7 @@
         }
     },
     "s_sync_text": {
-        "message": "Ваше групе се чувају у Chrome складишту за синхронизацију, па се појављују на сваком рачунару на ком сте пријављени у Chrome са укљученом синхронизацијом. Chrome тамо даје TabHamster-у $QUOTA$ KB. Групе су компримоване: то је место за око хиљаду картица. Свака група се чува и на овом рачунару. Сесије се никада не синхронизују.",
+        "message": "Ваше групе се чувају у складишту за синхронизацију прегледача, па се појављују на сваком рачунару на ком сте пријављени у прегледач са укљученом синхронизацијом. Прегледач тамо даје TabHamster-у $QUOTA$ KB. Групе су компримоване: то је место за око хиљаду картица. Свака група се чува и на овом рачунару. Сесије се никада не синхронизују.",
         "description": "Settings page. Sync and storage explanation",
         "placeholders": {
             "quota": {
@@ -2002,7 +2002,7 @@
         }
     },
     "s_help_shift": {
-        "message": "Отвара групу у новом прозору, као линк у Chrome-у. Исто раде дугме прозора поред Отвори и клик средњим тастером.",
+        "message": "Отвара групу у новом прозору, као и линк. Исто раде дугме прозора поред Отвори и клик средњим тастером.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_arrows": {

@@ -200,7 +200,7 @@
         }
     },
     "p_syncStorage_title": {
-        "message": "Chrome szinkronizálási tárhely: $USED$ / $QUOTA$ KB foglalt. A csoportjai itt tárolódnak, így a többi számítógépére is eljutnak. Ha megtelik, az új csoportok ezen a számítógépen maradnak, amíg nem lesz hely.",
+        "message": "A böngésző szinkronizálási tárhelye: $USED$ / $QUOTA$ KB foglalt. A csoportjai itt tárolódnak, így a többi számítógépére is eljutnak. Ha megtelik, az új csoportok ezen a számítógépen maradnak, amíg nem lesz hely.",
         "description": "Tooltip of the sync storage meter in the popup footer",
         "placeholders": {
             "used": {
@@ -214,7 +214,7 @@
         }
     },
     "p_syncStorageUsed": {
-        "message": "Chrome szinkronizálási tárhely, foglalt: $PERCENT$",
+        "message": "A böngésző szinkronizálási tárhelyéből foglalt: $PERCENT$",
         "description": "Screen reader label of the usage meter",
         "placeholders": {
             "percent": {
@@ -340,7 +340,7 @@
         }
     },
     "p_notSyncedYet": {
-        "message": "Egyelőre csak ezen a számítógépen mentve: a Chrome szinkronizálási tárhely megtelt.",
+        "message": "Egyelőre csak ezen a számítógépen mentve: a böngésző szinkronizálási tárhelye megtelt.",
         "description": "Second line of the bar when a saved group didn't fit in sync storage"
     },
     "p_field_placeholder_first": {
@@ -362,7 +362,7 @@
         }
     },
     "p_empty_sync": {
-        "message": "Ha a Chrome szinkronizálás be van kapcsolva, a csoportjai a többi számítógépén is megjelennek.",
+        "message": "Ha a böngésző szinkronizálása be van kapcsolva, a csoportjai a többi számítógépén is megjelennek.",
         "description": "Popup, no saved groups yet"
     },
     "p_empty_restore": {
@@ -978,7 +978,7 @@
         }
     },
     "p_unsyncedNote_full_one": {
-        "message": "A Chrome szinkronizálási tárhely megtelt ($USED$ / $QUOTA$ KB). Itt biztonságban van, és magától szinkronizálódik, amikor lesz hely.",
+        "message": "A böngésző szinkronizálási tárhelye megtelt ($USED$ / $QUOTA$ KB). Itt biztonságban van, és magától szinkronizálódik, amikor lesz hely.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -996,7 +996,7 @@
         }
     },
     "p_unsyncedNote_full_other": {
-        "message": "A Chrome szinkronizálási tárhely megtelt ($USED$ / $QUOTA$ KB). Itt biztonságban vannak, és maguktól szinkronizálódnak, amikor lesz hely.",
+        "message": "A böngésző szinkronizálási tárhelye megtelt ($USED$ / $QUOTA$ KB). Itt biztonságban vannak, és maguktól szinkronizálódnak, amikor lesz hely.",
         "description": "Note above groups that are not synced because sync storage is full (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1014,7 +1014,7 @@
         }
     },
     "p_unsyncedNote_later_one": {
-        "message": "A Chrome szinkronizálás még nem vette át. Itt biztonságban van, és később magától szinkronizálódik.",
+        "message": "A böngésző szinkronizálása még nem vette át. Itt biztonságban van, és később magától szinkronizálódik.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'one', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1024,7 +1024,7 @@
         }
     },
     "p_unsyncedNote_later_other": {
-        "message": "A Chrome szinkronizálás még nem vette át őket. Itt biztonságban vannak, és később maguktól szinkronizálódnak.",
+        "message": "A böngésző szinkronizálása még nem vette át őket. Itt biztonságban vannak, és később maguktól szinkronizálódnak.",
         "description": "Note above groups that are not synced for another reason than full storage (plural form 'other', by the number of groups)",
         "placeholders": {
             "count": {
@@ -1038,7 +1038,7 @@
         "description": "Link in the note above groups that are not synced"
     },
     "p_biggestHint": {
-        "message": "Az egyes csoportok által elfoglalt hely a Chrome szinkronizálási tárhelyen ($USED$ / $QUOTA$ KB foglalt). Egy csoport törlése felszabadítja a helyét.",
+        "message": "Az egyes csoportok által elfoglalt hely a böngésző szinkronizálási tárhelyén ($USED$ / $QUOTA$ KB foglalt). Egy csoport törlése felszabadítja a helyét.",
         "description": "Above the groups sorted by size",
         "placeholders": {
             "used": {
@@ -1250,7 +1250,7 @@
         }
     },
     "s_sync_text": {
-        "message": "A csoportjai a Chrome szinkronizálási tárhelyen vannak, így minden olyan számítógépen megjelennek, ahol bekapcsolt szinkronizálással jelentkezik be a Chrome-ba. A Chrome ott $QUOTA$ KB-ot ad a TabHamsternek. A csoportok tömörítve vannak: ez nagyjából ezer fülnyi hely. Minden csoport ezen a számítógépen is megmarad. A munkamenetek soha nem szinkronizálódnak.",
+        "message": "A csoportjai a böngésző szinkronizálási tárhelyén vannak, így minden olyan számítógépen megjelennek, ahol bekapcsolt szinkronizálással jelentkezik be a böngészőbe. A böngésző ott $QUOTA$ KB-ot ad a TabHamsternek. A csoportok tömörítve vannak: ez nagyjából ezer fülnyi hely. Minden csoport ezen a számítógépen is megmarad. A munkamenetek soha nem szinkronizálódnak.",
         "description": "Settings page. Sync and storage explanation",
         "placeholders": {
             "quota": {
@@ -1596,7 +1596,7 @@
         }
     },
     "s_help_shift": {
-        "message": "Új ablakban nyit meg egy csoportot, mint egy linket a Chrome-ban. Ugyanezt teszi a Megnyitás melletti ablak gomb és a középső kattintás.",
+        "message": "Új ablakban nyit meg egy csoportot, ugyanúgy, mint egy linket. Ugyanezt teszi a Megnyitás melletti ablak gomb és a középső kattintás.",
         "description": "Settings page. Help, key list. "
     },
     "s_help_arrows": {
