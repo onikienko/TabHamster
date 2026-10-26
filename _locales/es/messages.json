@@ -1252,6 +1252,20 @@
             }
         }
     },
+    "s_syncMissing": {
+        "message": "¿Sus grupos no aparecen en otro dispositivo?",
+        "description": "Settings page, Sync and storage: a line under the sync text; a click shows s_syncMissing_text"
+    },
+    "s_syncMissing_text": {
+        "message": "Inicie sesión en el navegador de ese dispositivo con la misma cuenta y active la sincronización. Instale TabHamster desde la misma tienda en ambos dispositivos. La tienda se muestra arriba, junto a la versión. Para pasar sus grupos a otro navegador o dispositivo, descargue un archivo de copia de seguridad aquí y restáurelo allí, en $SECTION$, más abajo.",
+        "description": "Settings page, Sync and storage: the answer to s_syncMissing. The store (Chrome Web Store, Edge Add-ons) is shown next to the version in the band at the top. SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ grupo está guardado por ahora solo en este dispositivo: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",

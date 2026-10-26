@@ -308,6 +308,14 @@ h2 {
 
 /* sync and storage */
 
+.sync-help {
+    margin-top: 12px;
+}
+
+.sync-help-text {
+    margin: 6px 0 0 18px;
+}
+
 .sync {
     display: flex;
     flex-direction: column;

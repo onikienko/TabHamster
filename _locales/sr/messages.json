@@ -1587,6 +1587,20 @@
             }
         }
     },
+    "s_syncMissing": {
+        "message": "Групе се не појављују на другом рачунару?",
+        "description": "Settings page, Sync and storage: a line under the sync text; a click shows s_syncMissing_text"
+    },
+    "s_syncMissing_text": {
+        "message": "Пријавите се тамо у прегледач истим налогом и укључите синхронизацију. Инсталирајте TabHamster из исте продавнице на оба рачунара. Продавница је приказана на врху, поред верзије. Да бисте пренели групе у други прегледач или на други рачунар, преузмите датотеку резервне копије овде и вратите је тамо, у одељку $SECTION$ испод.",
+        "description": "Settings page, Sync and storage: the answer to s_syncMissing. The store (Chrome Web Store, Edge Add-ons) is shown next to the version in the band at the top. SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ група је за сада сачувана само на овом рачунару: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",

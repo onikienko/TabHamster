@@ -179,7 +179,7 @@ function dateFormatControl(id) {
 const SECTIONS = [
     {id: 'general', title: 's_general', build: general},
     {id: 'saving', title: 's_saving', build: saving},
-    {id: 'sync', title: 's_sync', build: () => [el.sync]},
+    {id: 'sync', title: 's_sync', build: () => [el.sync, syncHelp()]},
     {id: 'backup', title: 's_backup', build: () => backupRows({reloadAll})},
     {id: 'deleted', title: 'o_trash_legend', build: deleted},
     {id: 'help', title: 'o_tabs_help', build: help},
@@ -253,6 +253,26 @@ function renderSync() {
                 h('p', {class: 'note-title'}, plural('s_unsynced', waiting.length, [nameList(waiting)])),
                 h('p', null, plural('s_unsyncedHint', waiting.length)))));
     }
+}
+
+/**
+ * "Groups don't show up on another computer?" under the sync text: a click shows the answer. Outside el.sync, which
+ * is drawn again on every change: it stays open, and keeps the focus.
+ */
+function syncHelp() {
+    // the section's name is a link to it: put a marker in its place, then split on it
+    const MARK = '\uE000';
+    const [before, after] = t('s_syncMissing_text', [MARK]).split(MARK);
+    const answer = h('p', {class: 'text sync-help-text', id: 'sync_help', hidden: true},
+        before, h('a', {href: '#backup'}, t('s_backup')), after);
+    const button = h('button', {class: 'link-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'sync_help'},
+        icon('chevronRight', 14), t('s_syncMissing'));
+    button.addEventListener('click', () => {
+        answer.hidden = !answer.hidden;
+        button.setAttribute('aria-expanded', String(!answer.hidden));
+        button.firstChild.replaceWith(icon(answer.hidden ? 'chevronRight' : 'chevronDown', 14));
+    });
+    return h('div', {class: 'sync-help'}, button, answer);
 }
 
 function deleted() {

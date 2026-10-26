@@ -1249,6 +1249,20 @@
             }
         }
     },
+    "s_syncMissing": {
+        "message": "Nem jelennek meg a csoportok a másik számítógépen?",
+        "description": "Settings page, Sync and storage: a line under the sync text; a click shows s_syncMissing_text"
+    },
+    "s_syncMissing_text": {
+        "message": "Jelentkezzen be ott is a böngészőbe ugyanazzal a fiókkal, és kapcsolja be a szinkronizálást. Mindkét számítógépen ugyanabból az áruházból telepítse a TabHamstert. Az áruház fent, a verzió mellett látható. Ha a csoportjait másik böngészőbe vagy számítógépre szeretné átvinni, töltsön le itt egy biztonsági mentési fájlt, és állítsa vissza ott, lent a $SECTION$ részben.",
+        "description": "Settings page, Sync and storage: the answer to s_syncMissing. The store (Chrome Web Store, Edge Add-ons) is shown next to the version in the band at the top. SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ csoport egyelőre csak ezen a számítógépen van mentve: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
