@@ -347,8 +347,8 @@ test('open in incognito: one window with all tabs', async () => {
 test('open in incognito: a refused address doesn\'t stop the others', async () => {
     const browser = fakeBrowser();
     const bg = startBackground({browser});
-    const tabs = TABS.concat({url: 'javascript:void(0)'}, {url: 'chrome://settings/'});
-    assert.deepEqual(await bg.send({msg: 'open', how: 'incognito', tabs}), {result: {failed: 2}});
+    const tabs = TABS.concat({url: 'javascript:void(0)'}, {url: 'chrome://settings/'}, {url: 'edge://crash/'});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'incognito', tabs}), {result: {failed: 3}});
     assert.deepEqual(browser.calls.map(c => c[1].url), [tabs.map(t => t.url), TABS.map(t => t.url)]);
 
     const only_bad = startBackground();

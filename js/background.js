@@ -226,14 +226,14 @@ const open_ops = {
     },
     // without "Allow in Incognito" the extension can open the window but can't add tabs to it later: all at once.
     // One address Chrome refuses fails the whole window: then once more without the kinds it refuses
-    // (javascript:, and chrome: debug pages like chrome://crash).
+    // (javascript:, and chrome: or edge: debug pages like chrome://crash, edge://crash).
     incognito: async function (tabs) {
         const urls = tabs.map(tab => tab.url);
         try {
             await chrome.windows.create({incognito: true, focused: true, url: urls});
             return {failed: 0};
         } catch (e) {
-            const rest = urls.filter(url => !/^\s*(javascript|chrome):/i.test(url));
+            const rest = urls.filter(url => !/^\s*(javascript|chrome|edge):/i.test(url));
             if (!rest.length || rest.length === urls.length) {
                 throw e;
             }
