@@ -1,0 +1,28 @@
+Gratuit et open source. Sans publicité, sans pistage.
+
+► Enregistrez les onglets ouverts dans un groupe, et retrouvez-les.
+  ✓ Appuyez sur Entrée pour enregistrer les onglets ouverts. Tapez d’abord un nom, ou laissez-le vide et le groupe portera la date.
+  ✓ Tapez pour chercher dans les noms des groupes, les titres et les adresses des onglets.
+  ✓ Les groupes sont conservés dans le stockage de synchronisation d’Edge. Connectez-vous à Edge avec la synchronisation activée pour les retrouver sur vos autres ordinateurs.
+  ✓ Des centaines d’onglets par groupe. Chaque groupe est aussi conservé sur votre ordinateur : si le stockage de synchronisation est plein, le groupe est quand même enregistré.
+  ✓ Faites glisser les groupes et les onglets pour les réordonner, ou un onglet vers un autre groupe.
+  ✓ Modifiez et supprimez des onglets, ajoutez un lien ou l’onglet actuel, remplacez un groupe par les onglets ouverts, renommez, ouvrez dans une fenêtre InPrivate, copiez les liens.
+  ✓ Annulation des modifications et des suppressions. Les groupes supprimés peuvent être restaurés pendant 30 jours.
+  ✓ Sauvegarde de vos groupes et paramètres dans un fichier.
+
+► Sessions : tout ce qui était ouvert dans vos 30 dernières sessions du navigateur.
+  ✓ Chaque onglet et chaque fenêtre, y compris ceux que vous avez fermés, et les pages par lesquelles chaque onglet est passé.
+  ✓ Restaurez les fenêtres d’une session telles qu’elles étaient, en un clic.
+  ✓ Les sessions restent sur votre ordinateur : elles ne sont pas synchronisées.
+
+► Thèmes clair et sombre.
+► Tout fonctionne au clavier et avec les lecteurs d’écran.
+
+► Conseils :
+  • Ouvrez TabHamster et appuyez sur Entrée pour enregistrer tous les onglets ouverts dans un groupe.
+  • Cliquez sur un groupe pour voir ses onglets, Ouvrir (ou Entrée) les ouvre. Maj, Ctrl / ⌘ ou un clic du milieu les ouvre dans une nouvelle fenêtre.
+  • Alt (Option) + ↑ ↓ déplace le groupe ou l’onglet sélectionné.
+
+► Installez TabHamster depuis la même boutique sur chaque ordinateur que vous synchronisez : les copies d’Edge Add-ons et du Chrome Web Store gardent des groupes séparés. Vous utilisez déjà TabHamster du Chrome Web Store ? Gardez cette copie, ou transférez vos groupes avec un fichier de sauvegarde.
+
+Code source : https://github.com/onikienko/TabHamster

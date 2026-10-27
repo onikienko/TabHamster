@@ -1,0 +1,28 @@
+Gratis y de código abierto. Sin anuncios ni rastreo.
+
+► Guarde las pestañas abiertas como un grupo y vuelva a encontrarlas.
+	✓ Pulse Intro para guardar las pestañas abiertas. Escriba antes un nombre, o déjelo vacío y el grupo tendrá la fecha como nombre.
+	✓ Escriba para buscar en los nombres de los grupos y en los títulos y direcciones de las pestañas.
+	✓ Los grupos se guardan en el almacenamiento de sincronización de Edge. Inicie sesión en Edge con la sincronización activada para tenerlos en sus otros dispositivos.
+	✓ Cientos de pestañas por grupo. Cada grupo también se guarda en su dispositivo: si el almacenamiento de sincronización está lleno, el grupo se guarda igualmente.
+	✓ Arrastre grupos y pestañas para ordenarlos, o arrastre una pestaña a otro grupo.
+	✓ Edite y quite pestañas, añada un enlace o la pestaña actual, reemplace un grupo por las pestañas abiertas, cambie el nombre, abra en una ventana InPrivate, copie los enlaces.
+	✓ Deshacer para cambios y eliminaciones. Los grupos eliminados se pueden restaurar durante 30 días.
+	✓ Copia de seguridad de sus grupos y su configuración en un archivo.
+
+► Sesiones: todo lo que estuvo abierto en sus últimas 30 sesiones del navegador.
+	✓ Cada pestaña y ventana, también las que cerró, y las páginas por las que pasó cada pestaña.
+	✓ Restaure las ventanas de una sesión tal como estaban, con un solo clic.
+	✓ Las sesiones se quedan en su dispositivo: no se sincronizan.
+
+► Temas claro y oscuro.
+► Todo funciona con el teclado y con lectores de pantalla.
+
+► Consejos:
+	• Abra TabHamster y pulse Intro para guardar todas las pestañas abiertas como un grupo.
+	• Haga clic en un grupo para ver sus pestañas; Abrir (o Intro) las abre. Mayús, Ctrl / ⌘ o un clic con el botón central las abre en una ventana nueva.
+	• Alt (Opción) + ↑ ↓ mueve el grupo o la pestaña seleccionados.
+
+► Instale TabHamster desde la misma tienda en todos los equipos que sincroniza: las copias de Edge Add-ons y de Chrome Web Store guardan grupos distintos. ¿Ya usa TabHamster de Chrome Web Store? Conserve esa copia o pase sus grupos con un archivo de copia de seguridad.
+
+Código fuente: https://github.com/onikienko/TabHamster

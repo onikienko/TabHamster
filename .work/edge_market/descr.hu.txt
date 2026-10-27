@@ -1,0 +1,28 @@
+Ingyenes és nyílt forráskódú. Reklámok és követés nélkül.
+
+► Mentse a megnyitott füleket csoportba, és találja meg őket újra.
+	✓ Az Enter megnyomásával menti a megnyitott füleket. Előbb írjon be egy nevet, vagy hagyja üresen, és a csoport neve a dátum lesz.
+	✓ Gépeléssel kereshet a csoportnevekben, valamint a fülek címében és webcímében.
+	✓ A csoportok az Edge szinkronizálási tárhelyén vannak. Jelentkezzen be az Edge-be bekapcsolt szinkronizálással, és a többi számítógépén is megjelennek.
+	✓ Akár több száz fül egy csoportban. Minden csoport a számítógépén is megmarad: ha a szinkronizálási tárhely megtelt, a csoport akkor is mentésre kerül.
+	✓ Húzással átrendezheti a csoportokat és füleket, vagy egy fület másik csoportba helyezhet.
+	✓ Fülek szerkesztése és eltávolítása, link vagy az aktuális fül hozzáadása, csoport cseréje a megnyitott fülekre, átnevezés, megnyitás InPrivate-ablakban, linkek másolása.
+	✓ A módosítások és törlések visszavonhatók. A törölt csoportok 30 napig visszaállíthatók.
+	✓ A csoportok és a beállítások biztonsági mentése fájlba.
+
+► Munkamenetek: minden, ami az utolsó 30 böngészési munkamenetben nyitva volt.
+	✓ Minden fül és ablak, a bezártakkal együtt, és az egyes fülekben megnyitott korábbi oldalak.
+	✓ Egy kattintással visszaállíthatja egy munkamenet ablakait úgy, ahogy voltak.
+	✓ A munkamenetek a számítógépén maradnak: nem szinkronizálódnak.
+
+► Világos és sötét téma.
+► Minden működik billentyűzettel és képernyőolvasóval.
+
+► Tippek:
+	• Nyissa meg a TabHamstert, és nyomja meg az Entert: az összes megnyitott fül csoportba kerül.
+	• Egy csoportra kattintva megjelennek a fülei, a Megnyitás (vagy az Enter) megnyitja őket. Shift, Ctrl / ⌘ vagy középső kattintás esetén új ablakban nyílnak meg.
+	• Az Alt (Option) + ↑ ↓ áthelyezi a kijelölt csoportot vagy fület.
+
+► Minden szinkronizált számítógépen ugyanabból az áruházból telepítse a TabHamstert: az Edge Add-ons és a Chrome Web Store példányai külön csoportokat tárolnak. Már a Chrome Web Store-ból telepített TabHamstert használja? Tartsa meg azt, vagy vigye át a csoportjait biztonsági mentési fájllal.
+
+Forráskód: https://github.com/onikienko/TabHamster
