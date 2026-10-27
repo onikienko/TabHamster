@@ -3,6 +3,9 @@
 
 const TAB_GROUPS = {permissions: ['tabGroups']};
 
+// the tabGroups API's colors (the same list as groupStore.TAB_GROUP_COLORS, for the background)
+export const TAB_GROUP_COLORS = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
+
 /** true when the permission is given */
 export async function hasTabGroups() {
     try {
@@ -43,6 +46,21 @@ export async function queryTabGroups() {
         console.error('TabHamster: tab groups not read', e);
         return [];
     }
+}
+
+/**
+ * What a list shows of each tab's browser tab group: {t, c, start} (start: the first of a run of neighbours in the
+ * same one, it shows the name), or null.
+ * @param {Array<?{id: *, t: string, c: string}>} groups each tab's tab group (id tells them apart), null for none
+ */
+export function tabGroupRuns(groups) {
+    let before = null;
+    return groups.map((group) => {
+        const shown = group ? {t: group.t, c: TAB_GROUP_COLORS.includes(group.c) ? group.c : 'grey',
+            start: !before || before.id !== group.id} : null;
+        before = group;
+        return shown;
+    });
 }
 
 /**

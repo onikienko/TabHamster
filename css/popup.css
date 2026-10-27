@@ -520,6 +520,109 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     pointer-events: auto;
 }
 
+/* Tabs in the browser's tab groups (PLAN.md 9.1, board "Sessions: everything that was open"): the first tab of each
+   run shows the tab group's name in a pill of its colour above it (a dot if it has no name), and the run's rows have
+   a bar of that colour. On the rows themselves, not around them: drag moves .tab-item elements of .tab-list. */
+.tab-item.tg > .tab-row {
+    padding-left: 8px;
+    border-left: 2px solid var(--tg);
+    border-radius: 0 6px 6px 0;
+}
+
+.tab-item.tg-start::before {
+    content: attr(data-tg);
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 18px;
+    margin: 4px 0;
+    padding: 0 7px;
+    overflow: hidden;
+    border-radius: 5px;
+    background: var(--tg);
+    color: var(--tg-on);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    unicode-bidi: plaintext;
+}
+
+.tab-item.tg-start[data-tg=""]::before {
+    width: 10px;
+    height: 10px;
+    margin: 8px 0 8px 2px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+/* Edit and Remove beside the row, not the pill */
+.tab-item.tg-start > .tab-actions {
+    top: 26px;
+}
+
+/* a tab's trail inside a run: the bar goes on beside it */
+.trail.tg {
+    position: relative;
+}
+
+.trail.tg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -7px;
+    width: 2px;
+    background: var(--tg);
+}
+
+.tg-grey {
+    --tg: var(--tg-grey);
+    --tg-on: var(--tg-ink);
+}
+
+.tg-blue {
+    --tg: var(--tg-blue);
+    --tg-on: var(--tg-ink);
+}
+
+.tg-red {
+    --tg: var(--tg-red);
+    --tg-on: var(--tg-ink);
+}
+
+.tg-yellow {
+    --tg: var(--tg-yellow);
+    --tg-on: var(--tg-ink-light);
+}
+
+.tg-green {
+    --tg: var(--tg-green);
+    --tg-on: var(--tg-ink);
+}
+
+.tg-pink {
+    --tg: var(--tg-pink);
+    --tg-on: var(--tg-ink);
+}
+
+.tg-purple {
+    --tg: var(--tg-purple);
+    --tg-on: var(--tg-ink);
+}
+
+.tg-cyan {
+    --tg: var(--tg-cyan);
+    --tg-on: var(--tg-ink);
+}
+
+.tg-orange {
+    --tg: var(--tg-orange);
+    --tg-on: var(--tg-ink-light);
+}
+
 /* editing a tab (or adding a link): title and address, like a rename */
 .tab-editor {
     display: flex;

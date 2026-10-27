@@ -16,7 +16,7 @@ import {normalizeName, findByName, countByName, freeName} from '../names.js';
 import {parseQuery, segments, search, matchesAll} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
-import {queryTabGroups, tabGroupFields, requestTabGroups} from '../ui/tab_groups.js';
+import {queryTabGroups, tabGroupFields, tabGroupRuns, requestTabGroups} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
@@ -1307,7 +1307,7 @@ function runSearch() {
     const query = el.field.value;
     state.words = parseQuery(query);
     state.results.saved = search(shownGroupKeys().map((key) => ({
-        key, name: groupName(key, state.groups[key]), tabs: state.groups[key].tabs,
+        key, name: groupName(key, state.groups[key]), tabs: state.groups[key].tabs.map(withTabGroupName),
     })), query);
     // only the tab that is shown is searched; switching keeps the words (PLAN.md M11c)
     state.results.sessions = sessionsShown() && state.sessionsLoaded ? search(sortedSessionKeys().map((key) => ({
@@ -1319,15 +1319,24 @@ function sessionsShown() {
     return state.view === 'sessions' && !!state.options.session_watcher;
 }
 
+/** a saved tab as search sees it: the name of its browser tab group finds it too */
+function withTabGroupName(tab) {
+    return tab.cg && tab.cg.t ? {title: (tab.title || '') + '\n' + tab.cg.t, url: tab.url} : tab;
+}
+
 /**
- * A session's tabs as search sees them, in the same order: a tab is found by the pages it went through too. The live
+ * A session's tabs as search sees them, in the same order: a tab is found by the pages it went through too, and by its
+ * browser tab group's name. The live
  * session's open tabs are left out: they are open anyway, and a match there has nothing to show or do.
  */
 function searchTabs(key) {
     const session = state.sessions[key];
     const open = new Set(key === state.currentSession ? endTabs(session, true) : []);
+    const groups = session.groups || {};
     return session.tabs.map((tab) => (open.has(tab) ? {} : {
-        title: [tab.title].concat((tab.trail || []).map((step) => step.title)).join('\n'),
+        // the pages it went through, and the name of its browser tab group
+        title: [tab.title].concat((tab.trail || []).map((step) => step.title),
+            tab.groupId >= 0 && groups[tab.groupId] ? [groups[tab.groupId].title] : []).join('\n'),
         url: [tab.url].concat((tab.trail || []).map((step) => step.url)).join('\n'),
     }));
 }
@@ -1518,6 +1527,12 @@ const rowTabs = new WeakMap();
  * {id, auto, open, count} for a session's tab with earlier pages: their number shows before the address, a click on it
  * (or → ←) shows and hides them.
  */
+/** a tab row's wrapper; in a browser tab group (`tg` from tabGroupRuns) its color, and the name on a run's first */
+function tabItem(tg) {
+    return tg ? {class: ['tab-item', 'tg', 'tg-' + tg.c, tg.start && 'tg-start'], dataset: tg.start ? {tg: tg.t} : null} :
+        {class: 'tab-item'};
+}
+
 function tabRow(tab, at, opts = {}) {
     const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
     const trail = opts.trail;
@@ -1551,12 +1566,12 @@ function tabRow(tab, at, opts = {}) {
     {text: tab.title || tab.url, sub: tab.title ? tab.url : null, align: 'start', focus: false, quiet: true,
         when: () => isCut(title)});
     if (!at) {
-        return h('div', {class: 'tab-item'}, link);
+        return h('div', tabItem(opts.tg), link);
     }
     const shown = {key: at.key, index: at.index, tab};
     rowTabs.set(link, shown);
     // not Tab stops: the keys do the same on the focused row
-    return h('div', {class: 'tab-item'}, link, h('div', {class: 'tab-actions'},
+    return h('div', tabItem(opts.tg), link, h('div', {class: 'tab-actions'},
         setTip(h('button', {
             class: 'ib', type: 'button', tabindex: '-1', 'aria-label': t('p_editTab'),
             onClick: () => startTabEdit(at.key, shown),
@@ -1757,7 +1772,13 @@ function groupItem(result, target) {
         const indexes = partial && !editing ? found.slice(0, foundShown('saved:' + key, found.length)) : found;
         // the tab may have another place than when its editor was opened (an earlier change shown meanwhile)
         const edited = editing && editing.tab ? tabIndexIn(group.tabs, editing) : -1;
-        const rows = indexes.map((i) => (i === edited ? tabEditor(key, editing) : tabRow(group.tabs[i], {key, index: i})));
+        // the browser tab groups its tabs were saved in (the one being edited is out of its run meanwhile)
+        const runs = tabGroupRuns(indexes.map((i) => {
+            const cg = i !== edited && group.tabs[i].cg;
+            return cg ? {id: cg.i, t: cg.t, c: cg.c} : null;
+        }));
+        const rows = indexes.map((i, n) => (i === edited ? tabEditor(key, editing) :
+            tabRow(group.tabs[i], {key, index: i}, {tg: runs[n]})));
         if (editing && !editing.tab) {
             rows.push(tabEditor(key, editing));
         }
@@ -1860,7 +1881,7 @@ function sessionWindowRows(key, win, i, live, found) {
             (live && !win.closed) || !win.tabs.length ? null :
                 h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', withSessionGroups(state.sessions[key], win.tabs)))},
                     t('p_openWindow'))),
-        shown.map((tab) => sessionTabRows(key, tab, found)),
+        sessionTabGroups(key, shown).map((tg, n) => sessionTabRows(key, shown[n], found, undefined, tg)),
         closedShown.length ? [
             h('button', {
                 class: 'fold', type: 'button', 'aria-expanded': String(foldOpen),
@@ -1873,20 +1894,33 @@ function sessionWindowRows(key, win, i, live, found) {
 }
 
 /**
- * A session's tab, and under it the pages it went through (newest first) when its trail is shown. A tab found only
- * through its trail shows it by itself. `right`: the time a closed tab closed.
+ * The browser tab groups of a session's tabs as a list shows them (tabGroupRuns), from the names the session
+ * recorded: a session without them (no permission, 1.0.0) shows its tabs without tab groups.
  */
-function sessionTabRows(key, tab, found, right) {
+function sessionTabGroups(key, tabs) {
+    const groups = state.sessions[key].groups || {};
+    return tabGroupRuns(tabs.map((tab) => {
+        const group = tab.groupId >= 0 && groups[tab.groupId];
+        return group ? {id: tab.groupId, t: group.title, c: group.color} : null;
+    }));
+}
+
+/**
+ * A session's tab, and under it the pages it went through (newest first) when its trail is shown. A tab found only
+ * through its trail shows it by itself. `right`: the time a closed tab closed. `tg`: its browser tab group
+ * (sessionTabGroups).
+ */
+function sessionTabRows(key, tab, found, right, tg) {
     const trail = tab.trail || [];
     if (!trail.length) {
-        return tabRow(tab, null, {right});
+        return tabRow(tab, null, {right, tg});
     }
     const id = 'trail:' + key + ':' + tab.id;
     const auto = !!found && !matchesAll((tab.title || '') + '\n' + (tab.url || ''), state.words);
     const open = isExpanded(id, auto);
     return [
-        tabRow(tab, null, {right, trail: {id, auto, open, count: trail.length}}),
-        open ? h('div', {class: 'trail'},
+        tabRow(tab, null, {right, tg, trail: {id, auto, open, count: trail.length}}),
+        open ? h('div', {class: ['trail', tg && 'tg', tg && 'tg-' + tg.c]},
             trail.slice().reverse().map((step) => tabRow(step, null, {right: shortTime(step.at, lang), step: true}))) : null,
     ];
 }

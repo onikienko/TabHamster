@@ -47,6 +47,20 @@
     --switch-off: #7F909C;
     --shadow: 0 8px 24px rgba(14, 38, 51, .18), 0 1px 3px rgba(14, 38, 51, .12);
 
+    /* the browser's tab groups, its own colours (Chrome's classic palette, PLAN.md 9.1); text on them: white, dark on
+       yellow and orange (--tg-ink-light) */
+    --tg-grey: #5F6368;
+    --tg-blue: #1A73E8;
+    --tg-red: #D93025;
+    --tg-yellow: #F9AB00;
+    --tg-green: #188038;
+    --tg-pink: #D01884;
+    --tg-purple: #A142F4;
+    --tg-cyan: #007B83;
+    --tg-orange: #FA903E;
+    --tg-ink: #FFFFFF;
+    --tg-ink-light: #202124;
+
     --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color-scheme: light;
 }
@@ -94,6 +108,17 @@
     --tip-line: #34495A;
     --switch-off: #62757F;
     --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
+    --tg-grey: #DADCE0;
+    --tg-blue: #8AB4F8;
+    --tg-red: #F28B82;
+    --tg-yellow: #FDD663;
+    --tg-green: #81C995;
+    --tg-pink: #FF8BCB;
+    --tg-purple: #C58AF9;
+    --tg-cyan: #78D9EC;
+    --tg-orange: #FCAD70;
+    --tg-ink: #202124;
+    --tg-ink-light: #202124;
     color-scheme: dark;
 }
 
@@ -141,6 +166,17 @@
         --tip-line: #34495A;
         --switch-off: #62757F;
         --shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
+        --tg-grey: #DADCE0;
+        --tg-blue: #8AB4F8;
+        --tg-red: #F28B82;
+        --tg-yellow: #FDD663;
+        --tg-green: #81C995;
+        --tg-pink: #FF8BCB;
+        --tg-purple: #C58AF9;
+        --tg-cyan: #78D9EC;
+        --tg-orange: #FCAD70;
+        --tg-ink: #202124;
+        --tg-ink-light: #202124;
         color-scheme: dark;
     }
 }

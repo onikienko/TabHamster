@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {tabGroupFields} from '../js/ui/tab_groups.js';
+import {tabGroupFields, tabGroupRuns} from '../js/ui/tab_groups.js';
 
 test('tabGroupFields: tab groups numbered in the order of their first tab, names and colors kept', () => {
     const groups = [
@@ -22,4 +22,17 @@ test('tabGroupFields: a tab group that wasn\'t read (no permission) leaves its t
     assert.deepEqual(tabGroupFields([{groupId: 3}, {groupId: 4}], []), [null, null]);
     assert.deepEqual(tabGroupFields([{groupId: 3}, {groupId: 4}], [{id: 4, title: 'A', color: 'red'}]),
         [null, {i: 1, t: 'A', c: 'red'}]);
+});
+
+test('tabGroupRuns: the first of each run of neighbours starts it; an unknown color is grey', () => {
+    const a = {id: 1, t: 'Trip', c: 'yellow'};
+    const b = {id: 2, t: '', c: 'magenta'};
+    assert.deepEqual(tabGroupRuns([null, a, a, b, null, a]), [
+        null,
+        {t: 'Trip', c: 'yellow', start: true},
+        {t: 'Trip', c: 'yellow', start: false},
+        {t: '', c: 'grey', start: true},
+        null,
+        {t: 'Trip', c: 'yellow', start: true},
+    ]);
 });
