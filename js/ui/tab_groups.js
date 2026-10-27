@@ -31,3 +31,42 @@ export function watchTabGroups(fn) {
     chrome.permissions.onAdded.addListener((p) => has(p) && fn(true));
     chrome.permissions.onRemoved.addListener((p) => has(p) && fn(false));
 }
+
+/** the browser's tab groups ({id, title, color, collapsed}), all windows; none without the permission */
+export async function queryTabGroups() {
+    if (!chrome.tabGroups || !(await hasTabGroups())) {
+        return [];
+    }
+    try {
+        return await chrome.tabGroups.query({});
+    } catch (e) {
+        console.error('TabHamster: tab groups not read', e);
+        return [];
+    }
+}
+
+/**
+ * The `cg` of each tab as a saved group keeps it (format: js/group_store.js), null for a tab in no tab group or in one
+ * missing from `groups`. Tabs of one tab group share {i, t, c, x?}: i numbers the tab groups 1, 2... in the order of
+ * their first tab, t is the name ('' if none), c the color, x: true if collapsed.
+ * @param {Array<{groupId?: number}>} tabs browser tabs
+ * @param {Array<{id: number, title?: string, color: string, collapsed?: boolean}>} groups from queryTabGroups
+ */
+export function tabGroupFields(tabs, groups) {
+    const byId = new Map(groups.map((group) => [group.id, group]));
+    const numbers = new Map();
+    return tabs.map((tab) => {
+        const group = tab.groupId >= 0 ? byId.get(tab.groupId) : null;
+        if (!group) {
+            return null;
+        }
+        if (!numbers.has(group.id)) {
+            numbers.set(group.id, numbers.size + 1);
+        }
+        const cg = {i: numbers.get(group.id), t: group.title || '', c: group.color};
+        if (group.collapsed) {
+            cg.x = true;
+        }
+        return cg;
+    });
+}

@@ -16,6 +16,7 @@ import {normalizeName, findByName, countByName, freeName} from '../names.js';
 import {parseQuery, segments, search, matchesAll} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
+import {queryTabGroups, tabGroupFields} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
@@ -211,6 +212,12 @@ async function queryTabsToSave() {
     return tabs.filter((tab) => !tab.pinned || state.options.pinned === 1);
 }
 
+/** the tabs as a saved group keeps them, with their browser tab groups when that is turned on (Settings) */
+async function savedTabs(tabs) {
+    const cgs = tabGroupFields(tabs, await queryTabGroups());
+    return tabs.map((tab, i) => savedTab(tab, i, cgs[i]));
+}
+
 /* ---------- opening ---------- */
 
 // the background opens them (open_ops in js/background.js): a new window closes the popup mid-way
@@ -328,10 +335,14 @@ function saveIntent() {
 
 /**
  * A tab as a saved group keeps it. `id`: a number no other tab of the group has (its place when the group is saved):
- * 0.4.0 finds a tab by it to remove or edit it.
+ * 0.4.0 finds a tab by it to remove or edit it. `cg`: its browser tab group (savedTabs), if any.
  */
-function savedTab(tab, id) {
-    return tab.pinned ? {url: tab.url, title: tab.title, id, pinned: true} : {url: tab.url, title: tab.title, id};
+function savedTab(tab, id, cg) {
+    const saved = tab.pinned ? {url: tab.url, title: tab.title, id, pinned: true} : {url: tab.url, title: tab.title, id};
+    if (cg) {
+        saved.cg = cg;
+    }
+    return saved;
 }
 
 /**
@@ -443,7 +454,7 @@ async function save() {
         if (state.groupsError) {
             await loadGroups();
         }
-        const tabs = (await queryTabsToSave()).map(savedTab);
+        const tabs = await savedTabs(await queryTabsToSave());
         if (!tabs.length) {
             showBar(t('p_nothingToSave'));
             return;
@@ -511,7 +522,7 @@ async function setTabs(key, tabs, text, keepOld = false) {
 }
 
 async function replaceWithOpenTabs(key) {
-    const tabs = (await queryTabsToSave()).map(savedTab);
+    const tabs = await savedTabs(await queryTabsToSave());
     if (!tabs.length) {
         showBar(t('p_nothingToSave'));
         return;
@@ -914,7 +925,7 @@ async function saveSessionAsGroup(key) {
     // the session's dates, not "Yesterday": the name stays
     const name = freeName(state.groups, session.updated ? interval(start, session.updated, lang, undefined, false) :
         dayTime(start, lang, undefined, false));
-    const tabs = endTabs(session).map(savedTab);
+    const tabs = endTabs(session).map((tab, i) => savedTab(tab, i));
     const groupKey = 'tg_' + Date.now();
     const group = {name, index: nextIndex(), tabs};
     const res = await groupStoreClient.save(groupKey, group);

@@ -527,6 +527,79 @@ test('setTabs with keep_old: the replaced version goes to trash; an undo takes i
     assert.deepEqual(await store.listTrash(), []);
 });
 
+// tabs with browser tab groups (cg) the way 1.1.0 saves them: 0, 1 in "Trip", 2 none, 3, 4 in an unnamed one
+function groupedTabs(seed) {
+    const trip = {i: 1, t: 'Trip', c: 'yellow'};
+    const other = {i: 2, t: '', c: 'blue', x: true};
+    return makeTabs(5, seed).map((tab, i) => Object.assign(tab, {id: i}, [trip, trip, null, other, other][i] ?
+        {cg: Object.assign({}, [trip, trip, null, other, other][i])} : {}));
+}
+
+test('tab groups: kept through sync and by tab changes that don\'t move the tab (as 1.0.0 does)', async () => {
+    const t = groupedTabs(1);
+    const {net, a, b} = await twoSyncedDevices({name: 'g', index: 1, tabs: t});
+    assert.deepEqual(plainList(await b.store.list()).tg_1.tabs, t);
+
+    const seen = (await b.store.list()).tg_1;
+    await b.store.editTab('tg_1', seen.tabs[3], 3, {url: 'https://x.example/', title: 'X'});
+    await b.store.removeTab('tg_1', seen.tabs[0], 0);
+    net.syncAll();
+    await a.store.reconcile();
+    assert.deepEqual(plainList(await a.store.list()).tg_1.tabs,
+        [t[1], t[2], Object.assign({}, t[3], {url: 'https://x.example/', title: 'X'}), t[4]]);
+});
+
+test('tab groups: a change only in them is a change of content, the order of cg\'s keys is not', () => {
+    const t = groupedTabs(2);
+    const g = {name: 'g', index: 1, tabs: t};
+    const sorted = t.map(tab => tab.cg ? Object.assign({}, tab, {cg: {x: tab.cg.x, t: tab.cg.t, i: tab.cg.i, c: tab.cg.c}}) : tab)
+        .map(tab => JSON.parse(JSON.stringify(tab)));
+    assert.ok(gs.sameContent(g, {name: 'g', index: 5, tabs: sorted}));
+    const recolored = t.map((tab, i) => i === 0 ? Object.assign({}, tab, {cg: Object.assign({}, tab.cg, {c: 'red'})}) : tab);
+    assert.ok(!gs.sameContent(g, {name: 'g', index: 1, tabs: recolored}));
+    const ungrouped = t.map(tab => ({url: tab.url, title: tab.title, id: tab.id}));
+    assert.ok(!gs.sameContent(g, {name: 'g', index: 1, tabs: ungrouped}));
+});
+
+test('tab groups: a moved tab joins its new neighbours\' tab group when they share one, else it is in none', async () => {
+    const {store} = makeDevice();
+    const t = groupedTabs(3);
+    const extra = Object.assign(makeTabs(1, 9)[0], {id: 5});
+    const pinned = Object.assign(makeTabs(1, 10)[0], {id: 6, pinned: true});
+    await store.save('tg_1', {name: 'g', index: 1, tabs: t.concat([extra, pinned])});
+    const cgs = async () => (await store.list()).tg_1.tabs.map(tab => [tab.id, tab.cg ? tab.cg.i : 0]);
+
+    // 2 (none) between 3 and 4 (both group 2): joins it
+    let seen = (await store.list()).tg_1;
+    await store.moveTab('tg_1', seen.tabs[2], 2, 3);
+    assert.deepEqual(await cgs(), [[0, 1], [1, 1], [3, 2], [2, 2], [4, 2], [5, 0], [6, 0]]);
+    assert.deepEqual((await store.list()).tg_1.tabs[3].cg, {i: 2, t: '', c: 'blue', x: true});
+    // 0 (group 1) to the end of group 2's run, next to an ungrouped tab: in none
+    seen = (await store.list()).tg_1;
+    await store.moveTab('tg_1', seen.tabs[0], 0, 4);
+    assert.deepEqual(await cgs(), [[1, 1], [3, 2], [2, 2], [4, 2], [0, 0], [5, 0], [6, 0]]);
+    // a pinned tab between two tabs of group 2: still in none
+    seen = (await store.list()).tg_1;
+    await store.moveTab('tg_1', seen.tabs[6], 6, 2);
+    assert.deepEqual(await cgs(), [[1, 1], [3, 2], [6, 0], [2, 2], [4, 2], [0, 0], [5, 0]]);
+});
+
+test('tab groups: a tab moved to another group leaves its own tab group behind', async () => {
+    const {store} = makeDevice();
+    await store.save('tg_1', {name: 'a', index: 1, tabs: groupedTabs(4)});
+    await store.save('tg_2', {name: 'b', index: 2, tabs: groupedTabs(5)});
+    let seen = (await store.list()).tg_1;
+    // to the end of b: next to group 2's last tab only
+    await store.moveTabTo('tg_1', seen.tabs[0], 0, 'tg_2', 5);
+    assert.equal((await store.list()).tg_2.tabs[5].cg, undefined);
+    // between b's two tabs of group 1: joins b's group 1, with b's name and color
+    seen = (await store.list()).tg_1;
+    await store.moveTabTo('tg_1', seen.tabs[2], 2, 'tg_2', 1);
+    const moved = (await store.list()).tg_2.tabs[1];
+    assert.equal(moved.url, seen.tabs[2].url);
+    assert.deepEqual(moved.cg, {i: 1, t: 'Trip', c: 'yellow'});
+});
+
 test('removeTab, editTab, addTab from an old view work on the tabs as they are now: no copy, nothing undone', async () => {
     const {store} = makeDevice();
     const t = makeTabs(5, 1).map((tab, i) => Object.assign(tab, {id: i}));

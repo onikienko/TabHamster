@@ -535,6 +535,27 @@ test('backup: a restore made by 0.4.0 (no counts in its snapshot) shows and undo
     assert.deepEqual(listWithoutFlags((await bg.groups('list')).result), {tg_1600000000001: makeGroup(3, 2)});
 });
 
+test('backup: tabs keep their browser tab groups; odd ones are cleaned up or left out', async () => {
+    const tabs = makeTabs(5, 3).map((tab, i) => Object.assign(tab, {id: i}));
+    tabs[0].cg = {i: 1, t: 'Trip', c: 'yellow', x: true};
+    tabs[1].cg = {i: 1, t: 'Trip', c: 'yellow', x: true};
+    const groups = {tg_1700000000001: {name: 'g', index: 1, tabs}};
+    const bg = await backgroundWithGroups(groups);
+    const text = (await bg.groups('exportBackup')).result;
+    const other = startBackground();
+    await other.groups('importBackup', text);
+    assert.deepEqual(listWithoutFlags((await other.groups('list')).result), groups);
+
+    const data = JSON.parse(text);
+    const odd = data.tg_1700000000001.tabs;
+    odd[2].cg = {i: 2, t: 'X', c: 'magenta', x: 1};
+    odd[3].cg = {i: 0, t: 'Y', c: 'red'};
+    odd[4].cg = 'blue';
+    await other.groups('importBackup', JSON.stringify(data));
+    const back = (await other.groups('list')).result.tg_1700000000001.tabs;
+    assert.deepEqual(back.map(tab => tab.cg), [tabs[0].cg, tabs[1].cg, {i: 2, t: 'X', c: 'grey'}, undefined, undefined]);
+});
+
 test('backup: bad input changes nothing', async () => {
     const current = {tg_1700000000001: makeGroup(5, 1)};
     const bg = await backgroundWithGroups(current);

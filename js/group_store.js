@@ -6,6 +6,10 @@
 // name/index stay plain so 0.3.0 can still list groups. 0.4.0 never writes `v` together with `tabs`.
 // 0.3.0 also writes an unused `color: ''`; it is ignored on read and never written.
 // An item with `v` above 2 comes from a newer TabHamster: it is left alone.
+// A tab: {url, title, id, pinned?, cg?}. cg (1.1.0): the browser tab group it was in, {i, t, c, x?}: i numbers the tab
+// groups inside this group, t its name ('' if none), c its color (the tabGroups API's names), x: true if collapsed.
+// On the tab, not in the header: 1.0.0 keeps tab fields it doesn't know when it edits or moves a tab, but writes only
+// name, index and tabs into a header.
 //
 // Every group also has a local record in chrome.storage.local at `lg_<ms>`:
 //   {g: {name, index, tabs}, h, synced, base, trashed?, trashed_by?, removing?}
@@ -173,6 +177,22 @@ var groupStore = (function () {
         return same(tabs[index]) ? index : tabs.findIndex(same);
     }
 
+    /**
+     * The tab moved to `at` (in place, a copy): it joins the browser tab group (cg) of the tabs on both sides when they
+     * are in the same one, else it is in none, as a tab dragged in the browser's tab strip. Pinned tabs never are.
+     */
+    function joinNeighbours(tabs, at) {
+        const before = tabs[at - 1];
+        const after = tabs[at + 1];
+        const tab = Object.assign({}, tabs[at]);
+        if (!tab.pinned && before && after && before.cg && after.cg && before.cg.i === after.cg.i) {
+            tab.cg = Object.assign({}, before.cg);
+        } else {
+            delete tab.cg;
+        }
+        tabs[at] = tab;
+    }
+
     /** `id` for a tab added to a group: one more than the biggest (0.4.0 stores the id of an edited tab as text) */
     function nextTabId(tabs) {
         return tabs.reduce(function (max, tab) {
@@ -182,11 +202,14 @@ var groupStore = (function () {
         }, -1) + 1;
     }
 
-    // same name and tabs: addresses, titles, pinned (not the place, not tab ids: a backup restore renumbers them)
+    // same name and tabs: addresses, titles, pinned, tab groups (not the place, not tab ids: a backup restore
+    // renumbers them). cg's fields in a fixed order: read back from sync, its keys are sorted.
     function sameContent(a, b) {
         const x = normalizeGroup(a);
         const y = normalizeGroup(b);
-        const tabs = g => JSON.stringify(g.tabs.map(tab => [tab && tab.url, tab && tab.title, !!(tab && tab.pinned)]));
+        const cg = tab => tab && tab.cg ? [tab.cg.i, tab.cg.t, tab.cg.c, !!tab.cg.x] : null;
+        const tabs = g => JSON.stringify(g.tabs.map(tab => [tab && tab.url, tab && tab.title, !!(tab && tab.pinned),
+            cg(tab)]));
         return x.name === y.name && tabs(x) === tabs(y);
     }
 
@@ -919,8 +942,9 @@ var groupStore = (function () {
             }
             const tab = rec.g.tabs[i];
             const dest_tabs = dest.g.tabs.slice();
-            dest_tabs.splice(Math.max(0, Math.min(pos, dest_tabs.length)), 0,
-                Object.assign({}, tab, {id: nextTabId(dest.g.tabs)}));
+            const at = Math.max(0, Math.min(pos, dest_tabs.length));
+            dest_tabs.splice(at, 0, Object.assign({}, tab, {id: nextTabId(dest.g.tabs)}));
+            joinNeighbours(dest_tabs, at);
             const tabs = rec.g.tabs.filter((other, j) => j !== i);
             const groups = {[to]: {name: dest.g.name, index: dest.g.index, tabs: dest_tabs}};
             if (tabs.length) {
@@ -1217,7 +1241,10 @@ var groupStore = (function () {
                 return !duplicate && tabs.some(saved => saved && saved.url === tab.url) ? null :
                     tabs.concat(Object.assign({}, tab, {id: nextTabId(tabs)}));
             }), [key]),
-            /** like removeTab; the tab goes to `pos` among the group's other tabs (0 = first) */
+            /**
+             * like removeTab; the tab goes to `pos` among the group's other tabs (0 = first), in the browser tab group
+             * of its new neighbours if they share one (joinNeighbours)
+             */
             moveTab: (key, seen, index, pos) => change(() => changeTabsNow(key, function (tabs) {
                 const i = findTab(tabs, seen, index);
                 const rest = tabs.filter((tab, j) => j !== i);
@@ -1226,11 +1253,13 @@ var groupStore = (function () {
                     return null;
                 }
                 rest.splice(at, 0, tabs[i]);
+                joinNeighbours(rest, at);
                 return rest;
             }), [key]),
             /**
              * The tab goes from group `key` to group `to`, at `pos` among its tabs (0 = first), with an id of its own
-             * there (also when `to` has its address already); one call for both groups.
+             * there (also when `to` has its address already), and not in its browser tab group any more (in the one of
+             * its new neighbours if they share one: joinNeighbours); one call for both groups.
              * @returns {Promise<{from?: Object, to?: Object, unchanged?: boolean, synced?: boolean, error?: string}>}
              *   from, to: like removeTab's answer for each group; `from.removed`: it was the group's last tab, the
              *   group went to trash with it (restore brings it back); `unchanged`: the tab is gone, or `to` is `key`
