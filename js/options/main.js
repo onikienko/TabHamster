@@ -519,6 +519,7 @@ function listenForChanges() {
 // none.
 const STORES = {
     mkfjjmjmnplabnplceaekkjcmdddokee: 'Chrome Web Store',
+    pifbgknmgjnlibbcbdblinmmlmdihkgc: 'Edge Add-ons',
 };
 
 async function start() {
