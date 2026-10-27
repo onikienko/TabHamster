@@ -614,6 +614,10 @@
         "message": "Ouvrir dans une fenêtre de navigation privée",
         "description": "Group menu"
     },
+    "p_openAsTabGroup": {
+        "message": "Ouvrir comme groupe d’onglets",
+        "description": "Group menu. Opens the group's tabs in this window as one of the browser's own tab groups, named like the group"
+    },
     "p_copyLinks": {
         "message": "Copier les liens",
         "description": "Group menu: copies the addresses of the group's tabs, one per line"

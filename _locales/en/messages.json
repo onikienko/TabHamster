@@ -614,6 +614,10 @@
         "message": "Open in incognito window",
         "description": "Group menu"
     },
+    "p_openAsTabGroup": {
+        "message": "Open as tab group",
+        "description": "Group menu. Opens the group's tabs in this window as one of the browser's own tab groups, named like the group"
+    },
     "p_copyLinks": {
         "message": "Copy links",
         "description": "Group menu: copies the addresses of the group's tabs, one per line"

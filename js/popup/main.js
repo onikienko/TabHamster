@@ -16,7 +16,7 @@ import {normalizeName, findByName, countByName, freeName} from '../names.js';
 import {parseQuery, segments, search, matchesAll} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
-import {queryTabGroups, tabGroupFields} from '../ui/tab_groups.js';
+import {queryTabGroups, tabGroupFields, requestTabGroups} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
@@ -568,6 +568,27 @@ async function addTab(key, tab) {
     await tabChanged(key, name, res, t('p_tabAdded', [tab.title || tab.url, name]), t('p_alreadyInGroup', name));
 }
 
+/**
+ * The group's tabs in this window as one browser tab group named like the group (its own tab groups aside; pinned
+ * tabs stay out of it; the browser picks the color). The first time it asks for the tabGroups permission, which also
+ * turns the Settings switch on; refused, nothing happens (opening without a tab group is what Open does).
+ */
+async function openAsTabGroup(key) {
+    const group = state.groups[key];
+    let given = false;
+    try {
+        // first, straight from the menu click: the browser asks only while its gesture lasts
+        given = await requestTabGroups();
+    } catch (e) {
+        console.error('TabHamster: tab groups permission', e);
+    }
+    if (!given || !group) {
+        return;
+    }
+    const cg = {i: 1, t: groupName(key, group)};
+    openInThisWindow(group.tabs.map((tab) => Object.assign({}, tab, {cg})));
+}
+
 async function copyLinks(group) {
     try {
         await navigator.clipboard.writeText(group.tabs.map((tab) => tab.url).join('\n'));
@@ -625,6 +646,7 @@ async function groupMenu(key, button) {
         {icon: 'pencil', label: t('p_rename'), run: () => startRename(key)},
         '-',
         {icon: 'incognito', label: t('p_openIncognito'), run: () => openElsewhere('incognito', group.tabs)},
+        {icon: 'tabGroup', label: t('p_openAsTabGroup'), run: () => openAsTabGroup(key)},
         {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(group)},
         '-',
         {icon: 'trash', label: t('p_delete'), danger: true, run: act(() => deleteGroup(key))},

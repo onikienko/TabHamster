@@ -611,6 +611,10 @@
         "message": "Megnyitás inkognitóablakban",
         "description": "Group menu"
     },
+    "p_openAsTabGroup": {
+        "message": "Megnyitás lapcsoportként",
+        "description": "Group menu. Opens the group's tabs in this window as one of the browser's own tab groups, named like the group"
+    },
     "p_copyLinks": {
         "message": "Linkek másolása",
         "description": "Group menu: copies the addresses of the group's tabs, one per line"

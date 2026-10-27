@@ -614,6 +614,10 @@
         "message": "Abrir en una ventana de incógnito",
         "description": "Group menu"
     },
+    "p_openAsTabGroup": {
+        "message": "Abrir como grupo de pestañas",
+        "description": "Group menu. Opens the group's tabs in this window as one of the browser's own tab groups, named like the group"
+    },
     "p_copyLinks": {
         "message": "Copiar enlaces",
         "description": "Group menu: copies the addresses of the group's tabs, one per line"
