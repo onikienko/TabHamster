@@ -1529,6 +1529,14 @@
         "message": "Закачене картице се поново отварају закачене када отворите групу.",
         "description": "Settings page. Under Include pinned tabs"
     },
+    "s_tabGroups": {
+        "message": "Запамти групе картица",
+        "description": "Settings page, Saving tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
+    },
+    "s_tabGroups_text": {
+        "message": "Чува називе и боје група картица прегледача и поново их отвара као групе картица. Прегледач ће једном тражити вашу дозволу.",
+        "description": "Settings page. Under Remember tab groups"
+    },
     "s_optionFailed": {
         "message": "Ово подешавање није сачувано. Покушајте поново.",
         "description": "Settings page. Bar when a setting could not be written"

@@ -1533,6 +1533,14 @@
         "message": "Коли ви відкриваєте групу, закріплені вкладки знову відкриваються закріпленими.",
         "description": "Settings page. Under Include pinned tabs"
     },
+    "s_tabGroups": {
+        "message": "Запам'ятовувати групи вкладок",
+        "description": "Settings page, Saving tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
+    },
+    "s_tabGroups_text": {
+        "message": "Зберігає назви й кольори груп вкладок браузера та знову відкриває їх як групи вкладок. Браузер один раз попросить вашого дозволу.",
+        "description": "Settings page. Under Remember tab groups"
+    },
     "s_optionFailed": {
         "message": "Не вдалося зберегти це налаштування. Спробуйте ще раз.",
         "description": "Settings page. Bar when a setting could not be written"

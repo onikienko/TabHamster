@@ -34,5 +34,8 @@
         "tabs",
         "favicon",
         "unlimitedStorage"
+    ],
+    "optional_permissions": [
+        "tabGroups"
     ]
 }

@@ -331,6 +331,37 @@
             },
             onRemoved: event(),
         },
+        // optional permissions: granted right away (no browser prompt here), kept for the page's lifetime
+        permissions: {
+            granted: [],
+            contains: function (p) {
+                return Promise.resolve(p.permissions.every(function (name) {
+                    return chrome.permissions.granted.indexOf(name) !== -1;
+                }));
+            },
+            request: function (p) {
+                p.permissions.forEach(function (name) {
+                    if (chrome.permissions.granted.indexOf(name) === -1) {
+                        chrome.permissions.granted.push(name);
+                    }
+                });
+                chrome.permissions.onAdded.listeners.forEach(function (fn) {
+                    fn(p);
+                });
+                return Promise.resolve(true);
+            },
+            remove: function (p) {
+                chrome.permissions.granted = chrome.permissions.granted.filter(function (name) {
+                    return p.permissions.indexOf(name) === -1;
+                });
+                chrome.permissions.onRemoved.listeners.forEach(function (fn) {
+                    fn(p);
+                });
+                return Promise.resolve(true);
+            },
+            onAdded: event(),
+            onRemoved: event(),
+        },
         i18n: {
             getMessage: getMessage,
             getUILanguage: function () {

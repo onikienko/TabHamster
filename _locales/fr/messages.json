@@ -1204,6 +1204,14 @@
         "message": "Les onglets épinglés se rouvrent épinglés quand vous ouvrez le groupe.",
         "description": "Settings page. Under Include pinned tabs"
     },
+    "s_tabGroups": {
+        "message": "Mémoriser les groupes d’onglets",
+        "description": "Settings page, Saving tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
+    },
+    "s_tabGroups_text": {
+        "message": "Conserve les noms et couleurs des groupes d’onglets du navigateur et les rouvre en groupes d’onglets. Le navigateur vous demande votre autorisation une seule fois.",
+        "description": "Settings page. Under Remember tab groups"
+    },
     "s_optionFailed": {
         "message": "Impossible d’enregistrer ce paramètre. Réessayez.",
         "description": "Settings page. Bar when a setting could not be written"

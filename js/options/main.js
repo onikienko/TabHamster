@@ -11,6 +11,7 @@ import {showBar} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {backupRows, renderRestoreInfo} from './backup.js';
+import {hasTabGroups, requestTabGroups, removeTabGroups, watchTabGroups} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const GITHUB = 'https://github.com/onikienko/TabHamster';
@@ -30,6 +31,8 @@ const state = {
     groupsFailed: false,
     // the restore that can be undone: {time, restored, trashed} or null
     restore: null,
+    // the tabGroups permission is given
+    tabGroups: false,
 };
 
 const el = {
@@ -129,6 +132,28 @@ function switchControl(name, labelId, on = 1, off = 0) {
     return button;
 }
 
+/**
+ * The browser's tab groups switch. Shows the permission itself, not a stored option: it can also be removed in the
+ * browser's extension settings (watchTabGroups redraws it then).
+ */
+function tabGroupsControl(labelId) {
+    const button = h('button', {
+        class: 'switch', type: 'button', role: 'switch', 'aria-labelledby': labelId,
+        onClick: async () => {
+            try {
+                // no await before the request: the browser asks only while the click's gesture lasts
+                state.tabGroups = state.tabGroups ? !(await removeTabGroups()) : await requestTabGroups();
+            } catch (e) {
+                console.error('TabHamster: tab groups permission', e);
+                showBar(t('s_optionFailed'));
+            }
+            renderOptions();
+        },
+    }, h('span', {class: 'knob'}));
+    updaters.push(() => button.setAttribute('aria-checked', String(state.tabGroups)));
+    return button;
+}
+
 function themeControl(labelId) {
     const buttons = ['system', 'light', 'dark'].map((value) => h('button', {
         class: 'seg-item', type: 'button', role: 'radio', dataset: {value},
@@ -200,6 +225,7 @@ function saving() {
     return [
         row('cur_win_label', t('s_curWin'), t('s_curWin_text'), switchControl('cur_win', 'cur_win_label')),
         row('pinned_label', t('o_savedTabs_pinned'), t('s_pinned_text'), switchControl('pinned', 'pinned_label')),
+        row('tab_groups_label', t('s_tabGroups'), t('s_tabGroups_text'), tabGroupsControl('tab_groups_label')),
         row('sessions_label', t('s_sessions'), t('s_sessions_text'), switchControl('session_watcher', 'sessions_label')),
     ];
 }
@@ -512,6 +538,10 @@ function listenForChanges() {
             loadGroups();
         }
     });
+    watchTabGroups((given) => {
+        state.tabGroups = given;
+        renderOptions();
+    });
 }
 
 // The store this copy came from, by its ID, next to the version: copies from different stores keep separate groups in
@@ -530,7 +560,7 @@ async function start() {
     document.getElementById('version').textContent = ['v' + chrome.runtime.getManifest().version,
         STORES[chrome.runtime.id]].filter(Boolean).join(' · ');
 
-    await loadOptions();
+    [state.tabGroups] = await Promise.all([hasTabGroups(), loadOptions()]);
     applyTheme(state.options.theme);
     build();
     renderOptions();

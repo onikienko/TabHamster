@@ -1204,6 +1204,14 @@
         "message": "Pinned tabs open pinned again when you open the group.",
         "description": "Settings page. Under Include pinned tabs"
     },
+    "s_tabGroups": {
+        "message": "Remember tab groups",
+        "description": "Settings page, Saving tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
+    },
+    "s_tabGroups_text": {
+        "message": "Keeps the names and colors of the browser’s tab groups, and opens them as tab groups again. The browser asks for your permission once.",
+        "description": "Settings page. Under Remember tab groups"
+    },
     "s_optionFailed": {
         "message": "Couldn’t save this setting. Try again.",
         "description": "Settings page. Bar when a setting could not be written"

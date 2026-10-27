@@ -1204,6 +1204,14 @@
         "message": "Las pestañas fijadas se vuelven a abrir fijadas al abrir el grupo.",
         "description": "Settings page. Under Include pinned tabs"
     },
+    "s_tabGroups": {
+        "message": "Recordar grupos de pestañas",
+        "description": "Settings page, Saving tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
+    },
+    "s_tabGroups_text": {
+        "message": "Guarda los nombres y colores de los grupos de pestañas del navegador y los vuelve a abrir como grupos de pestañas. El navegador le pedirá permiso una vez.",
+        "description": "Settings page. Under Remember tab groups"
+    },
     "s_optionFailed": {
         "message": "No se pudo guardar este ajuste. Inténtelo de nuevo.",
         "description": "Settings page. Bar when a setting could not be written"

@@ -1201,6 +1201,14 @@
         "message": "A csoport megnyitásakor a rögzített fülek ismét rögzítve nyílnak meg.",
         "description": "Settings page. Under Include pinned tabs"
     },
+    "s_tabGroups": {
+        "message": "Lapcsoportok megjegyzése",
+        "description": "Settings page, Saving tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
+    },
+    "s_tabGroups_text": {
+        "message": "Megőrzi a böngésző lapcsoportjainak nevét és színét, és újra lapcsoportként nyitja meg őket. A böngésző egyszer engedélyt kér Öntől.",
+        "description": "Settings page. Under Remember tab groups"
+    },
     "s_optionFailed": {
         "message": "Nem sikerült menteni ezt a beállítást. Próbálja újra.",
         "description": "Settings page. Bar when a setting could not be written"

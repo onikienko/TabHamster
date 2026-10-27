@@ -1,0 +1,33 @@
+// The browser's tab groups (names, colors): an optional permission, PLAN.md 9.1. Required, it would disable
+// TabHamster on update until each user accepts its warning. Without it, tabs are saved and opened as in 1.0.0.
+
+const TAB_GROUPS = {permissions: ['tabGroups']};
+
+/** true when the permission is given */
+export async function hasTabGroups() {
+    try {
+        return await chrome.permissions.contains(TAB_GROUPS);
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Asks for it; true when given. Call it straight from a click: the browser asks only during a user gesture, and an
+ * `await` before it can end the gesture.
+ */
+export function requestTabGroups() {
+    return chrome.permissions.request(TAB_GROUPS);
+}
+
+/** gives it back; true when removed */
+export function removeTabGroups() {
+    return chrome.permissions.remove(TAB_GROUPS);
+}
+
+/** fn(given) each time it is given or removed, here or in the browser's extension settings */
+export function watchTabGroups(fn) {
+    const has = (p) => !!(p && p.permissions && p.permissions.includes('tabGroups'));
+    chrome.permissions.onAdded.addListener((p) => has(p) && fn(true));
+    chrome.permissions.onRemoved.addListener((p) => has(p) && fn(false));
+}
