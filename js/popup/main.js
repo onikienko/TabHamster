@@ -309,10 +309,21 @@ function endTabs(session, live) {
     return sessionWindows(session, live).filter(isEnd).flatMap((win) => win.tabs);
 }
 
+/**
+ * A session's tabs with the browser tab groups it recorded (cg, as saved groups keep them), to open them in tab groups
+ * again. Sessions recorded without the tabGroups permission (and from 1.0.0) know only which tabs were grouped: plain.
+ */
+function withSessionGroups(session, tabs) {
+    const groups = Object.entries(session.groups || {}).map(([id, group]) => Object.assign({id: Number(id)}, group));
+    const cgs = tabGroupFields(tabs, groups);
+    return tabs.map((tab, i) => (cgs[i] ? Object.assign({}, tab, {cg: cgs[i]}) : tab));
+}
+
 async function restoreSession(session) {
     const windows = sessionWindows(session).filter(isEnd);
     // the first window may go into this one, if it is only a blank new tab
-    const done = await Promise.all(windows.map((win, i) => openTabs(i === 0 ? 'blankOrWindow' : 'window', win.tabs)));
+    const done = await Promise.all(windows.map((win, i) => openTabs(i === 0 ? 'blankOrWindow' : 'window',
+        withSessionGroups(session, win.tabs))));
     if (done.every(Boolean)) {
         window.close();
     }
@@ -925,7 +936,7 @@ async function saveSessionAsGroup(key) {
     // the session's dates, not "Yesterday": the name stays
     const name = freeName(state.groups, session.updated ? interval(start, session.updated, lang, undefined, false) :
         dayTime(start, lang, undefined, false));
-    const tabs = endTabs(session).map((tab, i) => savedTab(tab, i));
+    const tabs = withSessionGroups(session, endTabs(session)).map((tab, i) => savedTab(tab, i, tab.cg));
     const groupKey = 'tg_' + Date.now();
     const group = {name, index: nextIndex(), tabs};
     const res = await groupStoreClient.save(groupKey, group);
@@ -966,7 +977,7 @@ function sessionMenu(key, button) {
         {icon: 'plus', label: t('p_saveAsGroup'), sub: t('p_saveAsGroup_sub'), run: act(() => saveSessionAsGroup(key))},
         {
             icon: 'window', label: t('p_openInThisWindow'), sub: plural('p_allTabsOneWindow', tabs.length),
-            run: () => openInThisWindow(tabs),
+            run: () => openInThisWindow(withSessionGroups(state.sessions[key], tabs)),
         },
         {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks({tabs})},
         '-',
@@ -1825,7 +1836,7 @@ function sessionWindowRows(key, win, i, live, found) {
                 // only closed tabs left in it: no "0 tabs"
                 win.tabs.length ? plural('p_windowTitle', win.tabs.length, [i + 1]) : t('p_windowNumber', [i + 1])),
             (live && !win.closed) || !win.tabs.length ? null :
-                h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', win.tabs))},
+                h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', withSessionGroups(state.sessions[key], win.tabs)))},
                     t('p_openWindow'))),
         shown.map((tab) => sessionTabRows(key, tab, found)),
         closedShown.length ? [

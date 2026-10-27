@@ -22,8 +22,8 @@ function event() {
 }
 
 // windows and tabs that record what the background does with them. `active`: the active tab of window 1
-// tab_groups: the tabGroups permission is given
-function fakeBrowser(active, {tab_groups = false} = {}) {
+// tab_groups: the tabGroups permission is given; groups: what chrome.tabGroups.query answers
+function fakeBrowser(active, {tab_groups = false, groups = []} = {}) {
     const calls = [];
     let next_group = 1;
     // copies: objects from the sandbox have their own prototypes
@@ -57,9 +57,12 @@ function fakeBrowser(active, {tab_groups = false} = {}) {
                 }
                 return {id};
             },
+            query: async () => groups,
+            onUpdated: event(),
         } : undefined,
         permissions: {
             contains: async (p) => tab_groups && p.permissions.every(name => name === 'tabGroups'),
+            onAdded: event(),
         },
         windows: {
             create: async function (props) {
@@ -868,17 +871,83 @@ test('sessions: a burst of tab events makes a few writes, and the last one has e
 
 // mergeSession runs in the background's sandbox (its objects have their own prototypes: compared as JSON).
 // notes: {steps: {tabId: [{url, title, at}]}, titles: {tabId: {url, title}}, closing: [windowId], replaced: [[oldId, newId]]}
-function merge(bg, stored, open, window_ids, notes = {}, now = 1000) {
+function merge(bg, stored, open, window_ids, notes = {}, now = 1000, tab_groups = null) {
     const n = bg.context.newNotes();
     Object.entries(notes.steps || {}).forEach(([id, steps]) => n.steps.set(Number(id), steps));
     Object.entries(notes.titles || {}).forEach(([id, seen]) => n.titles.set(Number(id), seen));
     (notes.closing || []).forEach(id => n.closing.add(id));
     (notes.replaced || []).forEach(([from, to]) => n.replaced.set(from, to));
-    const session = bg.context.mergeSession(stored, open, new Set(window_ids), n, now);
+    const session = bg.context.mergeSession(stored, open, new Set(window_ids), n, now, tab_groups);
     return session && JSON.parse(JSON.stringify(session));
 }
 
 const openTab = (id, url, windowId = 1) => ({id, url, title: 'T ' + url, pinned: false, windowId});
+
+test('session tab groups: names and colors as now, those of closed windows as last seen, only those a tab is in', () => {
+    const bg = startBackground();
+    const grouped = (id, url, windowId, groupId) => Object.assign(openTab(id, url, windowId), {groupId});
+    const open = [grouped(1, 'https://a.example/', 1, 10), grouped(2, 'https://b.example/', 2, 20),
+        grouped(3, 'https://c.example/', 2, 21)];
+    const first = merge(bg, null, open, [1, 2], {}, 1000, [
+        {id: 10, title: 'Trip', color: 'yellow', collapsed: false, windowId: 1},
+        {id: 20, title: '', color: 'blue', collapsed: true, windowId: 2},
+        {id: 21, title: 'Gone', color: 'red', collapsed: false, windowId: 2},
+        {id: 30, title: 'Not recorded', color: 'red', collapsed: false, windowId: 3},
+    ]);
+    assert.deepEqual(first.groups, {
+        10: {title: 'Trip', color: 'yellow', collapsed: false},
+        20: {title: '', color: 'blue', collapsed: true},
+        21: {title: 'Gone', color: 'red', collapsed: false},
+    });
+    // window 2 closed, tab group 10 renamed; tab 3 left its group before
+    const second = merge(bg, first, [open[0]], [1], {closing: [2]}, 2000, [
+        {id: 10, title: 'Trip 2', color: 'green', collapsed: false, windowId: 1},
+    ]);
+    assert.deepEqual(second.groups, {
+        10: {title: 'Trip 2', color: 'green', collapsed: false},
+        20: {title: '', color: 'blue', collapsed: true},
+        21: {title: 'Gone', color: 'red', collapsed: false},
+    });
+    // without the permission (null): the names seen before stay; a tab group no tab is in any more goes
+    const third = merge(bg, second, [Object.assign({}, open[0], {groupId: -1})], [1], {}, 3000, null);
+    assert.deepEqual(third.groups, {
+        20: {title: '', color: 'blue', collapsed: true},
+        21: {title: 'Gone', color: 'red', collapsed: false},
+    });
+    // no tab groups at all: no `groups`
+    assert.equal(merge(bg, null, [openTab(1, 'https://a.example/')], [1]).groups, undefined);
+});
+
+test('session tab groups: recorded with the permission, a rename makes a write', async () => {
+    const tab = Object.assign({}, ONE_TAB, {groupId: 10});
+    const groups = [{id: 10, title: 'Trip', color: 'yellow', collapsed: false, windowId: 1}];
+    const browser = fakeBrowser(tab, {tab_groups: true, groups});
+    browser.tabs.query = async () => [tab];
+    const bg = startBackground({browser});
+    const stored = async () => {
+        const {session_id} = await bg.chrome.storage.session.get('session_id');
+        return session_id && (await bg.chrome.storage.local.get(session_id))[session_id];
+    };
+    await waitFor(async () => (await stored()));
+    assert.deepEqual((await stored()).groups, {10: {title: 'Trip', color: 'yellow', collapsed: false}});
+    assert.equal(bg.chrome.tabGroups.onUpdated.listeners.length, 1);
+
+    vm.runInContext('session_config.title_wait = 0', bg.context);
+    groups[0] = {id: 10, title: 'Trip 2', color: 'yellow', collapsed: true, windowId: 1};
+    bg.chrome.tabGroups.onUpdated.listeners.forEach(fn => fn(groups[0]));
+    await waitFor(async () => (await stored()).groups[10].title === 'Trip 2');
+    assert.deepEqual((await stored()).groups, {10: {title: 'Trip 2', color: 'yellow', collapsed: true}});
+
+    // without the permission: grouping only
+    const plain = fakeBrowser(tab);
+    plain.tabs.query = async () => [tab];
+    const bg2 = startBackground({browser: plain});
+    await waitFor(async () => (await bg2.chrome.storage.session.get('session_id')).session_id);
+    const {session_id} = await bg2.chrome.storage.session.get('session_id');
+    const session = (await bg2.chrome.storage.local.get(session_id))[session_id];
+    assert.equal(session.tabs[0].groupId, 10);
+    assert.equal(session.groups, undefined);
+});
 
 test('session tabs: a new address puts the one before into the trail; a reload or a new tab page does not', () => {
     const bg = startBackground();

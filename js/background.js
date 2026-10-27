@@ -414,10 +414,12 @@ groups.migrate().then(() => groups.reconcile()).catch(e => console.error('TabHam
 // now: a write merges the open tabs and windows into the stored session (mergeSession), so a missed event is put
 // right by the next write. Stored as (v: 2):
 //   {name: '', updated, v: 2, tabs: [{id, url, title, pinned, windowId, at, closed?, groupId?, trail?}],
-//    windows: {<windowId>: {closed}}}
+//    windows: {<windowId>: {closed}}, groups?: {<groupId>: {title, color, collapsed}}}
 // at: when the tab got to its address. closed: when the tab was closed by itself; a window closed with its tabs is
-// in `windows` instead, its tabs aren't marked. trail: [{url, title, at}], oldest first. groupId: a Chrome tab group
-// (names and colours come with `tabGroups`, PLAN.md 1.1.0). Sessions from before (no v) are snapshots of the tabs.
+// in `windows` instead, its tabs aren't marked. trail: [{url, title, at}], oldest first. groupId: the browser tab group
+// the tab is (or was) in; `groups` has their names and colors as last seen, only with the tabGroups permission (1.1.0,
+// PLAN.md 9.1): without it, and in sessions from 1.0.0, only which tabs were grouped. Sessions from before (no v) are
+// snapshots of the tabs.
 
 // Session writes and switching sessions on or off run one after another: two writes at once could each start a
 // session, and a write still running when sessions are turned off could start one again after the switch.
@@ -546,10 +548,11 @@ function sessionTab(tab, before, steps, now, seen) {
 
 /**
  * The session after a write: `stored` (null for a new one), the open tabs (in Chrome's order), the ids of the open
- * windows, the notes since the last write. A stored tab that isn't open any more was closed by itself if its window
+ * windows, the notes since the last write, the browser's tab groups now (chrome.tabGroups.query; null without the
+ * permission: the names seen before stay). A stored tab that isn't open any more was closed by itself if its window
  * is still open, else its window was closed (all its tabs stay, as they were). Null when there are no tabs.
  */
-function mergeSession(stored, open, window_ids, notes, now) {
+function mergeSession(stored, open, window_ids, notes, now, tab_groups = null) {
     const before = new Map();
     const windows = Object.assign({}, stored && stored.windows);
     // a session from before (a snapshot, no tab ids) is not continued: it starts again from the open tabs
@@ -592,7 +595,22 @@ function mergeSession(stored, open, window_ids, notes, now) {
             delete windows[id];
         }
     });
-    return {name: '', updated: now, v: 2, tabs, windows};
+    // tab groups as they are now; those of closed tabs and windows as last seen; only those a tab is in
+    const groups = Object.assign({}, stored && stored.v === 2 && stored.groups);
+    (tab_groups || []).forEach(function (group) {
+        groups[group.id] = {title: group.title || '', color: group.color, collapsed: !!group.collapsed};
+    });
+    const grouped = new Set(tabs.filter(tab => tab.groupId >= 0).map(tab => String(tab.groupId)));
+    Object.keys(groups).forEach(function (id) {
+        if (!grouped.has(id)) {
+            delete groups[id];
+        }
+    });
+    const session = {name: '', updated: now, v: 2, tabs, windows};
+    if (Object.keys(groups).length) {
+        session.groups = groups;
+    }
+    return session;
 }
 
 // not recorded: DevTools windows, and incognito tabs (seen only with "Allow in Incognito" on)
@@ -606,8 +624,8 @@ async function writeSession(fresh) {
     // what came in so far; what comes during this write is for the next one
     const notes = session_notes;
     session_notes = newNotes();
-    const [tabs, wins, items] = await Promise.all([
-        chrome.tabs.query({}), chrome.windows.getAll(), chrome.storage.local.get(session_id)]);
+    const [tabs, wins, items, tab_groups] = await Promise.all([
+        chrome.tabs.query({}), chrome.windows.getAll(), chrome.storage.local.get(session_id), queryTabGroups()]);
     if (continued && !sameRun(items[session_id], tabs)) {
         session_id = await startSession();
     }
@@ -618,7 +636,8 @@ async function writeSession(fresh) {
             session_notes.closing.add(id);
         }
     });
-    const session = mergeSession(items[session_id] || null, tabs.filter(recorded), window_ids, notes, Date.now());
+    const session = mergeSession(items[session_id] || null, tabs.filter(recorded), window_ids, notes, Date.now(),
+        tab_groups);
     if (!session) {
         return;
     }
@@ -626,6 +645,19 @@ async function writeSession(fresh) {
         await cleanupSessions();
     }
     await chrome.storage.local.set({[session_id]: session});
+}
+
+// the browser's tab groups, all windows; null without the tabGroups permission
+async function queryTabGroups() {
+    if (!chrome.tabGroups || !(await hasTabGroups())) {
+        return null;
+    }
+    try {
+        return await chrome.tabGroups.query({});
+    } catch (e) {
+        console.error('TabHamster: tab groups not read', e);
+        return null;
+    }
 }
 
 // Tab events come in bursts (restoring 100 tabs fires hundreds), and a write reads all tabs, so one write that has
@@ -670,8 +702,15 @@ function onUpdated(tab_id, change_info, tab) {
     }
     if (change_info.url || 'pinned' in change_info || 'groupId' in change_info) {
         updateCurrentSession();
-    } else if ((change_info.title || change_info.status === 'complete') && !title_timer) {
+    } else if (change_info.title || change_info.status === 'complete') {
         // a load that ended brings the title, also one the same as the page before's (no title change comes then)
+        updateSoon();
+    }
+}
+
+// a write within title_wait: for changes that come often and matter little alone (titles, tab groups)
+function updateSoon() {
+    if (!title_timer) {
         title_timer = setTimeout(function () {
             title_timer = null;
             updateCurrentSession();
@@ -712,6 +751,18 @@ const session_events = [
     [chrome.windows.onRemoved, onWindowRemoved],
 ];
 
+// A tab group renamed, recolored, collapsed: chrome.tabGroups is there only with the permission. Given while the
+// worker runs, it is added then (permissions.onAdded); the next write reads the names anyway.
+function watchTabGroupChanges() {
+    if (chrome.tabGroups && !session_events.some(([event]) => event === chrome.tabGroups.onUpdated)) {
+        session_events.push([chrome.tabGroups.onUpdated, updateSoon]);
+        return true;
+    }
+    return false;
+}
+
+watchTabGroupChanges();
+
 // Listeners are added when the service worker starts (Chrome wakes it only for those), then removed if sessions
 // are turned off. The Settings switch changes it at once. Turned off, the current session ends: on again starts a new
 // one (`fresh`).
@@ -738,6 +789,17 @@ function watchSessions(on, fresh) {
 session_events.forEach(([event, listener]) => event.addListener(listener));
 
 sessionsOn().then(on => watchSessions(on, false), e => console.error('TabHamster: reading the sessions option failed', e));
+
+if (chrome.permissions && chrome.permissions.onAdded) {
+    chrome.permissions.onAdded.addListener(function (permissions) {
+        if ((permissions.permissions || []).includes('tabGroups')) {
+            watchTabGroupChanges();
+            // listeners as the option says, and names recorded now
+            sessionsOn().then(on => watchSessions(on, false).then(() => on && updateCurrentSession()),
+                e => console.error('TabHamster: reading the sessions option failed', e));
+        }
+    });
+}
 
 chrome.storage.onChanged.addListener(function (changes, area_name) {
     if (area_name === 'sync' && changes.session_watcher) {
