@@ -1,5 +1,5 @@
-TabHamster Chrome Extension
-===========================
+TabHamster browser extension
+============================
 
 Session manager and tab saver. With sync.
 -----------------------------------------
@@ -9,6 +9,8 @@ Session manager and tab saver. With sync.
 Install for your browser:
 
 **[Chrome Web Store](https://chromewebstore.google.com/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee)**
+
+**[Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/tabhamster/pifbgknmgjnlibbcbdblinmmlmdihkgc)**
 
 ~~**[Opera Market](https://addons.opera.com/extensions/details/tabhamster/)**~~ (not available for Opera anymore)
 
