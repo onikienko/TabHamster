@@ -198,9 +198,10 @@ async function hasTabGroups() {
  * neighbouring tabs with the same cg.i becomes one tab group with its name, color and collapsed state. Only with the
  * tabGroups permission (PLAN.md 9.1): unnamed groups in colors the browser picks would look broken, so without it the
  * tabs stay ungrouped. A tab that didn't open is left out; pinned tabs can't be in a tab group. A failure leaves the
- * tabs open, ungrouped. ids: the opened tab of each of `tabs` (null if it didn't open).
+ * tabs open, ungrouped. ids: the opened tab of each of `tabs` (null if it didn't open). active: the opened tab that
+ * is active: its tab group isn't collapsed (the browser's own tab strip never hides the active tab in one).
  */
-async function groupTabs(windowId, tabs, ids) {
+async function groupTabs(windowId, tabs, ids, active) {
     if (!tabs.some(tab => tab.cg) || !(await hasTabGroups())) {
         return;
     }
@@ -221,7 +222,7 @@ async function groupTabs(windowId, tabs, ids) {
     for (const {cg, ids: tabIds} of runs) {
         try {
             const id = await chrome.tabs.group({tabIds, createProperties: {windowId}});
-            const props = {title: typeof cg.t === 'string' ? cg.t : '', collapsed: cg.x === true};
+            const props = {title: typeof cg.t === 'string' ? cg.t : '', collapsed: cg.x === true && !tabIds.includes(active)};
             if (groupStore.TAB_GROUP_COLORS.includes(cg.c)) {
                 props.color = cg.c;
             }
@@ -251,7 +252,8 @@ const open_ops = {
         if (res.failed === tabs.length) {
             throw res.error;
         }
-        await groupTabs(target, tabs, rest === tabs ? res.ids : [active.id].concat(res.ids));
+        const ids = rest === tabs ? res.ids : [active.id].concat(res.ids);
+        await groupTabs(target, tabs, ids, ids[0]);
         return {failed: res.failed};
     },
     // opens with the first tab Chrome accepts (a refused one leaves no window), the rest follow
@@ -269,7 +271,7 @@ const open_ops = {
                 await chrome.tabs.update(win.tabs[0].id, {pinned: true});
             }
             const res = await createTabs(win.id, tabs.slice(i + 1), false);
-            await groupTabs(win.id, tabs, new Array(i).fill(null).concat([win.tabs[0].id], res.ids));
+            await groupTabs(win.id, tabs, new Array(i).fill(null).concat([win.tabs[0].id], res.ids), win.tabs[0].id);
             return {failed: i + res.failed};
         }
         throw error;
@@ -297,7 +299,7 @@ const open_ops = {
             win = await chrome.windows.create({incognito: true, focused: true, url: opened.map(tab => tab.url)});
         }
         if (win && Array.isArray(win.tabs) && win.tabs.length === opened.length) {
-            await groupTabs(win.id, opened, win.tabs.map(tab => tab.id));
+            await groupTabs(win.id, opened, win.tabs.map(tab => tab.id), win.tabs[0] && win.tabs[0].id);
         }
         return {failed: urls.length - opened.length};
     },

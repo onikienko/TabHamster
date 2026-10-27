@@ -400,6 +400,12 @@ test('open with tab groups: each run of tabs with the same cg is one tab group w
     ]);
 });
 
+test('open with tab groups: a collapsed tab group that holds the tab opened first (the active one) opens expanded', async () => {
+    const browser = fakeBrowser(null, {tab_groups: true});
+    await startBackground({browser}).send({msg: 'open', how: 'window', tabs: [GROUPED[3], GROUPED[4], GROUPED[2], GROUPED[3]]});
+    assert.deepEqual(groupCalls(browser).filter(c => c[0] === 'tabGroup').map(c => c[2].collapsed), [false, true]);
+});
+
 test('open with tab groups: without the permission, no tab groups (not even unnamed ones)', async () => {
     const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'});
     const bg = startBackground({browser});
