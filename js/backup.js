@@ -60,15 +60,12 @@ var backup = (function () {
         return typeof value === typeof fallback ? value : undefined;
     }
 
-    // the tabGroups API's colors
-    const TAB_GROUP_COLORS = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
-
     // a tab's browser tab group (format: js/group_store.js) as the extension writes it, or null; an odd color is grey
     function cleanTabGroup(cg) {
         if (!cg || typeof cg !== 'object' || !Number.isInteger(cg.i) || cg.i < 1) {
             return null;
         }
-        const clean = {i: cg.i, t: typeof cg.t === 'string' ? cg.t : '', c: TAB_GROUP_COLORS.includes(cg.c) ? cg.c : 'grey'};
+        const clean = {i: cg.i, t: typeof cg.t === 'string' ? cg.t : '', c: groupStore.TAB_GROUP_COLORS.includes(cg.c) ? cg.c : 'grey'};
         if (cg.x === true) {
             clean.x = true;
         }

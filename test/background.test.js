@@ -22,8 +22,10 @@ function event() {
 }
 
 // windows and tabs that record what the background does with them. `active`: the active tab of window 1
-function fakeBrowser(active) {
+// tab_groups: the tabGroups permission is given
+function fakeBrowser(active, {tab_groups = false} = {}) {
     const calls = [];
+    let next_group = 1;
     // copies: objects from the sandbox have their own prototypes
     const record = (...call) => calls.push(JSON.parse(JSON.stringify(call)));
     let next_id = 100;
@@ -42,6 +44,22 @@ function fakeBrowser(active) {
                 record('update', id, props);
                 return {id};
             },
+            group: async function (options) {
+                record('group', options);
+                return next_group++;
+            },
+        },
+        tabGroups: tab_groups ? {
+            update: async function (id, props) {
+                record('tabGroup', id, props);
+                if (props.color === 'magenta') {
+                    throw new Error('Invalid color');
+                }
+                return {id};
+            },
+        } : undefined,
+        permissions: {
+            contains: async (p) => tab_groups && p.permissions.every(name => name === 'tabGroups'),
         },
         windows: {
             create: async function (props) {
@@ -78,6 +96,7 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
             query: browser.tabs.query,
             create: browser.tabs.create,
             update: browser.tabs.update,
+            group: browser.tabs.group,
             remove() {},
             onUpdated: event(),
             onMoved: event(),
@@ -86,6 +105,8 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
             onReplaced: event(),
         },
         windows: Object.assign({onRemoved: event()}, browser.windows),
+        tabGroups: browser.tabGroups,
+        permissions: browser.permissions,
         i18n: {getMessage: key => EN[key] ? EN[key].message : ''},
     };
     const context = vm.createContext({
@@ -354,6 +375,69 @@ test('open in incognito: a refused address doesn\'t stop the others', async () =
     const only_bad = startBackground();
     assert.deepEqual(await only_bad.send({msg: 'open', how: 'incognito', tabs: [{url: 'bad:1'}, TABS[0]]}),
         {error: 'Cannot open bad:1'});
+});
+
+// a saved group's tabs: a, b in "Trip" (yellow), c alone, d, e in an unnamed collapsed blue one, f pinned (never grouped)
+const TRIP = {i: 1, t: 'Trip', c: 'yellow'};
+const OTHER = {i: 2, t: '', c: 'blue', x: true};
+const GROUPED = [
+    {url: 'https://a.example/', cg: TRIP}, {url: 'https://b.example/', cg: TRIP}, {url: 'https://c.example/'},
+    {url: 'https://d.example/', cg: OTHER}, {url: 'https://e.example/', cg: OTHER},
+    {url: 'https://f.example/', pinned: true, cg: OTHER},
+];
+
+const groupCalls = (browser) => browser.calls.filter(c => c[0] === 'group' || c[0] === 'tabGroup');
+
+test('open with tab groups: each run of tabs with the same cg is one tab group with its name, color, collapsed', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'}, {tab_groups: true});
+    const bg = startBackground({browser});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: GROUPED, windowId: 1}), {result: {failed: 0}});
+    assert.deepEqual(groupCalls(browser), [
+        ['group', {tabIds: [100, 101], createProperties: {windowId: 1}}],
+        ['tabGroup', 1, {title: 'Trip', collapsed: false, color: 'yellow'}],
+        ['group', {tabIds: [103, 104], createProperties: {windowId: 1}}],
+        ['tabGroup', 2, {title: '', collapsed: true, color: 'blue'}],
+    ]);
+});
+
+test('open with tab groups: without the permission, no tab groups (not even unnamed ones)', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'});
+    const bg = startBackground({browser});
+    await bg.send({msg: 'open', how: 'current', tabs: GROUPED, windowId: 1});
+    assert.deepEqual(groupCalls(browser), []);
+});
+
+test('open with tab groups: a blank new tab, a new window, a tab that didn\'t open, a split run', async () => {
+    const blank = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'}, {tab_groups: true});
+    await startBackground({browser: blank}).send({msg: 'open', how: 'current', tabs: GROUPED, windowId: 1});
+    assert.deepEqual(groupCalls(blank).filter(c => c[0] === 'group').map(c => c[1].tabIds), [[1, 100], [102, 103]]);
+
+    const browser = fakeBrowser(null, {tab_groups: true});
+    const bg = startBackground({browser});
+    // b doesn't open: a is a group alone; a 1.0.0 drag split group 2 in two runs: two tab groups of the same name
+    const tabs = [GROUPED[0], {url: 'bad:b', cg: TRIP}, GROUPED[2], GROUPED[3], GROUPED[2], GROUPED[4]];
+    assert.deepEqual(await bg.send({msg: 'open', how: 'window', tabs}), {result: {failed: 1}});
+    assert.deepEqual(groupCalls(browser).filter(c => c[0] === 'group'), [
+        ['group', {tabIds: [100], createProperties: {windowId: 7}}],
+        ['group', {tabIds: [102], createProperties: {windowId: 7}}],
+        ['group', {tabIds: [104], createProperties: {windowId: 7}}],
+    ]);
+});
+
+test('open with tab groups: incognito groups the tabs it got back; an unknown color is left to the browser', async () => {
+    const browser = fakeBrowser(null, {tab_groups: true});
+    const bg = startBackground({browser});
+    const tabs = [{url: 'javascript:void(0)', cg: TRIP}, GROUPED[0], GROUPED[1]];
+    assert.deepEqual(await bg.send({msg: 'open', how: 'incognito', tabs}), {result: {failed: 1}});
+    assert.deepEqual(groupCalls(browser), [
+        ['group', {tabIds: [100, 101], createProperties: {windowId: 7}}],
+        ['tabGroup', 1, {title: 'Trip', collapsed: false, color: 'yellow'}],
+    ]);
+
+    const odd = fakeBrowser(null, {tab_groups: true});
+    await startBackground({browser: odd}).send({msg: 'open', how: 'window',
+        tabs: [{url: 'https://a.example/', cg: {i: 1, t: 'New', c: 'magenta'}}]});
+    assert.deepEqual(groupCalls(odd)[1], ['tabGroup', 1, {title: 'New', collapsed: false}]);
 });
 
 test('open: nothing to open, unknown way', async () => {

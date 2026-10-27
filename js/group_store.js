@@ -24,6 +24,8 @@ var groupStore = (function () {
     'use strict';
 
     const GROUP_PREFIX = 'tg_';
+    // a tab's cg.c: the tabGroups API's colors
+    const TAB_GROUP_COLORS = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
     const CHUNK_PREFIX = 'tc_';
     // stay this far below QUOTA_BYTES_PER_ITEM, for anything itemBytes() can't see
     const ITEM_MARGIN = 64;
@@ -1322,6 +1324,7 @@ var groupStore = (function () {
         findTab,
         nextTabId,
         sameContent,
+        TAB_GROUP_COLORS,
         chunkedHeader,
         encodeGroup,
         decodeGroup,

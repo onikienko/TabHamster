@@ -153,7 +153,8 @@ const group_ops = {
 };
 
 // Opening saved groups and sessions. Done here, not in the popup: a new window takes the focus and closes the popup,
-// and the opening has to finish anyway. tabs: [{url, pinned?}]. Answers {failed: number of tabs that didn't open}.
+// and the opening has to finish anyway. tabs: [{url, pinned?, cg?}]. Answers {failed: number of tabs that didn't open}.
+// Tabs saved in browser tab groups (cg) go back into tab groups (groupTabs).
 
 // a new tab page: it can take the first opened tab instead of staying empty next to them, and it isn't a page a
 // session's tab went through (Edge has its own)
@@ -166,19 +167,69 @@ function isBlankTab(tab) {
 }
 
 // one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others.
-// {failed: how many didn't open, error: the last error}
+// {failed: how many didn't open, error: the last error, ids: the opened tab of each (null if it didn't open)}
 async function createTabs(windowId, tabs, activeFirst) {
     let failed = 0;
     let error = null;
+    const ids = [];
     for (let i = 0; i < tabs.length; i++) {
         try {
-            await chrome.tabs.create({windowId, url: tabs[i].url, pinned: !!tabs[i].pinned, active: activeFirst && i === 0});
+            ids.push((await chrome.tabs.create({windowId, url: tabs[i].url, pinned: !!tabs[i].pinned,
+                active: activeFirst && i === 0})).id);
         } catch (e) {
             failed++;
             error = e;
+            ids.push(null);
         }
     }
-    return {failed, error};
+    return {failed, error, ids};
+}
+
+async function hasTabGroups() {
+    try {
+        return await chrome.permissions.contains({permissions: ['tabGroups']});
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Puts opened tabs back into the browser tab groups they were saved in (cg, format: js/group_store.js): each run of
+ * neighbouring tabs with the same cg.i becomes one tab group with its name, color and collapsed state. Only with the
+ * tabGroups permission (PLAN.md 9.1): unnamed groups in colors the browser picks would look broken, so without it the
+ * tabs stay ungrouped. A tab that didn't open is left out; pinned tabs can't be in a tab group. A failure leaves the
+ * tabs open, ungrouped. ids: the opened tab of each of `tabs` (null if it didn't open).
+ */
+async function groupTabs(windowId, tabs, ids) {
+    if (!tabs.some(tab => tab.cg) || !(await hasTabGroups())) {
+        return;
+    }
+    const runs = [];
+    let run = null;
+    tabs.forEach(function (tab, i) {
+        const cg = !tab.pinned && tab.cg && Number.isInteger(tab.cg.i) ? tab.cg : null;
+        if (!cg) {
+            run = null;
+        } else if (ids[i]) {
+            if (!run || run.cg.i !== cg.i) {
+                run = {cg, ids: []};
+                runs.push(run);
+            }
+            run.ids.push(ids[i]);
+        }
+    });
+    for (const {cg, ids: tabIds} of runs) {
+        try {
+            const id = await chrome.tabs.group({tabIds, createProperties: {windowId}});
+            const props = {title: typeof cg.t === 'string' ? cg.t : '', collapsed: cg.x === true};
+            if (groupStore.TAB_GROUP_COLORS.includes(cg.c)) {
+                props.color = cg.c;
+            }
+            await chrome.tabGroups.update(id, props);
+        } catch (e) {
+            console.error('TabHamster: tab group not made', e);
+        }
+    }
 }
 
 const open_ops = {
@@ -194,11 +245,13 @@ const open_ops = {
                 // open it as a new tab like the others
             }
         }
-        const res = await createTabs(active ? active.windowId : windowId, rest, rest === tabs);
+        const target = active ? active.windowId : windowId;
+        const res = await createTabs(target, rest, rest === tabs);
         // nothing opened: the popup stays open (an opened tab would close it) and says why
         if (res.failed === tabs.length) {
             throw res.error;
         }
+        await groupTabs(target, tabs, rest === tabs ? res.ids : [active.id].concat(res.ids));
         return {failed: res.failed};
     },
     // opens with the first tab Chrome accepts (a refused one leaves no window), the rest follow
@@ -215,7 +268,9 @@ const open_ops = {
             if (tabs[i].pinned) {
                 await chrome.tabs.update(win.tabs[0].id, {pinned: true});
             }
-            return {failed: i + (await createTabs(win.id, tabs.slice(i + 1), false)).failed};
+            const res = await createTabs(win.id, tabs.slice(i + 1), false);
+            await groupTabs(win.id, tabs, new Array(i).fill(null).concat([win.tabs[0].id], res.ids));
+            return {failed: i + res.failed};
         }
         throw error;
     },
@@ -226,20 +281,25 @@ const open_ops = {
     },
     // without "Allow in Incognito" the extension can open the window but can't add tabs to it later: all at once.
     // One address Chrome refuses fails the whole window: then once more without the kinds it refuses
-    // (javascript:, and chrome: or edge: debug pages like chrome://crash, edge://crash).
+    // (javascript:, and chrome: or edge: debug pages like chrome://crash, edge://crash). Tab groups only with
+    // "Allow in Incognito": without it the window comes back without its tabs.
     incognito: async function (tabs) {
         const urls = tabs.map(tab => tab.url);
+        let win;
+        let opened = tabs;
         try {
-            await chrome.windows.create({incognito: true, focused: true, url: urls});
-            return {failed: 0};
+            win = await chrome.windows.create({incognito: true, focused: true, url: urls});
         } catch (e) {
-            const rest = urls.filter(url => !/^\s*(javascript|chrome|edge):/i.test(url));
-            if (!rest.length || rest.length === urls.length) {
+            opened = tabs.filter(tab => !/^\s*(javascript|chrome|edge):/i.test(tab.url));
+            if (!opened.length || opened.length === urls.length) {
                 throw e;
             }
-            await chrome.windows.create({incognito: true, focused: true, url: rest});
-            return {failed: urls.length - rest.length};
+            win = await chrome.windows.create({incognito: true, focused: true, url: opened.map(tab => tab.url)});
         }
+        if (win && Array.isArray(win.tabs) && win.tabs.length === opened.length) {
+            await groupTabs(win.id, opened, win.tabs.map(tab => tab.id));
+        }
+        return {failed: urls.length - opened.length};
     },
 };
 
