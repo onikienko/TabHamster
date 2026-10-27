@@ -1,3 +1,4 @@
+1.0.0 (26.10.2026 20:04)
     FIRST COMPLETE OVERHAUL SINCE 2013
     New look for the popup and the Settings page, with light and dark themes (as the system, or chosen in Settings)
     A click on a group shows its tabs, Open (or Return) opens them. Shift, Ctrl / ⌘ or a middle click opens them in a new window
