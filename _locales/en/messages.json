@@ -640,6 +640,18 @@
         "message": "Tab group without a name",
         "description": "Read by screen readers for the coloured dot of a browser tab group that has no name"
     },
+    "p_tabGroupsOffer": {
+        "message": "Remember the names and colors of your tab groups?",
+        "description": "Bar shown once in the popup (after the update to 1.1) when the window has tabs in the browser's tab groups and the permission for them isn't given yet"
+    },
+    "p_tabGroupsOffer_on": {
+        "message": "Turn on",
+        "description": "Button on that bar: the browser then asks for the permission"
+    },
+    "p_tabGroupsOffer_no": {
+        "message": "No thanks",
+        "description": "Button on that bar: it doesn't ask again (Settings has the switch)"
+    },
     "p_copyLinks": {
         "message": "Copy links",
         "description": "Group menu: copies the addresses of the group's tabs, one per line"

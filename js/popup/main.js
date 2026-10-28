@@ -16,7 +16,7 @@ import {normalizeName, findByName, countByName, freeName} from '../names.js';
 import {parseQuery, segments, search, matchesAll} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
-import {queryTabGroups, tabGroupFields, tabGroupRuns, requestTabGroups, TAB_GROUP_COLORS} from '../ui/tab_groups.js';
+import {queryTabGroups, tabGroupFields, tabGroupRuns, requestTabGroups, hasTabGroups, TAB_GROUP_COLORS} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
@@ -516,7 +516,54 @@ async function save(source = null) {
     }
 }
 
-/* ---------- Save tab group (PLAN.md 9.1) ---------- */
+/* ---------- Save tab group, and the offer to remember tab groups (PLAN.md 9.1) ---------- */
+
+// the offer to remember tab groups was answered on this computer (chrome.storage.local)
+const TAB_GROUPS_OFFERED = 'tab_groups_offered';
+
+/**
+ * Once, after the update to 1.1.0 (or for a new user): this window has tabs in the browser's tab groups and the
+ * tabGroups permission isn't given, so the bar offers it. Turn on asks (the click is the gesture); either answer, or
+ * No thanks, settles it: Settings has the switch. Not over another message (its Undo, the icons question): a later
+ * popup offers it then.
+ */
+async function offerTabGroups() {
+    try {
+        if (barShown() || (await chrome.storage.local.get(TAB_GROUPS_OFFERED))[TAB_GROUPS_OFFERED]) {
+            return;
+        }
+        const tabs = await chrome.tabs.query({currentWindow: true});
+        if (!tabs.some((tab) => tab.groupId >= 0) || await hasTabGroups() || barShown()) {
+            return;
+        }
+    } catch (e) {
+        console.error('TabHamster: tab groups offer', e);
+        return;
+    }
+    const answered = () => chrome.storage.local.set({[TAB_GROUPS_OFFERED]: Date.now()})
+        .catch((e) => console.error('TabHamster: tab groups offer not kept', e));
+    const about = t('s_tabGroups_text');
+    showBar([t('p_tabGroupsOffer'), setTip(h('button', {class: 'bar-help', type: 'button', 'aria-label': about},
+        icon('help', 16)), {text: about})], [
+        {
+            label: t('p_tabGroupsOffer_on'), run: async () => {
+                // first, straight from the click: the browser asks only while its gesture lasts
+                const asking = requestTabGroups();
+                answered();
+                try {
+                    if (await asking) {
+                        // the line under the band can show the tab group's name and color now
+                        await loadTabGroup();
+                        render();
+                    }
+                } catch (e) {
+                    console.error('TabHamster: tab groups permission', e);
+                }
+            },
+        },
+        {label: t('p_tabGroupsOffer_no'), run: answered},
+    ], {stay: true});
+}
 
 // browser tab group id -> the key of the group it was saved as or updated: for unnamed and renamed tab groups. Tab
 // group ids last one browser run, as chrome.storage.session.
@@ -2609,6 +2656,7 @@ async function start() {
         state.pendingSave = false;
         save();
     }
+    offerTabGroups();
 
     enableDrag(el.list, {
         enabled: canReorder,
