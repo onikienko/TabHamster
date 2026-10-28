@@ -34,7 +34,7 @@ Permission justifications:
 
 storage
 ```
-Saved groups and settings are kept in chrome.storage.sync, so they reach the user's other computers through browser sync. chrome.storage.local keeps the browser sessions (the last 30), a local copy of every group, groups deleted in the last 30 days (so they can be restored), and the undo copy of a restore from a backup file. chrome.storage.session keeps the ID of the current session. Nothing is sent anywhere else.
+Saved groups and settings are kept in chrome.storage.sync, so they reach the user's other computers through browser sync. chrome.storage.local keeps the browser sessions (the last 30), a local copy of every group, groups deleted in the last 30 days (so they can be restored), and the undo copy of a restore from a backup file. chrome.storage.session keeps the ID of the current session, and which saved group each of the browser's tab groups was saved as (until the browser closes). Nothing is sent anywhere else.
 ```
 
 tabs
