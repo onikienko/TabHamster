@@ -1698,8 +1698,8 @@
         "description": "Settings page. Help, key list. Left column: the browser's tab groups"
     },
     "s_help_tabGroups": {
-        "message": "Ha a Lapcsoportok megjegyzése be van kapcsolva (Fülek mentése), a csoportok és a munkamenetek megőrzik a böngésző lapcsoportjainak nevét és színét, és újra lapcsoportként nyitják meg őket. A Lapcsoport mentése a mező alatt jelenik meg, ha az aktuális fül egy lapcsoportban van.",
-        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group the button in the popup: use their texts"
+        "message": "Ha a Lapcsoportok megjegyzése be van kapcsolva (Fülek mentése), a csoportok és a munkamenetek megőrzik a böngésző lapcsoportjainak nevét és színét, és újra lapcsoportként nyitják meg őket. Ha az aktuális fül egy lapcsoportban van, a mező alatt megjelenik a Lapcsoport mentése, vagy a Csoport frissítése, ha a lapcsoportot már mentette, és azóta megváltozott.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group and Update group the buttons in the popup: use their texts"
     },
     "s_about_free": {
         "message": "A TabHamster ingyenes és nyílt forráskódú.",
