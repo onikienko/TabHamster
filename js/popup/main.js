@@ -1681,19 +1681,19 @@ function favicon(url) {
 // a saved group's tab row (its link) -> {key, index, tab}: what it showed, for Delete and F2
 const rowTabs = new WeakMap();
 
-/**
- * A tab of a group or session: a link that opens it. A saved group's tab (`at`: {key, index}) also has Edit and
- * Remove, shown over the end of the row on hover or when the row has the focus with keys (Delete, F2).
- * `opts`: `right`, a time instead of the address (closed tabs, trail pages); `step`, a page of a trail; `trail`,
- * {id, auto, open, count} for a session's tab with earlier pages: their number shows before the address, a click on it
- * (or → ←) shows and hides them.
- */
 /** a tab row's wrapper; in a browser tab group (`tg` from tabGroupRuns) its color, and the name on a run's first */
 function tabItem(tg) {
     return tg ? {class: ['tab-item', 'tg', 'tg-' + tg.c, tg.start && 'tg-start'], dataset: tg.start ? {tg: tg.t} : null} :
         {class: 'tab-item'};
 }
 
+/**
+ * A tab of a group or session: a link that opens it. A saved group's tab (`at`: {key, index}) also has Edit and
+ * Remove, shown over the end of the row on hover or when the row has the focus with keys (Delete, F2).
+ * `opts`: `right`, a time instead of the address (closed tabs, trail pages); `step`, a page of a trail; `trail`,
+ * {id, auto, open, count} for a session's tab with earlier pages: their number shows before the address, a click on it
+ * (or → ←) shows and hides them; `tg`, its browser tab group (tabItem).
+ */
 function tabRow(tab, at, opts = {}) {
     const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
     const trail = opts.trail;
