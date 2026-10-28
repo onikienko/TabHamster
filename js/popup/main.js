@@ -1937,7 +1937,7 @@ function groupItem(result, target) {
         const runs = tabGroupRuns(indexes.map((i) => {
             const cg = i !== edited && group.tabs[i].cg;
             return cg ? {id: cg.i, t: cg.t, c: cg.c} : null;
-        }));
+        }), indexes);
         const rows = indexes.map((i, n) => (i === edited ? tabEditor(key, editing) :
             tabRow(group.tabs[i], {key, index: i}, {tg: runs[n]})));
         if (editing && !editing.tab) {
@@ -2042,7 +2042,7 @@ function sessionWindowRows(key, win, i, live, found) {
             (live && !win.closed) || !win.tabs.length ? null :
                 h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', withSessionGroups(state.sessions[key], win.tabs)))},
                     t('p_openWindow'))),
-        sessionTabGroups(key, shown).map((tg, n) => sessionTabRows(key, shown[n], found, undefined, tg)),
+        sessionTabGroups(key, shown, found && tabs).map((tg, n) => sessionTabRows(key, shown[n], found, undefined, tg)),
         closedShown.length ? [
             h('button', {
                 class: 'fold', type: 'button', 'aria-expanded': String(foldOpen),
@@ -2056,14 +2056,16 @@ function sessionWindowRows(key, win, i, live, found) {
 
 /**
  * The browser tab groups of a session's tabs as a list shows them (tabGroupRuns), from the names the session
- * recorded: a session without them (no permission, 1.0.0) shows its tabs without tab groups.
+ * recorded: a session without them (no permission, 1.0.0) shows its tabs without tab groups. `all`: the window's
+ * tabs when `tabs` are only those a search found.
  */
-function sessionTabGroups(key, tabs) {
+function sessionTabGroups(key, tabs, all) {
     const groups = state.sessions[key].groups || {};
+    const places = all ? new Map(all.map((tab, i) => [tab, i])) : null;
     return tabGroupRuns(tabs.map((tab) => {
         const group = tab.groupId >= 0 && groups[tab.groupId];
         return group ? {id: tab.groupId, t: group.title, c: group.color} : null;
-    }));
+    }), places && tabs.map((tab) => places.get(tab)));
 }
 
 /**

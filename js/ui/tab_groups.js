@@ -52,12 +52,15 @@ export async function queryTabGroups() {
  * What a list shows of each tab's browser tab group: {t, c, start} (start: the first of a run of neighbours in the
  * same one, it shows the name), or null.
  * @param {Array<?{id: *, t: string, c: string}>} groups each tab's tab group (id tells them apart), null for none
+ * @param {?number[]} places each tab's place among all the tabs when only some are shown (search): tabs with others
+ *   between them aren't neighbours
  */
-export function tabGroupRuns(groups) {
+export function tabGroupRuns(groups, places = null) {
     let before = null;
-    return groups.map((group) => {
+    return groups.map((group, n) => {
+        const apart = !!places && places[n] !== places[n - 1] + 1;
         const shown = group ? {t: group.t, c: TAB_GROUP_COLORS.includes(group.c) ? group.c : 'grey',
-            start: !before || before.id !== group.id} : null;
+            start: !before || before.id !== group.id || apart} : null;
         before = group;
         return shown;
     });

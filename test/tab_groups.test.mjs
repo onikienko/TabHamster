@@ -36,3 +36,8 @@ test('tabGroupRuns: the first of each run of neighbours starts it; an unknown co
         {t: 'Trip', c: 'yellow', start: true},
     ]);
 });
+
+test('tabGroupRuns: only some tabs shown (search), tabs with others between them start a run each', () => {
+    const a = {id: 1, t: 'Trip', c: 'yellow'};
+    assert.deepEqual(tabGroupRuns([a, a, a, a], [2, 3, 7, 8]).map((run) => run.start), [true, false, true, false]);
+});
