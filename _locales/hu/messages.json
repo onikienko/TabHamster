@@ -1672,7 +1672,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Csoportmenü: a fülei cseréje a nyitott fülekre, az aktuális fül vagy egy link hozzáadása, átnevezés, megnyitás inkognitóablakban, linkek másolása vagy törlés. A törölt csoportok 30 napig a Nemrég törölt között maradnak.",
+        "message": "Csoportmenü: a fülei cseréje a nyitott fülekre, az aktuális fül vagy egy link hozzáadása, átnevezés, megnyitás inkognitóablakban, megnyitás egyetlen lapcsoportként, linkek másolása vagy törlés. A törölt csoportok 30 napig a Nemrég törölt között maradnak.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1682,6 +1682,14 @@
     "s_help_sessions": {
         "message": "Az utolsó 30 böngészési munkamenet, a bezárt fülekkel és ablakokkal, és az egyes fülekben megnyitott korábbi oldalakkal. A Visszaállítás a munkamenet végén nyitva lévő ablakokat hozza vissza.",
         "description": "Settings page. Help, key list. "
+    },
+    "s_help_tabGroupsKey": {
+        "message": "Lapcsoportok",
+        "description": "Settings page. Help, key list. Left column: the browser's tab groups"
+    },
+    "s_help_tabGroups": {
+        "message": "Ha a Lapcsoportok megjegyzése be van kapcsolva (Fülek mentése), a csoportok és a munkamenetek megőrzik a böngésző lapcsoportjainak nevét és színét, és újra lapcsoportként nyitják meg őket. A Lapcsoport mentése a mező alatt jelenik meg, ha az aktuális fül egy lapcsoportban van.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group the button in the popup: use their texts"
     },
     "s_about_free": {
         "message": "A TabHamster ingyenes és nyílt forráskódú.",

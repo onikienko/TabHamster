@@ -1675,7 +1675,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Menu du groupe : remplacer ses onglets par ceux qui sont ouverts, ajouter l’onglet actuel ou un lien, renommer, ouvrir dans une fenêtre de navigation privée, copier les liens ou supprimer. Les groupes supprimés restent 30 jours dans Supprimés récemment.",
+        "message": "Menu du groupe : remplacer ses onglets par ceux qui sont ouverts, ajouter l’onglet actuel ou un lien, renommer, ouvrir dans une fenêtre de navigation privée, ouvrir comme un seul groupe d’onglets, copier les liens ou supprimer. Les groupes supprimés restent 30 jours dans Supprimés récemment.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1685,6 +1685,14 @@
     "s_help_sessions": {
         "message": "Vos 30 dernières sessions de navigation, avec les onglets et fenêtres fermés et les pages par lesquelles chaque onglet est passé. Restaurer rouvre les fenêtres ouvertes à la fin de la session.",
         "description": "Settings page. Help, key list. "
+    },
+    "s_help_tabGroupsKey": {
+        "message": "Groupes d’onglets",
+        "description": "Settings page. Help, key list. Left column: the browser's tab groups"
+    },
+    "s_help_tabGroups": {
+        "message": "Avec Mémoriser les groupes d’onglets activé (Enregistrement des onglets), les groupes et les sessions conservent les noms et couleurs des groupes d’onglets du navigateur et les rouvrent en groupes d’onglets. Enregistrer le groupe d’onglets apparaît sous le champ quand l’onglet actuel est dans l’un d’eux.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group the button in the popup: use their texts"
     },
     "s_about_free": {
         "message": "TabHamster est gratuit et open source.",

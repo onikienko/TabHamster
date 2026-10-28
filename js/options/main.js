@@ -387,6 +387,7 @@ function help() {
         [cap(keyLabel('delete')), t('s_help_delete')],
         [cap('F2'), t('s_help_f2')],
         [t('s_help_sessionsKey'), t('s_help_sessions')],
+        [t('s_help_tabGroupsKey'), t('s_help_tabGroups')],
     ];
     return [h('dl', {class: 'keys'}, tips.map(([key, text]) => h('div', {class: 'row'},
         h('dt', null, keyCaps(key)), h('dd', null, text)))),

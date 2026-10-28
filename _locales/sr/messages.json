@@ -2078,7 +2078,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Мени групе: замени њене картице отвореним, додај тренутну картицу или линк, преименуј, отвори у прозору без архивирања, копирај линкове или избриши. Избрисане групе остају у Недавно избрисаним 30 дана.",
+        "message": "Мени групе: замени њене картице отвореним, додај тренутну картицу или линк, преименуј, отвори у прозору без архивирања, отвори као једну групу картица, копирај линкове или избриши. Избрисане групе остају у Недавно избрисаним 30 дана.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -2088,6 +2088,14 @@
     "s_help_sessions": {
         "message": "Ваших последњих 30 сесија прегледача, са картицама и прозорима које сте затворили и страницама кроз које је свака картица прошла. Врати враћа прозоре који су били отворени на крају сесије.",
         "description": "Settings page. Help, key list. "
+    },
+    "s_help_tabGroupsKey": {
+        "message": "Групе картица",
+        "description": "Settings page. Help, key list. Left column: the browser's tab groups"
+    },
+    "s_help_tabGroups": {
+        "message": "Када је укључено „Запамти групе картица“ (Чување картица), групе и сесије чувају називе и боје група картица прегледача и поново их отварају као групе картица. „Сачувај групу картица“ се појављује испод поља када је тренутна картица у некој од њих.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group the button in the popup: use their texts"
     },
     "s_about_free": {
         "message": "TabHamster је бесплатан и отвореног кода.",

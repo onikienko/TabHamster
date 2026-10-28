@@ -2082,7 +2082,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Меню групи: замінити її вкладки відкритими, додати поточну вкладку чи посилання, перейменувати, відкрити в анонімному вікні, скопіювати посилання або видалити. Видалені групи залишаються в «Нещодавно видалених» 30 днів.",
+        "message": "Меню групи: замінити її вкладки відкритими, додати поточну вкладку чи посилання, перейменувати, відкрити в анонімному вікні, відкрити як одну групу вкладок, скопіювати посилання або видалити. Видалені групи залишаються в «Нещодавно видалених» 30 днів.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -2092,6 +2092,14 @@
     "s_help_sessions": {
         "message": "Ваші останні 30 сесій браузера із закритими вкладками й вікнами та сторінками, раніше відкритими в кожній вкладці. «Відновити» повертає вікна, відкриті наприкінці сесії.",
         "description": "Settings page. Help, key list. "
+    },
+    "s_help_tabGroupsKey": {
+        "message": "Групи вкладок",
+        "description": "Settings page. Help, key list. Left column: the browser's tab groups"
+    },
+    "s_help_tabGroups": {
+        "message": "Коли ввімкнено «Запам'ятовувати групи вкладок» («Збереження вкладок»), групи й сесії зберігають назви й кольори груп вкладок браузера та знову відкривають їх як групи вкладок. «Зберегти групу вкладок» з'являється під полем, коли поточна вкладка в одній із них.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group the button in the popup: use their texts"
     },
     "s_about_free": {
         "message": "TabHamster безкоштовний і має відкритий код.",

@@ -1675,7 +1675,7 @@
         "description": "Settings page. Help, key list. After Esc"
     },
     "s_help_more": {
-        "message": "Group menu: replace its tabs with the open ones, add the current tab or a link, rename, open in an incognito window, copy links, or delete. Deleted groups stay in Recently deleted for 30 days.",
+        "message": "Group menu: replace its tabs with the open ones, add the current tab or a link, rename, open in an incognito window, open as one tab group, copy links, or delete. Deleted groups stay in Recently deleted for 30 days.",
         "description": "Settings page. Help, key list. After ⋯"
     },
     "s_help_sessionsKey": {
@@ -1685,6 +1685,14 @@
     "s_help_sessions": {
         "message": "Your last 30 browser sessions, with the tabs and windows you closed and the pages each tab went through. Restore brings back the windows that were open when the session ended.",
         "description": "Settings page. Help, key list. "
+    },
+    "s_help_tabGroupsKey": {
+        "message": "Tab groups",
+        "description": "Settings page. Help, key list. Left column: the browser's tab groups"
+    },
+    "s_help_tabGroups": {
+        "message": "With Remember tab groups on (Saving tabs), groups and sessions keep the names and colors of the browser’s tab groups and open them as tab groups again. Save tab group appears under the field when the current tab is in one.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group the button in the popup: use their texts"
     },
     "s_about_free": {
         "message": "TabHamster is free and open source.",
