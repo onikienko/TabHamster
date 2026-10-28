@@ -638,7 +638,17 @@
     },
     "p_unnamedTabGroup": {
         "message": "Grupo de pestañas sin nombre",
-        "description": "Read by screen readers for the coloured dot of a browser tab group that has no name"
+        "description": "Read by screen readers for the coloured dot of a browser tab group that has no name, and for a tab in one in the lists"
+    },
+    "p_inTabGroup": {
+        "message": "Grupo de pestañas: $NAME$",
+        "description": "Read by screen readers for a tab in one of the browser's tab groups, in the lists of saved groups and sessions",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Trip to Tofino"
+            }
+        }
     },
     "p_tabGroupsOffer": {
         "message": "¿Recordar los nombres y colores de sus grupos de pestañas?",

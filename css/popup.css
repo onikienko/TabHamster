@@ -568,8 +568,9 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     border-radius: 0 6px 6px 0;
 }
 
+/* nothing for screen readers (alt text ""): the row's link says its tab group */
 .tab-item.tg-start::before {
-    content: attr(data-tg);
+    content: attr(data-tg) / "";
     display: block;
     width: fit-content;
     max-width: 100%;

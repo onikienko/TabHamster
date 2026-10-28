@@ -1703,7 +1703,9 @@ function tabRow(tab, at, opts = {}) {
         dataset: at ? {key: at.key, index: String(at.index)} : trail ? {toggle: trail.id, auto: trail.auto ? '1' : ''} : {},
         'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
         'aria-expanded': trail ? String(trail.open) : null,
-        'aria-description': trail ? plural('p_trailCount', trail.count) : null,
+        // the pill over a run is only seen: each tab says its tab group
+        'aria-description': [opts.tg && (opts.tg.t ? t('p_inTabGroup', [opts.tg.t]) : t('p_unnamedTabGroup')),
+            trail && plural('p_trailCount', trail.count)].filter(Boolean).join(', ') || null,
     },
     favicon(tab.url),
     tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
