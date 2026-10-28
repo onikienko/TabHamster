@@ -182,13 +182,18 @@ var groupStore = (function () {
     /**
      * The tab moved to `at` (in place, a copy): it joins the browser tab group (cg) of the tabs on both sides when they
      * are in the same one, else it is in none, as a tab dragged in the browser's tab strip. Pinned tabs never are.
+     * `same`: moved inside its own group, it also stays in its tab group next to a tab of it (its first or last place).
      */
-    function joinNeighbours(tabs, at) {
+    function joinNeighbours(tabs, at, same) {
         const before = tabs[at - 1];
         const after = tabs[at + 1];
         const tab = Object.assign({}, tabs[at]);
-        if (!tab.pinned && before && after && before.cg && after.cg && before.cg.i === after.cg.i) {
-            tab.cg = Object.assign({}, before.cg);
+        const shared = before && after && before.cg && after.cg && before.cg.i === after.cg.i ? before.cg : null;
+        const own = same && tab.cg && [before, after].some(other => other && other.cg && other.cg.i === tab.cg.i) ?
+            tab.cg : null;
+        const cg = tab.pinned ? null : shared || own;
+        if (cg) {
+            tab.cg = Object.assign({}, cg);
         } else {
             delete tab.cg;
         }
@@ -1245,7 +1250,7 @@ var groupStore = (function () {
             }), [key]),
             /**
              * like removeTab; the tab goes to `pos` among the group's other tabs (0 = first), in the browser tab group
-             * of its new neighbours if they share one (joinNeighbours)
+             * of its new neighbours if they share one, or still in its own next to a tab of it (joinNeighbours)
              */
             moveTab: (key, seen, index, pos) => change(() => changeTabsNow(key, function (tabs) {
                 const i = findTab(tabs, seen, index);
@@ -1255,7 +1260,7 @@ var groupStore = (function () {
                     return null;
                 }
                 rest.splice(at, 0, tabs[i]);
-                joinNeighbours(rest, at);
+                joinNeighbours(rest, at, true);
                 return rest;
             }), [key]),
             /**

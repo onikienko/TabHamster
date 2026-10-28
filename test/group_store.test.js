@@ -584,6 +584,26 @@ test('tab groups: a moved tab joins its new neighbours\' tab group when they sha
     assert.deepEqual(await cgs(), [[1, 1], [3, 2], [6, 0], [2, 2], [4, 2], [0, 0], [5, 0]]);
 });
 
+test('tab groups: a tab moved to the first or last place of its own tab group stays in it', async () => {
+    const {store} = makeDevice();
+    await store.save('tg_1', {name: 'g', index: 1, tabs: groupedTabs(6)});
+    const cgs = async () => (await store.list()).tg_1.tabs.map(tab => [tab.id, tab.cg ? tab.cg.i : 0]);
+
+    // the two tabs of group 1 swapped: 1 goes first, next to 0 only
+    let seen = (await store.list()).tg_1;
+    await store.moveTab('tg_1', seen.tabs[1], 1, 0);
+    assert.deepEqual(await cgs(), [[1, 1], [0, 1], [2, 0], [3, 2], [4, 2]]);
+    // 3 after 4, the last of group 2: next to 4 and nothing
+    seen = (await store.list()).tg_1;
+    await store.moveTab('tg_1', seen.tabs[3], 3, 4);
+    assert.deepEqual(await cgs(), [[1, 1], [0, 1], [2, 0], [4, 2], [3, 2]]);
+    assert.deepEqual((await store.list()).tg_1.tabs[4].cg, {i: 2, t: '', c: 'blue', x: true});
+    // 0 between 2 (none) and 4 (group 2): a tab of its own group on neither side, in none
+    seen = (await store.list()).tg_1;
+    await store.moveTab('tg_1', seen.tabs[1], 1, 2);
+    assert.deepEqual(await cgs(), [[1, 1], [2, 0], [0, 0], [4, 2], [3, 2]]);
+});
+
 test('tab groups: a tab moved to another group leaves its own tab group behind', async () => {
     const {store} = makeDevice();
     await store.save('tg_1', {name: 'a', index: 1, tabs: groupedTabs(4)});
