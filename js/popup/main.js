@@ -1487,8 +1487,8 @@ function withTabGroupName(tab) {
 
 /**
  * A session's tabs as search sees them, in the same order: a tab is found by the pages it went through too, and by its
- * browser tab group's name. The live
- * session's open tabs are left out: they are open anyway, and a match there has nothing to show or do.
+ * browser tab group's name. The live session's open tabs are left out: they are open anyway, and a match there has
+ * nothing to show or do.
  */
 function searchTabs(key) {
     const session = state.sessions[key];
@@ -2042,8 +2042,10 @@ function sessionWindowRows(key, win, i, live, found) {
                 // only closed tabs left in it: no "0 tabs"
                 win.tabs.length ? plural('p_windowTitle', win.tabs.length, [i + 1]) : t('p_windowNumber', [i + 1])),
             (live && !win.closed) || !win.tabs.length ? null :
-                h('button', {class: 'link', type: 'button', onClick: single(() => openElsewhere('window', withSessionGroups(state.sessions[key], win.tabs)))},
-                    t('p_openWindow'))),
+                h('button', {
+                    class: 'link', type: 'button',
+                    onClick: single(() => openElsewhere('window', withSessionGroups(state.sessions[key], win.tabs))),
+                }, t('p_openWindow'))),
         sessionTabGroups(key, shown, found && tabs).map((tg, n) => sessionTabRows(key, shown[n], found, undefined, tg)),
         closedShown.length ? [
             h('button', {
