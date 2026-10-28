@@ -16,7 +16,7 @@ import {normalizeName, findByName, countByName, freeName} from '../names.js';
 import {parseQuery, segments, search, matchesAll} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
-import {queryTabGroups, tabGroupFields, tabGroupRuns, requestTabGroups} from '../ui/tab_groups.js';
+import {queryTabGroups, tabGroupFields, tabGroupRuns, requestTabGroups, TAB_GROUP_COLORS} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
@@ -39,6 +39,9 @@ const state = {
     editingTab: null,
     usage: null,
     openTabs: 0,
+    // the active tab's browser tab group: {id, title, color (null without the permission), tabs, link (the saved
+    // group it was saved as or updated, this browser run)}, or null
+    tabGroup: null,
     view: 'saved',
     // saved groups shown: all (null), only those not in sync ('unsynced'), or by space in sync ('biggest')
     filter: null,
@@ -80,6 +83,7 @@ const el = {
     countSaved: document.getElementById('count_saved'),
     list: document.getElementById('list'),
     footer: document.getElementById('footer'),
+    tgLine: document.getElementById('tg_line'),
     // screen readers hear what a search found (announceResults)
     found: h('div', {class: 'sr-only', role: 'status', 'aria-live': 'polite'}),
 };
@@ -332,11 +336,11 @@ async function restoreSession(session) {
 /* ---------- saving ---------- */
 
 /**
- * What Save (and Enter) would do with the text in the field:
+ * What Save (and Enter) would do with the text in the field, or `fallback` when it is empty (a tab group's name):
  * {kind: 'new', name} ('' = named by date), or {kind: 'replace', key, name} when a group already has that name
  */
-function saveIntent() {
-    const name = normalizeName(el.field.value);
+function saveIntent(fallback = '') {
+    const name = normalizeName(el.field.value) || normalizeName(fallback);
     if (!name) {
         return {kind: 'new', name: ''};
     }
@@ -450,7 +454,12 @@ function undoAction(undo, about) {
     };
 }
 
-async function save() {
+/**
+ * Saves the open tabs (this window, or all: Settings) as a group, or `source`: {tabs, name} (a tab group: its tabs, and
+ * its name for an empty field). A name a group has already replaces that group's tabs. Answers the group's key, or
+ * null when nothing was saved.
+ */
+async function save(source = null) {
     if (!state.ready) {
         state.pendingSave = true;
         return;
@@ -465,12 +474,12 @@ async function save() {
         if (state.groupsError) {
             await loadGroups();
         }
-        const tabs = await savedTabs(await queryTabsToSave());
+        const tabs = await savedTabs(source ? source.tabs : await queryTabsToSave());
         if (!tabs.length) {
             showBar(t('p_nothingToSave'));
-            return;
+            return null;
         }
-        const intent = saveIntent();
+        const intent = saveIntent(source ? source.name : '');
         let key;
         let text;
         let undo;
@@ -497,11 +506,116 @@ async function save() {
         state.expanded.delete('saved:' + key);
         await afterChange(fresh);
         showBar(text, undoAction(undo, fresh));
+        return fresh;
     } catch (e) {
         console.error('TabHamster: save failed', e);
         showBar(t('p_syncStorageDefault_error'));
+        return null;
     } finally {
         state.saving = false;
+    }
+}
+
+/* ---------- Save tab group (PLAN.md 9.1) ---------- */
+
+// browser tab group id -> the key of the group it was saved as or updated: for unnamed and renamed tab groups. Tab
+// group ids last one browser run, as chrome.storage.session.
+const TAB_GROUP_LINKS = 'tab_group_links';
+
+/** the active tab's browser tab group (state.tabGroup), if it is in one */
+async function loadTabGroup() {
+    state.tabGroup = null;
+    try {
+        const [active] = await chrome.tabs.query({active: true, currentWindow: true});
+        if (!active || !(active.groupId >= 0)) {
+            return;
+        }
+        const [tabs, groups, links] = await Promise.all([
+            chrome.tabs.query({groupId: active.groupId}),
+            queryTabGroups(),
+            chrome.storage.session.get(TAB_GROUP_LINKS).catch(() => ({})),
+        ]);
+        const group = groups.find((g) => g.id === active.groupId);
+        state.tabGroup = {
+            id: active.groupId, title: group ? group.title || '' : '', color: group ? group.color : null, tabs,
+            link: (links[TAB_GROUP_LINKS] || {})[active.groupId] || null,
+        };
+    } catch (e) {
+        console.error('TabHamster: tab group not read', e);
+    }
+}
+
+/** the saved group a tab group belongs to: the one it was saved as or updated, else one with its name; or null */
+function tabGroupKey(tg) {
+    if (tg.link && state.groups[tg.link]) {
+        return tg.link;
+    }
+    return tg.title ? findByName(state.groups, tg.title) : null;
+}
+
+async function linkTabGroup(id, key) {
+    try {
+        const links = (await chrome.storage.session.get(TAB_GROUP_LINKS))[TAB_GROUP_LINKS] || {};
+        links[id] = key;
+        await chrome.storage.session.set({[TAB_GROUP_LINKS]: links});
+    } catch (e) {
+        console.error('TabHamster: tab group link not kept', e);
+    }
+    if (state.tabGroup && state.tabGroup.id === id) {
+        state.tabGroup.link = key;
+    }
+}
+
+/**
+ * The line under the band: the tab group's name (a dot if it has none), its tab count and Save tab group, or Update
+ * group when it was saved before and has changed. Hidden when the active tab is in no tab group, or the group it
+ * belongs to has the same addresses in the same order.
+ */
+function renderTabGroupLine() {
+    const tg = state.tabGroup;
+    const key = tg && tabGroupKey(tg);
+    const saved = key && state.groups[key].tabs.map((tab) => tab.url);
+    const same = saved && saved.length === tg.tabs.length && tg.tabs.every((tab, i) => (tab.url || tab.pendingUrl) === saved[i]);
+    const show = !!tg && tg.tabs.length > 0 && !same;
+    el.tgLine.hidden = !show;
+    document.body.classList.toggle('has-tg-line', show);
+    clear(el.tgLine);
+    if (!show) {
+        return;
+    }
+    const color = TAB_GROUP_COLORS.includes(tg.color) ? tg.color : 'grey';
+    const button = h('button', {class: 'open', type: 'button', onClick: single(act(saveTabGroup))},
+        t(key ? 'p_updateTabGroup' : 'p_saveTabGroup'));
+    if (key) {
+        setTip(button, {text: t('p_updateTabGroup_tip', groupName(key, state.groups[key]))});
+    }
+    el.tgLine.append(
+        h('span', {class: ['tg-pill', 'ellipsis', 'tg-' + color], dir: 'auto', role: tg.title ? null : 'img',
+            'aria-label': tg.title ? null : t('p_unnamedTabGroup')}, tg.title),
+        h('span', {class: 'tg-count num ellipsis'}, plural('p_tabsCount', tg.tabs.length)),
+        button);
+}
+
+/**
+ * Saves the active tab's tab group: as a new group (the field's text, else its name, else the date), or over the group
+ * it belongs to (Update group; a name typed in the field picks the group as Save does). Undo as for Save and Replace.
+ */
+async function saveTabGroup() {
+    const tg = state.tabGroup;
+    if (!tg) {
+        return;
+    }
+    const key = !normalizeName(el.field.value) && tabGroupKey(tg);
+    if (key) {
+        const tabs = await savedTabs(tg.tabs);
+        await linkTabGroup(tg.id, key);
+        await setTabs(key, tabs, plural('p_replaced', tabs.length, [groupName(key, state.groups[key])]), true);
+        return;
+    }
+    const saved = await save({tabs: tg.tabs, name: tg.title});
+    if (saved) {
+        await linkTabGroup(tg.id, saved);
+        render();
     }
 }
 
@@ -2192,6 +2306,7 @@ function render() {
     renderTabs();
     // before the list changes: its check whether the label fits would lay out the whole new list
     renderSave();
+    renderTabGroupLine();
     renderList();
     renderFooter();
 }
@@ -2484,7 +2599,8 @@ async function start() {
     state.view = state.options.active_tab === '#sessions' ? 'sessions' : 'saved';
 
     const [tabs, win] = await Promise.all([
-        queryTabsToSave(), chrome.windows.getCurrent(), loadGroups(), sessionsShown() ? loadSessions() : null, loadUsage()]);
+        queryTabsToSave(), chrome.windows.getCurrent(), loadGroups(), sessionsShown() ? loadSessions() : null, loadUsage(),
+        loadTabGroup()]);
     state.openTabs = tabs.length;
     state.windowId = win.id;
     render();

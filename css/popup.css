@@ -184,9 +184,48 @@ button {
     padding: 4px 6px 6px;
 }
 
-/* the bar takes 56 px above the footer */
+/* the bar takes 56 px above the footer, the Save tab group line 40 px under the band */
 body.has-bar .list {
     max-height: 388px;
+}
+
+body.has-tg-line .list {
+    max-height: 404px;
+}
+
+body.has-tg-line.has-bar .list {
+    max-height: 348px;
+}
+
+/* "Save tab group": the active tab's browser tab group, when it isn't saved as it is (PLAN.md 9.1, board
+   "1.1 Save a tab group: where", option A) */
+.tg-line {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    box-sizing: border-box;
+    padding: 0 8px 0 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.tg-line .tg-pill {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.tg-line .tg-count {
+    flex: 1 1 auto;
+    min-width: 40px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.tg-line .open {
+    flex: none;
+    height: 28px;
 }
 
 .row {
@@ -534,9 +573,14 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     display: block;
     width: fit-content;
     max-width: 100%;
+    margin: 4px 0;
+}
+
+/* a tab group's name in its colour (the Save tab group line uses it too) */
+.tab-item.tg-start::before,
+.tg-pill {
     box-sizing: border-box;
     height: 18px;
-    margin: 4px 0;
     padding: 0 7px;
     overflow: hidden;
     border-radius: 5px;
@@ -551,9 +595,13 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
 }
 
 .tab-item.tg-start[data-tg=""]::before {
+    margin: 8px 0 8px 2px;
+}
+
+.tab-item.tg-start[data-tg=""]::before,
+.tg-pill:empty {
     width: 10px;
     height: 10px;
-    margin: 8px 0 8px 2px;
     padding: 0;
     border-radius: 50%;
 }
