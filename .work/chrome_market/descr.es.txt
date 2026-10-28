@@ -15,6 +15,13 @@ Gratis y de código abierto. Sin anuncios ni rastreo.
 	✓ Restaure las ventanas de una sesión tal como estaban, con un solo clic.
 	✓ Las sesiones se quedan en su dispositivo: no se sincronizan.
 
+► Los grupos de pestañas del navegador, con sus nombres y colores.
+	✓ Al guardar una ventana se conservan sus grupos de pestañas. Al abrir el grupo, vuelven como grupos de pestañas.
+	✓ Guarde el grupo de pestañas en el que está como un grupo propio, o actualícelo cuando haya cambiado.
+	✓ Abra cualquier grupo como un solo grupo de pestañas.
+	✓ Las sesiones también recuerdan los grupos de pestañas, y Restaurar los recupera.
+	✓ Actívelo en Configuración: el navegador le pedirá permiso una vez. Sin él, todo lo demás funciona como antes.
+
 ► Temas claro y oscuro.
 ► Todo funciona con el teclado y con lectores de pantalla.
 

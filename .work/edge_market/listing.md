@@ -34,7 +34,7 @@ Permission justifications:
 
 storage
 ```
-Saved tab groups and settings are kept in chrome.storage.sync, so they reach the user's other computers through browser sync. chrome.storage.local keeps the browser sessions (the last 30), a local copy of every group, groups deleted in the last 30 days (so they can be restored), and the undo copy of a restore from a backup file. chrome.storage.session keeps the ID of the current session. Nothing is sent anywhere else.
+Saved groups and settings are kept in chrome.storage.sync, so they reach the user's other computers through browser sync. chrome.storage.local keeps the browser sessions (the last 30), a local copy of every group, groups deleted in the last 30 days (so they can be restored), and the undo copy of a restore from a backup file. chrome.storage.session keeps the ID of the current session. Nothing is sent anywhere else.
 ```
 
 tabs
@@ -49,7 +49,12 @@ Shows each saved tab's icon in the list, taken from the browser's own icon cache
 
 unlimitedStorage
 ```
-chrome.storage.local holds a full copy of the user's saved tab groups (and groups deleted in the last 30 days), so saving a group never fails when sync storage (100 KB) is full. It also holds the last 30 browser sessions, which with their closed tabs and visited pages can take several MB. The data stays on the user's computer.
+chrome.storage.local holds a full copy of the user's saved groups (and groups deleted in the last 30 days), so saving a group never fails when sync storage (100 KB) is full. It also holds the last 30 browser sessions, which with their closed tabs and visited pages can take several MB. The data stays on the user's computer.
+```
+
+tabGroups (optional: asked only when the user turns on "Remember tab groups" in Settings or chooses "Open as tab group")
+```
+Reads the names, colors and collapsed state of the browser's tab groups, so saved groups and sessions keep them, and creates tab groups with them when a saved group or session is opened. The data is stored with the groups and sessions as described under storage and is not sent anywhere.
 ```
 
 Remote code: No, I am not using remote code.
@@ -87,6 +92,7 @@ To test:
 2. Click the group to see its tabs; "Open" opens them, the group's menu has more actions (replace with open tabs, rename, open in an incognito (InPrivate) window, copy links, delete with Undo).
 3. The "Sessions" tab lists the current and past browser sessions; "Restore" reopens a session's windows.
 4. Settings (the icon at the bottom right of the popup): theme, backup and restore, recently deleted groups, help.
+5. Tab groups (optional): Settings > Saving > "Remember tab groups" asks for the tabGroups permission. Put some tabs in a tab group, save the window, close it, and open the group: the tab group comes back with its name and color. The ⋯ menu's "Open as tab group" opens a saved group as one tab group.
 
 Data: groups are kept in chrome.storage.sync (browser sync) and in chrome.storage.local; sessions only in chrome.storage.local. The extension makes no network requests of its own, except the optional "Load missing icons from sites" (Settings > General, off until the user allows it), which loads /favicon.ico from the saved sites. Source code: https://github.com/onikienko/TabHamster
 ```

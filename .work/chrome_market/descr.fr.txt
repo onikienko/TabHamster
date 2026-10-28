@@ -15,6 +15,13 @@ Gratuit et open source. Sans publicité, sans pistage.
   ✓ Restaurez les fenêtres d’une session telles qu’elles étaient, en un clic.
   ✓ Les sessions restent sur votre ordinateur : elles ne sont pas synchronisées.
 
+► Les groupes d’onglets du navigateur, avec leurs noms et couleurs.
+  ✓ Enregistrer une fenêtre conserve ses groupes d’onglets. Ouvrir le groupe les rétablit en groupes d’onglets.
+  ✓ Enregistrez le groupe d’onglets où vous êtes comme un groupe à part, ou mettez-le à jour quand il a changé.
+  ✓ Ouvrez n’importe quel groupe comme un seul groupe d’onglets.
+  ✓ Les sessions mémorisent aussi les groupes d’onglets, et Restaurer les rétablit.
+  ✓ Activez-le dans les Paramètres : le navigateur vous demande votre autorisation une seule fois. Sans cela, tout le reste fonctionne comme avant.
+
 ► Thèmes clair et sombre.
 ► Tout fonctionne au clavier et avec les lecteurs d’écran.
 

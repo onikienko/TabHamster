@@ -15,6 +15,13 @@ Ingyenes és nyílt forráskódú. Reklámok és követés nélkül.
 	✓ Egy kattintással visszaállíthatja egy munkamenet ablakait úgy, ahogy voltak.
 	✓ A munkamenetek a számítógépén maradnak: nem szinkronizálódnak.
 
+► A böngésző lapcsoportjai, nevükkel és színükkel.
+	✓ Egy ablak mentésekor a lapcsoportjai is megmaradnak. A csoport megnyitásakor újra lapcsoportként jelennek meg.
+	✓ Mentse az aktuális lapcsoportot külön csoportként, vagy frissítse, ha megváltozott.
+	✓ Bármelyik csoportot megnyithatja egyetlen lapcsoportként.
+	✓ A munkamenetek is megjegyzik a lapcsoportokat, és a Visszaállítás visszahozza őket.
+	✓ Kapcsolja be a Beállításokban: a böngésző egyszer engedélyt kér. Enélkül minden más úgy működik, mint eddig.
+
 ► Világos és sötét téma.
 ► Minden működik billentyűzettel és képernyőolvasóval.
 

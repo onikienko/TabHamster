@@ -15,6 +15,13 @@ Free and open source. No ads, no tracking.
 	✓ Restore a session's windows as they were, in one click.
 	✓ Sessions stay on your computer: they are not synced.
 
+► The browser's tab groups, with their names and colors.
+	✓ Saving a window keeps its tab groups. Opening the group brings them back as tab groups.
+	✓ Save the tab group you're in as a group of its own, or update it after it changed.
+	✓ Open any group as one tab group.
+	✓ Sessions remember tab groups too, and Restore brings them back.
+	✓ Turn it on in Settings: the browser asks for permission once. Without it, everything else works as before.
+
 ► Light and dark themes.
 ► Everything works with the keyboard and with screen readers.
 
