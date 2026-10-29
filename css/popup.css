@@ -562,9 +562,21 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
    of its colour (a dot if it has no name) and Open and new window, and the run's rows have a bar of that colour. On
    the rows themselves, not around them: drag moves .tab-item elements of .tab-list. */
 .tab-item.tg > .tab-row {
-    padding-left: 8px;
-    border-left: 2px solid var(--tg);
-    border-radius: 0 6px 6px 0;
+    position: relative;
+    margin-left: 7px;
+    padding-left: 3px;
+}
+
+/* the bar is left of the row, not its border: the focus ring (2 px out) goes round the row with all its corners
+   rounded and leaves the bar alone */
+.tab-item.tg > .tab-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -7px;
+    width: 2px;
+    background: var(--tg);
 }
 
 /* a row of its own (Enter opens the tab group); the buttons fit in its 26 px: nothing grows when they show */
@@ -574,11 +586,10 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     align-items: center;
     height: 26px;
     border-radius: 6px;
-    background: var(--bg);
 }
 
 body:not(.keyboard) .tg-head:hover,
-body.keyboard .tg-head:has(> .tg-name:focus) {
+body.keyboard .tg-head:has(:focus) {
     background: var(--hover);
 }
 

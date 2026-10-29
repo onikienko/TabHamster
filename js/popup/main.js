@@ -1709,7 +1709,7 @@ function tabItem(tg) {
 /**
  * The line over a run's first tab, a row of the list: the tab group's name in a pill (a dot if unnamed),
  * and Open and new window on hover or focus, which open the whole run (`tg.run()`, its tabs with cg) as a tab group.
- * Enter and Shift+Enter on it do the same; a click on the pill does nothing.
+ * Enter and Shift+Enter on it do the same; a mouse click on the line does nothing.
  */
 function tabGroupHead(tg) {
     const which = tg.t ? t('p_inTabGroup', [tg.t]) : t('p_unnamedTabGroup');
@@ -1725,6 +1725,8 @@ function tabGroupHead(tg) {
                 }
             }
         },
+        // Space and screen readers press the button (detail 0); a mouse click (detail 1+) does nothing
+        onClick: (e) => e.detail === 0 && open(e),
     }, pill);
     if (tg.t) {
         // only for a name the line cuts off, as group names
