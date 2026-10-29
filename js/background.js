@@ -196,9 +196,9 @@ async function hasTabGroups() {
 /**
  * Puts opened tabs back into the browser tab groups they were saved in (cg, format: js/group_store.js): each run of
  * neighbouring tabs with the same cg.i becomes one tab group with its name, color and collapsed state. Only with the
- * tabGroups permission (PLAN.md 9.1): unnamed groups in colors the browser picks would look broken, so without it the
- * tabs stay ungrouped. A tab that didn't open is left out; pinned tabs can't be in a tab group. A failure leaves the
- * tabs open, ungrouped. ids: the opened tab of each of `tabs` (null if it didn't open). active: the opened tab that
+ * tabGroups permission: unnamed groups in colors the browser picks would look broken, so without it the tabs stay
+ * ungrouped. A tab that didn't open is left out; pinned tabs can't be in a tab group. A failure leaves the tabs open,
+ * ungrouped. ids: the opened tab of each of `tabs` (null if it didn't open). active: the opened tab that
  * is active: its tab group isn't collapsed (the browser's own tab strip never hides the active tab in one).
  */
 async function groupTabs(windowId, tabs, ids, active) {
@@ -417,9 +417,9 @@ groups.migrate().then(() => groups.reconcile()).catch(e => console.error('TabHam
 //    windows: {<windowId>: {closed}}, groups?: {<groupId>: {title, color, collapsed}}}
 // at: when the tab got to its address. closed: when the tab was closed by itself; a window closed with its tabs is
 // in `windows` instead, its tabs aren't marked. trail: [{url, title, at}], oldest first. groupId: the browser tab group
-// the tab is (or was) in; `groups` has their names and colors as last seen, only with the tabGroups permission (1.1.0,
-// PLAN.md 9.1): without it, and in sessions from 1.0.0, only which tabs were grouped. Sessions from before (no v) are
-// snapshots of the tabs.
+// the tab is (or was) in; `groups` has their names and colors as last seen, only with the tabGroups permission (1.1.0):
+// without it, and in sessions from 1.0.0, only which tabs were grouped. Sessions from before (no v) are snapshots of
+// the tabs.
 
 // Session writes and switching sessions on or off run one after another: two writes at once could each start a
 // session, and a write still running when sessions are turned off could start one again after the switch.

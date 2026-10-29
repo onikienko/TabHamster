@@ -1,5 +1,5 @@
 // Welcome page: opened on install (js/background.js) and from Settings, Help. Shows how to pin TabHamster to the
-// toolbar, unless it is pinned already. Decisions: work-docs/PLAN.md section 8.
+// toolbar, unless it is pinned already.
 // Pinned or not: chrome.action.getUserSettings (Chrome 91+); onUserSettingsChanged (Chrome 130+) updates the page
 // when the user pins it from the drawing. Browsers without them always show the drawing.
 

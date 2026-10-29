@@ -1,4 +1,4 @@
-// The browser's tab groups (names, colors): an optional permission, PLAN.md 9.1. Required, it would disable
+// The browser's tab groups (names, colors): an optional permission. Required, it would disable
 // TabHamster on update until each user accepts its warning. Without it, tabs are saved and opened as in 1.0.0.
 
 const TAB_GROUPS = {permissions: ['tabGroups']};

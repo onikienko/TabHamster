@@ -2,7 +2,7 @@
 
 import {svg} from './dom.js';
 
-// The original icon's face: Arial text (.work/icons_psd/128.psd) as paths, from work-docs/icons/face.svg.
+// The original icon's face: Arial text (.work/icons_psd/128.psd) as paths.
 // In the icon's 128 grid it sits in the box 20 27.5 95 71.
 const LOGO = [
     // brackets and the mouth dot: " (  .  )", Arial

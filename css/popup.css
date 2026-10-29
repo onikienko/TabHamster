@@ -1,4 +1,4 @@
-/* Popup. Design: work-docs/design/boards/Hybrid.dc.html (E). Chrome limits a popup to 800 x 600. */
+/* Popup. Chrome limits a popup to 800 x 600. */
 
 html, body {
     width: 420px;
@@ -197,8 +197,7 @@ body.has-tg-line.has-bar .list {
     max-height: 348px;
 }
 
-/* "Save tab group": the active tab's browser tab group, when it isn't saved as it is (PLAN.md 9.1, board
-   "1.1 Save a tab group: where", option A) */
+/* "Save tab group": the active tab's browser tab group, when it isn't saved as it is */
 .tg-line {
     display: flex;
     flex: none;
@@ -559,10 +558,9 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     pointer-events: auto;
 }
 
-/* Tabs in the browser's tab groups (PLAN.md 9.1, board "Sessions: everything that was open"): the first tab of each
-   run has a line above it with the tab group's name in a pill of its colour (a dot if it has no name) and Open and new
-   window, and the run's rows have a bar of that colour. On the rows themselves, not around them: drag moves
-   .tab-item elements of .tab-list. */
+/* Tabs in the browser's tab groups: the first tab of each run has a line above it with the tab group's name in a pill
+   of its colour (a dot if it has no name) and Open and new window, and the run's rows have a bar of that colour. On
+   the rows themselves, not around them: drag moves .tab-item elements of .tab-list. */
 .tab-item.tg > .tab-row {
     padding-left: 8px;
     border-left: 2px solid var(--tg);

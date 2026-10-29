@@ -1,4 +1,4 @@
-// Popup: saved groups and sessions. Design: work-docs/design/boards (E), decisions: work-docs/PLAN.md section 7.
+// Popup: saved groups and sessions.
 // Saved groups come from the group store in the background service worker (groupStoreClient),
 // sessions from chrome.storage.local (written by the session watcher in js/background.js).
 
@@ -32,7 +32,7 @@ const state = {
     groups: {},
     groupsError: null,
     sessions: {},
-    // sessions are read when their tab is shown (PLAN.md M11c): Saved groups needs nothing from them
+    // sessions are read when their tab is shown: Saved groups needs nothing from them
     sessionsLoaded: false,
     currentSession: null,
     // the saved tab being edited: {key, index, tab} (see tabIndexIn), tab and index null for a new link at the end
@@ -516,7 +516,7 @@ async function save(source = null) {
     }
 }
 
-/* ---------- Save tab group, and the offer to remember tab groups (PLAN.md 9.1) ---------- */
+/* ---------- Save tab group, and the offer to remember tab groups ---------- */
 
 // the offer to remember tab groups was answered on this computer (chrome.storage.local)
 const TAB_GROUPS_OFFERED = 'tab_groups_offered';
@@ -1490,7 +1490,7 @@ function runSearch() {
     state.results.saved = search(shownGroupKeys().map((key) => ({
         key, name: groupName(key, state.groups[key]), tabs: state.groups[key].tabs.map(withTabGroupName),
     })), query);
-    // only the tab that is shown is searched; switching keeps the words (PLAN.md M11c)
+    // only the tab that is shown is searched; switching keeps the words
     state.results.sessions = sessionsShown() && state.sessionsLoaded ? search(sortedSessionKeys().map((key) => ({
         key, name: sessionName(key), tabs: searchTabs(key),
     })), query) : [];
@@ -1707,7 +1707,7 @@ function tabItem(tg) {
 }
 
 /**
- * The line over a run's first tab (PLAN.md 9.1), a row of the list: the tab group's name in a pill (a dot if unnamed),
+ * The line over a run's first tab, a row of the list: the tab group's name in a pill (a dot if unnamed),
  * and Open and new window on hover or focus, which open the whole run (`tg.run()`, its tabs with cg) as a tab group.
  * Enter and Shift+Enter on it do the same; a click on the pill does nothing.
  */

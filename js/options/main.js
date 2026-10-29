@@ -1,4 +1,4 @@
-// Settings page. Design: work-docs/design/boards/Settings.dc.html, decisions: work-docs/PLAN.md sections 7 and 8 (M8).
+// Settings page.
 // Options live in chrome.storage.sync (defaults in js/storage.js) and apply as soon as they change.
 // Saved groups, Recently deleted and backups go through the group store in the background (groupStoreClient).
 

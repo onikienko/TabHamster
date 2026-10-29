@@ -1,5 +1,5 @@
 /* Colours, font and base styles shared by the popup and the settings page.
-   Palette: work-docs/design/boards/Palette.dc.html. <html data-theme="system|light|dark"> picks the theme. */
+   <html data-theme="system|light|dark"> picks the theme. */
 
 :root {
     --band: #00B6E8;
@@ -47,7 +47,7 @@
     --switch-off: #7F909C;
     --shadow: 0 8px 24px rgba(14, 38, 51, .18), 0 1px 3px rgba(14, 38, 51, .12);
 
-    /* the browser's tab groups, its own colours (Chrome's classic palette, PLAN.md 9.1); text on them: white, dark on
+    /* the browser's tab groups, its own colours (Chrome's classic palette); text on them: white, dark on
        yellow and orange (--tg-ink-light) */
     --tg-grey: #5F6368;
     --tg-blue: #1A73E8;
