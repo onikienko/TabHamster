@@ -67,6 +67,23 @@ export function tabGroupRuns(groups, places = null) {
 }
 
 /**
+ * The run of neighbours in the same browser tab group as `tabs[at]`, all of it (a search may show only some).
+ * @param {function(*): *} id a tab's tab group, null for none
+ */
+export function tabGroupRun(tabs, at, id) {
+    const own = id(tabs[at]);
+    let from = at;
+    let to = at + 1;
+    while (from > 0 && id(tabs[from - 1]) === own) {
+        from--;
+    }
+    while (to < tabs.length && id(tabs[to]) === own) {
+        to++;
+    }
+    return tabs.slice(from, to);
+}
+
+/**
  * The `cg` of each tab as a saved group keeps it (format: js/group_store.js), null for a tab in no tab group or in one
  * missing from `groups`. Tabs of one tab group share {i, t, c, x?}: i numbers the tab groups 1, 2... in the order of
  * their first tab, t is the name ('' if none), c the color, x: true if collapsed.

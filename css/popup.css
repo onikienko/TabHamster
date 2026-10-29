@@ -501,8 +501,8 @@ body.keyboard .row:has(:focus) .end-meta {
 }
 
 /* as group rows: hover with the mouse, focus with keys, never both. Hover is on the wrapper: the row stays lit while
-   the pointer is on its Edit / Remove buttons */
-body:not(.keyboard) .tab-item:hover > .tab-row,
+   the pointer is on its Edit / Remove buttons (not on a tab group's line over it) */
+body:not(.keyboard) .tab-item:hover:not(:has(> .tg-head:hover)) > .tab-row,
 body.keyboard .tab-row:focus {
     background: var(--hover);
     color: var(--text);
@@ -553,32 +553,108 @@ body:not(.keyboard) .fold:focus-visible {
     height: 24px;
 }
 
-body:not(.keyboard) .tab-item:hover .tab-actions,
+body:not(.keyboard) .tab-item:hover:not(:has(> .tg-head:hover)) .tab-actions,
 body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     opacity: 1;
     pointer-events: auto;
 }
 
 /* Tabs in the browser's tab groups (PLAN.md 9.1, board "Sessions: everything that was open"): the first tab of each
-   run shows the tab group's name in a pill of its colour above it (a dot if it has no name), and the run's rows have
-   a bar of that colour. On the rows themselves, not around them: drag moves .tab-item elements of .tab-list. */
+   run has a line above it with the tab group's name in a pill of its colour (a dot if it has no name) and Open and new
+   window, and the run's rows have a bar of that colour. On the rows themselves, not around them: drag moves
+   .tab-item elements of .tab-list. */
 .tab-item.tg > .tab-row {
     padding-left: 8px;
     border-left: 2px solid var(--tg);
     border-radius: 0 6px 6px 0;
 }
 
-/* nothing for screen readers (alt text ""): the row's link says its tab group */
-.tab-item.tg-start::before {
-    content: attr(data-tg) / "";
-    display: block;
-    width: fit-content;
-    max-width: 100%;
-    margin: 4px 0;
+/* a row of its own (Enter opens the tab group); the buttons fit in its 26 px: nothing grows when they show */
+.tg-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--bg);
+}
+
+body:not(.keyboard) .tg-head:hover,
+body.keyboard .tg-head:has(> .tg-name:focus) {
+    background: var(--hover);
+}
+
+/* the whole line, so it is where the pointer selects it; a click on it does nothing */
+.tg-name {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: default;
+}
+
+body:not(.keyboard) .tg-name:focus-visible {
+    outline: none;
+}
+
+.tg-head .tg-pill {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+/* as a row's: over the end of a long name, on hover or with the focus in them with keys */
+.tg-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 4px 0 2px;
+    border-radius: 0 6px 6px 0;
+    background: inherit;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tg-actions::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 100%;
+    bottom: 0;
+    width: 16px;
+    background: inherit;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000);
+    mask-image: linear-gradient(to right, transparent, #000);
+}
+
+.tg-actions .open {
+    height: 24px;
+}
+
+.tg-actions .ib {
+    width: 24px;
+    height: 24px;
+}
+
+.tg-actions button:focus-visible {
+    outline-offset: 0;
+}
+
+body:not(.keyboard):not(.dragging) .tg-head:hover .tg-actions,
+body.keyboard .tg-head:has(:focus) .tg-actions {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 /* a tab group's name in its colour (the Save tab group line uses it too) */
-.tab-item.tg-start::before,
 .tg-pill {
     box-sizing: border-box;
     height: 18px;
@@ -595,11 +671,10 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     unicode-bidi: plaintext;
 }
 
-.tab-item.tg-start[data-tg=""]::before {
-    margin: 8px 0 8px 2px;
+.tg-head .tg-pill:empty {
+    margin-left: 2px;
 }
 
-.tab-item.tg-start[data-tg=""]::before,
 .tg-pill:empty {
     width: 10px;
     height: 10px;
@@ -607,7 +682,7 @@ body.keyboard .tab-item:has(> .tab-row:focus) .tab-actions {
     border-radius: 50%;
 }
 
-/* Edit and Remove beside the row, not the pill */
+/* Edit and Remove beside the row, not the tab group's line */
 .tab-item.tg-start > .tab-actions {
     top: 26px;
 }

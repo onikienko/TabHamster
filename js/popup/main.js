@@ -16,7 +16,7 @@ import {normalizeName, findByName, countByName, freeName} from '../names.js';
 import {parseQuery, segments, search, matchesAll} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
-import {queryTabGroups, tabGroupFields, tabGroupRuns, requestTabGroups, hasTabGroups, TAB_GROUP_COLORS} from '../ui/tab_groups.js';
+import {queryTabGroups, tabGroupFields, tabGroupRuns, tabGroupRun, requestTabGroups, hasTabGroups, TAB_GROUP_COLORS} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const numbers = new Intl.NumberFormat(lang);
@@ -748,6 +748,26 @@ async function openAsTabGroup(key) {
     }
     const cg = {i: 1, t: groupName(key, group)};
     openInThisWindow(group.tabs.map((tab) => Object.assign({}, tab, {cg})));
+}
+
+/**
+ * Opens a run of tabs (with their cg) as its browser tab group, in this window ('current') or a new one ('window').
+ * Asks for the permission first, straight from the click, as Open as tab group; refused: nothing opens.
+ */
+async function openTabGroup(how, tabs) {
+    let given = false;
+    try {
+        given = await requestTabGroups();
+    } catch (e) {
+        console.error('TabHamster: tab groups permission', e);
+    }
+    if (given) {
+        if (how === 'window') {
+            openInNewWindow(tabs);
+        } else {
+            openInThisWindow(tabs);
+        }
+    }
 }
 
 async function copyLinks(group) {
@@ -1545,16 +1565,16 @@ function marked(text) {
         text;
 }
 
-// group and session names, "3 closed tabs" of a session's window and tab rows: ↑ ↓ move between them
-const STOPS = 'button.name, button.fold, .tab-row';
+// group and session names, "3 closed tabs" of a session's window, tab group lines and tab rows: ↑ ↓ move between them
+const STOPS = 'button.name, button.fold, button.tg-name, .tab-row';
 
 /** the list's stops, in order */
 function listStops() {
     return Array.from(el.list.querySelectorAll(STOPS));
 }
 
-// buttons of a row (Open, new window, ⋯, Restore) and "Open window" of a session's windows
-const ITEM_BUTTONS = '.row button:not(.name):not(.chev), .win-title button';
+// buttons of a row (Open, new window, ⋯, Restore), "Open window" of a session's windows, Open and new window of a tab group
+const ITEM_BUTTONS = '.row button:not(.name):not(.chev), .win-title button, .tg-head button';
 
 /**
  * Tab enters the list at one place: the focused group or tab, else the first one (↑ ↓ move it). From there Tab goes
@@ -1681,10 +1701,45 @@ function favicon(url) {
 // a saved group's tab row (its link) -> {key, index, tab}: what it showed, for Delete and F2
 const rowTabs = new WeakMap();
 
-/** a tab row's wrapper; in a browser tab group (`tg` from tabGroupRuns) its color, and the name on a run's first */
+/** a tab row's wrapper; in a browser tab group (`tg` from tabGroupRuns) its color */
 function tabItem(tg) {
-    return tg ? {class: ['tab-item', 'tg', 'tg-' + tg.c, tg.start && 'tg-start'], dataset: tg.start ? {tg: tg.t} : null} :
-        {class: 'tab-item'};
+    return {class: tg ? ['tab-item', 'tg', 'tg-' + tg.c, tg.start && 'tg-start'] : 'tab-item'};
+}
+
+/**
+ * The line over a run's first tab (PLAN.md 9.1), a row of the list: the tab group's name in a pill (a dot if unnamed),
+ * and Open and new window on hover or focus, which open the whole run (`tg.run()`, its tabs with cg) as a tab group.
+ * Enter and Shift+Enter on it do the same; a click on the pill does nothing.
+ */
+function tabGroupHead(tg) {
+    const which = tg.t ? t('p_inTabGroup', [tg.t]) : t('p_unnamedTabGroup');
+    const open = (e) => openTabGroup(wantsNewWindow(e) ? 'window' : 'current', tg.run());
+    const pill = h('span', {class: 'tg-pill ellipsis', dir: 'auto'}, tg.t);
+    const name = h('button', {
+        class: 'tg-name', type: 'button', 'aria-label': which, 'aria-keyshortcuts': 'Enter Shift+Enter',
+        onKeydown: (e) => {
+            if (e.key === 'Enter' && !e.isComposing) {
+                e.preventDefault();
+                if (!e.repeat) {
+                    open(e);
+                }
+            }
+        },
+    }, pill);
+    if (tg.t) {
+        // only for a name the line cuts off, as group names
+        setTip(name, {text: tg.t, bold: true, align: 'start', focus: false, quiet: true, when: () => isCut(pill)});
+    }
+    return h('div', {class: 'tg-head'}, name,
+        h('div', {class: 'tg-actions'},
+            setTip(h('button', {
+                class: 'open', type: 'button', 'aria-description': which, onClick: single(open),
+                onAuxclick: single((e) => e.button === 1 && openTabGroup('window', tg.run())),
+            }, t('p_open')), {text: t('p_openInThisWindow'), keys: [ENTER]}),
+            setTip(h('button', {
+                class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'), 'aria-description': which,
+                onClick: single(() => openTabGroup('window', tg.run())),
+            }, icon('newWindow', 16)), {text: t('p_openNewWindow'), keys: [keyCombo(['shift', 'enter'])]})));
 }
 
 /**
@@ -1692,7 +1747,7 @@ function tabItem(tg) {
  * Remove, shown over the end of the row on hover or when the row has the focus with keys (Delete, F2).
  * `opts`: `right`, a time instead of the address (closed tabs, trail pages); `step`, a page of a trail; `trail`,
  * {id, auto, open, count} for a session's tab with earlier pages: their number shows before the address, a click on it
- * (or → ←) shows and hides them; `tg`, its browser tab group (tabItem).
+ * (or → ←) shows and hides them; `tg`, its browser tab group (tabItem), on a run's first tab with `run` (tabGroupHead).
  */
 function tabRow(tab, at, opts = {}) {
     const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
@@ -1728,13 +1783,14 @@ function tabRow(tab, at, opts = {}) {
     h('span', {class: ['domain', 'ellipsis', opts.right && 'num']}, opts.right || marked(hostOf(tab.url)))),
     {text: tab.title || tab.url, sub: tab.title ? tab.url : null, align: 'start', focus: false, quiet: true,
         when: () => isCut(title)});
+    const head = opts.tg && opts.tg.start ? tabGroupHead(opts.tg) : null;
     if (!at) {
-        return h('div', tabItem(opts.tg), link);
+        return h('div', tabItem(opts.tg), head, link);
     }
     const shown = {key: at.key, index: at.index, tab};
     rowTabs.set(link, shown);
     // not Tab stops: the keys do the same on the focused row
-    return h('div', tabItem(opts.tg), link, h('div', {class: 'tab-actions'},
+    return h('div', tabItem(opts.tg), head, link, h('div', {class: 'tab-actions'},
         setTip(h('button', {
             class: 'ib', type: 'button', tabindex: '-1', 'aria-label': t('p_editTab'),
             onClick: () => startTabEdit(at.key, shown),
@@ -1940,6 +1996,11 @@ function groupItem(result, target) {
             const cg = i !== edited && group.tabs[i].cg;
             return cg ? {id: cg.i, t: cg.t, c: cg.c} : null;
         }), indexes);
+        runs.forEach((tg, n) => {
+            if (tg && tg.start) {
+                tg.run = () => tabGroupRun(group.tabs, indexes[n], (tab) => (tab.cg ? tab.cg.i : null));
+            }
+        });
         const rows = indexes.map((i, n) => (i === edited ? tabEditor(key, editing) :
             tabRow(group.tabs[i], {key, index: i}, {tg: runs[n]})));
         if (editing && !editing.tab) {
@@ -2046,7 +2107,7 @@ function sessionWindowRows(key, win, i, live, found) {
                     class: 'link', type: 'button',
                     onClick: single(() => openElsewhere('window', withSessionGroups(state.sessions[key], win.tabs))),
                 }, t('p_openWindow'))),
-        sessionTabGroups(key, shown, found && tabs).map((tg, n) => sessionTabRows(key, shown[n], found, undefined, tg)),
+        sessionTabGroups(key, shown, tabs, !!found).map((tg, n) => sessionTabRows(key, shown[n], found, undefined, tg)),
         closedShown.length ? [
             h('button', {
                 class: 'fold', type: 'button', 'aria-expanded': String(foldOpen),
@@ -2061,15 +2122,23 @@ function sessionWindowRows(key, win, i, live, found) {
 /**
  * The browser tab groups of a session's tabs as a list shows them (tabGroupRuns), from the names the session
  * recorded: a session without them (no permission, 1.0.0) shows its tabs without tab groups. `all`: the window's
- * tabs when `tabs` are only those a search found.
+ * tabs (a run opens all of its own); `found`: `tabs` are only those a search found.
  */
-function sessionTabGroups(key, tabs, all) {
-    const groups = state.sessions[key].groups || {};
-    const places = all ? new Map(all.map((tab, i) => [tab, i])) : null;
-    return tabGroupRuns(tabs.map((tab) => {
+function sessionTabGroups(key, tabs, all, found) {
+    const session = state.sessions[key];
+    const groups = session.groups || {};
+    const places = new Map(all.map((tab, i) => [tab, i]));
+    const runs = tabGroupRuns(tabs.map((tab) => {
         const group = tab.groupId >= 0 && groups[tab.groupId];
         return group ? {id: tab.groupId, t: group.title, c: group.color} : null;
-    }), places && tabs.map((tab) => places.get(tab)));
+    }), found ? tabs.map((tab) => places.get(tab)) : null);
+    runs.forEach((tg, n) => {
+        if (tg && tg.start) {
+            tg.run = () => withSessionGroups(session,
+                tabGroupRun(all, places.get(tabs[n]), (tab) => (tab.groupId >= 0 ? tab.groupId : null)));
+        }
+    });
+    return runs;
 }
 
 /**
@@ -2473,7 +2542,7 @@ el.list.addEventListener('keydown', (e) => {
         if (toggle && isExpanded(toggle, auto) !== (e.key === 'ArrowRight')) {
             e.preventDefault();
             toggleItem(toggle, auto);
-        } else if (e.key === 'ArrowLeft' && target.matches('.tab-row, .fold')) {
+        } else if (e.key === 'ArrowLeft' && target.matches('.tab-row, .fold, .tg-name')) {
             const trail = target.closest('.trail');
             const fold = target.closest('.fold-list');
             const up = trail ? trail.previousElementSibling.querySelector('.tab-row') :
@@ -2539,7 +2608,7 @@ let pointerAt = null;
 let pointerNow = null;
 el.list.addEventListener('pointermove', (e) => {
     pointerNow = {x: e.clientX, y: e.clientY};
-    if (e.target.closest('.fold, .tab-item, .row')) {
+    if (rowOf(e.target)) {
         pointerAt = pointerNow;
     }
 });
@@ -2552,19 +2621,26 @@ el.list.addEventListener('scroll', () => {
     pointerAt = pointerNow && rowAt(pointerNow) ? pointerNow : null;
 }, {passive: true});
 
-/** the row at a point of the list: a group or session row, "3 closed tabs", a tab */
-function rowAt(point) {
-    const node = document.elementFromPoint(point.x, point.y);
-    return node && el.list.contains(node) ? node.closest('.fold, .tab-item, .row') : null;
+/** the row a node is in: a group or session row, "3 closed tabs", a tab group's line (over its first tab), a tab */
+function rowOf(node) {
+    return node.closest('.fold, .tg-head, .tab-item, .row');
 }
 
-/** the row the pointer is on, or was last on (pointerAt), by its stop: a group or session name, "3 closed tabs", a tab */
+/** the row at a point of the list */
+function rowAt(point) {
+    const node = document.elementFromPoint(point.x, point.y);
+    return node && el.list.contains(node) ? rowOf(node) : null;
+}
+
+/** the row the pointer is on, or was last on (pointerAt), by its stop: a group or session name, "3 closed tabs", a tab
+ * group's line, a tab */
 function rowUnderPointer() {
     const row = pointerAt && rowAt(pointerAt);
     if (!row) {
         return null;
     }
-    return row.matches('.fold') ? row : row.querySelector(row.matches('.tab-item') ? '.tab-row' : 'button.name');
+    return row.matches('.fold') ? row :
+        row.querySelector(row.matches('.tg-head') ? '.tg-name' : row.matches('.tab-item') ? ':scope > .tab-row' : 'button.name');
 }
 
 // keys the list's keydown handler gives a row; Tab, Esc and typing are not about a row
@@ -2584,7 +2660,7 @@ document.addEventListener('keydown', (e) => {
         !document.body.classList.contains('dragging') && el.list.contains(focus) && focus.matches(STOPS + ', ' + ITEM_BUTTONS)) {
         const stop = rowUnderPointer();
         // the focus already in that row (Open, Restore, ⋯ just clicked): the key is for it
-        if (stop && stop !== focus && !stop.closest('.fold, .tab-item, .row').contains(focus)) {
+        if (stop && stop !== focus && rowOf(stop) !== rowOf(focus)) {
             e.preventDefault();
             e.stopImmediatePropagation();
             stop.focus();
