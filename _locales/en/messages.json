@@ -1704,6 +1704,10 @@
         "message": "With Remember tab groups on (Saving tabs), groups and sessions keep the names and colors of the browser’s tab groups and open them as tab groups again. When the current tab is in one, Save tab group appears under the field, or Update group if the tab group was saved and has changed since.",
         "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group and Update group the buttons in the popup: use their texts"
     },
+    "s_help_tabGroupsAlways": {
+        "message": "Groups and sessions keep the names and colors of the browser’s tab groups and open them as tab groups again. When the current tab is in one, Save tab group appears under the field, or Update group if the tab group was saved and has changed since.",
+        "description": "Settings page. Help, key list. After Tab groups, instead of s_help_tabGroups where the browser gives the tab groups permission without asking (Firefox: no Remember tab groups switch). Save tab group and Update group are the buttons in the popup: use their texts"
+    },
     "s_about_free": {
         "message": "TabHamster is free and open source.",
         "description": "Settings page. About"

@@ -2111,6 +2111,10 @@
         "message": "Коли ввімкнено «Запам'ятовувати групи вкладок» («Збереження вкладок»), групи й сесії зберігають назви й кольори груп вкладок браузера та знову відкривають їх як групи вкладок. Коли поточна вкладка в одній із них, під полем з'являється «Зберегти групу вкладок» або «Оновити групу», якщо групу вкладок уже збережено і відтоді вона змінилася.",
         "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group and Update group the buttons in the popup: use their texts"
     },
+    "s_help_tabGroupsAlways": {
+        "message": "Групи й сесії зберігають назви й кольори груп вкладок браузера та знову відкривають їх як групи вкладок. Коли поточна вкладка в одній із них, під полем з'являється «Зберегти групу вкладок» або «Оновити групу», якщо групу вкладок уже збережено і відтоді вона змінилася.",
+        "description": "Settings page. Help, key list. After Tab groups, instead of s_help_tabGroups where the browser gives the tab groups permission without asking (Firefox: no Remember tab groups switch). Save tab group and Update group are the buttons in the popup: use their texts"
+    },
     "s_about_free": {
         "message": "TabHamster безкоштовний і має відкритий код.",
         "description": "Settings page. About"

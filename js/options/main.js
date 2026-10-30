@@ -11,7 +11,7 @@ import {showBar} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {backupRows, renderRestoreInfo} from './backup.js';
-import {hasTabGroups, requestTabGroups, removeTabGroups, watchTabGroups} from '../ui/tab_groups.js';
+import {hasTabGroups, requestTabGroups, removeTabGroups, watchTabGroups, tabGroupsRequired} from '../ui/tab_groups.js';
 
 const lang = uiLanguage();
 const GITHUB = 'https://github.com/onikienko/TabHamster';
@@ -225,7 +225,9 @@ function saving() {
     return [
         row('cur_win_label', t('s_curWin'), t('s_curWin_text'), switchControl('cur_win', 'cur_win_label')),
         row('pinned_label', t('o_savedTabs_pinned'), t('s_pinned_text'), switchControl('pinned', 'pinned_label')),
-        row('tab_groups_label', t('s_tabGroups'), t('s_tabGroups_text'), tabGroupsControl('tab_groups_label')),
+        // where the manifest requires it (Firefox) there is nothing to switch
+        tabGroupsRequired() ? null :
+            row('tab_groups_label', t('s_tabGroups'), t('s_tabGroups_text'), tabGroupsControl('tab_groups_label')),
         row('sessions_label', t('s_sessions'), t('s_sessions_text'), switchControl('session_watcher', 'sessions_label')),
     ];
 }
@@ -387,7 +389,7 @@ function help() {
         [cap(keyLabel('delete')), t('s_help_delete')],
         [cap('F2'), t('s_help_f2')],
         [t('s_help_sessionsKey'), t('s_help_sessions')],
-        [t('s_help_tabGroupsKey'), t('s_help_tabGroups')],
+        [t('s_help_tabGroupsKey'), t(tabGroupsRequired() ? 's_help_tabGroupsAlways' : 's_help_tabGroups')],
     ];
     return [h('dl', {class: 'keys'}, tips.map(([key, text]) => h('div', {class: 'row'},
         h('dt', null, keyCaps(key)), h('dd', null, text)))),

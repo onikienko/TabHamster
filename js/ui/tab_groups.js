@@ -1,10 +1,16 @@
-// The browser's tab groups (names, colors): an optional permission. Required, it would disable
+// The browser's tab groups (names, colors): an optional permission in Chrome and Edge. Required, it would disable
 // TabHamster on update until each user accepts its warning. Without it, tabs are saved and opened as in 1.0.0.
+// Firefox gives it without asking or warning, so its manifest requires it: no switch, nothing to ask.
 
 const TAB_GROUPS = {permissions: ['tabGroups']};
 
 // the tabGroups API's colors (the same list as groupStore.TAB_GROUP_COLORS, for the background)
 export const TAB_GROUP_COLORS = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
+
+/** true where the manifest requires the permission (Firefox): always given, can't be removed */
+export function tabGroupsRequired() {
+    return (chrome.runtime.getManifest().permissions || []).includes('tabGroups');
+}
 
 /** true when the permission is given */
 export async function hasTabGroups() {
@@ -20,7 +26,8 @@ export async function hasTabGroups() {
  * `await` before it can end the gesture.
  */
 export function requestTabGroups() {
-    return chrome.permissions.request(TAB_GROUPS);
+    // required: already given, nothing to ask (and no prompt to wait for)
+    return tabGroupsRequired() ? Promise.resolve(true) : chrome.permissions.request(TAB_GROUPS);
 }
 
 /** gives it back; true when removed */

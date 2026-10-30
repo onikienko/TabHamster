@@ -1704,6 +1704,10 @@
         "message": "Avec Mémoriser les groupes d’onglets activé (Enregistrement des onglets), les groupes et les sessions conservent les noms et couleurs des groupes d’onglets du navigateur et les rouvrent en groupes d’onglets. Quand l’onglet actuel est dans l’un d’eux, Enregistrer le groupe d’onglets apparaît sous le champ, ou Mettre à jour le groupe si le groupe d’onglets a été enregistré et a changé depuis.",
         "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group and Update group the buttons in the popup: use their texts"
     },
+    "s_help_tabGroupsAlways": {
+        "message": "Les groupes et les sessions conservent les noms et couleurs des groupes d’onglets du navigateur et les rouvrent en groupes d’onglets. Quand l’onglet actuel est dans l’un d’eux, Enregistrer le groupe d’onglets apparaît sous le champ, ou Mettre à jour le groupe si le groupe d’onglets a été enregistré et a changé depuis.",
+        "description": "Settings page. Help, key list. After Tab groups, instead of s_help_tabGroups where the browser gives the tab groups permission without asking (Firefox: no Remember tab groups switch). Save tab group and Update group are the buttons in the popup: use their texts"
+    },
     "s_about_free": {
         "message": "TabHamster est gratuit et open source.",
         "description": "Settings page. About"
