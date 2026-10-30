@@ -62,6 +62,22 @@ Tests (Node 22 or newer): `node --test test/*.test.js test/*.test.mjs`
 Store package: `cd build && python3 build.py -m` writes `build/releases/<version>.zip` (the version from
 `manifest.json`) and adds that version to the top of [the changelog](build/releases/changelog.txt).
 
+### Firefox
+
+Firefox (140 or newer) needs its own manifest, which the build script makes from `manifest.json`: a background page
+instead of the service worker, `tabGroups` required instead of optional, no `favicon`, and the add-on ID.
+
+1. `cd build && python3 build.py --firefox-dev --watch` writes the extension with that manifest to `build/firefox/`
+   and keeps copying changed files into it (Ctrl+C stops it). Without `--watch` it writes the folder once.
+2. In another terminal, from the project folder: `npx web-ext run -s build/firefox` opens Firefox with a fresh profile
+   and the extension, and reloads it after each change. Or open `about:debugging#/runtime/this-firefox`, Load
+   Temporary Add-on, and pick `build/firefox/manifest.json` (reload it there after a change).
+
+Edit the project's files, not the ones in `build/firefox/`: they are copies and get overwritten.
+`npx web-ext lint -s build/firefox` checks the extension as addons.mozilla.org does.
+
+Store package: `cd build && python3 build.py -m --firefox` writes `build/releases/<version>-firefox.zip`.
+
 Contributing
 ------------
 
