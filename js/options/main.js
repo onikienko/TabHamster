@@ -547,10 +547,11 @@ function listenForChanges() {
 
 // The store this copy came from, by its ID, next to the version: copies from different stores keep separate groups in
 // sync (another ID). A brand name, not translated. The Edge Add-ons ID comes with its listing; an unpacked build has
-// none.
+// none in Chrome. Firefox takes the ID from the manifest, so a Firefox build run from a folder shows its store too.
 const STORES = {
     mkfjjmjmnplabnplceaekkjcmdddokee: 'Chrome Web Store',
     pifbgknmgjnlibbcbdblinmmlmdihkgc: 'Edge Add-ons',
+    '@TabHamster': 'Firefox Add-ons',
 };
 
 async function start() {

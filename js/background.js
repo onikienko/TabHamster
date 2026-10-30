@@ -1,4 +1,7 @@
-importScripts('storage.js', 'group_store.js', 'backup.js');
+// a service worker in Chrome; Firefox runs a background page that loads these files from the manifest
+if (typeof importScripts === 'function') {
+    importScripts('storage.js', 'group_store.js', 'backup.js');
+}
 
 // The only writer of saved groups. Popup and options pages go through js/group_store_client.js.
 const groups = groupStore.createGroupStore({
