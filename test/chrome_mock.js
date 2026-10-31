@@ -47,16 +47,24 @@ function withCallback(promise, callback) {
  * Test hooks: `log` of write calls, `beforeWrite(op, keys)` that can throw to fail a write,
  * `onWrite(changes)` called after a successful write, raw*() to change data without any of that.
  */
-function createStorageArea({limits = null, clock = Date.now} = {}) {
+// firefox: storage.sync as Firefox's webext-storage keeps it: the same limits, not given as constants; an item is the key
+// and its JSON (no Chromium escapes), the total is the JSON of one object of all items; no write rate limits.
+function createStorageArea({limits = null, clock = Date.now, firefox = false} = {}) {
     let data = new Map();
     const write_times = [];
+    const itemSize = firefox ?
+        (key, value) => Buffer.byteLength(key) + Buffer.byteLength(JSON.stringify(value)) : chromeItemSize;
 
     function total(map) {
         let sum = 0;
         map.forEach(function (value, key) {
-            sum += chromeItemSize(key, value);
+            sum += itemSize(key, value);
         });
         return sum;
+    }
+
+    function quotaTotal(map) {
+        return firefox ? Buffer.byteLength(JSON.stringify(Object.fromEntries(map))) : total(map);
     }
 
     function checkRate() {
@@ -74,7 +82,7 @@ function createStorageArea({limits = null, clock = Date.now} = {}) {
         if (area.beforeWrite) {
             area.beforeWrite(op, keys);
         }
-        if (limits) {
+        if (limits && !firefox) {
             checkRate();
         }
     }
@@ -114,15 +122,15 @@ function createStorageArea({limits = null, clock = Date.now} = {}) {
         });
         if (limits) {
             keys.forEach(function (key) {
-                if (chromeItemSize(key, items[key]) > limits.QUOTA_BYTES_PER_ITEM) {
-                    throw new Error('Resource::kQuotaBytesPerItem quota exceeded');
+                if (itemSize(key, items[key]) > limits.QUOTA_BYTES_PER_ITEM) {
+                    throw new Error(firefox ? FIREFOX_QUOTA_ERROR : 'Resource::kQuotaBytesPerItem quota exceeded');
                 }
             });
-            if (total(next) > limits.QUOTA_BYTES) {
-                throw new Error('Resource::kQuotaBytes quota exceeded');
+            if (quotaTotal(next) > limits.QUOTA_BYTES) {
+                throw new Error(firefox ? FIREFOX_QUOTA_ERROR : 'Resource::kQuotaBytes quota exceeded');
             }
             if (next.size > limits.MAX_ITEMS) {
-                throw new Error('Resource::kMaxItems quota exceeded');
+                throw new Error(firefox ? FIREFOX_QUOTA_ERROR : 'Resource::kMaxItems quota exceeded');
             }
         }
         data = next;
@@ -147,7 +155,7 @@ function createStorageArea({limits = null, clock = Date.now} = {}) {
             return total(data);
         }
         const list = typeof keys === 'string' ? [keys] : keys;
-        return list.reduce((sum, key) => data.has(key) ? sum + chromeItemSize(key, data.get(key)) : sum, 0);
+        return list.reduce((sum, key) => data.has(key) ? sum + itemSize(key, data.get(key)) : sum, 0);
     }
 
     const area = {
@@ -196,10 +204,16 @@ function createStorageArea({limits = null, clock = Date.now} = {}) {
             return out;
         },
     };
-    if (limits) {
+    if (limits && !firefox) {
         Object.assign(area, limits);
     }
     return area;
+}
+
+const FIREFOX_QUOTA_ERROR = 'QuotaExceededError: storage.sync API call exceeded its quota limitations.';
+
+function createFirefoxSyncArea(clock) {
+    return createStorageArea({limits: SYNC_LIMITS, clock, firefox: true});
 }
 
 function createSyncArea(clock) {
@@ -261,4 +275,5 @@ function createSyncNetwork(clock) {
     return {addDevice, upload, download, syncAll, server};
 }
 
-module.exports = {makeClock, createStorageArea, createSyncArea, createSyncNetwork, MINUTE, HOUR};
+module.exports = {makeClock, createStorageArea, createSyncArea, createFirefoxSyncArea, FIREFOX_QUOTA_ERROR,
+    createSyncNetwork, MINUTE, HOUR};

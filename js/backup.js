@@ -17,7 +17,7 @@ var backup = (function () {
     /**
      * @param {Object} groups {key: {name, index, tabs}}
      * @param {Object} options extension options
-     * @param {Object} sync_limits chrome.storage.sync (QUOTA_BYTES_PER_ITEM, QUOTA_BYTES): what 0.3.0 could restore
+     * @param {Object} sync_limits groupStore.syncLimits (QUOTA_BYTES_PER_ITEM, QUOTA_BYTES): what 0.3.0 could restore
      * @returns {string}
      */
     function exportText(groups, options, sync_limits) {

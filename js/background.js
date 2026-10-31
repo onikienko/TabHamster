@@ -105,7 +105,7 @@ const group_ops = {
 
     exportBackup: async function () {
         const options = await chrome.storage.sync.get(storage.default_options);
-        return backup.exportText(withoutSyncFlags(await groups.list()), options, chrome.storage.sync);
+        return backup.exportText(withoutSyncFlags(await groups.list()), options, groupStore.syncLimits(chrome.storage.sync));
     },
     // what importBackup would do, nothing is changed: {groups, tabs, options, current, trashed} (see restorePlan)
     // or {error: 'not_backup' | 'damaged' | 'empty'}

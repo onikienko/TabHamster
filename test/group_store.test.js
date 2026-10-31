@@ -1,7 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const gs = require('../js/group_store.js');
-const {makeClock, createStorageArea, createSyncArea, createSyncNetwork, MINUTE, HOUR} = require('./chrome_mock.js');
+const {makeClock, createStorageArea, createSyncArea, createFirefoxSyncArea, FIREFOX_QUOTA_ERROR, createSyncNetwork, MINUTE, HOUR} =
+    require('./chrome_mock.js');
 const {mulberry32, makeTabs, makeGroup, int} = require('./helpers.js');
 
 const DAY = 24 * HOUR;
@@ -1451,4 +1452,34 @@ test('fuzz: two devices end up with the same groups', async () => {
         }
     }
     assert.ok(converged >= 10, 'only ' + converged + ' runs had everything in sync');
+});
+
+test('firefox: no limit constants there, groups still go to sync; usage is the total as Firefox counts it', async () => {
+    const clock = makeClock();
+    const {store, sync} = makeDevice({clock, sync: createFirefoxSyncArea(clock)});
+    assert.equal(sync.QUOTA_BYTES, undefined);
+    assert.equal((await store.save('tg_1', makeGroup(20, 1))).synced, true);
+    await sync.set({theme: 'dark'});
+    const usage = await store.usage();
+    assert.equal(usage.quota, 102400);
+    assert.equal(usage.bytes, Buffer.byteLength(JSON.stringify(sync.dump())));
+});
+
+test('firefox: groups fill sync up to the settings reserve and never meet Firefox\'s own quota error', async () => {
+    const clock = makeClock();
+    const {store, sync} = makeDevice({clock, sync: createFirefoxSyncArea(clock)});
+    let res;
+    let i = 0;
+    do {
+        res = await store.save('tg_' + (1000 + i), makeGroup(2, i));
+        i++;
+    } while (res.synced && i < 1000);
+    // hundreds of items: their quotes, colons and commas are more than the 1 KB reserve
+    assert.ok(i > 200, 'groups saved: ' + i);
+    assert.deepEqual(res, {synced: false, error: QUOTA_ERROR});
+    const total = Buffer.byteLength(JSON.stringify(sync.dump()));
+    assert.ok(total <= 102400 - 1024, 'total ' + total);
+    // settings still fit
+    await sync.set({theme: 'dark', date_format: 'us'});
+    assert.notEqual(res.error, FIREFOX_QUOTA_ERROR);
 });

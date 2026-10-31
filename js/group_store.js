@@ -62,13 +62,25 @@ var groupStore = (function () {
     }
 
     // Bytes chrome.storage.sync counts for one item: key + value as written by Chromium's JSON writer.
-    // It escapes '<' (1 -> 6 bytes) and U+2028/U+2029 (3 -> 6 bytes), JSON.stringify doesn't.
-    function itemBytes(key, value) {
+    // It escapes '<' (1 -> 6 bytes) and U+2028/U+2029 (3 -> 6 bytes), JSON.stringify doesn't. Firefox's writer
+    // doesn't either (chromium_escapes false): there it's the key and JSON.stringify's bytes.
+    function itemBytes(key, value, chromium_escapes = true) {
         const json = JSON.stringify(value);
-        return encoder.encode(key).length +
-            encoder.encode(json).length +
-            5 * countMatches(json, /</g) +
-            3 * countMatches(json, /[\u2028\u2029]/g);
+        const bytes = encoder.encode(key).length + encoder.encode(json).length;
+        return chromium_escapes ? bytes + 5 * countMatches(json, /</g) + 3 * countMatches(json, /[\u2028\u2029]/g) : bytes;
+    }
+
+    // chrome.storage.sync's limits. Firefox has the same ones but doesn't give them (the constants are undefined), and
+    // checks its total as the JSON of one object of all items: each item adds its key's quotes, a colon and a comma
+    // to what getBytesInUse counts (item_overhead).
+    function syncLimits(sync) {
+        const firefox = sync.QUOTA_BYTES === undefined;
+        return {
+            QUOTA_BYTES: firefox ? 102400 : sync.QUOTA_BYTES,
+            QUOTA_BYTES_PER_ITEM: firefox ? 8192 : sync.QUOTA_BYTES_PER_ITEM,
+            MAX_ITEMS: firefox ? 512 : sync.MAX_ITEMS,
+            item_overhead: firefox ? 4 : 0,
+        };
     }
 
     // cyrb53: 53-bit string hash, enough to tell whether tabs changed
@@ -228,7 +240,7 @@ var groupStore = (function () {
      * Sync items for one group.
      * @param {string} key group key, 'tg_<ms>'
      * @param {{name: string, index: number, tabs: Array}} group
-     * @param {number} quota_per_item chrome.storage.sync.QUOTA_BYTES_PER_ITEM
+     * @param {number} quota_per_item chrome.storage.sync.QUOTA_BYTES_PER_ITEM (syncLimits)
      * @param {number} [now] current time in ms, used for the write ID of a chunked group
      * @param {function(): number} [random] random source for the write ID
      * @returns {Promise<{items: Object, h: string, w: (string|null), n: number}>}
@@ -359,7 +371,7 @@ var groupStore = (function () {
 
     /**
      * @param {Object} options
-     * @param {Object} options.sync chrome.storage.sync (limits are read from it)
+     * @param {Object} options.sync chrome.storage.sync (limits from syncLimits)
      * @param {Object} options.local chrome.storage.local
      * @param {function(): number} [options.now]
      * @param {function(): number} [options.random]
@@ -369,6 +381,7 @@ var groupStore = (function () {
      */
     function createGroupStore(options) {
         const sync = options.sync;
+        const limits = syncLimits(sync);
         const local = options.local;
         const now = options.now || Date.now;
         const random = options.random || Math.random;
@@ -465,10 +478,23 @@ var groupStore = (function () {
             });
         }
 
+        // what the items take of the quota
         function bytesOf(items, keys) {
             return keys.reduce(function (sum, k) {
-                return items[k] === undefined ? sum : sum + itemBytes(k, items[k]);
+                return items[k] === undefined ? sum :
+                    sum + itemBytes(k, items[k], !limits.item_overhead) + limits.item_overhead;
             }, 0);
+        }
+
+        // what sync holds now, as the quota counts it
+        async function bytesInUse(sync_items) {
+            const bytes = await sync.getBytesInUse(null);
+            if (!limits.item_overhead) {
+                return bytes;
+            }
+            const count = Object.keys(sync_items || await sync.get(null)).length;
+            // and the object's braces, one comma less than items
+            return bytes + count * limits.item_overhead + 1;
         }
 
         // a group key nothing uses, from the time `from` (ms) on
@@ -496,7 +522,7 @@ var groupStore = (function () {
         // Always a complete new version: reusing chunks for a rename could point a header at chunks
         // another device has just removed.
         async function planPush(key, group, sync_items) {
-            const enc = await encodeGroup(key, group, sync.QUOTA_BYTES_PER_ITEM, now(), random);
+            const enc = await encodeGroup(key, group, limits.QUOTA_BYTES_PER_ITEM, now(), random);
             const plan = {key, chunks: {}, main: {}, old_chunks: []};
             const current = sync_items[key];
             const current_w = current && typeof current.w === 'string' ? current.w : null;
@@ -523,24 +549,24 @@ var groupStore = (function () {
             const old = [].concat(...plans.map(p => p.old_chunks));
             const new_keys = Object.keys(chunks).concat(Object.keys(main));
 
-            const in_use = await sync.getBytesInUse(null);
+            const in_use = await bytesInUse(sync_items);
             const added = bytesOf(chunks, Object.keys(chunks)) + bytesOf(main, Object.keys(main));
             const replaced = bytesOf(sync_items, new_keys);
             const old_bytes = bytesOf(sync_items, old);
             const final_bytes = in_use + added - replaced - old_bytes;
             // same messages as Chrome's own errors (Chrome 155)
             // into the settings' reserve only by a write that doesn't grow what is there (sync filled before 1.0.0)
-            if (final_bytes > sync.QUOTA_BYTES ||
-                (final_bytes > sync.QUOTA_BYTES - OPTIONS_RESERVE && final_bytes > in_use)) {
+            if (final_bytes > limits.QUOTA_BYTES ||
+                (final_bytes > limits.QUOTA_BYTES - OPTIONS_RESERVE && final_bytes > in_use)) {
                 throw new Error('Resource::kQuotaBytes quota exceeded');
             }
             const final_count = Object.keys(sync_items).length - old.length +
                 new_keys.filter(k => sync_items[k] === undefined).length;
-            if (final_count > sync.MAX_ITEMS) {
+            if (final_count > limits.MAX_ITEMS) {
                 throw new Error('Resource::kMaxItems quota exceeded');
             }
 
-            if (final_bytes + old_bytes <= sync.QUOTA_BYTES) {
+            if (final_bytes + old_bytes <= limits.QUOTA_BYTES) {
                 if (Object.keys(chunks).length) {
                     await sync.set(chunks);
                 }
@@ -1113,7 +1139,7 @@ var groupStore = (function () {
                     }
                     let enc;
                     try {
-                        enc = await encodeGroup(key, item, sync.QUOTA_BYTES_PER_ITEM, now(), random);
+                        enc = await encodeGroup(key, item, limits.QUOTA_BYTES_PER_ITEM, now(), random);
                     } catch (e) {
                         continue;
                     }
@@ -1172,7 +1198,7 @@ var groupStore = (function () {
 
         async function usageNow() {
             const records = await readRecords();
-            return {bytes: await sync.getBytesInUse(null), quota: sync.QUOTA_BYTES, unsynced: waitingKeys(records).length};
+            return {bytes: await bytesInUse(), quota: limits.QUOTA_BYTES, unsynced: waitingKeys(records).length};
         }
 
         // Space each group takes in sync: its item and chunks, so what deleting it frees. A group that is not
@@ -1192,7 +1218,7 @@ var groupStore = (function () {
                 }
                 let bytes = null;
                 try {
-                    const enc = await encodeGroup(key, rec.g, sync.QUOTA_BYTES_PER_ITEM, now(), random);
+                    const enc = await encodeGroup(key, rec.g, limits.QUOTA_BYTES_PER_ITEM, now(), random);
                     bytes = bytesOf(enc.items, Object.keys(enc.items));
                 } catch (e) {
                     // too big for one sync item: stays on this computer
@@ -1321,6 +1347,7 @@ var groupStore = (function () {
         chunkKey,
         parseChunkKey,
         itemBytes,
+        syncLimits,
         hash,
         tabsHash,
         writeId,
