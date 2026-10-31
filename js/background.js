@@ -1,6 +1,6 @@
 // a service worker in Chrome; Firefox runs a background page that loads these files from the manifest
 if (typeof importScripts === 'function') {
-    importScripts('storage.js', 'group_store.js', 'backup.js');
+    importScripts('storage.js', 'group_store.js', 'backup.js', 'icon_cache.js');
 }
 
 // The only writer of saved groups. Popup and options pages go through js/group_store_client.js.
@@ -810,3 +810,16 @@ chrome.storage.onChanged.addListener(function (changes, area_name) {
         watchSessions(!!(value === undefined ? storage.default_options.session_watcher : value), true);
     }
 });
+
+// Firefox has no _favicon: the icons its tabs show are kept for the popup (js/icon_cache.js), not those of incognito tabs
+if (!(chrome.runtime.getManifest().permissions || []).includes('favicon')) {
+    const keepIcon = function (tab) {
+        if (!tab.incognito && tab.favIconUrl) {
+            iconCache.remember(tab.url, tab.favIconUrl).catch(e => console.error('TabHamster: icon not kept', e));
+        }
+    };
+    chrome.tabs.onUpdated.addListener((tab_id, change, tab) => keepIcon(tab), {properties: ['favIconUrl']});
+    // the tabs open at start: their icons came before the background did
+    chrome.tabs.query({}).then(tabs => tabs.forEach(keepIcon), e => console.error('TabHamster: tabs not read', e));
+    iconCache.trim().catch(e => console.error('TabHamster: icons not trimmed', e));
+}

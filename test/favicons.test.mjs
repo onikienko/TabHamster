@@ -7,7 +7,11 @@ const icons = {'https://known.example/page': new Uint8Array([9, 9, 9])};
 let requests = [];
 let broken = false;
 
-globalThis.chrome = {runtime: {getURL: (path) => 'chrome-extension://id' + path}};
+// Chrome's permissions; without `favicon` (Firefox) the icons come from iconCache
+let permissions = ['favicon'];
+globalThis.chrome = {runtime: {getURL: (path) => 'chrome-extension://id' + path, getManifest: () => ({permissions})}};
+const kept = {'https://kept.example': 'png'};
+globalThis.iconCache = {get: async (pageUrl) => kept[new URL(pageUrl).origin] || null};
 globalThis.fetch = async (url) => {
     requests.push(url);
     if (broken) {
@@ -44,6 +48,18 @@ test('chromeIcon: when _favicon can\'t be read, the page shows it as before', as
         assert.equal(await chromeIcon(page), faviconUrl(page));
     } finally {
         broken = false;
+    }
+});
+
+test('chromeIcon without _favicon (Firefox): the icon the background kept for the site, null if none', async () => {
+    permissions = [];
+    requests = [];
+    try {
+        assert.equal(await chromeIcon('https://kept.example/any/page'), 'blob:icon');
+        assert.equal(await chromeIcon('https://never.example/'), null);
+        assert.equal(requests.length, 0);
+    } finally {
+        permissions = ['favicon'];
     }
 });
 

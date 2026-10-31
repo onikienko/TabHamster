@@ -2,6 +2,7 @@
 // browser: for any other it answers with its grey globe. Groups synced from another computer are full of those,
 // so the popup can load them from the sites themselves instead (option site_icons: 'ask', 'load' or 'off').
 // Answers are kept for as long as the page is open: the popup draws its rows again on every change.
+// Firefox has no _favicon: there the icons come from those the background kept (js/icon_cache.js, the global iconCache).
 
 // Chrome's icon at 32 px: sharp at 16 px on a high-density screen
 const SIZE = 32;
@@ -43,7 +44,23 @@ function same(a, b) {
     return a.length === b.length && a.every((byte, i) => byte === b[i]);
 }
 
+function hasFavicon() {
+    return (chrome.runtime.getManifest().permissions || []).includes('favicon');
+}
+
+async function kept(pageUrl) {
+    try {
+        const png = await iconCache.get(pageUrl);
+        return png ? URL.createObjectURL(png) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
 async function check(pageUrl) {
+    if (!hasFavicon()) {
+        return kept(pageUrl);
+    }
     const src = faviconUrl(pageUrl);
     try {
         blank = blank || bytes(faviconUrl(UNKNOWN_PAGE));

@@ -90,6 +90,7 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
         storage: {sync, local, session, onChanged: event()},
         runtime: {
             onInstalled: event(), onStartup: event(), onMessage: event(), onUpdateAvailable: event(), reload() {},
+            getManifest: () => ({permissions: ['storage', 'tabs', 'favicon', 'unlimitedStorage']}),
             sendMessage(msg) {
                 sent.push(JSON.parse(JSON.stringify(msg)));
                 return Promise.reject(new Error('Could not establish connection. Receiving end does not exist.'));

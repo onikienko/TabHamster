@@ -276,7 +276,7 @@
                 return root + path.replace(/^\//, '');
             },
             getManifest: function () {
-                return {version: 'harness'};
+                return {version: 'harness', permissions: ['storage', 'tabs', 'favicon', 'unlimitedStorage']};
             },
             sendMessage: function (msg) {
                 var copy = JSON.parse(JSON.stringify(msg));
