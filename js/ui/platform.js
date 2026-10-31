@@ -1,3 +1,8 @@
+/** Firefox (its extension pages are moz-extension:): no incognito there but private windows, allowed per add-on */
+export function isFirefox() {
+    return chrome.runtime.getURL('').startsWith('moz-extension:');
+}
+
 // Key names as the user's keyboard shows them. A Mac has Return, Option and Command; others Enter, Alt and Ctrl.
 // Option is reported as altKey, so code checks the same properties everywhere.
 

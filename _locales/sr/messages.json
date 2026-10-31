@@ -795,6 +795,10 @@
         "message": "Отвори у прозору без архивирања",
         "description": "Group menu"
     },
+    "p_openPrivate": {
+        "message": "Отвори у приватном прозору",
+        "description": "Group menu item in Firefox, instead of p_openIncognito (Firefox's word): opens the group in a private window"
+    },
     "p_openAsTabGroup": {
         "message": "Отвори као групу картица",
         "description": "Group menu. Opens the group's tabs in this window as one of the browser's own tab groups, named like the group"
@@ -964,6 +968,14 @@
     "p_openFailed": {
         "message": "Отварање картица није успело.",
         "description": "Bar when Chrome refused to open the tabs (for example incognito is turned off by an administrator)"
+    },
+    "p_privateNotAllowed": {
+        "message": "Firefox дозвољава да TabHamster отвара приватне прозоре тек када то дозволите: Firefox мени › Додаци и теме › TabHamster › Покрени у приватним прозорима › Дозволи.",
+        "description": "Bar in Firefox when the group can't open in a private window: Firefox hasn't allowed TabHamster there. The path to the setting in Firefox's own words; button p_ok"
+    },
+    "p_ok": {
+        "message": "У реду",
+        "description": "Bar button: closes the message (p_privateNotAllowed)"
     },
     "p_restore": {
         "message": "Врати",
@@ -2090,6 +2102,10 @@
     "s_help_more": {
         "message": "Мени групе: замени њене картице отвореним, додај тренутну картицу или линк, преименуј, отвори у прозору без архивирања, отвори као једну групу картица, копирај линкове или избриши. Избрисане групе остају у Недавно избрисаним 30 дана.",
         "description": "Settings page. Help, key list. After ⋯"
+    },
+    "s_help_morePrivate": {
+        "message": "Мени групе: замени њене картице отвореним, додај тренутну картицу или линк, преименуј, отвори у приватном прозору, отвори као једну групу картица, копирај линкове или избриши. Избрисане групе остају у Недавно избрисаним 30 дана.",
+        "description": "Settings page. Help, key list, after ⋯, in Firefox: s_help_more with Firefox's private window instead of incognito"
     },
     "s_help_sessionsKey": {
         "message": "Картица Сесије",

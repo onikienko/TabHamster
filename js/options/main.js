@@ -5,7 +5,7 @@
 import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
-import {isMac, keyLabel} from '../ui/platform.js';
+import {isMac, keyLabel, isFirefox} from '../ui/platform.js';
 import {keyTime, numericDate, dayTime, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
@@ -385,7 +385,7 @@ function help() {
         ['→ ←', t('s_help_arrows')],
         [t('s_help_moveKey', modifier('alt')), t('s_help_move')],
         [cap(keyLabel('esc')), t('s_help_esc')],
-        ['⋯', t('s_help_more')],
+        ['⋯', t(isFirefox() ? 's_help_morePrivate' : 's_help_more')],
         [cap(keyLabel('delete')), t('s_help_delete')],
         [cap('F2'), t('s_help_f2')],
         [t('s_help_sessionsKey'), t('s_help_sessions')],

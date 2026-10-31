@@ -5,7 +5,7 @@
 import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
-import {wantsNewWindow, keyLabel, keyCombo, isMac} from '../ui/platform.js';
+import {wantsNewWindow, keyLabel, keyCombo, isMac, isFirefox} from '../ui/platform.js';
 import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, withScheme, kilobytes} from '../ui/format.js';
 import {knownIcon, chromeIcon, siteIcon, siteIconFailed} from '../ui/favicons.js';
 import {showBar, hideBarAbout, barShown} from '../ui/bar.js';
@@ -257,6 +257,11 @@ function openInThisWindow(tabs) {
 
 /** in a new window ('window') or an incognito one ('incognito'); the popup closes unless that failed */
 async function openElsewhere(how, tabs) {
+    // Firefox opens a private window for an extension only once the user allows it there: say where
+    if (how === 'incognito' && isFirefox() && !(await chrome.extension.isAllowedIncognitoAccess())) {
+        showBar(t('p_privateNotAllowed'), {label: t('p_ok'), run: () => {}}, {stay: true});
+        return;
+    }
     if (await openTabs(how, tabs)) {
         window.close();
     }
@@ -826,7 +831,7 @@ async function groupMenu(key, button) {
         {icon: 'link', label: t('p_addLink'), run: () => startTabEdit(key, null)},
         {icon: 'pencil', label: t('p_rename'), run: () => startRename(key)},
         '-',
-        {icon: 'incognito', label: t('p_openIncognito'), run: () => openElsewhere('incognito', group.tabs)},
+        {icon: 'incognito', label: t(isFirefox() ? 'p_openPrivate' : 'p_openIncognito'), run: () => openElsewhere('incognito', group.tabs)},
         {icon: 'tabGroup', label: t('p_openAsTabGroup'), run: () => openAsTabGroup(key)},
         {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(group)},
         '-',

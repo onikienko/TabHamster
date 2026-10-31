@@ -83,14 +83,16 @@ function fakeBrowser(active, {tab_groups = false, groups = []} = {}) {
 const ONE_TAB = {id: 1, url: 'https://example.com/', title: 'Example', pinned: false, windowId: 1};
 
 function startBackground({sync = createSyncArea(), local = createStorageArea(), session = createStorageArea(),
-    browser = fakeBrowser(), start_wait = 0} = {}) {
+    browser = fakeBrowser(), start_wait = 0, firefox = false} = {}) {
     // messages the background sends to open pages; like Chrome, it fails when no page listens
     const sent = [];
     const chrome = {
         storage: {sync, local, session, onChanged: event()},
         runtime: {
             onInstalled: event(), onStartup: event(), onMessage: event(), onUpdateAvailable: event(), reload() {},
-            getManifest: () => ({permissions: ['storage', 'tabs', 'favicon', 'unlimitedStorage']}),
+            getManifest: () => ({permissions: firefox ? ['storage', 'tabs', 'unlimitedStorage', 'tabGroups'] :
+                ['storage', 'tabs', 'favicon', 'unlimitedStorage']}),
+            getURL: path => (firefox ? 'moz-extension://uuid/' : 'chrome-extension://id/') + path,
             sendMessage(msg) {
                 sent.push(JSON.parse(JSON.stringify(msg)));
                 return Promise.reject(new Error('Could not establish connection. Receiving end does not exist.'));
@@ -117,8 +119,12 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
         chrome, console, setTimeout, clearTimeout, TextEncoder, TextDecoder, Blob, Response,
         CompressionStream, DecompressionStream, btoa, atob, structuredClone,
     });
+    // no IndexedDB here: Firefox's icon cache (js/icon_cache.js) does nothing
+    if (firefox) {
+        context.iconCache = {get: async () => null, remember: async () => {}, trim: async () => {}};
+    }
     context.importScripts = function (...files) {
-        files.forEach(function (file) {
+        files.filter(file => !(firefox && file === 'icon_cache.js')).forEach(function (file) {
             const code = fs.readFileSync(path.join(ROOT, 'js', file), 'utf8');
             vm.runInContext(code, context, {filename: file});
         });
@@ -324,6 +330,35 @@ test('open in the current window: a blank new tab takes the first tab', async ()
         ['create', {windowId: 1, url: 'https://b.example/', pinned: false, active: false}],
         ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false}],
     ]);
+});
+
+test('open in the current window: Firefox\'s new tab pages are blank too', async () => {
+    for (const url of ['about:newtab', 'about:home', 'about:privatebrowsing']) {
+        const browser = fakeBrowser({id: 1, windowId: 1, url});
+        const bg = startBackground({browser});
+        await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
+        assert.deepEqual(browser.calls[0], ['update', 1, {url: 'https://a.example/', pinned: true}], url);
+    }
+});
+
+test('firefox: only addresses it shows are opened, a reader view tab as its page; the rest count as failed', async () => {
+    const browser = fakeBrowser();
+    const bg = startBackground({browser, firefox: true});
+    const tabs = [{url: 'chrome://settings/'}, {url: 'https://a.example/', cg: {i: 1, t: 'A', c: 'blue'}},
+        {url: 'mailto:a@example.com'}, {url: 'edge://settings/'}, {url: 'chrome-extension://abc/page.html'},
+        {url: 'about:config'}, {url: 'file:///etc/hosts'}, {url: 'about:reader?url=https%3A%2F%2Fb.example%2Fx%3Fy%3D1'},
+        {url: 'view-source:http://c.example/'}, {url: 'about:blank'}, {url: 'about:reader?url=%E0%A4%A'}];
+    assert.deepEqual(await bg.send({msg: 'open', how: 'window', tabs}), {result: {failed: 7}});
+    assert.deepEqual(browser.calls.filter(c => c[0] !== 'update').map(c => c[1].url), [
+        'https://a.example/', 'https://b.example/x?y=1', 'view-source:http://c.example/', 'about:blank']);
+});
+
+test('firefox: nothing it can open is an error, and opens nothing', async () => {
+    const browser = fakeBrowser();
+    const bg = startBackground({browser, firefox: true});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: [{url: 'chrome://newtab/'}, {url: 'mailto:x@y.z'}]}),
+        {error: 'Nothing this browser can open'});
+    assert.deepEqual(browser.calls, []);
 });
 
 test('open in a new window: the window opens with the first tab, the rest follow; bad ones are skipped', async () => {

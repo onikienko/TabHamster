@@ -614,6 +614,10 @@
         "message": "Open in incognito window",
         "description": "Group menu"
     },
+    "p_openPrivate": {
+        "message": "Open in private window",
+        "description": "Group menu item in Firefox, instead of p_openIncognito (Firefox's word): opens the group in a private window"
+    },
     "p_openAsTabGroup": {
         "message": "Open as tab group",
         "description": "Group menu. Opens the group's tabs in this window as one of the browser's own tab groups, named like the group"
@@ -773,6 +777,14 @@
     "p_openFailed": {
         "message": "Couldn’t open the tabs.",
         "description": "Bar when Chrome refused to open the tabs (for example incognito is turned off by an administrator)"
+    },
+    "p_privateNotAllowed": {
+        "message": "Firefox lets TabHamster open private windows only once you allow it: Firefox menu › Add-ons and themes › TabHamster › Run in Private Windows › Allow.",
+        "description": "Bar in Firefox when the group can't open in a private window: Firefox hasn't allowed TabHamster there. The path to the setting in Firefox's own words; button p_ok"
+    },
+    "p_ok": {
+        "message": "OK",
+        "description": "Bar button: closes the message (p_privateNotAllowed)"
     },
     "p_restore": {
         "message": "Restore",
@@ -1687,6 +1699,10 @@
     "s_help_more": {
         "message": "Group menu: replace its tabs with the open ones, add the current tab or a link, rename, open in an incognito window, open as one tab group, copy links, or delete. Deleted groups stay in Recently deleted for 30 days.",
         "description": "Settings page. Help, key list. After ⋯"
+    },
+    "s_help_morePrivate": {
+        "message": "Group menu: replace its tabs with the open ones, add the current tab or a link, rename, open in a private window, open as one tab group, copy links, or delete. Deleted groups stay in Recently deleted for 30 days.",
+        "description": "Settings page. Help, key list, after ⋯, in Firefox: s_help_more with Firefox's private window instead of incognito"
     },
     "s_help_sessionsKey": {
         "message": "Sessions tab",

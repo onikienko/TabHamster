@@ -614,6 +614,10 @@
         "message": "Abrir en una ventana de incógnito",
         "description": "Group menu"
     },
+    "p_openPrivate": {
+        "message": "Abrir en una ventana privada",
+        "description": "Group menu item in Firefox, instead of p_openIncognito (Firefox's word): opens the group in a private window"
+    },
     "p_openAsTabGroup": {
         "message": "Abrir como grupo de pestañas",
         "description": "Group menu. Opens the group's tabs in this window as one of the browser's own tab groups, named like the group"
@@ -773,6 +777,14 @@
     "p_openFailed": {
         "message": "No se pudieron abrir las pestañas.",
         "description": "Bar when Chrome refused to open the tabs (for example incognito is turned off by an administrator)"
+    },
+    "p_privateNotAllowed": {
+        "message": "Firefox solo deja que TabHamster abra ventanas privadas si lo permites: menú de Firefox › Complementos y temas › TabHamster › Ejecutar en ventanas privadas › Permitir.",
+        "description": "Bar in Firefox when the group can't open in a private window: Firefox hasn't allowed TabHamster there. The path to the setting in Firefox's own words; button p_ok"
+    },
+    "p_ok": {
+        "message": "Aceptar",
+        "description": "Bar button: closes the message (p_privateNotAllowed)"
     },
     "p_restore": {
         "message": "Restaurar",
@@ -1687,6 +1699,10 @@
     "s_help_more": {
         "message": "Menú del grupo: reemplazar sus pestañas por las abiertas, añadir la pestaña actual o un enlace, cambiar el nombre, abrir en una ventana de incógnito, abrir como un solo grupo de pestañas, copiar los enlaces o eliminar. Los grupos eliminados se quedan en Eliminados recientemente durante 30 días.",
         "description": "Settings page. Help, key list. After ⋯"
+    },
+    "s_help_morePrivate": {
+        "message": "Menú del grupo: reemplazar sus pestañas por las abiertas, añadir la pestaña actual o un enlace, cambiar el nombre, abrir en una ventana privada, abrir como un solo grupo de pestañas, copiar los enlaces o eliminar. Los grupos eliminados se quedan en Eliminados recientemente durante 30 días.",
+        "description": "Settings page. Help, key list, after ⋯, in Firefox: s_help_more with Firefox's private window instead of incognito"
     },
     "s_help_sessionsKey": {
         "message": "Pestaña Sesiones",

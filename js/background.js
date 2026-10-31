@@ -160,13 +160,46 @@ const group_ops = {
 // Tabs saved in browser tab groups (cg) go back into tab groups (groupTabs).
 
 // a new tab page: it can take the first opened tab instead of staying empty next to them, and it isn't a page a
-// session's tab went through (Edge has its own)
+// session's tab went through (Edge has its own; Firefox: about:newtab, about:home in a new window, about:privatebrowsing)
 function isBlankUrl(url) {
-    return /^(chrome:\/\/(newtab|new-tab-page)\/?|edge:\/\/newtab\/?|about:blank)$/.test(url || '');
+    return /^(chrome:\/\/(newtab|new-tab-page)\/?|edge:\/\/newtab\/?|about:(blank|newtab|home|privatebrowsing))$/.test(url || '');
 }
 
 function isBlankTab(tab) {
     return !!tab && isBlankUrl(tab.pendingUrl || tab.url);
+}
+
+// Firefox refuses Chrome's pages, file:, data:, javascript: and its own about: pages, and hands addresses it doesn't
+// show itself to other apps or an error page (mailto: opens a new mail, edge: and chrome-extension: an error)
+const FIREFOX = chrome.runtime.getURL('').startsWith('moz-extension:');
+
+/** the address Firefox opens for a saved one: web pages (also as view-source:) and about:blank; a reader view tab
+ * opens its page; null for the rest */
+function firefoxUrl(url) {
+    const reader = /^about:reader\?(?:[^#]*&)?url=([^&#]+)/.exec(url);
+    if (reader) {
+        try {
+            url = decodeURIComponent(reader[1]);
+        } catch (e) {
+            return null;
+        }
+    }
+    return /^(view-source:)?https?:\/\//i.test(url) || url === 'about:blank' ? url : null;
+}
+
+/** the tabs the browser can open, and how many were left out */
+function openable(tabs) {
+    if (!FIREFOX) {
+        return {tabs, skipped: 0};
+    }
+    const out = [];
+    for (const tab of tabs) {
+        const url = firefoxUrl(tab && tab.url);
+        if (url) {
+            out.push(Object.assign({}, tab, {url}));
+        }
+    }
+    return {tabs: out, skipped: tabs.length - out.length};
 }
 
 // one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others.
@@ -375,8 +408,13 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
                 sendResponse({error: 'Nothing to open'});
                 break;
             }
-            open_ops[msg.how](msg.tabs, msg.windowId).then(function (result) {
-                sendResponse({result});
+            const {tabs, skipped} = openable(msg.tabs);
+            if (!tabs.length) {
+                sendResponse({error: 'Nothing this browser can open'});
+                break;
+            }
+            open_ops[msg.how](tabs, msg.windowId).then(function (result) {
+                sendResponse({result: Object.assign(result, {failed: result.failed + skipped})});
             }, function (e) {
                 sendResponse({error: e.message});
             });
