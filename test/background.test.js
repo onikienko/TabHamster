@@ -341,16 +341,18 @@ test('open in the current window: Firefox\'s new tab pages are blank too', async
     }
 });
 
-test('firefox: only addresses it shows are opened, a reader view tab as its page; the rest count as failed', async () => {
+test('firefox: only addresses it shows are opened (add-on pages too), a reader view tab as its page; the rest count as failed', async () => {
     const browser = fakeBrowser();
     const bg = startBackground({browser, firefox: true});
     const tabs = [{url: 'chrome://settings/'}, {url: 'https://a.example/', cg: {i: 1, t: 'A', c: 'blue'}},
         {url: 'mailto:a@example.com'}, {url: 'edge://settings/'}, {url: 'chrome-extension://abc/page.html'},
         {url: 'about:config'}, {url: 'file:///etc/hosts'}, {url: 'about:reader?url=https%3A%2F%2Fb.example%2Fx%3Fy%3D1'},
-        {url: 'view-source:http://c.example/'}, {url: 'about:blank'}, {url: 'about:reader?url=%E0%A4%A'}];
+        {url: 'view-source:http://c.example/'}, {url: 'about:blank'}, {url: 'about:reader?url=%E0%A4%A'},
+        {url: 'moz-extension://uuid/options.html#help'}];
     assert.deepEqual(await bg.send({msg: 'open', how: 'window', tabs}), {result: {failed: 7}});
     assert.deepEqual(browser.calls.filter(c => c[0] !== 'update').map(c => c[1].url), [
-        'https://a.example/', 'https://b.example/x?y=1', 'view-source:http://c.example/', 'about:blank']);
+        'https://a.example/', 'https://b.example/x?y=1', 'view-source:http://c.example/', 'about:blank',
+        'moz-extension://uuid/options.html#help']);
 });
 
 test('firefox: nothing it can open is an error, and opens nothing', async () => {

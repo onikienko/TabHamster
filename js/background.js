@@ -173,8 +173,9 @@ function isBlankTab(tab) {
 // show itself to other apps or an error page (mailto: opens a new mail, edge: and chrome-extension: an error)
 const FIREFOX = chrome.runtime.getURL('').startsWith('moz-extension:');
 
-/** the address Firefox opens for a saved one: web pages (also as view-source:) and about:blank; a reader view tab
- * opens its page; null for the rest */
+/** the address Firefox opens for a saved one: web pages (also as view-source:), add-on pages and about:blank; a reader
+ * view tab opens its page; null for the rest. An add-on page's address changes when the add-on is installed again
+ * (and differs on each computer): an old one opens as a blank tab, as a page of a removed extension does in Chrome */
 function firefoxUrl(url) {
     const reader = /^about:reader\?(?:[^#]*&)?url=([^&#]+)/.exec(url);
     if (reader) {
@@ -184,7 +185,7 @@ function firefoxUrl(url) {
             return null;
         }
     }
-    return /^(view-source:)?https?:\/\//i.test(url) || url === 'about:blank' ? url : null;
+    return /^((view-source:)?https?|moz-extension):\/\//i.test(url) || url === 'about:blank' ? url : null;
 }
 
 /** the tabs the browser can open, and how many were left out */
