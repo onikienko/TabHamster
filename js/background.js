@@ -171,10 +171,14 @@ function isBlankTab(tab) {
 // tab right of the active one whatever the index (and its own setting) says: a tab not where it should be is moved.
 // With the open_in_front option each tab comes to the front instead, without an index, as 0.3.0 did: the browser
 // places it by its own settings, after the one before, and the last one stays in front.
+// `start`: the index for the first one when not the end of the window.
 // {failed: how many didn't open, error: the last error}
-async function createTabs(windowId, tabs, activeFirst) {
+async function createTabs(windowId, tabs, activeFirst, start) {
     const {open_in_front} = await storage.area.get({open_in_front: storage.default_options.open_in_front});
-    let end = !open_in_front && windowId ? (await chrome.tabs.query({windowId})).length : null;
+    let end = null;
+    if (!open_in_front && windowId) {
+        end = start !== undefined ? start : (await chrome.tabs.query({windowId})).length;
+    }
     let failed = 0;
     let error = null;
     for (let i = 0; i < tabs.length; i++) {
@@ -195,7 +199,7 @@ async function createTabs(windowId, tabs, activeFirst) {
             continue;
         }
         // a pinned tab stays with the pinned ones, wherever the index points
-        if (!props.pinned && tab && tab.index !== end) {
+        if (!props.pinned && tab.index !== end) {
             try {
                 await chrome.tabs.move(tab.id, {index: end});
             } catch (e) {
@@ -213,15 +217,21 @@ const open_ops = {
     current: async function (tabs, windowId) {
         const [active] = await chrome.tabs.query(windowId ? {active: true, windowId} : {active: true, lastFocusedWindow: true});
         let rest = tabs;
+        let start;
         if (isBlankTab(active)) {
             try {
-                await chrome.tabs.update(active.id, {url: tabs[0].url, pinned: !!tabs[0].pinned});
+                const tab = await chrome.tabs.update(active.id, {url: tabs[0].url, pinned: !!tabs[0].pinned});
                 rest = tabs.slice(1);
+                // the rest right after it, not at the end of the window: the blank tab can be anywhere in it
+                // (Ctrl+T in a browser that opens new tabs next to the current one)
+                if (tab) {
+                    start = tab.index + 1;
+                }
             } catch (e) {
                 // open it as a new tab like the others
             }
         }
-        const res = await createTabs(active ? active.windowId : windowId, rest, rest === tabs);
+        const res = await createTabs(active ? active.windowId : windowId, rest, rest === tabs, start);
         // nothing opened: the popup stays open (an opened tab would close it) and says why
         if (res.failed === tabs.length) {
             throw res.error;

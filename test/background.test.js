@@ -24,15 +24,18 @@ function event() {
 // windows and tabs that record what the background does with them. `active`: the active tab of window 1.
 // A new tab goes where its index says; without one at the end, or with `after_current` right after the active tab
 // (Cent Browser's "Open tab to the right of the current one"); with `vivaldi` right after the active tab whatever the
-// index. strip(windowId): its tab addresses, '*' on the active.
-function fakeBrowser(active, {after_current = false, vivaldi = false} = {}) {
+// index. `before`, `after`: addresses of other tabs left and right of the active one.
+// strip(windowId): its tab addresses, '*' on the active.
+function fakeBrowser(active, {after_current = false, vivaldi = false, before = [], after = []} = {}) {
     const calls = [];
     // copies: objects from the sandbox have their own prototypes
     const record = (...call) => calls.push(JSON.parse(JSON.stringify(call)));
     let next_id = 100;
     const strips = {};
     if (active) {
-        strips[active.windowId] = [{...active, active: true}];
+        const other = (url, i) => ({id: 50 + i, windowId: active.windowId, url});
+        strips[active.windowId] = [...before.map(other), {...active, active: true},
+            ...after.map((url, i) => other(url, before.length + i))];
     }
     const strip = windowId => (strips[windowId] = strips[windowId] || []);
     const activate = (tabs, tab) => tabs.forEach(t => { t.active = t === tab; });
@@ -67,11 +70,12 @@ function fakeBrowser(active, {after_current = false, vivaldi = false} = {}) {
             },
             update: async function (id, props) {
                 record('update', id, props);
-                const tab = Object.values(strips).flat().find(t => t.id === id);
+                const tabs = Object.values(strips).find(list => list.some(t => t.id === id)) || [];
+                const tab = tabs.find(t => t.id === id);
                 if (tab && props.url) {
                     tab.url = props.url;
                 }
-                return {id};
+                return tab ? {id, index: tabs.indexOf(tab)} : {id};
             },
         },
         windows: {
@@ -378,6 +382,17 @@ test('open in the current window: a blank new tab takes the first tab', async ()
         ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false, index: 2}],
     ]);
     assert.deepEqual(browser.strip(1), ['https://a.example/*', 'https://b.example/', 'https://c.example/']);
+});
+
+test('open in the current window: the rest follow a blank new tab that isn\'t the last one', async () => {
+    // Ctrl+T in a browser that opens new tabs next to the current one
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'},
+        {after_current: true, before: ['https://x.example/'], after: ['https://y.example/']});
+    const bg = startBackground({browser});
+    const tabs = [{url: 'https://a.example/'}, {url: 'https://b.example/'}, {url: 'https://c.example/'}];
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs, windowId: 1}), {result: {failed: 0}});
+    assert.deepEqual(browser.strip(1),
+        ['https://x.example/', 'https://a.example/*', 'https://b.example/', 'https://c.example/', 'https://y.example/']);
 });
 
 test('open in a new window: the window opens with the first tab, the rest follow; bad ones are skipped', async () => {
