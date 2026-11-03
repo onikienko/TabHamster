@@ -858,7 +858,15 @@ if (!(chrome.runtime.getManifest().permissions || []).includes('favicon')) {
         }
     };
     chrome.tabs.onUpdated.addListener((tab_id, change, tab) => keepIcon(tab), {properties: ['favIconUrl']});
-    // the tabs open at start: their icons came before the background did
-    chrome.tabs.query({}).then(tabs => tabs.forEach(keepIcon), e => console.error('TabHamster: tabs not read', e));
-    iconCache.trim().catch(e => console.error('TabHamster: icons not trimmed', e));
+    // The tabs already open when the background first runs: their icons came before it did. Once per browser run
+    // (session storage is emptied when the browser starts or TabHamster is updated): Firefox stops an idle background
+    // and starts it again for the next event, and every tab's icon would be looked up again each time.
+    chrome.storage.session.get('icons_kept').then(async function ({icons_kept}) {
+        if (icons_kept) {
+            return;
+        }
+        (await chrome.tabs.query({})).forEach(keepIcon);
+        await chrome.storage.session.set({icons_kept: true});
+        await iconCache.trim();
+    }).catch(e => console.error('TabHamster: icons of open tabs not kept', e));
 }

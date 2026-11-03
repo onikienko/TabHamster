@@ -83,7 +83,8 @@ function fakeBrowser(active, {tab_groups = false, groups = []} = {}) {
 const ONE_TAB = {id: 1, url: 'https://example.com/', title: 'Example', pinned: false, windowId: 1};
 
 function startBackground({sync = createSyncArea(), local = createStorageArea(), session = createStorageArea(),
-    browser = fakeBrowser(), start_wait = 0, firefox = false} = {}) {
+    browser = fakeBrowser(), start_wait = 0, firefox = false,
+    icon_cache = {get: async () => null, remember: async () => {}, trim: async () => {}}} = {}) {
     // messages the background sends to open pages; like Chrome, it fails when no page listens
     const sent = [];
     const chrome = {
@@ -119,9 +120,9 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
         chrome, console, setTimeout, clearTimeout, TextEncoder, TextDecoder, Blob, Response,
         CompressionStream, DecompressionStream, btoa, atob, structuredClone,
     });
-    // no IndexedDB here: Firefox's icon cache (js/icon_cache.js) does nothing
+    // no IndexedDB here: a stand-in for Firefox's icon cache (js/icon_cache.js)
     if (firefox) {
-        context.iconCache = {get: async () => null, remember: async () => {}, trim: async () => {}};
+        context.iconCache = icon_cache;
     }
     context.importScripts = function (...files) {
         files.filter(file => !(firefox && file === 'icon_cache.js')).forEach(function (file) {
@@ -353,6 +354,23 @@ test('firefox: only addresses it shows are opened (add-on pages too), a reader v
     assert.deepEqual(browser.calls.filter(c => c[0] !== 'update').map(c => c[1].url), [
         'https://a.example/', 'https://b.example/x?y=1', 'view-source:http://c.example/', 'about:blank',
         'moz-extension://uuid/options.html#help']);
+});
+
+test('firefox: the icons of the tabs open at start are kept once per browser run, not on each start of the background', async () => {
+    const tab = {id: 1, windowId: 1, url: 'https://a.example/', favIconUrl: 'data:image/png;base64,AA', incognito: false};
+    const kept = [];
+    const icon_cache = {get: async () => null, remember: async (url, src) => { kept.push([url, src]); }, trim: async () => {}};
+    const session = createStorageArea();
+    startBackground({browser: fakeBrowser(tab), session, icon_cache, firefox: true});
+    await waitFor(async () => (await session.get('icons_kept')).icons_kept);
+    assert.deepEqual(kept, [['https://a.example/', 'data:image/png;base64,AA']]);
+    // stopped while idle and started again for an event: the same run, nothing looked up again
+    startBackground({browser: fakeBrowser(tab), session, icon_cache, firefox: true});
+    await new Promise(resolve => setTimeout(resolve, 50));
+    assert.equal(kept.length, 1);
+    // a new browser run (session storage emptied): looked up again
+    startBackground({browser: fakeBrowser(tab), session: createStorageArea(), icon_cache, firefox: true});
+    await waitFor(() => kept.length === 2);
 });
 
 test('firefox: nothing it can open is an error, and opens nothing', async () => {
