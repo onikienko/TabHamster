@@ -1,0 +1,34 @@
+Ingyenes és nyílt forráskódú. Reklámok és követés nélkül.
+
+► Mentse a megnyitott füleket csoportba, és találja meg őket újra.
+✓ Az Enter megnyomásával menti a megnyitott füleket. Előbb írjon be egy nevet, vagy hagyja üresen, és a csoport neve a dátum lesz.
+✓ Gépeléssel kereshet a csoportnevekben, valamint a fülek címében és webcímében.
+✓ A csoportok a Firefox szinkronizálási tárhelyén vannak. Kapcsolja be a Firefox szinkronizálást a Kiegészítőkkel együtt, és a többi számítógépén is megjelennek.
+✓ Akár több száz fül egy csoportban. Minden csoport a számítógépén is megmarad: ha a szinkronizálási tárhely megtelt, a csoport akkor is mentésre kerül.
+✓ Húzással átrendezheti a csoportokat és füleket, vagy egy fület másik csoportba helyezhet.
+✓ Fülek szerkesztése és eltávolítása, link vagy az aktuális fül hozzáadása, csoport cseréje a megnyitott fülekre, átnevezés, megnyitás privát ablakban, linkek másolása.
+✓ A módosítások és törlések visszavonhatók. A törölt csoportok 30 napig visszaállíthatók.
+✓ A csoportok és a beállítások biztonsági mentése fájlba.
+
+► Munkamenetek: minden, ami az utolsó 30 böngészési munkamenetben nyitva volt.
+✓ Minden fül és ablak, a bezártakkal együtt, és az egyes fülekben megnyitott korábbi oldalak.
+✓ Egy kattintással visszaállíthatja egy munkamenet ablakait úgy, ahogy voltak.
+✓ A munkamenetek a számítógépén maradnak: nem szinkronizálódnak.
+
+► A böngésző lapcsoportjai, nevükkel és színükkel.
+✓ Egy ablak mentésekor a lapcsoportjai is megmaradnak. A csoport megnyitásakor újra lapcsoportként jelennek meg.
+✓ Mentse az aktuális lapcsoportot külön csoportként, vagy frissítse, ha megváltozott.
+✓ Bármelyik csoportot megnyithatja egyetlen lapcsoportként.
+✓ A munkamenetek is megjegyzik a lapcsoportokat, és a Visszaállítás visszahozza őket.
+
+► Világos és sötét téma.
+► Minden működik billentyűzettel és képernyőolvasóval.
+
+► Tippek:
+• Nyissa meg a TabHamstert, és nyomja meg az Entert: az összes megnyitott fül csoportba kerül.
+• Egy csoportra kattintva megjelennek a fülei, a Megnyitás (vagy az Enter) megnyitja őket. Shift, Ctrl / ⌘ vagy középső kattintás esetén új ablakban nyílnak meg.
+• Az Alt (Option) + ↑ ↓ áthelyezi a kijelölt csoportot vagy fület.
+
+► Chrome-ról vagy Edge-ről vált? Vigye át a csoportjait biztonsági mentési fájllal: töltse le ott a TabHamster beállításaiban (Biztonsági mentés és visszaállítás), majd állítsa vissza itt.
+
+Forráskód: https://github.com/onikienko/TabHamster
