@@ -21,25 +21,56 @@ function event() {
     };
 }
 
-// windows and tabs that record what the background does with them. `active`: the active tab of window 1
-function fakeBrowser(active) {
+// windows and tabs that record what the background does with them. `active`: the active tab of window 1.
+// A new tab goes where its index says; without one at the end, or with `after_current` right after the active tab
+// (Cent Browser's "Open tab to the right of the current one"); with `vivaldi` right after the active tab whatever the
+// index. strip(windowId): its tab addresses, '*' on the active.
+function fakeBrowser(active, {after_current = false, vivaldi = false} = {}) {
     const calls = [];
     // copies: objects from the sandbox have their own prototypes
     const record = (...call) => calls.push(JSON.parse(JSON.stringify(call)));
     let next_id = 100;
+    const strips = {};
+    if (active) {
+        strips[active.windowId] = [{...active, active: true}];
+    }
+    const strip = windowId => (strips[windowId] = strips[windowId] || []);
+    const activate = (tabs, tab) => tabs.forEach(t => { t.active = t === tab; });
     return {
         calls,
+        strip: windowId => strip(windowId).map(t => t.url + (t.active ? '*' : '')),
         tabs: {
-            query: (filter, callback) => (callback ? callback([]) : Promise.resolve(active ? [active] : [])),
+            query: (filter, callback) => (callback ? callback([]) : Promise.resolve(
+                !filter.active && filter.windowId ? strip(filter.windowId).slice() : active ? [active] : [])),
             create: async function (props) {
                 record('create', props);
                 if (/^bad:/.test(props.url)) {
                     throw new Error('Cannot open ' + props.url);
                 }
-                return {id: next_id++, windowId: props.windowId};
+                const tabs = strip(props.windowId);
+                const tab = {id: next_id++, windowId: props.windowId, url: props.url};
+                const current = tabs.findIndex(t => t.active);
+                const at = vivaldi && current >= 0 ? current + 1 : props.index !== undefined ?
+                    Math.min(props.index, tabs.length) : after_current && current >= 0 ? current + 1 : tabs.length;
+                tabs.splice(at, 0, tab);
+                if (props.active) {
+                    activate(tabs, tab);
+                }
+                return {id: tab.id, windowId: tab.windowId, index: at};
+            },
+            move: async function (id, props) {
+                record('move', id, props);
+                const tabs = Object.values(strips).find(list => list.some(t => t.id === id));
+                const tab = tabs.splice(tabs.findIndex(t => t.id === id), 1)[0];
+                tabs.splice(Math.min(props.index, tabs.length), 0, tab);
+                return {id, index: tabs.indexOf(tab)};
             },
             update: async function (id, props) {
                 record('update', id, props);
+                const tab = Object.values(strips).flat().find(t => t.id === id);
+                if (tab && props.url) {
+                    tab.url = props.url;
+                }
                 return {id};
             },
         },
@@ -51,7 +82,8 @@ function fakeBrowser(active) {
                 if (bad) {
                     throw new Error('Cannot open ' + bad);
                 }
-                return {id: 7, tabs: urls.map(() => ({id: next_id++, windowId: 7}))};
+                strips[7] = urls.map((url, i) => ({id: next_id++, windowId: 7, url, active: i === 0}));
+                return {id: 7, tabs: strips[7].map(t => ({id: t.id, windowId: 7}))};
             },
             getAll: async () => (active ? [{id: active.windowId}] : []),
         },
@@ -78,6 +110,7 @@ function startBackground({sync = createSyncArea(), local = createStorageArea(), 
             query: browser.tabs.query,
             create: browser.tabs.create,
             update: browser.tabs.update,
+            move: browser.tabs.move,
             remove() {},
             onUpdated: event(),
             onMoved: event(),
@@ -267,10 +300,55 @@ test('open in the current window: new tabs in order, the first one active', asyn
     const bg = startBackground({browser});
     assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1}), {result: {failed: 0}});
     assert.deepEqual(browser.calls, [
-        ['create', {windowId: 1, url: 'https://a.example/', pinned: true, active: true}],
-        ['create', {windowId: 1, url: 'https://b.example/', pinned: false, active: false}],
-        ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false}],
+        ['create', {windowId: 1, url: 'https://a.example/', pinned: true, active: true, index: 1}],
+        ['create', {windowId: 1, url: 'https://b.example/', pinned: false, active: false, index: 2}],
+        ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false, index: 3}],
     ]);
+    assert.deepEqual(browser.strip(1), ['https://news.example/', 'https://a.example/*', 'https://b.example/', 'https://c.example/']);
+});
+
+test('open in the current window: a browser that opens new tabs next to the current one keeps the order', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'}, {after_current: true});
+    const bg = startBackground({browser});
+    await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
+    // without the index: news, a*, c, b
+    assert.deepEqual(browser.strip(1), ['https://news.example/', 'https://a.example/*', 'https://b.example/', 'https://c.example/']);
+    assert.ok(!browser.calls.some(c => c[0] === 'move'), 'the index is enough');
+});
+
+test('open in Vivaldi (a new tab right of the active one whatever the index): moved into place', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'}, {vivaldi: true});
+    const bg = startBackground({browser});
+    const tabs = [{url: 'https://a.example/'}, {url: 'https://b.example/'}, {url: 'https://c.example/'}, {url: 'https://d.example/'}];
+    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs, windowId: 1}), {result: {failed: 0}});
+    // without the move: news, a*, d, c, b
+    assert.deepEqual(browser.strip(1),
+        ['https://news.example/', 'https://a.example/*', 'https://b.example/', 'https://c.example/', 'https://d.example/']);
+    // b lands right of the active a, already its place
+    assert.deepEqual(browser.calls.filter(c => c[0] === 'move').map(c => c[2].index), [3, 4]);
+
+    // a pinned tab isn't moved: the browser keeps it with the pinned ones
+    const pinned = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'}, {vivaldi: true});
+    await startBackground({browser: pinned}).send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
+    assert.ok(!pinned.calls.some(c => c[0] === 'move' && c[1] === 100));
+});
+
+test('open with "Switch to each tab as it opens": each tab active, no index, the browser places it, the last stays', async () => {
+    for (const after_current of [false, true]) {
+        const browser = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'}, {after_current});
+        const sync = createSyncArea();
+        await sync.set({open_in_front: 1});
+        const bg = startBackground({browser, sync});
+        assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1}), {result: {failed: 0}});
+        assert.ok(browser.calls.every(c => c[1].active === true && !('index' in c[1])));
+        assert.deepEqual(browser.strip(1), ['https://news.example/', 'https://a.example/', 'https://b.example/', 'https://c.example/*']);
+    }
+    const browser = fakeBrowser();
+    const sync = createSyncArea();
+    await sync.set({open_in_front: 1});
+    const bg = startBackground({browser, sync});
+    assert.deepEqual(await bg.send({msg: 'open', how: 'window', tabs: TABS.concat({url: 'bad:x'})}), {result: {failed: 1}});
+    assert.deepEqual(browser.strip(7), ['https://a.example/', 'https://b.example/', 'https://c.example/*']);
 });
 
 test('open in the current window: some bad tabs are counted, all bad is an error', async () => {
@@ -296,9 +374,10 @@ test('open in the current window: a blank new tab takes the first tab', async ()
     await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
     assert.deepEqual(browser.calls, [
         ['update', 1, {url: 'https://a.example/', pinned: true}],
-        ['create', {windowId: 1, url: 'https://b.example/', pinned: false, active: false}],
-        ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false}],
+        ['create', {windowId: 1, url: 'https://b.example/', pinned: false, active: false, index: 1}],
+        ['create', {windowId: 1, url: 'https://c.example/', pinned: false, active: false, index: 2}],
     ]);
+    assert.deepEqual(browser.strip(1), ['https://a.example/*', 'https://b.example/', 'https://c.example/']);
 });
 
 test('open in a new window: the window opens with the first tab, the rest follow; bad ones are skipped', async () => {
@@ -309,6 +388,9 @@ test('open in a new window: the window opens with the first tab, the rest follow
     assert.deepEqual(browser.calls.map(c => c[0] === 'window' ? c[1].url : c[0] === 'update' ? 'pin' : c[1].url), [
         'https://a.example/', 'pin', 'https://b.example/', 'https://c.example/', 'bad:x', 'https://d.example/']);
     assert.ok(browser.calls.filter(c => c[0] === 'create').every(c => c[1].windowId === 7 && !c[1].active));
+    // a failed tab takes no place
+    assert.deepEqual(browser.calls.filter(c => c[0] === 'create').map(c => c[1].index), [1, 2, 3, 3]);
+    assert.deepEqual(browser.strip(7), ['https://a.example/*', 'https://b.example/', 'https://c.example/', 'https://d.example/']);
 });
 
 test('open in a new window: a first tab Chrome refuses doesn\'t stop the others', async () => {

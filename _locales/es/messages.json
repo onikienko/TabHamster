@@ -1129,7 +1129,7 @@
         "description": "Settings page. Section and side menu item"
     },
     "s_saving": {
-        "message": "Guardar pestañas",
+        "message": "Guardar y abrir pestañas",
         "description": "Settings page. Section and side menu item"
     },
     "s_sync": {
@@ -1203,6 +1203,14 @@
     "s_pinned_text": {
         "message": "Las pestañas fijadas se vuelven a abrir fijadas al abrir el grupo.",
         "description": "Settings page. Under Include pinned tabs"
+    },
+    "s_openInFront": {
+        "message": "Cambiar a cada pestaña al abrirla",
+        "description": "Settings page, Saving and opening tabs. Switch: when a group or session opens, each tab comes to the front in turn (the last stays there) and the browser places it; off: the first tab is in front, the rest open behind it at the end of the window"
+    },
+    "s_openInFront_text": {
+        "message": "Terminará en la última pestaña, no en la primera. Su navegador decide dónde va cada pestaña nueva.",
+        "description": "Settings page. Under Switch to each tab as it opens"
     },
     "s_optionFailed": {
         "message": "No se pudo guardar este ajuste. Inténtelo de nuevo.",

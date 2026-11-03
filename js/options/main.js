@@ -201,6 +201,7 @@ function saving() {
         row('cur_win_label', t('s_curWin'), t('s_curWin_text'), switchControl('cur_win', 'cur_win_label')),
         row('pinned_label', t('o_savedTabs_pinned'), t('s_pinned_text'), switchControl('pinned', 'pinned_label')),
         row('sessions_label', t('s_sessions'), t('s_sessions_text'), switchControl('session_watcher', 'sessions_label')),
+        row('in_front_label', t('s_openInFront'), t('s_openInFront_text'), switchControl('open_in_front', 'in_front_label')),
     ];
 }
 

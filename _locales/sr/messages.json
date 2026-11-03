@@ -1454,7 +1454,7 @@
         "description": "Settings page. Section and side menu item"
     },
     "s_saving": {
-        "message": "Чување картица",
+        "message": "Чување и отварање картица",
         "description": "Settings page. Section and side menu item"
     },
     "s_sync": {
@@ -1528,6 +1528,14 @@
     "s_pinned_text": {
         "message": "Закачене картице се поново отварају закачене када отворите групу.",
         "description": "Settings page. Under Include pinned tabs"
+    },
+    "s_openInFront": {
+        "message": "Прелази на сваку картицу при отварању",
+        "description": "Settings page, Saving and opening tabs. Switch: when a group or session opens, each tab comes to the front in turn (the last stays there) and the browser places it; off: the first tab is in front, the rest open behind it at the end of the window"
+    },
+    "s_openInFront_text": {
+        "message": "На крају ћете бити на последњој картици, а не на првој. Прегледач одлучује где иде свака нова картица.",
+        "description": "Settings page. Under Switch to each tab as it opens"
     },
     "s_optionFailed": {
         "message": "Ово подешавање није сачувано. Покушајте поново.",

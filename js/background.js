@@ -166,17 +166,44 @@ function isBlankTab(tab) {
 }
 
 // one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others.
+// Each goes to the end of the window by its index: without one, a browser set to open new tabs next to the current
+// one (Cent Browser, Opera) puts every background tab right of the first, in reverse order. Vivaldi puts every new
+// tab right of the active one whatever the index (and its own setting) says: a tab not where it should be is moved.
+// With the open_in_front option each tab comes to the front instead, without an index, as 0.3.0 did: the browser
+// places it by its own settings, after the one before, and the last one stays in front.
 // {failed: how many didn't open, error: the last error}
 async function createTabs(windowId, tabs, activeFirst) {
+    const {open_in_front} = await storage.area.get({open_in_front: storage.default_options.open_in_front});
+    let end = !open_in_front && windowId ? (await chrome.tabs.query({windowId})).length : null;
     let failed = 0;
     let error = null;
     for (let i = 0; i < tabs.length; i++) {
+        const props = {windowId, url: tabs[i].url, pinned: !!tabs[i].pinned,
+            active: !!open_in_front || (activeFirst && i === 0)};
+        if (end !== null) {
+            props.index = end;
+        }
+        let tab;
         try {
-            await chrome.tabs.create({windowId, url: tabs[i].url, pinned: !!tabs[i].pinned, active: activeFirst && i === 0});
+            tab = await chrome.tabs.create(props);
         } catch (e) {
             failed++;
             error = e;
+            continue;
         }
+        if (end === null) {
+            continue;
+        }
+        // a pinned tab stays with the pinned ones, wherever the index points
+        if (!props.pinned && tab && tab.index !== end) {
+            try {
+                await chrome.tabs.move(tab.id, {index: end});
+            } catch (e) {
+                // opened, only not in its place
+                console.error('TabHamster: tab not moved', e);
+            }
+        }
+        end++;
     }
     return {failed, error};
 }

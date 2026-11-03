@@ -1129,7 +1129,7 @@
         "description": "Settings page. Section and side menu item"
     },
     "s_saving": {
-        "message": "Enregistrement des onglets",
+        "message": "Enregistrement et ouverture des onglets",
         "description": "Settings page. Section and side menu item"
     },
     "s_sync": {
@@ -1203,6 +1203,14 @@
     "s_pinned_text": {
         "message": "Les onglets épinglés se rouvrent épinglés quand vous ouvrez le groupe.",
         "description": "Settings page. Under Include pinned tabs"
+    },
+    "s_openInFront": {
+        "message": "Basculer vers chaque onglet à son ouverture",
+        "description": "Settings page, Saving and opening tabs. Switch: when a group or session opens, each tab comes to the front in turn (the last stays there) and the browser places it; off: the first tab is in front, the rest open behind it at the end of the window"
+    },
+    "s_openInFront_text": {
+        "message": "Vous arrivez sur le dernier onglet, pas sur le premier. Votre navigateur décide où va chaque nouvel onglet.",
+        "description": "Settings page. Under Switch to each tab as it opens"
     },
     "s_optionFailed": {
         "message": "Impossible d’enregistrer ce paramètre. Réessayez.",
