@@ -11,8 +11,9 @@ from zipfile import ZipFile
 from urllib.parse import urlencode
 from urllib.error import HTTPError, URLError
 
-CUR_PATH = os.path.abspath(os.curdir)
-PRJ_PATH = os.path.abspath(os.pardir)
+# the build folder and the project around it, wherever the script is run from
+CUR_PATH = os.path.dirname(os.path.abspath(__file__))
+PRJ_PATH = os.path.dirname(CUR_PATH)
 PRJ_PAR_DIR, PRJ_DIR_NAME = os.path.split(PRJ_PATH)
 BUILD_PATH = os.path.join(CUR_PATH, 'releases')
 PACKAGE_FILE = os.path.join(CUR_PATH, 'build.json')
@@ -226,7 +227,7 @@ try:
         "changelog"]
     if ARG_NO_MINIFY not in sys.argv:
         for index, dirname in enumerate(minify['dirs']):
-            minify['dirs'][index] = os.path.abspath(dirname)
+            minify['dirs'][index] = os.path.abspath(os.path.join(CUR_PATH, dirname))
     else:
         minify['dirs'] = []
 except Exception:
