@@ -7,6 +7,7 @@ var storage = {
         active_tab: '#saved', //or '#sessions'
         session_watcher: 1, //extension will watch sessions
         theme: 'system', // or 'light', 'dark'
-        site_icons: 'ask' // or 'load', 'off': icons Chrome doesn't have come from the sites (js/ui/favicons.js)
+        site_icons: 'ask', // or 'load', 'off': icons Chrome doesn't have come from the sites (js/ui/favicons.js)
+        open_in_front: 0 // 1: opened tabs come to the front one by one, placed by the browser (js/background.js)
     }
 };

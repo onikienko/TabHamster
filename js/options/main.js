@@ -229,6 +229,7 @@ function saving() {
         tabGroupsRequired() ? null :
             row('tab_groups_label', t('s_tabGroups'), t('s_tabGroups_text'), tabGroupsControl('tab_groups_label')),
         row('sessions_label', t('s_sessions'), t('s_sessions_text'), switchControl('session_watcher', 'sessions_label')),
+        row('in_front_label', t('s_openInFront'), t('s_openInFront_text'), switchControl('open_in_front', 'in_front_label')),
     ];
 }
 

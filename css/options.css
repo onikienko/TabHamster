@@ -62,7 +62,7 @@ p {
 
 .page {
     display: grid;
-    grid-template-columns: 184px minmax(0, 1fr);
+    grid-template-columns: 200px minmax(0, 1fr);
     gap: 48px;
     max-width: 960px;
     margin: 0 auto;
@@ -90,11 +90,11 @@ p {
     color: var(--text);
 }
 
-/* stronger than a hovered item (--hover); stays so under the pointer */
+/* stronger than a hovered item (--hover); stays so under the pointer. Not bold: a bolder label is wider and could
+   wrap to a second line only while it is selected */
 .nav a[aria-current="true"] {
     background: var(--tonal);
     color: var(--on-tonal);
-    font-weight: 600;
 }
 
 .main {

@@ -1186,7 +1186,7 @@
         "description": "Settings page. Section and side menu item"
     },
     "s_saving": {
-        "message": "Fülek mentése",
+        "message": "Fülek mentése és megnyitása",
         "description": "Settings page. Section and side menu item"
     },
     "s_sync": {
@@ -1263,11 +1263,19 @@
     },
     "s_tabGroups": {
         "message": "Lapcsoportok megjegyzése",
-        "description": "Settings page, Saving tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
+        "description": "Settings page, Saving and opening tabs. Switch for the optional tabGroups permission (the browser's own tab groups: names, colors)"
     },
     "s_tabGroups_text": {
         "message": "Megőrzi a böngésző lapcsoportjainak nevét és színét, és újra lapcsoportként nyitja meg őket. A böngésző egyszer engedélyt kér Öntől.",
         "description": "Settings page. Under Remember tab groups"
+    },
+    "s_openInFront": {
+        "message": "Váltás minden fülre megnyitáskor",
+        "description": "Settings page, Saving and opening tabs. Switch: when a group or session opens, each tab comes to the front in turn (the last stays there) and the browser places it; off: the first tab is in front, the rest open behind it at the end of the window"
+    },
+    "s_openInFront_text": {
+        "message": "Végül az utolsó fülön lesz, nem az elsőn. A böngésző dönti el, hová kerülnek az új fülek.",
+        "description": "Settings page. Under Switch to each tab as it opens"
     },
     "s_optionFailed": {
         "message": "Nem sikerült menteni ezt a beállítást. Próbálja újra.",
