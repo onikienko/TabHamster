@@ -527,10 +527,10 @@ async function save(source = null) {
 const TAB_GROUPS_OFFERED = 'tab_groups_offered';
 
 /**
- * Once, after the update to 1.1.0 (or for a new user): this window has tabs in the browser's tab groups and the
- * tabGroups permission isn't given, so the bar offers it. Turn on asks (the click is the gesture); either answer, or
- * No thanks, settles it: Settings has the switch. Not over another message (its Undo, the icons question): a later
- * popup offers it then.
+ * Once, after the update that brings tab groups (or for a new user): this window has tabs in the browser's tab groups
+ * and the tabGroups permission isn't given, so the bar offers it. Turn on asks (the click is the gesture); either
+ * answer, or No thanks, settles it: Settings has the switch. Not over another message (its Undo, the icons question):
+ * a later popup offers it then.
  */
 async function offerTabGroups() {
     try {

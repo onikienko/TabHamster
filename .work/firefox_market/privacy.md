@@ -6,7 +6,7 @@ title: TabHamster Privacy Policy
 
 # TabHamster Privacy Policy
 
-Last updated: (the day 1.1.0 is published)
+Last updated: (the day 1.2.0 is published)
 
 TabHamster is a browser extension that saves groups of tabs and keeps your recent browser sessions.
 Chrome Web Store: https://chromewebstore.google.com/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee

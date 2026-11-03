@@ -6,7 +6,7 @@
 // name/index stay plain so 0.3.0 can still list groups. 0.4.0 never writes `v` together with `tabs`.
 // 0.3.0 also writes an unused `color: ''`; it is ignored on read and never written.
 // An item with `v` above 2 comes from a newer TabHamster: it is left alone.
-// A tab: {url, title, id, pinned?, cg?}. cg (1.1.0): the browser tab group it was in, {i, t, c, x?}: i numbers the tab
+// A tab: {url, title, id, pinned?, cg?}. cg: the browser tab group it was in, {i, t, c, x?}: i numbers the tab
 // groups inside this group, t its name ('' if none), c its color (the tabGroups API's names), x: true if collapsed.
 // On the tab, not in the header: 1.0.0 keeps tab fields it doesn't know when it edits or moves a tab, but writes only
 // name, index and tabs into a header.

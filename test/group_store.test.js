@@ -528,7 +528,7 @@ test('setTabs with keep_old: the replaced version goes to trash; an undo takes i
     assert.deepEqual(await store.listTrash(), []);
 });
 
-// tabs with browser tab groups (cg) the way 1.1.0 saves them: 0, 1 in "Trip", 2 none, 3, 4 in an unnamed one
+// tabs with browser tab groups (cg) the way they are saved: 0, 1 in "Trip", 2 none, 3, 4 in an unnamed one
 function groupedTabs(seed) {
     const trip = {i: 1, t: 'Trip', c: 'yellow'};
     const other = {i: 2, t: '', c: 'blue', x: true};

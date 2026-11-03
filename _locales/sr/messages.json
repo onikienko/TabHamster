@@ -837,7 +837,7 @@
     },
     "p_tabGroupsOffer": {
         "message": "Памтити називе и боје ваших група картица?",
-        "description": "Bar shown once in the popup (after the update to 1.1) when the window has tabs in the browser's tab groups and the permission for them isn't given yet"
+        "description": "Bar shown once in the popup (after the update that brings tab groups) when the window has tabs in the browser's tab groups and the permission for them isn't given yet"
     },
     "p_tabGroupsOffer_on": {
         "message": "Укључи",

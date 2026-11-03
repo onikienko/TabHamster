@@ -459,7 +459,7 @@ groups.migrate().then(() => groups.reconcile()).catch(e => console.error('TabHam
 //    windows: {<windowId>: {closed}}, groups?: {<groupId>: {title, color, collapsed}}}
 // at: when the tab got to its address. closed: when the tab was closed by itself; a window closed with its tabs is
 // in `windows` instead, its tabs aren't marked. trail: [{url, title, at}], oldest first. groupId: the browser tab group
-// the tab is (or was) in; `groups` has their names and colors as last seen, only with the tabGroups permission (1.1.0):
+// the tab is (or was) in; `groups` has their names and colors as last seen, only with the tabGroups permission:
 // without it, and in sessions from 1.0.0, only which tabs were grouped. Sessions from before (no v) are snapshots of
 // the tabs.
 

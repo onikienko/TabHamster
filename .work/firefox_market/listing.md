@@ -58,7 +58,7 @@ the same in Firefox). Captions (AMO lets each have one):
 
 ## Version notes (release notes)
 
-en: `First version for Firefox, with everything TabHamster 1.1.0 has in Chrome and Edge.`
+en: `First version for Firefox, with everything TabHamster 1.2.0 has in Chrome and Edge.`
 
 ## Notes to reviewer
 
