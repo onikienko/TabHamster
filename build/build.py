@@ -123,8 +123,7 @@ def backgroundScripts(worker):
     with open(worker_path, encoding='utf-8') as f:
         found = re.search(r"^\s*importScripts\(([^)]*)\)", f.read(), re.M)
     if not found:
-        print('Error. No importScripts(...) in', worker)
-        exit()
+        raise ValueError('No importScripts(...) in ' + worker)
     base = os.path.dirname(worker)
     names = re.findall(r"'([^']+)'", found.group(1))
     return [base + '/' + name for name in names] + [worker]
@@ -168,14 +167,17 @@ def projectFiles():
 def syncFirefoxDev(known):
     # copies new and changed files (Firefox doesn't load an extension's files through symlinks), removes deleted ones
     files = projectFiles()
-    for rel, mtime in files.items():
-        if known.get(rel) == mtime:
-            continue
+    changed = [rel for rel, mtime in files.items() if known.get(rel) != mtime]
+    with open(MANIFEST_FILE, encoding='utf-8') as f:
+        manifest = json.load(f)
+    # the manifest lists the files the worker loads with importScripts: a changed worker writes it again too
+    worker = os.path.normpath(manifest['background']['service_worker'])
+    if worker in changed and 'manifest.json' not in changed:
+        changed.append('manifest.json')
+    for rel in changed:
         dest = os.path.join(FIREFOX_DEV_PATH, rel)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         if rel == 'manifest.json':
-            with open(MANIFEST_FILE, encoding='utf-8') as f:
-                manifest = json.load(f)
             with open(dest, 'w', encoding='utf-8') as f:
                 f.write(firefoxManifest(manifest))
         else:
@@ -219,6 +221,13 @@ zip_basename = build_version + ('-firefox' if firefox else '') + '.zip'
 if not firefox_dev and os.path.exists(os.path.join(BUILD_PATH, zip_basename)):
     print('Error.', zip_basename, 'already exists')
     exit()
+# the Firefox manifest can be made: it needs the worker's importScripts line
+if firefox or firefox_dev:
+    try:
+        firefoxManifest(getJSON(MANIFEST_FILE))
+    except (OSError, ValueError) as error:
+        print('Error.', error)
+        exit()
 
 # get package info
 try:
