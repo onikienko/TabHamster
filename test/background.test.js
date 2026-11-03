@@ -43,8 +43,10 @@ function fakeBrowser(active, {after_current = false, vivaldi = false, before = [
         calls,
         strip: windowId => strip(windowId).map(t => t.url + (t.active ? '*' : '')),
         tabs: {
+            // the active tab with its place in the window, as the browser gives it
             query: (filter, callback) => (callback ? callback([]) : Promise.resolve(
-                !filter.active && filter.windowId ? strip(filter.windowId).slice() : active ? [active] : [])),
+                !filter.active && filter.windowId ? strip(filter.windowId).slice() :
+                    active ? [{...active, index: strip(active.windowId).findIndex(t => t.id === active.id)}] : [])),
             create: async function (props) {
                 record('create', props);
                 if (/^bad:/.test(props.url)) {
@@ -75,7 +77,13 @@ function fakeBrowser(active, {after_current = false, vivaldi = false, before = [
                 if (tab && props.url) {
                     tab.url = props.url;
                 }
-                return tab ? {id, index: tabs.indexOf(tab)} : {id};
+                // pinned: moved to the end of the pinned ones, as browsers do
+                if (tab && props.pinned && !tab.pinned) {
+                    tabs.splice(tabs.indexOf(tab), 1);
+                    tabs.splice(tabs.filter(t => t.pinned).length, 0, tab);
+                    tab.pinned = true;
+                }
+                return tab ? {id, index: tabs.indexOf(tab), pinned: !!tab.pinned} : {id};
             },
         },
         windows: {
@@ -393,6 +401,34 @@ test('open in the current window: the rest follow a blank new tab that isn\'t th
     assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs, windowId: 1}), {result: {failed: 0}});
     assert.deepEqual(browser.strip(1),
         ['https://x.example/', 'https://a.example/*', 'https://b.example/', 'https://c.example/', 'https://y.example/']);
+});
+
+test('open in the current window: a blank new tab pinned for the first tab, the rest go where it was', async () => {
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'},
+        {before: ['https://x.example/'], after: ['https://y.example/']});
+    const bg = startBackground({browser});
+    await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
+    assert.deepEqual(browser.strip(1),
+        ['https://a.example/*', 'https://x.example/', 'https://b.example/', 'https://c.example/', 'https://y.example/']);
+});
+
+test('open with "Switch to each tab as it opens": a blank new tab is left as it is, as 0.3.0 did', async () => {
+    for (const [after_current, strip] of [
+        [false, ['https://x.example/', 'chrome://newtab/', 'https://y.example/', 'https://a.example/', 'https://b.example/',
+            'https://c.example/*']],
+        [true, ['https://x.example/', 'chrome://newtab/', 'https://a.example/', 'https://b.example/', 'https://c.example/*',
+            'https://y.example/']],
+    ]) {
+        const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'},
+            {after_current, before: ['https://x.example/'], after: ['https://y.example/']});
+        const sync = createSyncArea();
+        await sync.set({open_in_front: 1});
+        const bg = startBackground({browser, sync});
+        const tabs = [{url: 'https://a.example/'}, {url: 'https://b.example/'}, {url: 'https://c.example/'}];
+        assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs, windowId: 1}), {result: {failed: 0}});
+        assert.ok(!browser.calls.some(c => c[0] === 'update'));
+        assert.deepEqual(browser.strip(1), strip);
+    }
 });
 
 test('open in a new window: the window opens with the first tab, the rest follow; bad ones are skipped', async () => {

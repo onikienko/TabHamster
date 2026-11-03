@@ -165,16 +165,22 @@ function isBlankTab(tab) {
     return !!tab && isBlankUrl(tab.pendingUrl || tab.url);
 }
 
+// whether opened tabs come to the front one by one, placed by the browser, as 0.3.0 opened them
+async function openInFront() {
+    const {open_in_front} = await storage.area.get({open_in_front: storage.default_options.open_in_front});
+    return !!open_in_front;
+}
+
 // one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others.
-// Each goes to the end of the window by its index: without one, a browser set to open new tabs next to the current
-// one (Cent Browser, Opera) puts every background tab right of the first, in reverse order. Vivaldi puts every new
-// tab right of the active one whatever the index (and its own setting) says: a tab not where it should be is moved.
+// Each goes after the one before by its index, from `start` or the end of the window: without an index, a browser set
+// to open new tabs next to the current one (Cent Browser, Opera) puts every background tab right of the first, in
+// reverse order. Vivaldi puts every new tab right of the active one whatever the index (and its own setting) says:
+// a tab not where it should be is moved.
 // With the open_in_front option each tab comes to the front instead, without an index, as 0.3.0 did: the browser
 // places it by its own settings, after the one before, and the last one stays in front.
-// `start`: the index for the first one when not the end of the window.
 // {failed: how many didn't open, error: the last error}
 async function createTabs(windowId, tabs, activeFirst, start) {
-    const {open_in_front} = await storage.area.get({open_in_front: storage.default_options.open_in_front});
+    const open_in_front = await openInFront();
     let end = null;
     if (!open_in_front && windowId) {
         end = start !== undefined ? start : (await chrome.tabs.query({windowId})).length;
@@ -183,7 +189,7 @@ async function createTabs(windowId, tabs, activeFirst, start) {
     let error = null;
     for (let i = 0; i < tabs.length; i++) {
         const props = {windowId, url: tabs[i].url, pinned: !!tabs[i].pinned,
-            active: !!open_in_front || (activeFirst && i === 0)};
+            active: open_in_front || (activeFirst && i === 0)};
         if (end !== null) {
             props.index = end;
         }
@@ -213,19 +219,20 @@ async function createTabs(windowId, tabs, activeFirst, start) {
 }
 
 const open_ops = {
-    // into the popup's window; a blank new tab there takes the first tab
+    // into the popup's window; a blank new tab there takes the first tab, except with open_in_front: 0.3.0 left it
     current: async function (tabs, windowId) {
         const [active] = await chrome.tabs.query(windowId ? {active: true, windowId} : {active: true, lastFocusedWindow: true});
         let rest = tabs;
         let start;
-        if (isBlankTab(active)) {
+        if (isBlankTab(active) && !(await openInFront())) {
             try {
                 const tab = await chrome.tabs.update(active.id, {url: tabs[0].url, pinned: !!tabs[0].pinned});
                 rest = tabs.slice(1);
                 // the rest right after it, not at the end of the window: the blank tab can be anywhere in it
-                // (Ctrl+T in a browser that opens new tabs next to the current one)
+                // (Ctrl+T in a browser that opens new tabs next to the current one). Pinned now, it went left to the
+                // pinned ones: the rest go where it was, after the tab that was left of it.
                 if (tab) {
-                    start = tab.index + 1;
+                    start = (tab.pinned && !active.pinned ? active.index : tab.index) + 1;
                 }
             } catch (e) {
                 // open it as a new tab like the others
