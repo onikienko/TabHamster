@@ -1,3 +1,4 @@
+1.1.0 (03.11.2026 15:30)
 1.0.0 (26.10.2026 20:04)
     FIRST COMPLETE OVERHAUL SINCE 2013
     New look for the popup and the Settings page, with light and dark themes (as the system, or chosen in Settings)
