@@ -65,7 +65,8 @@ Store package: `cd build && python3 build.py -m` writes `build/releases/<version
 ### Firefox
 
 Firefox (140 or newer) needs its own manifest, which the build script makes from `manifest.json`: a background page
-instead of the service worker, `tabGroups` required instead of optional, no `favicon`, and the add-on ID.
+instead of the service worker, `tabGroups` required instead of optional, no `favicon`, the toolbar button placed in
+the toolbar on install (`default_area`), and the add-on ID.
 
 1. `cd build && python3 build.py --firefox-dev --watch` writes the extension with that manifest to `build/firefox/`
    and keeps copying changed files into it (Ctrl+C stops it). Without `--watch` it writes the folder once.

@@ -138,6 +138,9 @@ def firefoxManifest(manifest):
         [p for p in manifest.get('optional_permissions', []) if p in FIREFOX_REQUIRED]
     if optional:
         m['optional_permissions'] = optional
+    # the button starts in the toolbar, not in the extensions menu (Firefox only): the welcome page then has no
+    # pinning steps, which follow Chrome's menu (Firefox pins from the ⋯ menu instead)
+    m['action'] = dict(m['action'], default_area='navbar')
     m['browser_specific_settings'] = {'gecko': {
         'id': FIREFOX_ID,
         'strict_min_version': FIREFOX_MIN_VERSION,
