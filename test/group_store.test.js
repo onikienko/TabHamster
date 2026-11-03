@@ -9,9 +9,9 @@ const DAY = 24 * HOUR;
 const QUOTA_ERROR = 'Resource::kQuotaBytes quota exceeded';
 const RATE_ERROR = 'This request exceeds the MAX_WRITE_OPERATIONS_PER_MINUTE quota.';
 
-function makeDevice({clock = makeClock(), sync = createSyncArea(clock), seed = 1, on_synced} = {}) {
+function makeDevice({clock = makeClock(), sync = createSyncArea(clock), seed = 1, on_synced, firefox} = {}) {
     const local = createStorageArea({clock});
-    const store = gs.createGroupStore({sync, local, now: clock, random: mulberry32(seed), on_synced});
+    const store = gs.createGroupStore({sync, local, now: clock, random: mulberry32(seed), on_synced, firefox});
     return {clock, sync, local, store};
 }
 
@@ -1456,7 +1456,7 @@ test('fuzz: two devices end up with the same groups', async () => {
 
 test('firefox: no limit constants there, groups still go to sync; usage is the total as Firefox counts it', async () => {
     const clock = makeClock();
-    const {store, sync} = makeDevice({clock, sync: createFirefoxSyncArea(clock)});
+    const {store, sync} = makeDevice({clock, sync: createFirefoxSyncArea(clock), firefox: true});
     assert.equal(sync.QUOTA_BYTES, undefined);
     assert.equal((await store.save('tg_1', makeGroup(20, 1))).synced, true);
     await sync.set({theme: 'dark'});
@@ -1467,7 +1467,7 @@ test('firefox: no limit constants there, groups still go to sync; usage is the t
 
 test('firefox: groups fill sync up to the settings reserve and never meet Firefox\'s own quota error', async () => {
     const clock = makeClock();
-    const {store, sync} = makeDevice({clock, sync: createFirefoxSyncArea(clock)});
+    const {store, sync} = makeDevice({clock, sync: createFirefoxSyncArea(clock), firefox: true});
     let res;
     let i = 0;
     do {
@@ -1482,4 +1482,13 @@ test('firefox: groups fill sync up to the settings reserve and never meet Firefo
     // settings still fit
     await sync.set({theme: 'dark', date_format: 'us'});
     assert.notEqual(res.error, FIREFOX_QUOTA_ERROR);
+});
+
+test('firefox: sync is counted by the browser it runs in, not by whether the limits are given', () => {
+    const given = {QUOTA_BYTES: 102400, QUOTA_BYTES_PER_ITEM: 8192, MAX_ITEMS: 512};
+    assert.deepEqual(gs.syncLimits(given, true), Object.assign({item_overhead: 4}, given));
+    assert.deepEqual(gs.syncLimits({}, true), Object.assign({item_overhead: 4}, given));
+    assert.deepEqual(gs.syncLimits(given, false), Object.assign({item_overhead: 0}, given));
+    // Node has no chrome: not Firefox
+    assert.equal(gs.syncLimits(given).item_overhead, 0);
 });

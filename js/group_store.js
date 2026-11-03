@@ -70,15 +70,21 @@ var groupStore = (function () {
         return chromium_escapes ? bytes + 5 * countMatches(json, /</g) + 3 * countMatches(json, /[\u2028\u2029]/g) : bytes;
     }
 
-    // chrome.storage.sync's limits. Firefox has the same ones but doesn't give them (the constants are undefined), and
-    // checks its total as the JSON of one object of all items: each item adds its key's quotes, a colon and a comma
-    // to what getBytesInUse counts (item_overhead).
-    function syncLimits(sync) {
-        const firefox = sync.QUOTA_BYTES === undefined;
+    // Firefox (its extension pages are moz-extension:), which counts storage.sync its own way (syncLimits)
+    function inFirefox() {
+        return typeof chrome !== 'undefined' && !!chrome.runtime && typeof chrome.runtime.getURL === 'function' &&
+            chrome.runtime.getURL('').startsWith('moz-extension:');
+    }
+
+    // chrome.storage.sync's limits: the ones the browser gives, else the same numbers (Firefox has them but doesn't
+    // give them). The way of counting goes by the browser, not by the missing constants: Firefox checks its total as
+    // the JSON of one object of all items, so each item adds its key's quotes, a colon and a comma to what
+    // getBytesInUse counts (item_overhead).
+    function syncLimits(sync, firefox = inFirefox()) {
         return {
-            QUOTA_BYTES: firefox ? 102400 : sync.QUOTA_BYTES,
-            QUOTA_BYTES_PER_ITEM: firefox ? 8192 : sync.QUOTA_BYTES_PER_ITEM,
-            MAX_ITEMS: firefox ? 512 : sync.MAX_ITEMS,
+            QUOTA_BYTES: sync.QUOTA_BYTES || 102400,
+            QUOTA_BYTES_PER_ITEM: sync.QUOTA_BYTES_PER_ITEM || 8192,
+            MAX_ITEMS: sync.MAX_ITEMS || 512,
             item_overhead: firefox ? 4 : 0,
         };
     }
@@ -373,6 +379,7 @@ var groupStore = (function () {
      * @param {Object} options
      * @param {Object} options.sync chrome.storage.sync (limits from syncLimits)
      * @param {Object} options.local chrome.storage.local
+     * @param {boolean} [options.firefox] counts sync as Firefox does (default: when it runs in Firefox)
      * @param {function(): number} [options.now]
      * @param {function(): number} [options.random]
      * @param {string} [options.conflict_suffix] added to the name of a group copy made on an edit conflict
@@ -381,7 +388,7 @@ var groupStore = (function () {
      */
     function createGroupStore(options) {
         const sync = options.sync;
-        const limits = syncLimits(sync);
+        const limits = syncLimits(sync, options.firefox);
         const local = options.local;
         const now = options.now || Date.now;
         const random = options.random || Math.random;
