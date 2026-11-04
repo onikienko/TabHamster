@@ -1,4 +1,9 @@
 1.1.0 (03.11.2026 15:30)
+    Opened tabs keep the group's order in every browser, also in one set to open new tabs next to the current one (Cent Browser, Vivaldi, Opera)
+    New setting "Switch to each tab as it opens" (Settings > Saving and opening tabs): each tab comes to the front as it opens, the browser places it, and the last one stays in front, as in 0.3.0. A blank new tab is left as it is then
+    Tabs opened over a blank new tab follow it, wherever it is in the window
+    Settings: the "Saving tabs" section is now "Saving and opening tabs"; the selected menu item no longer wraps to a second line
+    Spanish, French, Hungarian, Serbian: new texts added (machine translated)
 1.0.0 (26.10.2026 20:04)
     FIRST COMPLETE OVERHAUL SINCE 2013
     New look for the popup and the Settings page, with light and dark themes (as the system, or chosen in Settings)
