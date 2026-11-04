@@ -161,9 +161,9 @@ const group_ops = {
 
 // a new tab page: it can take the first opened tab instead of staying empty next to them, and it isn't a page a
 // session's tab went through (Edge has its own; Firefox: about:newtab, about:home in a new window, about:privatebrowsing;
-// Vivaldi's start page, with ?section=... after Ctrl+T)
+// Vivaldi's start page, with ?section=... after Ctrl+T; Opera's Speed Dial, startpage in older versions)
 function isBlankUrl(url) {
-    return /^(chrome:\/\/(newtab|new-tab-page)\/?|edge:\/\/newtab\/?|about:(blank|newtab|home|privatebrowsing)|(chrome|vivaldi):\/\/vivaldi-webui\/startpage\/?(\?.*)?)$/.test(url || '');
+    return /^(chrome:\/\/(newtab|new-tab-page)\/?|edge:\/\/newtab\/?|about:(blank|newtab|home|privatebrowsing)|(chrome|vivaldi):\/\/vivaldi-webui\/startpage\/?(\?.*)?|(chrome|opera):\/\/startpage(shared)?\/?)$/.test(url || '');
 }
 
 function isBlankTab(tab) {

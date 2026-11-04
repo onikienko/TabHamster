@@ -476,9 +476,9 @@ test('open with "Switch to each tab as it opens": a blank new tab is left as it 
     }
 });
 
-test('open in the current window: Firefox\'s new tab pages and Vivaldi\'s start page are blank too', async () => {
+test('open in the current window: Firefox\'s new tab pages and Vivaldi\'s and Opera\'s start pages are blank too', async () => {
     for (const url of ['about:newtab', 'about:home', 'about:privatebrowsing', 'chrome://vivaldi-webui/startpage',
-        'chrome://vivaldi-webui/startpage?section=Speed-dials&background-color=#363536', 'vivaldi://vivaldi-webui/startpage']) {
+        'chrome://vivaldi-webui/startpage?section=Speed-dials&background-color=#363536', 'vivaldi://vivaldi-webui/startpage', 'chrome://startpageshared/', 'chrome://startpage/', 'opera://startpage']) {
         const browser = fakeBrowser({id: 1, windowId: 1, url});
         const bg = startBackground({browser});
         await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
