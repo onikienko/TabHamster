@@ -36,7 +36,8 @@ function fakeBrowser(active, {after_current = false, vivaldi = false, before = [
     let next_id = 100;
     const strips = {};
     if (active) {
-        const other = (url, i) => ({id: 50 + i, windowId: active.windowId, url});
+        // an address, or a tab such as {url, pinned: true}
+        const other = (tab, i) => ({id: 50 + i, windowId: active.windowId, ...(typeof tab === 'string' ? {url: tab} : tab)});
         strips[active.windowId] = [...before.map(other), {...active, active: true},
             ...after.map((url, i) => other(url, before.length + i))];
     }
@@ -425,24 +426,35 @@ test('open in the current window: a blank new tab takes the first tab', async ()
     assert.deepEqual(browser.strip(1), ['https://a.example/*', 'https://b.example/', 'https://c.example/']);
 });
 
-test('open in the current window: the rest follow a blank new tab that isn\'t the last one', async () => {
-    // Ctrl+T in a browser that opens new tabs next to the current one
-    const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'},
-        {after_current: true, before: ['https://x.example/'], after: ['https://y.example/']});
-    const bg = startBackground({browser});
-    const tabs = [{url: 'https://a.example/'}, {url: 'https://b.example/'}, {url: 'https://c.example/'}];
-    assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs, windowId: 1}), {result: {failed: 0}});
-    assert.deepEqual(browser.strip(1),
-        ['https://x.example/', 'https://a.example/*', 'https://b.example/', 'https://c.example/', 'https://y.example/']);
+test('open in the current window: a blank new tab among other tabs stays, the tabs go to the end', async () => {
+    // Ctrl+T in a browser that opens new tabs next to the current one: it may hold typed text
+    for (const after_current of [false, true]) {
+        const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'},
+            {after_current, before: ['https://x.example/'], after: ['https://y.example/']});
+        const bg = startBackground({browser});
+        const tabs = [{url: 'https://a.example/'}, {url: 'https://b.example/'}, {url: 'https://c.example/'}];
+        assert.deepEqual(await bg.send({msg: 'open', how: 'current', tabs, windowId: 1}), {result: {failed: 0}});
+        assert.ok(!browser.calls.some(c => c[0] === 'update'));
+        assert.deepEqual(browser.strip(1), ['https://x.example/', 'chrome://newtab/', 'https://y.example/',
+            'https://a.example/*', 'https://b.example/', 'https://c.example/']);
+    }
 });
 
-test('open in the current window: a blank new tab pinned for the first tab, the rest go where it was', async () => {
-    const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'},
-        {before: ['https://x.example/'], after: ['https://y.example/']});
-    const bg = startBackground({browser});
-    await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
-    assert.deepEqual(browser.strip(1),
-        ['https://a.example/*', 'https://x.example/', 'https://b.example/', 'https://c.example/', 'https://y.example/']);
+test('open in the current window: pinned tabs don\'t count, the blank new tab after them takes the first tab', async () => {
+    for (const [tabs, strip] of [
+        [TABS, ['https://p.example/', 'https://a.example/*', 'https://b.example/', 'https://c.example/']],
+        [TABS.slice(1), ['https://p.example/', 'https://b.example/*', 'https://c.example/']],
+    ]) {
+        const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'},
+            {before: [{url: 'https://p.example/', pinned: true}]});
+        await startBackground({browser}).send({msg: 'open', how: 'current', tabs, windowId: 1});
+        assert.equal(browser.calls[0][0], 'update');
+        assert.deepEqual(browser.strip(1), strip);
+    }
+    // a pinned blank tab isn't one the user just opened
+    const browser = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/', pinned: true});
+    await startBackground({browser}).send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
+    assert.ok(!browser.calls.some(c => c[0] === 'update'));
 });
 
 test('open with "Switch to each tab as it opens": a blank new tab is left as it is, as 0.3.0 did', async () => {
@@ -464,8 +476,9 @@ test('open with "Switch to each tab as it opens": a blank new tab is left as it 
     }
 });
 
-test('open in the current window: Firefox\'s new tab pages are blank too', async () => {
-    for (const url of ['about:newtab', 'about:home', 'about:privatebrowsing']) {
+test('open in the current window: Firefox\'s new tab pages and Vivaldi\'s start page are blank too', async () => {
+    for (const url of ['about:newtab', 'about:home', 'about:privatebrowsing', 'chrome://vivaldi-webui/startpage',
+        'chrome://vivaldi-webui/startpage?section=Speed-dials&background-color=#363536', 'vivaldi://vivaldi-webui/startpage']) {
         const browser = fakeBrowser({id: 1, windowId: 1, url});
         const bg = startBackground({browser});
         await bg.send({msg: 'open', how: 'current', tabs: TABS, windowId: 1});
@@ -541,10 +554,18 @@ test('open in a new window: nothing Chrome accepts is an error', async () => {
         {error: 'Cannot open bad:2'});
 });
 
-test('open a session window: into a window that is only a blank new tab, else a new window', async () => {
+test('open a session window: into a window that is only a blank new tab (and pinned tabs), else a new window', async () => {
     const blank = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'});
     await startBackground({browser: blank}).send({msg: 'open', how: 'blankOrWindow', tabs: TABS, windowId: 1});
     assert.deepEqual(blank.calls.map(c => c[0]), ['update', 'create', 'create']);
+
+    const pinned = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'}, {before: [{url: 'https://p.example/', pinned: true}]});
+    await startBackground({browser: pinned}).send({msg: 'open', how: 'blankOrWindow', tabs: TABS, windowId: 1});
+    assert.deepEqual(pinned.calls.map(c => c[0]), ['update', 'create', 'create']);
+
+    const among = fakeBrowser({id: 1, windowId: 1, url: 'chrome://newtab/'}, {after: ['https://y.example/']});
+    await startBackground({browser: among}).send({msg: 'open', how: 'blankOrWindow', tabs: TABS, windowId: 1});
+    assert.deepEqual(among.calls.map(c => c[0]), ['window', 'update', 'create', 'create']);
 
     const busy = fakeBrowser({id: 1, windowId: 1, url: 'https://news.example/'});
     await startBackground({browser: busy}).send({msg: 'open', how: 'blankOrWindow', tabs: TABS, windowId: 1});

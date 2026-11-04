@@ -160,13 +160,26 @@ const group_ops = {
 // Tabs saved in browser tab groups (cg) go back into tab groups (groupTabs).
 
 // a new tab page: it can take the first opened tab instead of staying empty next to them, and it isn't a page a
-// session's tab went through (Edge has its own; Firefox: about:newtab, about:home in a new window, about:privatebrowsing)
+// session's tab went through (Edge has its own; Firefox: about:newtab, about:home in a new window, about:privatebrowsing;
+// Vivaldi's start page, with ?section=... after Ctrl+T)
 function isBlankUrl(url) {
-    return /^(chrome:\/\/(newtab|new-tab-page)\/?|edge:\/\/newtab\/?|about:(blank|newtab|home|privatebrowsing))$/.test(url || '');
+    return /^(chrome:\/\/(newtab|new-tab-page)\/?|edge:\/\/newtab\/?|about:(blank|newtab|home|privatebrowsing)|(chrome|vivaldi):\/\/vivaldi-webui\/startpage\/?(\?.*)?)$/.test(url || '');
 }
 
 function isBlankTab(tab) {
     return !!tab && isBlankUrl(tab.pendingUrl || tab.url);
+}
+
+/** whether the active tab is a blank new tab and the window's only tab apart from pinned ones (the browser just
+ * started, a new empty window): then it takes the first opened tab instead of staying next to them. Among other tabs a
+ * blank one stays: the user just opened it and may have typed into its address bar or the page's search box, which
+ * extensions can't see. */
+async function isLoneBlankTab(active) {
+    if (!isBlankTab(active) || active.pinned) {
+        return false;
+    }
+    const tabs = await chrome.tabs.query({windowId: active.windowId});
+    return tabs.every(tab => tab.pinned || tab.id === active.id);
 }
 
 // Firefox refuses Chrome's pages, file:, data:, javascript: and its own about: pages, and hands addresses it doesn't
@@ -210,18 +223,18 @@ async function openInFront() {
 }
 
 // one by one, in order: a tab that can't be opened (a bad address) doesn't stop the others.
-// Each goes after the one before by its index, from `start` or the end of the window: without an index, a browser set
+// Each goes after the one before by its index, from the end of the window: without an index, a browser set
 // to open new tabs next to the current one (Cent Browser, Opera) puts every background tab right of the first, in
 // reverse order. Vivaldi puts every new tab right of the active one whatever the index (and its own setting) says:
 // a tab not where it should be is moved.
 // With the open_in_front option each tab comes to the front instead, without an index, as 0.3.0 did: the browser
 // places it by its own settings, after the one before, and the last one stays in front.
 // {failed: how many didn't open, error: the last error, ids: the opened tab of each (null if it didn't open)}
-async function createTabs(windowId, tabs, activeFirst, start) {
+async function createTabs(windowId, tabs, activeFirst) {
     const open_in_front = await openInFront();
     let end = null;
     if (!open_in_front && windowId) {
-        end = start !== undefined ? start : (await chrome.tabs.query({windowId})).length;
+        end = (await chrome.tabs.query({windowId})).length;
     }
     let failed = 0;
     let error = null;
@@ -314,28 +327,22 @@ async function groupTabs(windowId, tabs, ids, active) {
 }
 
 const open_ops = {
-    // into the popup's window; a blank new tab there takes the first tab, except with open_in_front: 0.3.0 left it
+    // into the popup's window; a lone blank new tab there (isLoneBlankTab) takes the first tab, the rest go to the end
+    // of the window. With open_in_front it stays, as 0.3.0 left it.
     current: async function (tabs, windowId) {
         const [active] = await chrome.tabs.query(windowId ? {active: true, windowId} : {active: true, lastFocusedWindow: true});
         const in_front = await openInFront();
         let rest = tabs;
-        let start;
-        if (isBlankTab(active) && !in_front) {
+        if (!in_front && await isLoneBlankTab(active)) {
             try {
-                const tab = await chrome.tabs.update(active.id, {url: tabs[0].url, pinned: !!tabs[0].pinned});
+                await chrome.tabs.update(active.id, {url: tabs[0].url, pinned: !!tabs[0].pinned});
                 rest = tabs.slice(1);
-                // the rest right after it, not at the end of the window: the blank tab can be anywhere in it
-                // (Ctrl+T in a browser that opens new tabs next to the current one). Pinned now, it went left to the
-                // pinned ones: the rest go where it was, after the tab that was left of it.
-                if (tab) {
-                    start = (tab.pinned && !active.pinned ? active.index : tab.index) + 1;
-                }
             } catch (e) {
                 // open it as a new tab like the others
             }
         }
         const target = active ? active.windowId : windowId;
-        const res = await createTabs(target, rest, rest === tabs, start);
+        const res = await createTabs(target, rest, rest === tabs);
         // nothing opened: the popup stays open (an opened tab would close it) and says why
         if (res.failed === tabs.length) {
             throw res.error;
@@ -365,10 +372,11 @@ const open_ops = {
         }
         throw error;
     },
-    // a session's window: into the popup's window if all it has is a blank new tab (Chrome just started), else new
+    // a session's window: into the popup's window if all it has is a blank new tab and pinned tabs (the browser just
+    // started), else a new one
     blankOrWindow: async function (tabs, windowId) {
-        const here = windowId ? await chrome.tabs.query({windowId}) : [];
-        return here.length === 1 && isBlankTab(here[0]) ? open_ops.current(tabs, windowId) : open_ops.window(tabs);
+        const [active] = windowId ? await chrome.tabs.query({active: true, windowId}) : [];
+        return await isLoneBlankTab(active) ? open_ops.current(tabs, windowId) : open_ops.window(tabs);
     },
     // without "Allow in Incognito" the extension can open the window but can't add tabs to it later: all at once.
     // One address Chrome refuses fails the whole window: then once more without the kinds it refuses
