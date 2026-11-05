@@ -1894,6 +1894,8 @@ function nameButton(id, auto, label, sub, open, newWindow, details) {
     const button = h('button', {
         class: 'name ellipsis', type: 'button', dir: 'auto', 'aria-expanded': String(isExpanded(id, auto)),
         'aria-description': details.filter(Boolean).join(', '),
+        // a saved group: F2 renames it (sessions are named by their date)
+        'aria-keyshortcuts': id.startsWith('saved:') ? 'F2' : null,
         dataset: {toggle: id, auto: auto ? '1' : ''},
         onClick: single((e) => (newWindow && wantsNewWindow(e) ? newWindow() : toggleItem(id, auto))),
         onAuxclick: single((e) => newWindow && e.button === 1 && newWindow()),
@@ -2539,6 +2541,12 @@ el.list.addEventListener('keydown', (e) => {
         } else {
             act(() => removeTab(tabAt))();
         }
+        return;
+    }
+    // a saved group's name: F2 renames it, as the ⋯ menu's Rename
+    if (e.key === 'F2' && !e.repeat && e.target.matches('button.name') && e.target.dataset.toggle.startsWith('saved:')) {
+        e.preventDefault();
+        startRename(e.target.closest('.item').dataset.key);
         return;
     }
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.altKey) {

@@ -2298,8 +2298,8 @@
         "description": "Settings page, Help: what Delete does on a tab of a saved group in the popup"
     },
     "s_help_f2": {
-        "message": "Редагує назву й адресу вкладки у фокусі.",
-        "description": "Settings page, Help: what F2 does on a tab of a saved group in the popup"
+        "message": "Перейменовує групу у фокусі або редагує назву й адресу вкладки у фокусі.",
+        "description": "Settings page, Help: what F2 does in the popup on a saved group (rename) and on a tab of one (edit)"
     },
     "p_siteIcons_ask": {
         "message": "Завантажити відсутні значки із сайтів?",
