@@ -121,6 +121,18 @@ export function openMenu(anchor, items, {label, onClose} = {}) {
             closeMenu(true);
             return;
         } else {
+            // a key an item shows (Rename: F2) chooses it while the menu is open, as in the browser's own menus;
+            // for this menu's item, wherever the pointer is (the menu is the one thing taking keys and clicks now)
+            const chosen = !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey &&
+                items.find((item) => item !== '-' && item.keys && item.keys.includes(e.key));
+            if (chosen) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!e.repeat) {
+                    closeMenu(true);
+                    chosen.run();
+                }
+            }
             return;
         }
         e.preventDefault();
