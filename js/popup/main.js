@@ -855,7 +855,7 @@ async function groupMenu(key, button) {
             run: act(() => addTab(key, current)),
         } : null,
         {icon: 'link', label: t('p_addLink'), run: () => startTabEdit(key, null)},
-        {icon: 'pencil', label: t('p_rename'), run: () => startRename(key)},
+        {icon: 'pencil', label: t('p_rename'), keys: ['F2'], run: () => startRename(key)},
         '-',
         {icon: 'incognito', label: t(isFirefox() ? 'p_openPrivate' : 'p_openIncognito'), run: () => openElsewhere('incognito', group.tabs)},
         {icon: 'tabGroup', label: t('p_openAsTabGroup'), run: () => openAsTabGroup(key)},

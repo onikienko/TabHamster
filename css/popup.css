@@ -1300,6 +1300,29 @@ body.keyboard .item.target > .row:has(:focus) {
     font-size: 12px;
 }
 
+/* the key that does the same from the list (Rename: F2), as in tooltips; muted, so it reads as a hint */
+.menu-keys {
+    flex: none;
+    display: flex;
+    gap: 3px;
+    margin-left: auto;
+    padding-left: 8px;
+    color: var(--muted);
+}
+
+.menu-keys kbd {
+    display: inline-flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 5px;
+    /* --line first for Chrome before 111 (no color-mix) */
+    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    border-radius: 4px;
+    font: 600 11px/1 var(--font);
+    white-space: nowrap;
+}
+
 .menu-sep {
     height: 1px;
     margin: 4px 6px;

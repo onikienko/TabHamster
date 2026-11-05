@@ -68,8 +68,9 @@ export function isMenuOpen(anchor) {
 }
 
 /**
- * openMenu(button, [{label, sub?, icon, danger?, run}, '-', ...], {label, onClose})
- * '-' is a separator. `sub` is a second, muted line.
+ * openMenu(button, [{label, sub?, icon, danger?, keys?, run}, '-', ...], {label, onClose})
+ * '-' is a separator. `sub` is a second, muted line. `keys`: ['F2'], the key that does the same from the list, shown at
+ * the end of the item as in tooltips (a screen reader hears it from aria-keyshortcuts).
  */
 export function openMenu(anchor, items, {label, onClose} = {}) {
     closeMenu(false);
@@ -81,6 +82,7 @@ export function openMenu(anchor, items, {label, onClose} = {}) {
             }
             const button = h('button', {
                     class: ['menu-item', item.danger && 'danger'], type: 'button', role: 'menuitem', tabindex: '-1',
+                    'aria-keyshortcuts': item.keys ? item.keys.join(' ') : null,
                     onClick: () => {
                         closeMenu(true);
                         item.run();
@@ -89,7 +91,8 @@ export function openMenu(anchor, items, {label, onClose} = {}) {
                 icon(item.icon, 16),
                 h('span', {class: 'menu-text'},
                     h('span', {class: 'menu-label'}, item.label),
-                    item.sub ? h('span', {class: 'menu-sub ellipsis'}, item.sub) : null));
+                    item.sub ? h('span', {class: 'menu-sub ellipsis'}, item.sub) : null),
+                item.keys ? h('span', {class: 'menu-keys', 'aria-hidden': 'true'}, item.keys.map((key) => h('kbd', null, key))) : null);
             // the item under the pointer takes the focus, so it is the one selected item (and arrows go on from it)
             button.addEventListener('pointermove', () => {
                 if (document.activeElement !== button) {
