@@ -3,7 +3,7 @@ Ingyenes és nyílt forráskódú. Reklámok és követés nélkül.
 ► Mentse a megnyitott füleket csoportba, és találja meg őket újra.
 ✓ Az Enter megnyomásával menti a megnyitott füleket. Előbb írjon be egy nevet, vagy hagyja üresen, és a csoport neve a dátum lesz.
 ✓ Gépeléssel kereshet a csoportnevekben, valamint a fülek címében és webcímében.
-✓ A csoportok a Firefox szinkronizálási tárhelyén vannak. Kapcsolja be a Firefox szinkronizálást a Kiegészítőkkel együtt, és a többi számítógépén is megjelennek.
+✓ A csoportok a Firefox szinkronizálási tárhelyén vannak. Kapcsolja be a Firefox szinkronizálást a Kiegészítőkkel együtt, és a többi számítógépén is megjelennek. A Firefox néhány percenként szinkronizál; a Beállítások › Szinkronizálás › Szinkronizálás most azonnal átviszi a változásokat.
 ✓ Akár több száz fül egy csoportban. Minden csoport a számítógépén is megmarad: ha a szinkronizálási tárhely megtelt, a csoport akkor is mentésre kerül.
 ✓ Húzással átrendezheti a csoportokat és füleket, vagy egy fület másik csoportba helyezhet.
 ✓ Fülek szerkesztése és eltávolítása, link vagy az aktuális fül hozzáadása, csoport cseréje a megnyitott fülekre, átnevezés, megnyitás privát ablakban, linkek másolása.

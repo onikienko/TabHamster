@@ -3,7 +3,7 @@ Gratuit et open source. Sans publicité, sans pistage.
 ► Enregistrez les onglets ouverts dans un groupe, et retrouvez-les.
 ✓ Appuyez sur Entrée pour enregistrer les onglets ouverts. Tapez d’abord un nom, ou laissez-le vide et le groupe portera la date.
 ✓ Tapez pour chercher dans les noms des groupes, les titres et les adresses des onglets.
-✓ Les groupes sont conservés dans le stockage de synchronisation de Firefox. Activez la synchronisation de Firefox avec les modules complémentaires cochés pour les retrouver sur vos autres ordinateurs.
+✓ Les groupes sont conservés dans le stockage de synchronisation de Firefox. Activez la synchronisation de Firefox avec les modules complémentaires cochés pour les retrouver sur vos autres ordinateurs. Firefox synchronise à quelques minutes d’intervalle ; Paramètres › Synchronisation › Synchroniser maintenant envoie les changements tout de suite.
 ✓ Des centaines d’onglets par groupe. Chaque groupe est aussi conservé sur votre ordinateur : si le stockage de synchronisation est plein, le groupe est quand même enregistré.
 ✓ Faites glisser les groupes et les onglets pour les réordonner, ou un onglet vers un autre groupe.
 ✓ Modifiez et supprimez des onglets, ajoutez un lien ou l’onglet actuel, remplacez un groupe par les onglets ouverts, renommez, ouvrez dans une fenêtre de navigation privée, copiez les liens.

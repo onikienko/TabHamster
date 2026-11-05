@@ -3,7 +3,7 @@ Free and open source. No ads, no tracking.
 ► Save open tabs as a group, and find them again.
 ✓ Press Enter to save the open tabs. Type a name first, or leave it empty and the group is named by the date.
 ✓ Type to search group names, tab titles and addresses.
-✓ Groups are kept in Firefox sync storage. Turn on Firefox Sync with Add-ons checked to get them on your other computers.
+✓ Groups are kept in Firefox sync storage. Turn on Firefox Sync with Add-ons checked to get them on your other computers. Firefox syncs every few minutes; Settings › Sync › Sync now sends changes right away.
 ✓ Hundreds of tabs per group. Every group is also kept on your computer: if sync storage is full, the group is still saved.
 ✓ Drag groups and tabs to reorder them, or drag a tab into another group.
 ✓ Edit and remove tabs, add a link or the current tab, replace a group with the open tabs, rename, open in a private window, copy links.
