@@ -2307,6 +2307,56 @@
         "message": "Браузер має значки лише сайтів, відкритих у ньому. Для інших, наприклад вкладок, збережених на іншому комп'ютері, спливаюче вікно завантажує кожен значок з його сайту, тож сайт бачить вашу IP-адресу.",
         "description": "Settings page. Under Load missing icons from sites"
     },
+    "s_iconCache": {
+        "message": "Значки сайтів на цьому комп'ютері",
+        "description": "Settings page, General, Firefox only. Title of the row with the site icons TabHamster keeps"
+    },
+    "s_iconCache_about": {
+        "message": "Значки сайтів, відкритих у вкладках. Вони потрібні спливаючому вікну, бо Firefox не ділиться своїми. Вкладки приватних вікон не враховуються.",
+        "description": "Settings page. Under Site icons on this computer, when their number couldn't be read"
+    },
+    "s_iconCache_text_one": {
+        "message": "Збережені значки сайтів: $NUMBER$. Вони потрібні спливаючому вікну, бо Firefox не ділиться своїми. Вкладки приватних вікон не враховуються.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'one')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_few": {
+        "message": "Збережені значки сайтів: $NUMBER$. Вони потрібні спливаючому вікну, бо Firefox не ділиться своїми. Вкладки приватних вікон не враховуються.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'few')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_other": {
+        "message": "Збережені значки сайтів: $NUMBER$. Вони потрібні спливаючому вікну, бо Firefox не ділиться своїми. Вкладки приватних вікон не враховуються.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'other')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_clear": {
+        "message": "Очистити",
+        "description": "Settings page. Button that removes the kept site icons"
+    },
+    "s_iconCache_cleared": {
+        "message": "Значки сайтів очищено",
+        "description": "Settings page. Bar after the site icons were removed"
+    },
+    "s_iconCache_failed": {
+        "message": "Не вдалося очистити значки сайтів. Спробуйте ще раз.",
+        "description": "Settings page. Bar when the site icons could not be removed"
+    },
 
     "w_title": {
         "message": "Вітаємо в TabHamster",

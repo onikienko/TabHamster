@@ -23,8 +23,9 @@ Firefox Add-ons: https://addons.mozilla.org/firefox/addon/tabhamster/
 - A copy of the saved groups, the sessions and the recently deleted groups are stored in the browser's local storage
   (storage.local), on your computer only.
 - In Firefox, the icon of each site your tabs show is also kept on your computer, so TabHamster can show it (Firefox
-  doesn't let extensions use its own icon store). Up to 20,000 sites; tabs in private windows are left out. The icons
-  are removed when you remove TabHamster.
+  doesn't let extensions use its own icon store). Up to 20,000 sites; tabs in private windows are left out. Clear
+  them at any time in Settings > General ("Site icons on this computer"); they are also removed when you remove
+  TabHamster.
 - A backup file is made only when you download or copy it, and stays where you put it.
 
 ## What TabHamster sends

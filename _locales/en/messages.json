@@ -1900,6 +1900,46 @@
         "message": "The browser only has icons of sites opened in it. For the others, such as tabs saved on another computer, the popup loads each icon from its site, so the site sees your IP address.",
         "description": "Settings page. Under Load missing icons from sites"
     },
+    "s_iconCache": {
+        "message": "Site icons on this computer",
+        "description": "Settings page, General, Firefox only. Title of the row with the site icons TabHamster keeps"
+    },
+    "s_iconCache_about": {
+        "message": "Icons of the sites your tabs show, kept so the popup can show them (Firefox doesn’t share its own). Tabs in private windows are left out.",
+        "description": "Settings page. Under Site icons on this computer, when their number couldn't be read"
+    },
+    "s_iconCache_text_one": {
+        "message": "The icon of $NUMBER$ site, kept so the popup can show it (Firefox doesn’t share its own). Tabs in private windows are left out.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'one')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_other": {
+        "message": "Icons of $NUMBER$ sites, kept so the popup can show them (Firefox doesn’t share its own). Tabs in private windows are left out.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'other')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_clear": {
+        "message": "Clear",
+        "description": "Settings page. Button that removes the kept site icons"
+    },
+    "s_iconCache_cleared": {
+        "message": "Site icons cleared",
+        "description": "Settings page. Bar after the site icons were removed"
+    },
+    "s_iconCache_failed": {
+        "message": "Couldn’t clear the site icons. Try again.",
+        "description": "Settings page. Bar when the site icons could not be removed"
+    },
 
     "w_title": {
         "message": "Welcome to TabHamster",

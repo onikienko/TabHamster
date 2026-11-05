@@ -141,5 +141,18 @@ var iconCache = (function () {
         });
     }
 
-    return {get, remember, trim};
+    /** how many sites have an icon kept */
+    async function count() {
+        return done((await sites('readonly')).count());
+    }
+
+    /** drops every kept icon (Settings); they come back as pages load */
+    async function clear() {
+        await done((await sites('readwrite')).clear());
+        // else a site already looked at this run would wait a day to get its icon back
+        noted.clear();
+        added = 0;
+    }
+
+    return {get, remember, trim, count, clear};
 }());

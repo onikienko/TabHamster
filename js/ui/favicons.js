@@ -44,7 +44,8 @@ function same(a, b) {
     return a.length === b.length && a.every((byte, i) => byte === b[i]);
 }
 
-function hasFavicon() {
+/** Chrome's _favicon is there; without it (Firefox) the background keeps the icons itself (js/icon_cache.js) */
+export function hasFavicon() {
     return (chrome.runtime.getManifest().permissions || []).includes('favicon');
 }
 

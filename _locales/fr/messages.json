@@ -1900,6 +1900,46 @@
         "message": "Le navigateur n’a que les icônes des sites ouverts dans celui-ci. Pour les autres, comme les onglets enregistrés sur un autre ordinateur, la fenêtre de TabHamster charge chaque icône depuis son site, qui voit alors votre adresse IP.",
         "description": "Settings page. Under Load missing icons from sites"
     },
+    "s_iconCache": {
+        "message": "Icônes des sites sur cet ordinateur",
+        "description": "Settings page, General, Firefox only. Title of the row with the site icons TabHamster keeps"
+    },
+    "s_iconCache_about": {
+        "message": "Les icônes des sites ouverts dans vos onglets, gardées pour que la fenêtre de TabHamster puisse les afficher (Firefox ne partage pas les siennes). Les onglets des fenêtres privées n’y sont pas.",
+        "description": "Settings page. Under Site icons on this computer, when their number couldn't be read"
+    },
+    "s_iconCache_text_one": {
+        "message": "L’icône de $NUMBER$ site, gardée pour que la fenêtre de TabHamster puisse l’afficher (Firefox ne partage pas les siennes). Les onglets des fenêtres privées n’y sont pas.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'one')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_other": {
+        "message": "Les icônes de $NUMBER$ sites, gardées pour que la fenêtre de TabHamster puisse les afficher (Firefox ne partage pas les siennes). Les onglets des fenêtres privées n’y sont pas.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'other')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_clear": {
+        "message": "Effacer",
+        "description": "Settings page. Button that removes the kept site icons"
+    },
+    "s_iconCache_cleared": {
+        "message": "Icônes des sites effacées",
+        "description": "Settings page. Bar after the site icons were removed"
+    },
+    "s_iconCache_failed": {
+        "message": "Impossible d’effacer les icônes des sites. Réessayez.",
+        "description": "Settings page. Bar when the site icons could not be removed"
+    },
 
     "w_title": {
         "message": "Bienvenue dans TabHamster",

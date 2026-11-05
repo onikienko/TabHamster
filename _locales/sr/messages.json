@@ -2303,6 +2303,56 @@
         "message": "Прегледач има иконице само сајтова отворених у њему. За остале, на пример картице сачуване на другом рачунару, искачући прозор учитава сваку иконицу са њеног сајта, па сајт види вашу IP адресу.",
         "description": "Settings page. Under Load missing icons from sites"
     },
+    "s_iconCache": {
+        "message": "Иконице сајтова на овом рачунару",
+        "description": "Settings page, General, Firefox only. Title of the row with the site icons TabHamster keeps"
+    },
+    "s_iconCache_about": {
+        "message": "Иконице сајтова отворених у картицама. Потребне су искачућем прозору, јер Firefox не дели своје. Картице из приватних прозора нису укључене.",
+        "description": "Settings page. Under Site icons on this computer, when their number couldn't be read"
+    },
+    "s_iconCache_text_one": {
+        "message": "Сачуване иконице сајтова: $NUMBER$. Потребне су искачућем прозору, јер Firefox не дели своје. Картице из приватних прозора нису укључене.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'one')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_few": {
+        "message": "Сачуване иконице сајтова: $NUMBER$. Потребне су искачућем прозору, јер Firefox не дели своје. Картице из приватних прозора нису укључене.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'few')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_other": {
+        "message": "Сачуване иконице сајтова: $NUMBER$. Потребне су искачућем прозору, јер Firefox не дели своје. Картице из приватних прозора нису укључене.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'other')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_clear": {
+        "message": "Обриши",
+        "description": "Settings page. Button that removes the kept site icons"
+    },
+    "s_iconCache_cleared": {
+        "message": "Иконице сајтова су обрисане",
+        "description": "Settings page. Bar after the site icons were removed"
+    },
+    "s_iconCache_failed": {
+        "message": "Иконице сајтова нису обрисане. Покушајте поново.",
+        "description": "Settings page. Bar when the site icons could not be removed"
+    },
 
     "w_title": {
         "message": "Добро дошли у TabHamster",

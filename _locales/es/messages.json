@@ -1900,6 +1900,46 @@
         "message": "El navegador solo tiene los iconos de los sitios abiertos en él. Para los demás, como las pestañas guardadas en otro dispositivo, la ventana emergente carga cada icono desde su sitio, por lo que el sitio ve su dirección IP.",
         "description": "Settings page. Under Load missing icons from sites"
     },
+    "s_iconCache": {
+        "message": "Iconos de sitios en este dispositivo",
+        "description": "Settings page, General, Firefox only. Title of the row with the site icons TabHamster keeps"
+    },
+    "s_iconCache_about": {
+        "message": "Los iconos de los sitios que muestran sus pestañas, guardados para que la ventana emergente pueda mostrarlos (Firefox no comparte los suyos). Las pestañas de ventanas privadas no se incluyen.",
+        "description": "Settings page. Under Site icons on this computer, when their number couldn't be read"
+    },
+    "s_iconCache_text_one": {
+        "message": "El icono de $NUMBER$ sitio, guardado para que la ventana emergente pueda mostrarlo (Firefox no comparte los suyos). Las pestañas de ventanas privadas no se incluyen.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'one')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_other": {
+        "message": "Los iconos de $NUMBER$ sitios, guardados para que la ventana emergente pueda mostrarlos (Firefox no comparte los suyos). Las pestañas de ventanas privadas no se incluyen.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'other')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_clear": {
+        "message": "Borrar",
+        "description": "Settings page. Button that removes the kept site icons"
+    },
+    "s_iconCache_cleared": {
+        "message": "Iconos de sitios borrados",
+        "description": "Settings page. Bar after the site icons were removed"
+    },
+    "s_iconCache_failed": {
+        "message": "No se pudieron borrar los iconos de sitios. Inténtelo de nuevo.",
+        "description": "Settings page. Bar when the site icons could not be removed"
+    },
 
     "w_title": {
         "message": "Le damos la bienvenida a TabHamster",

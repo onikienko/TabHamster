@@ -74,7 +74,7 @@ To test:
 
 Permissions: storage (groups in storage.sync and storage.local, sessions in storage.local), tabs (addresses and titles of open tabs, to save them and to keep the session list), unlimitedStorage (a local copy of every group, the last 30 sessions, and the site icon cache), tabGroups (tab groups' names and colors in saved groups and sessions).
 
-Site icons: Firefox gives extensions no access to its icon cache, so the background keeps the icon of each site the tabs show (tab.favIconUrl, scaled to 32 px) in IndexedDB, up to 20,000 sites (js/icon_cache.js); tabs in private windows are left out. Nothing leaves the computer.
+Site icons: Firefox gives extensions no access to its icon cache, so the background keeps the icon of each site the tabs show (tab.favIconUrl, scaled to 32 px) in IndexedDB, up to 20,000 sites (js/icon_cache.js); tabs in private windows are left out; Settings > General shows how many and has Clear. Nothing leaves the computer.
 
 Network: the add-on makes no requests of its own, except the optional "Load missing icons from sites" (Settings > General, off until the user allows it), which loads /favicon.ico from the saved sites.
 ```

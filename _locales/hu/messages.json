@@ -1897,6 +1897,46 @@
         "message": "A böngésző csak a benne megnyitott webhelyek ikonjait ismeri. A többihez, például a másik számítógépen mentett fülekhez, a felugró ablak minden ikont a saját webhelyéről tölt be, így a webhely látja az IP-címét.",
         "description": "Settings page. Under Load missing icons from sites"
     },
+    "s_iconCache": {
+        "message": "Webhelyikonok ezen a számítógépen",
+        "description": "Settings page, General, Firefox only. Title of the row with the site icons TabHamster keeps"
+    },
+    "s_iconCache_about": {
+        "message": "A fülekben megnyitott webhelyek ikonjai. A felugró ablaknak kellenek, mert a Firefox nem osztja meg a sajátjait. A privát ablakok fülei kimaradnak.",
+        "description": "Settings page. Under Site icons on this computer, when their number couldn't be read"
+    },
+    "s_iconCache_text_one": {
+        "message": "Mentett webhelyikonok: $NUMBER$. A felugró ablaknak kellenek, mert a Firefox nem osztja meg a sajátjait. A privát ablakok fülei kimaradnak.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'one')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_text_other": {
+        "message": "Mentett webhelyikonok: $NUMBER$. A felugró ablaknak kellenek, mert a Firefox nem osztja meg a sajátjait. A privát ablakok fülei kimaradnak.",
+        "description": "Settings page. Under Site icons on this computer: how many sites have an icon kept (plural form 'other')",
+        "placeholders": {
+            "number": {
+                "content": "$2",
+                "example": "1,234"
+            }
+        }
+    },
+    "s_iconCache_clear": {
+        "message": "Törlés",
+        "description": "Settings page. Button that removes the kept site icons"
+    },
+    "s_iconCache_cleared": {
+        "message": "Webhelyikonok törölve",
+        "description": "Settings page. Bar after the site icons were removed"
+    },
+    "s_iconCache_failed": {
+        "message": "Nem sikerült törölni a webhelyikonokat. Próbálja újra.",
+        "description": "Settings page. Bar when the site icons could not be removed"
+    },
 
     "w_title": {
         "message": "Üdvözli a TabHamster",

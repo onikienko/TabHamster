@@ -517,6 +517,18 @@ test('firefox: the icons of the tabs open at start are kept once per browser run
     await waitFor(() => kept.length === 2);
 });
 
+test('firefox: Settings counts and clears the kept site icons through the background', async () => {
+    const calls = [];
+    const icon_cache = {get: async () => null, remember: async () => {}, trim: async () => {},
+        count: async () => { calls.push('count'); return 7; }, clear: async () => { calls.push('clear'); }};
+    const bg = startBackground({icon_cache, firefox: true});
+    assert.deepEqual(await bg.send({msg: 'icons', op: 'count'}), {result: 7});
+    assert.deepEqual(await bg.send({msg: 'icons', op: 'clear'}), {});
+    assert.deepEqual(calls, ['count', 'clear']);
+    icon_cache.clear = async () => { throw new Error('blocked'); };
+    assert.deepEqual(await bg.send({msg: 'icons', op: 'clear'}), {error: 'blocked'});
+});
+
 test('firefox: nothing it can open is an error, and opens nothing', async () => {
     const browser = fakeBrowser();
     const bg = startBackground({browser, firefox: true});

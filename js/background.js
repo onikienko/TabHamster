@@ -491,6 +491,15 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
                 sendResponse({error: e.message});
             });
             return true; // answer comes later
+        case 'icons':
+            // Firefox's icon cache (js/icon_cache.js) for Settings: cleared here, where `remember` keeps what this run
+            // has already looked at
+            (msg.op === 'clear' ? iconCache.clear() : iconCache.count()).then(function (result) {
+                sendResponse({result});
+            }, function (e) {
+                sendResponse({error: e.message});
+            });
+            return true;
     }
 });
 

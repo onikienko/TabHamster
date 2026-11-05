@@ -12,6 +12,7 @@ import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {backupRows, renderRestoreInfo} from './backup.js';
 import {hasTabGroups, requestTabGroups, removeTabGroups, watchTabGroups, tabGroupsRequired} from '../ui/tab_groups.js';
+import {hasFavicon} from '../ui/favicons.js';
 
 const lang = uiLanguage();
 const GITHUB = 'https://github.com/onikienko/TabHamster';
@@ -21,6 +22,7 @@ const PRIVACY = 'https://onikienko.github.io/browser-extensions/tabhamster-priva
 const NAMES_SHOWN = 3;
 // "45%", "45 %" in French
 const percents = new Intl.NumberFormat(lang, {style: 'percent', maximumFractionDigits: 0});
+const numbers = new Intl.NumberFormat(lang);
 
 const state = {
     options: null,
@@ -33,6 +35,8 @@ const state = {
     restore: null,
     // the tabGroups permission is given
     tabGroups: false,
+    // Firefox: how many sites the background keeps an icon of (js/icon_cache.js); null if unknown
+    iconCount: null,
 };
 
 const el = {
@@ -64,6 +68,16 @@ async function loadGroups() {
     renderSync();
     renderTrash();
     renderRestoreInfo(state.restore);
+}
+
+/** Firefox: how many site icons the background keeps (state.iconCount) */
+async function loadIconCount() {
+    try {
+        const res = await chrome.runtime.sendMessage({msg: 'icons', op: 'count'});
+        state.iconCount = res && !res.error ? res.result : null;
+    } catch (e) {
+        state.iconCount = null;
+    }
 }
 
 /** after a restore or its undo: options and groups both changed */
@@ -220,7 +234,48 @@ function general() {
         // not asked yet ('ask') is off
         row('site_icons_label', t('s_siteIcons'), t('s_siteIcons_text'),
             switchControl('site_icons', 'site_icons_label', 'load', 'off')),
+        // only where the background keeps the icons itself (Firefox)
+        hasFavicon() ? null : iconCacheRow(),
     ];
+}
+
+/**
+ * Firefox: the site icons the background keeps for the popup (js/icon_cache.js), how many, and Clear. No Undo: they
+ * come back as pages load.
+ */
+function iconCacheRow() {
+    const labelId = 'icon_cache_label';
+    let clearing = false;
+    const button = h('button', {
+        class: 'btn tonal', type: 'button', id: 'icon_cache_clear', 'aria-labelledby': 'icon_cache_clear ' + labelId,
+        onClick: async () => {
+            clearing = true;
+            renderOptions();
+            try {
+                // through the background: it also forgets which sites it has looked at this run
+                const res = await chrome.runtime.sendMessage({msg: 'icons', op: 'clear'});
+                if (!res || res.error) {
+                    throw new Error(res ? res.error : 'no answer');
+                }
+                state.iconCount = 0;
+                showBar(t('s_iconCache_cleared'));
+            } catch (e) {
+                console.error('TabHamster: site icons not cleared', e);
+                showBar(t('s_iconCache_failed'));
+                await loadIconCount();
+            }
+            clearing = false;
+            renderOptions();
+        },
+    }, t('s_iconCache_clear'));
+    const line = row(labelId, t('s_iconCache'), ' ', button);
+    updaters.push(() => {
+        const count = state.iconCount;
+        line.querySelector('.row-text').textContent = count === null ? t('s_iconCache_about') :
+            plural('s_iconCache_text', count, [numbers.format(count)]);
+        button.disabled = clearing || count === 0;
+    });
+    return line;
 }
 
 function saving() {
@@ -516,6 +571,14 @@ function watchSections() {
 let groupsTimer = null;
 
 function listenForChanges() {
+    // Firefox: the background keeps icons while Settings waits in its tab; the count is read again on coming back
+    if (!hasFavicon()) {
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                loadIconCount().then(renderOptions);
+            }
+        });
+    }
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'sync') {
             return;
@@ -567,7 +630,7 @@ async function start() {
     document.getElementById('version').textContent = ['v' + chrome.runtime.getManifest().version,
         STORES[chrome.runtime.id]].filter(Boolean).join(' · ');
 
-    [state.tabGroups] = await Promise.all([hasTabGroups(), loadOptions()]);
+    [state.tabGroups] = await Promise.all([hasTabGroups(), loadOptions(), hasFavicon() ? null : loadIconCount()]);
     applyTheme(state.options.theme);
     build();
     renderOptions();
