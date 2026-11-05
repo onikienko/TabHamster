@@ -70,7 +70,8 @@ var groupStore = (function () {
         return chromium_escapes ? bytes + 5 * countMatches(json, /</g) + 3 * countMatches(json, /[\u2028\u2029]/g) : bytes;
     }
 
-    // Firefox (its extension pages are moz-extension:), which counts storage.sync its own way (syncLimits)
+    // Firefox (its extension pages are moz-extension:), which counts storage.sync its own way (syncLimits). The check
+    // for the plain scripts (the background too); the pages' modules have isFirefox() in js/ui/platform.js.
     function inFirefox() {
         return typeof chrome !== 'undefined' && !!chrome.runtime && typeof chrome.runtime.getURL === 'function' &&
             chrome.runtime.getURL('').startsWith('moz-extension:');
@@ -1355,6 +1356,7 @@ var groupStore = (function () {
         parseChunkKey,
         itemBytes,
         syncLimits,
+        inFirefox,
         hash,
         tabsHash,
         writeId,

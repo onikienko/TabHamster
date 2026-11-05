@@ -184,7 +184,7 @@ async function isLoneBlankTab(active) {
 
 // Firefox refuses Chrome's pages, file:, data:, javascript: and its own about: pages, and hands addresses it doesn't
 // show itself to other apps or an error page (mailto: opens a new mail, edge: and chrome-extension: an error)
-const FIREFOX = chrome.runtime.getURL('').startsWith('moz-extension:');
+const FIREFOX = groupStore.inFirefox();
 
 /** the address Firefox opens for a saved one: web pages (also as view-source:), add-on pages and about:blank; a reader
  * view tab opens its page; null for the rest. An add-on page's address changes when the add-on is installed again

@@ -1,4 +1,7 @@
-/** Firefox (its extension pages are moz-extension:): no incognito there but private windows, allowed per add-on */
+/**
+ * Firefox (its extension pages are moz-extension:): no incognito there but private windows, allowed per add-on. The
+ * same check as groupStore.inFirefox() (js/group_store.js), which the plain scripts use: modules can't import them.
+ */
 export function isFirefox() {
     return chrome.runtime.getURL('').startsWith('moz-extension:');
 }
