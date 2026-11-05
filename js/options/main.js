@@ -348,7 +348,8 @@ function renderSync() {
 function syncHelp() {
     // the section's name is a link to it: put a marker in its place, then split on it
     const MARK = '\uE000';
-    const [before, after] = t('s_syncMissing_text', [MARK]).split(MARK);
+    // Firefox: one store, Add-ons in its Sync settings brings TabHamster too, and it syncs every few minutes
+    const [before, after] = t(isFirefox() ? 's_syncMissing_textFirefox' : 's_syncMissing_text', [MARK]).split(MARK);
     const answer = h('p', {class: 'text sync-help-text', id: 'sync_help', hidden: true},
         before, h('a', {href: '#backup'}, t('s_backup')), after);
     const button = h('button', {class: 'link-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'sync_help'},

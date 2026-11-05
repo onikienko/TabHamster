@@ -1697,6 +1697,16 @@
             }
         }
     },
+    "s_syncMissing_textFirefox": {
+        "message": "Пријавите се тамо у Firefox истим налогом, укључите усклађивање и означите Додаци: Firefox ће тада тамо инсталирати TabHamster и донети ваше групе. Firefox усклађује на сваких неколико минута; да бисте измену послали одмах, изаберите Firefox мени › Подешавања › Усклађивање › Усклађуј на рачунару на ком сте је направили, а затим и на другом. Да бисте пренели групе у други прегледач, преузмите датотеку резервне копије овде и вратите је тамо, у одељку $SECTION$ испод.",
+        "description": "Settings page, Sync and storage, in Firefox instead of s_syncMissing_text. Add-ons, Settings, Sync, Sync now: Firefox's own words (its menu, its Sync settings and their button). SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ група је за сада сачувана само на овом рачунару: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
@@ -2401,6 +2411,10 @@
     "w_sync": {
         "message": "Користите TabHamster на другом рачунару? Када је синхронизација прегледача укључена, ваше групе се саме појављују овде.",
         "description": "Welcome page. Before the link w_backup"
+    },
+    "w_syncFirefox": {
+        "message": "Користите TabHamster на другом рачунару? Када је Firefox усклађивање укључено и у њему означени Додаци, ваше групе се саме појављују овде.",
+        "description": "Welcome page, in Firefox instead of w_sync. Before the link w_backup. Add-ons: the checkbox in Firefox's Sync settings, in Firefox's own words"
     },
     "w_backup": {
         "message": "Без синхронизације вратите их из датотеке резервне копије.",

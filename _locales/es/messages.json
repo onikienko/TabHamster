@@ -1362,6 +1362,16 @@
             }
         }
     },
+    "s_syncMissing_textFirefox": {
+        "message": "Inicie sesión en Firefox en ese dispositivo con la misma cuenta, active la sincronización y marque Complementos: Firefox instalará allí TabHamster y traerá sus grupos. Firefox sincroniza cada pocos minutos; para enviar un cambio enseguida, elija menú de Firefox › Ajustes › Sincronización › Sincronizar ahora en el dispositivo donde lo hizo y luego en el otro. Para pasar sus grupos a otro navegador, descargue un archivo de copia de seguridad aquí y restáurelo allí, en $SECTION$, más abajo.",
+        "description": "Settings page, Sync and storage, in Firefox instead of s_syncMissing_text. Add-ons, Settings, Sync, Sync now: Firefox's own words (its menu, its Sync settings and their button). SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ grupo está guardado por ahora solo en este dispositivo: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
@@ -1988,6 +1998,10 @@
     "w_sync": {
         "message": "¿Usa TabHamster en otro dispositivo? Con la sincronización del navegador activada, sus grupos aparecen aquí solos.",
         "description": "Welcome page. Before the link w_backup"
+    },
+    "w_syncFirefox": {
+        "message": "¿Usa TabHamster en otro dispositivo? Con la sincronización de Firefox activada y Complementos marcado, sus grupos aparecen aquí solos.",
+        "description": "Welcome page, in Firefox instead of w_sync. Before the link w_backup. Add-ons: the checkbox in Firefox's Sync settings, in Firefox's own words"
     },
     "w_backup": {
         "message": "Sin sincronización, restáurelos desde un archivo de copia de seguridad.",

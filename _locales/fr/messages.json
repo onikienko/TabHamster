@@ -1362,6 +1362,16 @@
             }
         }
     },
+    "s_syncMissing_textFirefox": {
+        "message": "Connectez-vous à Firefox sur cet ordinateur avec le même compte, activez la synchronisation et cochez Modules complémentaires : Firefox y installe alors TabHamster et y apporte vos groupes. Firefox synchronise à quelques minutes d’intervalle ; pour envoyer un changement tout de suite, choisissez menu de Firefox › Paramètres › Synchronisation › Synchroniser maintenant sur l’ordinateur où vous l’avez fait, puis sur l’autre. Pour transférer vos groupes vers un autre navigateur, téléchargez un fichier de sauvegarde ici et restaurez-le là-bas, dans $SECTION$ ci-dessous.",
+        "description": "Settings page, Sync and storage, in Firefox instead of s_syncMissing_text. Add-ons, Settings, Sync, Sync now: Firefox's own words (its menu, its Sync settings and their button). SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ groupe est pour l’instant enregistré sur cet ordinateur uniquement : $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
@@ -1988,6 +1998,10 @@
     "w_sync": {
         "message": "Vous utilisez TabHamster sur un autre ordinateur ? Avec la synchronisation du navigateur activée, vos groupes arrivent ici tout seuls.",
         "description": "Welcome page. Before the link w_backup"
+    },
+    "w_syncFirefox": {
+        "message": "Vous utilisez TabHamster sur un autre ordinateur ? Avec la synchronisation de Firefox activée et Modules complémentaires coché, vos groupes arrivent ici tout seuls.",
+        "description": "Welcome page, in Firefox instead of w_sync. Before the link w_backup. Add-ons: the checkbox in Firefox's Sync settings, in Firefox's own words"
     },
     "w_backup": {
         "message": "Sans synchronisation, restaurez-les depuis un fichier de sauvegarde.",

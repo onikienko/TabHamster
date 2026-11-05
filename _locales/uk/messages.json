@@ -1701,6 +1701,16 @@
             }
         }
     },
+    "s_syncMissing_textFirefox": {
+        "message": "Увійдіть там у Firefox з тим самим обліковим записом, увімкніть синхронізацію й позначте Додатки: тоді Firefox сам установить там TabHamster і перенесе ваші групи. Firefox синхронізує раз на кілька хвилин; щоб надіслати зміну одразу, виберіть меню Firefox › Налаштування › Синхронізація › Синхронізувати зараз на комп'ютері, де ви її зробили, а потім на іншому. Щоб перенести групи в інший браузер, завантажте тут файл резервної копії та відновіть його там, у розділі «$SECTION$» нижче.",
+        "description": "Settings page, Sync and storage, in Firefox instead of s_syncMissing_text. Add-ons, Settings, Sync, Sync now: Firefox's own words (its menu, its Sync settings and their button). SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ група поки що збережена лише на цьому комп'ютері: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
@@ -2405,6 +2415,10 @@
     "w_sync": {
         "message": "Користуєтеся TabHamster на іншому комп'ютері? Коли синхронізацію браузера ввімкнено, ваші групи з'являються тут самі.",
         "description": "Welcome page. Before the link w_backup"
+    },
+    "w_syncFirefox": {
+        "message": "Користуєтеся TabHamster на іншому комп'ютері? Коли синхронізацію Firefox увімкнено й у ній позначено Додатки, ваші групи з'являються тут самі.",
+        "description": "Welcome page, in Firefox instead of w_sync. Before the link w_backup. Add-ons: the checkbox in Firefox's Sync settings, in Firefox's own words"
     },
     "w_backup": {
         "message": "Без синхронізації відновіть їх із файлу резервної копії.",

@@ -1362,6 +1362,16 @@
             }
         }
     },
+    "s_syncMissing_textFirefox": {
+        "message": "Sign in to Firefox there with the same account, turn on Sync and check Add-ons: Firefox then installs TabHamster there and brings your groups. Firefox syncs every few minutes; to send a change at once, choose Firefox menu › Settings › Sync › Sync now on the computer where you made it, then on the other one. To move your groups to another browser, download a backup file here and restore it there, in $SECTION$ below.",
+        "description": "Settings page, Sync and storage, in Firefox instead of s_syncMissing_text. Add-ons, Settings, Sync, Sync now: Firefox's own words (its menu, its Sync settings and their button). SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ group is saved on this computer only for now: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
@@ -1988,6 +1998,10 @@
     "w_sync": {
         "message": "Using TabHamster on another computer? With browser sync on, your groups show up here on their own.",
         "description": "Welcome page. Before the link w_backup"
+    },
+    "w_syncFirefox": {
+        "message": "Using TabHamster on another computer? With Firefox Sync on and Add-ons checked in it, your groups show up here on their own.",
+        "description": "Welcome page, in Firefox instead of w_sync. Before the link w_backup. Add-ons: the checkbox in Firefox's Sync settings, in Firefox's own words"
     },
     "w_backup": {
         "message": "Without sync, restore them from a backup file.",

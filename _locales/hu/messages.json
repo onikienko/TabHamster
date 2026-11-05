@@ -1359,6 +1359,16 @@
             }
         }
     },
+    "s_syncMissing_textFirefox": {
+        "message": "Jelentkezzen be ott is a Firefoxba ugyanazzal a fiókkal, kapcsolja be a szinkronizálást, és jelölje be a Kiegészítőket: a Firefox ekkor ott is telepíti a TabHamstert, és átviszi a csoportjait. A Firefox néhány percenként szinkronizál; ha egy változást azonnal át szeretne vinni, válassza a Firefox menü › Beállítások › Szinkronizálás › Szinkronizálás most lehetőséget azon a számítógépen, ahol a változás történt, majd a másikon is. Ha a csoportjait másik böngészőbe szeretné átvinni, töltsön le itt egy biztonsági mentési fájlt, és állítsa vissza ott, lent a $SECTION$ részben.",
+        "description": "Settings page, Sync and storage, in Firefox instead of s_syncMissing_text. Add-ons, Settings, Sync, Sync now: Firefox's own words (its menu, its Sync settings and their button). SECTION: the name of the Backup and restore section (s_backup), a link to it",
+        "placeholders": {
+            "section": {
+                "content": "$1",
+                "example": "Backup and restore"
+            }
+        }
+    },
     "s_unsynced_one": {
         "message": "$COUNT$ csoport egyelőre csak ezen a számítógépen van mentve: $NAMES$",
         "description": "Settings page. Groups waiting for room in sync, with up to 3 names (plural form 'one')",
@@ -1985,6 +1995,10 @@
     "w_sync": {
         "message": "Másik számítógépen is használja a TabHamstert? Ha a böngésző szinkronizálása be van kapcsolva, a csoportjai maguktól megjelennek itt.",
         "description": "Welcome page. Before the link w_backup"
+    },
+    "w_syncFirefox": {
+        "message": "Másik számítógépen is használja a TabHamstert? Ha a Firefox szinkronizálása be van kapcsolva, és benne a Kiegészítők be vannak jelölve, a csoportjai maguktól megjelennek itt.",
+        "description": "Welcome page, in Firefox instead of w_sync. Before the link w_backup. Add-ons: the checkbox in Firefox's Sync settings, in Firefox's own words"
     },
     "w_backup": {
         "message": "Szinkronizálás nélkül állítsa vissza őket biztonsági mentésből.",

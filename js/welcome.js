@@ -6,6 +6,7 @@
 import {logo} from './ui/icons.js';
 import {t, uiLanguage} from './ui/i18n.js';
 import {applyTheme} from './ui/theme.js';
+import {isFirefox} from './ui/platform.js';
 
 const el = (id) => document.getElementById(id);
 
@@ -38,7 +39,8 @@ async function start() {
     el('art').setAttribute('aria-label', t('w_drawing'));
     el('step1').textContent = t('w_step1');
     el('step2').textContent = t('w_step2');
-    el('sync_text').textContent = t('w_sync');
+    // Firefox syncs add-on data only with Add-ons checked in its Sync settings
+    el('sync_text').textContent = t(isFirefox() ? 'w_syncFirefox' : 'w_sync');
     el('backup_link').textContent = t('w_backup');
 
     const [{theme}, pinned] = await Promise.all([
