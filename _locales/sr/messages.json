@@ -1535,15 +1535,15 @@
     },
     "s_theme_system": {
         "message": "Систем",
-        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+        "description": "Settings page. Theme choice. Three choices share 290 px: keep it under about 10 characters"
     },
     "s_theme_light": {
         "message": "Светла",
-        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+        "description": "Settings page. Theme choice. Three choices share 290 px: keep it under about 10 characters"
     },
     "s_theme_dark": {
         "message": "Тамна",
-        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+        "description": "Settings page. Theme choice. Three choices share 290 px: keep it under about 10 characters"
     },
     "s_dateFormat_text": {
         "message": "Користи се за називе група сачуваних без назива.",

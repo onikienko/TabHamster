@@ -1207,15 +1207,15 @@
     },
     "s_theme_system": {
         "message": "Rendszer",
-        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+        "description": "Settings page. Theme choice. Three choices share 290 px: keep it under about 10 characters"
     },
     "s_theme_light": {
         "message": "Világos",
-        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+        "description": "Settings page. Theme choice. Three choices share 290 px: keep it under about 10 characters"
     },
     "s_theme_dark": {
         "message": "Sötét",
-        "description": "Settings page. Theme choice. Three choices share 250 px: keep it under about 10 characters"
+        "description": "Settings page. Theme choice. Three choices share 290 px: keep it under about 10 characters"
     },
     "s_dateFormat_text": {
         "message": "A név nélkül mentett csoportok elnevezéséhez.",
