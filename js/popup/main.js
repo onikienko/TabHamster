@@ -2693,15 +2693,22 @@ function isRowKey(e) {
         (e.key === 'F10' && e.shiftKey);
 }
 
+// From the field only the keys it has no use for (F2, the menu key), and only while the pointer is on a row now: Return,
+// Space, Delete and the arrows stay the field's.
+function isFieldRowKey(e) {
+    return (e.key === 'F2' || e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) && !!pointerNow && !!rowAt(pointerNow);
+}
+
 // Keys in use: the focused row looks selected, not the one under a resting pointer; moving the pointer takes over.
 // Not :focus-visible: Chrome doesn't count focus that came from a click (Alt+↓ on a group just clicked).
 // With the pointer in use, the row under it (or the last row it was on) is the selected one, so a row key acts on it:
-// it gets the focus and the key, as if it had been focused with keys. The field, a rename or a tab editor keep their keys (focus not on a row),
-// so do menus (focus in the menu) and drags.
+// it gets the focus and the key, as if it had been focused with keys. The field (but for isFieldRowKey), a rename or a tab
+// editor keep their keys (focus not on a row), so do menus (focus in the menu) and drags.
 document.addEventListener('keydown', (e) => {
     const focus = document.activeElement;
     if (e.isTrusted && isRowKey(e) && !document.body.classList.contains('keyboard') &&
-        !document.body.classList.contains('dragging') && el.list.contains(focus) && focus.matches(STOPS + ', ' + ITEM_BUTTONS)) {
+        !document.body.classList.contains('dragging') &&
+        ((el.list.contains(focus) && focus.matches(STOPS + ', ' + ITEM_BUTTONS)) || (focus === el.field && isFieldRowKey(e)))) {
         const stop = rowUnderPointer();
         // the focus already in that row (Open, Restore, ⋯ just clicked): the key is for it
         if (stop && stop !== focus && rowOf(stop) !== rowOf(focus)) {
