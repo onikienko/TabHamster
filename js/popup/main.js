@@ -271,6 +271,32 @@ function openInNewWindow(tabs) {
     openElsewhere('window', tabs);
 }
 
+/**
+ * A click on a tab row that is another add-on's page, in Firefox: it doesn't follow a link from our page to another
+ * add-on's page unless that add-on lists it as web accessible, and says nothing. tabs.create can open it, so the popup
+ * opens it as the link would: Shift in a new window, ⌘ / Ctrl or the middle button in the background (with Shift too:
+ * in front), else in front; next to the current tab. Everything else stays an ordinary link.
+ */
+function openAddonRow(e) {
+    const link = e.target.closest && e.target.closest('a.tab-row');
+    const url = link && link.getAttribute('href');
+    if (!url || !/^moz-extension:/i.test(url) || e.defaultPrevented || e.button > 1 || !isFirefox()) {
+        return;
+    }
+    e.preventDefault();
+    // a double click opens it once
+    if (e.detail > 1) {
+        return;
+    }
+    const mod = isMac() ? e.metaKey : e.ctrlKey;
+    const opened = e.shiftKey && !mod && e.button === 0 ? chrome.windows.create({url}) :
+        chrome.tabs.query({active: true, windowId: state.windowId}).then(([current]) => chrome.tabs.create({
+            url, windowId: state.windowId, active: !(mod || e.button === 1) || e.shiftKey,
+            openerTabId: current ? current.id : undefined,
+        }));
+    opened.catch((err) => console.error('TabHamster: could not open', url, err));
+}
+
 // windows closed this close to the last one are closed with it: Chrome quitting closes them one by one
 const SESSION_END_SPAN = 5000;
 
@@ -2579,6 +2605,9 @@ el.list.addEventListener('keydown', (e) => {
         el.field.focus();
     }
 });
+
+el.list.addEventListener('click', openAddonRow);
+el.list.addEventListener('auxclick', openAddonRow);
 
 // Chrome's own menu would follow the menu key's ⋯ menu
 let menuKeyAt = 0;
