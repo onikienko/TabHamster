@@ -6,7 +6,7 @@ import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {wantsNewWindow, keyLabel, keyCombo, isMac, isFirefox} from '../ui/platform.js';
-import {keyTime, numericDate, listDate, fullDate, shortTime, dayTime, interval, hostOf, withScheme, kilobytes} from '../ui/format.js';
+import {keyTime, dateName, listDate, fullDate, shortTime, dayTime, interval, hostOf, withScheme, kilobytes} from '../ui/format.js';
 import {knownIcon, chromeIcon, siteIcon, siteIconFailed} from '../ui/favicons.js';
 import {showBar, hideBarAbout, barShown} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
@@ -501,7 +501,7 @@ async function save(source = null) {
             key = 'tg_' + Date.now();
             const group = {name: intent.name, index: nextIndex(), tabs};
             const res = await groupStoreClient.save(key, group);
-            text = plural('p_savedAs', tabs.length, [intent.name || numericDate(keyTime(key), state.options.date_format)]) +
+            text = plural('p_savedAs', tabs.length, [intent.name || dateName(keyTime(key), state.options.date_format, lang)]) +
                 notSyncedNote(res);
             undo = () => groupStoreClient.discard(key, group);
             fresh = key;
@@ -1619,7 +1619,7 @@ function sortedSessionKeys() {
 }
 
 function groupName(key, group) {
-    return group.name || numericDate(keyTime(key), state.options.date_format);
+    return group.name || dateName(keyTime(key), state.options.date_format, lang);
 }
 
 /**

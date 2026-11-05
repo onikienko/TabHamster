@@ -1224,6 +1224,26 @@
         "message": "Sert à nommer les groupes enregistrés sans nom.",
         "description": "Settings page. Under Date format"
     },
+    "s_dateFormat_monthName": {
+        "message": "$DATE$ (nom du mois)",
+        "description": "Settings page. Date format choice, shown with the date and time now in the browser's language, the month as a word",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "Nov 4, 2026, 1:05 PM"
+            }
+        }
+    },
+    "s_dateFormat_short": {
+        "message": "$DATE$ (court)",
+        "description": "Settings page. Date format choice, shown with the date and time now in the browser's language, in numbers",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "11/4/2026, 1:05 PM"
+            }
+        }
+    },
     "s_dateFormat_dayFirst": {
         "message": "$DATE$ (jour d’abord)",
         "description": "Settings page. Date format choice, shown with the date and time now",

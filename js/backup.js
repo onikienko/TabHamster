@@ -41,7 +41,7 @@ var backup = (function () {
 
     // the choices each text option has; on/off options are 0 or 1
     const CHOICES = {
-        date_format: ['eu', 'us'],
+        date_format: ['local', 'local_numeric', 'eu', 'us'],
         active_tab: ['#saved', '#sessions'],
         theme: ['system', 'light', 'dark'],
         site_icons: ['ask', 'load', 'off'],

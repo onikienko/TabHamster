@@ -1,17 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {domainToASCII} from 'node:url';
-import {keyTime, numericDate, shortDate, shortTime, dayName, dayTime, interval, hostOf, withScheme, kilobytes, listDate, fullDate} from '../js/ui/format.js';
+import {keyTime, dateName, shortDate, shortTime, dayName, dayTime, interval, hostOf, withScheme, kilobytes, listDate, fullDate} from '../js/ui/format.js';
 
 test('keyTime reads tg_<ms> keys', () => {
     assert.equal(keyTime('tg_1760000000000'), 1760000000000);
     assert.equal(keyTime('nonsense'), 0);
 });
 
-test('numericDate: day first (eu) or year first (us), like 0.4.0', () => {
+test('dateName: day first (eu) or year first (us), like 0.4.0; an unknown format as day first', () => {
     const ms = new Date(2026, 9, 6, 9, 5).getTime();
-    assert.equal(numericDate(ms, 'eu'), '06-10-2026 09:05');
-    assert.equal(numericDate(ms, 'us'), '2026-10-06 09:05');
+    assert.equal(dateName(ms, 'eu', 'en-US'), '06-10-2026 09:05');
+    assert.equal(dateName(ms, 'us', 'uk'), '2026-10-06 09:05');
+    assert.equal(dateName(ms, 'later', 'en-US'), '06-10-2026 09:05');
+});
+
+test('dateName: local formats in the language, always with the month name in the first', () => {
+    const ms = new Date(2026, 10, 4, 13, 5).getTime();
+    assert.equal(dateName(ms, 'local', 'en-US'), 'Nov 4, 2026, 1:05 PM');
+    assert.equal(dateName(ms, 'local', 'uk'), '4 лист. 2026 р., 13:05');
+    // Serbian's medium date style is numbers only
+    assert.equal(dateName(ms, 'local', 'sr'), '4. нов 2026. 13:05');
+    assert.equal(dateName(ms, 'local_numeric', 'en-US'), '11/4/2026, 1:05 PM');
+    assert.equal(dateName(ms, 'local_numeric', 'uk'), '04.11.2026, 13:05');
 });
 
 test('shortDate adds the year only for another year', () => {

@@ -26,10 +26,17 @@ function two(n) {
 
 /**
  * Name of a group saved without a name: its date and time in the format chosen in Settings.
- * 'eu': 16-10-2026 21:52, 'us': 2026-10-16 21:52 (same as 0.4.0).
+ * 'local': as the browser's language writes it, with the month's name ("Oct 16, 2026, 9:52 PM", "16 жовт. 2026 р.,
+ * 21:52"; asked for by part: Serbian's and German's medium style has no month name); 'local_numeric': the same in
+ * numbers ("10/16/2026, 9:52 PM", "16.10.2026, 21:52"); 'eu': 16-10-2026 21:52, 'us': 2026-10-16 21:52 (same as
+ * 0.4.0). Anything else (a newer version's format) as 'eu', as older versions show the local ones.
  */
-export function numericDate(ms, format) {
+export function dateName(ms, format, lang) {
     const d = new Date(ms);
+    if (format === 'local' || format === 'local_numeric') {
+        return formatter(Intl.DateTimeFormat, lang, {year: 'numeric', month: format === 'local' ? 'short' : 'numeric',
+            day: 'numeric', hour: 'numeric', minute: '2-digit'}).format(d);
+    }
     const day = two(d.getDate());
     const month = two(d.getMonth() + 1);
     const time = two(d.getHours()) + ':' + two(d.getMinutes());

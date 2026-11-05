@@ -6,7 +6,7 @@ import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
 import {isMac, keyLabel, isFirefox} from '../ui/platform.js';
-import {keyTime, numericDate, dayTime, kilobytes} from '../ui/format.js';
+import {keyTime, dateName, dayTime, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
@@ -76,7 +76,7 @@ async function reloadAll() {
 
 /** name of a group as the popup shows it: its own, or the date it was saved */
 function groupName(key, group) {
-    return group.name || numericDate(keyTime(key), state.options.date_format);
+    return group.name || dateName(keyTime(key), state.options.date_format, lang);
 }
 
 /* ---------- options ---------- */
@@ -187,14 +187,16 @@ function themeControl(labelId) {
     return group;
 }
 
-/** the two formats shown as today's date in them */
+/** the formats shown as the date and time now in them */
 function dateFormatControl(id) {
     const now = Date.now();
+    const formats = [['local', 's_dateFormat_monthName'], ['local_numeric', 's_dateFormat_short'],
+        ['eu', 's_dateFormat_dayFirst'], ['us', 's_dateFormat_yearFirst']];
     const select = h('select', {class: 'select', id, onChange: () => setOption('date_format', select.value)},
-        h('option', {value: 'eu'}, t('s_dateFormat_dayFirst', numericDate(now, 'eu'))),
-        h('option', {value: 'us'}, t('s_dateFormat_yearFirst', numericDate(now, 'us'))));
+        formats.map(([value, text]) => h('option', {value}, t(text, dateName(now, value, lang)))));
     updaters.push(() => {
-        select.value = state.options.date_format === 'us' ? 'us' : 'eu';
+        // a format this version doesn't know (a newer one's) shows as day first, as names do
+        select.value = formats.some(([value]) => value === state.options.date_format) ? state.options.date_format : 'eu';
     });
     return select;
 }
