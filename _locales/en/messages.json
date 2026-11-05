@@ -1778,6 +1778,10 @@
         "message": "Report a problem",
         "description": "Settings page. About, link to the issues page on GitHub"
     },
+    "s_about_version": {
+        "message": "Version",
+        "description": "Settings page. About, before the version and the store this copy came from (like 'Developer')"
+    },
     "s_about_developer": {
         "message": "Developer",
         "description": "Settings page. About, before the developer's name (like 'Translations' and 'Thanks to')"

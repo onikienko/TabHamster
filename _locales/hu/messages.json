@@ -1775,6 +1775,10 @@
         "message": "Hiba bejelentése",
         "description": "Settings page. About, link to the issues page on GitHub"
     },
+    "s_about_version": {
+        "message": "Verzió",
+        "description": "Settings page. About, before the version and the store this copy came from (like 'Developer')"
+    },
     "s_about_developer": {
         "message": "Fejlesztő",
         "description": "Settings page. About, before the developer's name (like 'Translations' and 'Thanks to')"

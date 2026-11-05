@@ -483,6 +483,8 @@ function about() {
             h('a', {href: PRIVACY, target: '_blank', rel: 'noopener'}, t('s_about_privacy')), ' · ',
             h('a', {href: GITHUB + '/issues', target: '_blank', rel: 'noopener'}, t('s_about_issues'))),
         h('dl', {class: 'credits'},
+            h('dt', null, t('s_about_version')),
+            h('dd', {class: 'num'}, versionText()),
             h('dt', null, t('s_about_developer')),
             // the flag says it in words to a screen reader and in its tooltip
             h('dd', null, person(...DEVELOPER), ' ', setTip(h('span', {class: 'flag', role: 'img',
@@ -623,13 +625,17 @@ const STORES = {
     '@TabHamster': 'Firefox Add-ons',
 };
 
+/** "1.2.0 · Chrome Web Store", in the band (with a v) and in About */
+function versionText(prefix = '') {
+    return [prefix + chrome.runtime.getManifest().version, STORES[chrome.runtime.id]].filter(Boolean).join(' · ');
+}
+
 async function start() {
     document.documentElement.lang = lang;
     document.title = t('s_title');
     document.getElementById('title').textContent = t('s_title');
     document.getElementById('logo').append(logo(46, 'TabHamster'));
-    document.getElementById('version').textContent = ['v' + chrome.runtime.getManifest().version,
-        STORES[chrome.runtime.id]].filter(Boolean).join(' · ');
+    document.getElementById('version').textContent = versionText('v');
 
     [state.tabGroups] = await Promise.all([hasTabGroups(), loadOptions(), hasFavicon() ? null : loadIconCount()]);
     applyTheme(state.options.theme);
