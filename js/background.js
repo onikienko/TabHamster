@@ -921,20 +921,23 @@ chrome.storage.onChanged.addListener(function (changes, area_name) {
 
 // Firefox has no _favicon: the icons its tabs show are kept for the popup (js/icon_cache.js), not those of incognito tabs
 if (!(chrome.runtime.getManifest().permissions || []).includes('favicon')) {
-    const keepIcon = function (tab) {
+    const keepIcon = async function (tab) {
         if (!tab.incognito && tab.favIconUrl) {
-            iconCache.remember(tab.url, tab.favIconUrl).catch(e => console.error('TabHamster: icon not kept', e));
+            await iconCache.remember(tab.url, tab.favIconUrl).catch(e => console.error('TabHamster: icon not kept', e));
         }
     };
     chrome.tabs.onUpdated.addListener((tab_id, change, tab) => keepIcon(tab), {properties: ['favIconUrl']});
     // The tabs already open when the background first runs: their icons came before it did. Once per browser run
     // (session storage is emptied when the browser starts or TabHamster is updated): Firefox stops an idle background
     // and starts it again for the next event, and every tab's icon would be looked up again each time.
+    // One at a time: a restored window can have hundreds, each decoded and drawn again at browser start.
     chrome.storage.session.get('icons_kept').then(async function ({icons_kept}) {
         if (icons_kept) {
             return;
         }
-        (await chrome.tabs.query({})).forEach(keepIcon);
+        for (const tab of await chrome.tabs.query({})) {
+            await keepIcon(tab);
+        }
         await chrome.storage.session.set({icons_kept: true});
         await iconCache.trim();
     }).catch(e => console.error('TabHamster: icons of open tabs not kept', e));

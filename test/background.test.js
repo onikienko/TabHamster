@@ -517,6 +517,28 @@ test('firefox: the icons of the tabs open at start are kept once per browser run
     await waitFor(() => kept.length === 2);
 });
 
+test('firefox: the icons of the tabs open at start are kept one at a time', async () => {
+    const tabs = [1, 2, 3].map(n => ({id: n, windowId: 1, url: 'https://s' + n + '.example/',
+        favIconUrl: 'data:image/png;base64,A' + n, incognito: false}));
+    const browser = fakeBrowser(tabs[0]);
+    // all open tabs, in every window
+    browser.tabs.query = async () => tabs.slice();
+    let running = 0;
+    let most = 0;
+    const kept = [];
+    const icon_cache = {get: async () => null, trim: async () => {}, remember: async (url) => {
+        most = Math.max(most, ++running);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        kept.push(url);
+        running--;
+    }};
+    const session = createStorageArea();
+    startBackground({browser, session, icon_cache, firefox: true});
+    await waitFor(async () => (await session.get('icons_kept')).icons_kept);
+    assert.deepEqual(kept, tabs.map(tab => tab.url));
+    assert.equal(most, 1);
+});
+
 test('firefox: Settings counts and clears the kept site icons through the background', async () => {
     const calls = [];
     const icon_cache = {get: async () => null, remember: async () => {}, trim: async () => {},
