@@ -2712,7 +2712,9 @@ document.addEventListener('keydown', (e) => {
     const focus = document.activeElement;
     if (e.isTrusted && isRowKey(e) && !document.body.classList.contains('keyboard') &&
         !document.body.classList.contains('dragging') &&
-        ((el.list.contains(focus) && focus.matches(STOPS + ', ' + ITEM_BUTTONS)) || (focus === el.field && isFieldRowKey(e)))) {
+        ((el.list.contains(focus) && focus.matches(STOPS + ', ' + ITEM_BUTTONS)) || (focus === el.field && isFieldRowKey(e)) ||
+            // nothing has the focus (a menu closed by a click outside, the focused row gone): every row key is free
+            ((!focus || focus === document.body) && !!pointerNow && !!rowAt(pointerNow)))) {
         const stop = rowUnderPointer();
         // the focus already in that row (Open, Restore, ⋯ just clicked): the key is for it
         if (stop && stop !== focus && rowOf(stop) !== rowOf(focus)) {
