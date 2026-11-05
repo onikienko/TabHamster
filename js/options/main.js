@@ -5,7 +5,7 @@
 import {h, clear} from '../ui/dom.js';
 import {icon, logo} from '../ui/icons.js';
 import {t, plural, uiLanguage} from '../ui/i18n.js';
-import {isMac, keyLabel, isFirefox} from '../ui/platform.js';
+import {isMac, keyLabel, keyCombo, isFirefox} from '../ui/platform.js';
 import {keyTime, dateName, dayTime, kilobytes} from '../ui/format.js';
 import {showBar} from '../ui/bar.js';
 import {setTip} from '../ui/tooltip.js';
@@ -440,7 +440,7 @@ function help() {
         [t('s_help_typeKey'), t('s_help_type')],
         [t('s_help_downKey', enter), t('s_help_down')],
         [t('s_help_clickKey'), t('s_help_click', keyLabel('enter'))],
-        [t('s_help_shiftKey', modifier('shift')), t('s_help_shift')],
+        [t('s_help_shiftKey', modifier('shift')), t('s_help_shift', keyCombo(['shift', 'enter']))],
         ['→ ←', t('s_help_arrows')],
         [t('s_help_moveKey', modifier('alt')), t('s_help_move')],
         [cap(keyLabel('esc')), t('s_help_esc')],

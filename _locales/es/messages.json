@@ -1709,8 +1709,14 @@
         }
     },
     "s_help_shift": {
-        "message": "Abre un grupo en una ventana nueva, igual que con un enlace. Lo mismo hacen el botón de ventana junto a Abrir y el clic con el botón central.",
-        "description": "Settings page. Help, key list. "
+        "message": "Abre un grupo en una ventana nueva, igual que con un enlace. Lo mismo hacen el botón de ventana junto a Abrir y el clic con el botón central. $KEY$ lo hace con el grupo seleccionado o, con el campo vacío, con el grupo bajo el puntero.",
+        "description": "Settings page. Help, key list: Shift+click on a group. KEY: Shift+Return as the keyboard shows it (⇧ ↩ on a Mac, Shift+Enter elsewhere)",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Shift+Enter"
+            }
+        }
     },
     "s_help_arrows": {
         "message": "Muestran y ocultan las pestañas del grupo resaltado.",

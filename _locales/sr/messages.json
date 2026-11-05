@@ -2112,8 +2112,14 @@
         }
     },
     "s_help_shift": {
-        "message": "Отвара групу у новом прозору, као и линк. Исто раде дугме прозора поред Отвори и клик средњим тастером.",
-        "description": "Settings page. Help, key list. "
+        "message": "Отвара групу у новом прозору, као и линк. Исто раде дугме прозора поред Отвори и клик средњим тастером. $KEY$ то ради за изабрану групу или, када је поље празно, за групу испод показивача.",
+        "description": "Settings page. Help, key list: Shift+click on a group. KEY: Shift+Return as the keyboard shows it (⇧ ↩ on a Mac, Shift+Enter elsewhere)",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Shift+Enter"
+            }
+        }
     },
     "s_help_arrows": {
         "message": "Приказују и скривају картице истакнуте групе.",

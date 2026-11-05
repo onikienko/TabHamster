@@ -1709,8 +1709,14 @@
         }
     },
     "s_help_shift": {
-        "message": "Opens a group in a new window, as it does with a link. So do the window button next to Open and a middle click.",
-        "description": "Settings page. Help, key list. "
+        "message": "Opens a group in a new window, as it does with a link. So do the window button next to Open and a middle click. $KEY$ does it for the selected group or, while the field is empty, for the group under the pointer.",
+        "description": "Settings page. Help, key list: Shift+click on a group. KEY: Shift+Return as the keyboard shows it (⇧ ↩ on a Mac, Shift+Enter elsewhere)",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Shift+Enter"
+            }
+        }
     },
     "s_help_arrows": {
         "message": "Show and hide the tabs of the highlighted group.",

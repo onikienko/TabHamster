@@ -2116,8 +2116,14 @@
         }
     },
     "s_help_shift": {
-        "message": "Відкриває групу в новому вікні, як і посилання. Те саме роблять кнопка вікна поруч із «Відкрити» та клацання середньою кнопкою.",
-        "description": "Settings page. Help, key list. "
+        "message": "Відкриває групу в новому вікні, як і посилання. Те саме роблять кнопка вікна поруч із «Відкрити» та клацання середньою кнопкою. $KEY$ робить це для вибраної групи або, коли поле порожнє, для групи під вказівником.",
+        "description": "Settings page. Help, key list: Shift+click on a group. KEY: Shift+Return as the keyboard shows it (⇧ ↩ on a Mac, Shift+Enter elsewhere)",
+        "placeholders": {
+            "key": {
+                "content": "$1",
+                "example": "Shift+Enter"
+            }
+        }
     },
     "s_help_arrows": {
         "message": "Показують і ховають вкладки виділеної групи.",
