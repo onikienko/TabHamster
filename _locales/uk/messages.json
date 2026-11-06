@@ -2210,8 +2210,8 @@
         "description": "Settings page. Help, key list. Left column: the browser's tab groups"
     },
     "s_help_tabGroups": {
-        "message": "Коли ввімкнено «Запам'ятовувати групи вкладок» («Збереження вкладок»), групи й сесії зберігають назви й кольори груп вкладок браузера та знову відкривають їх як групи вкладок. Коли поточна вкладка в одній із них, під полем з'являється «Зберегти групу вкладок» або «Оновити групу», якщо групу вкладок уже збережено і відтоді вона змінилася.",
-        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group and Update group the buttons in the popup: use their texts"
+        "message": "Коли ввімкнено «Запам'ятовувати групи вкладок» («Збереження та відкриття вкладок»), групи й сесії зберігають назви й кольори груп вкладок браузера та знову відкривають їх як групи вкладок. Коли поточна вкладка в одній із них, під полем з'являється «Зберегти групу вкладок» або «Оновити групу», якщо групу вкладок уже збережено і відтоді вона змінилася.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving and opening tabs, Save tab group and Update group the buttons in the popup: use their texts"
     },
     "s_help_tabGroupsAlways": {
         "message": "Групи й сесії зберігають назви й кольори груп вкладок браузера та знову відкривають їх як групи вкладок. Коли поточна вкладка в одній із них, під полем з'являється «Зберегти групу вкладок» або «Оновити групу», якщо групу вкладок уже збережено і відтоді вона змінилася.",

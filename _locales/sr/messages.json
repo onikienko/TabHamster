@@ -2206,8 +2206,8 @@
         "description": "Settings page. Help, key list. Left column: the browser's tab groups"
     },
     "s_help_tabGroups": {
-        "message": "Када је укључено Запамти групе картица (Чување картица), групе и сесије чувају називе и боје група картица прегледача и поново их отварају као групе картица. Када је тренутна картица у некој од њих, испод поља се појављује Сачувај групу картица, или Ажурирај групу ако је група картица сачувана и од тада се променила.",
-        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving tabs, Save tab group and Update group the buttons in the popup: use their texts"
+        "message": "Када је укључено Запамти групе картица (Чување и отварање картица), групе и сесије чувају називе и боје група картица прегледача и поново их отварају као групе картица. Када је тренутна картица у некој од њих, испод поља се појављује Сачувај групу картица, или Ажурирај групу ако је група картица сачувана и од тада се променила.",
+        "description": "Settings page. Help, key list. After Tab groups. Remember tab groups is the switch in Settings > Saving and opening tabs, Save tab group and Update group the buttons in the popup: use their texts"
     },
     "s_help_tabGroupsAlways": {
         "message": "Групе и сесије чувају називе и боје група картица прегледача и поново их отварају као групе картица. Када је тренутна картица у некој од њих, испод поља се појављује Сачувај групу картица, или Ажурирај групу ако је група картица сачувана и од тада се променила.",
