@@ -70,9 +70,11 @@ export function isMenuOpen(anchor) {
 /**
  * openMenu(button, [{label, sub?, icon, danger?, keys?, run}, '-', ...], {label, onClose})
  * '-' is a separator. `sub` is a second, muted line. `keys`: ['F2'], the key that does the same from the list, shown at
- * the end of the item as in tooltips (a screen reader hears it from aria-keyshortcuts).
+ * the end of the item as in tooltips (a screen reader hears it from aria-keyshortcuts). null items are left out (an
+ * item only some groups have).
  */
-export function openMenu(anchor, items, {label, onClose} = {}) {
+export function openMenu(anchor, allItems, {label, onClose} = {}) {
+    const items = allItems.filter(Boolean);
     closeMenu(false);
     const buttons = [];
     const menu = h('div', {class: 'menu', role: 'menu', 'aria-label': label},

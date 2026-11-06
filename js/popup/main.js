@@ -862,7 +862,7 @@ async function groupMenu(key, button) {
         {icon: 'copy', label: t('p_copyLinks'), run: () => copyLinks(group)},
         '-',
         {icon: 'trash', label: t('p_delete'), danger: true, run: act(() => deleteGroup(key))},
-    ].filter(Boolean), {label: groupName(key, group), onClose: () => menuClosed(row)});
+    ], {label: groupName(key, group), onClose: () => menuClosed(row)});
 }
 
 /* ---------- order ---------- */
