@@ -55,33 +55,58 @@ def isNameMatch(name, match_list):
     return False
 
 
-def writeToChangelogFile():
-    if changelog['filename']:
-        print('\nWriting to changelog file ...')
-        changelog_path = os.path.join(BUILD_PATH, changelog['filename'])
+def changelogPath():
+    return os.path.join(BUILD_PATH, changelog['filename']) if changelog['filename'] else None
 
-        if changelog['datetimeformat']:
-            try:
-                timestamp = ' (' + datetime.datetime.now().strftime(changelog['datetimeformat']) + ')'
-            except ValueError:
-                print('Invalid changelog.datetimeformat string in package.json')
-                timestamp = ''
-        else:
-            timestamp = ''
+
+def readChangelog():
+    try:
+        with open(changelogPath(), encoding='utf-8') as f:
+            return f.readlines()
+    except OSError:
+        return []
+
+
+def isNote(line):
+    return line.startswith((' ', '\t'))
+
+
+def isThisVersion(line):
+    # "1.2.0 (date)": this version was built before, its line is stamped again
+    return line.split(' (')[0].strip() == build_version
+
+
+def checkChangelog():
+    # the notes come first: indented lines at the top, one per change; the build adds the version's line above them
+    if not changelogPath():
+        return
+    lines = readChangelog()
+    if not lines or not (isNote(lines[0]) or (isThisVersion(lines[0]) and len(lines) > 1 and isNote(lines[1]))):
+        print('Write the notes for %s at the top of %s first: one indented line per change.'
+              % (build_version, os.path.relpath(changelogPath(), PRJ_PATH)))
+        sys.exit(1)
+
+
+def stampChangelog():
+    # the version's line with the build's date and time, above the notes (replaced on a rebuild)
+    if not changelogPath():
+        return
+    timestamp = ''
+    if changelog['datetimeformat']:
         try:
-            if not os.path.isfile(changelog_path):
-                f = open(changelog_path, 'w', encoding='utf-8')
-                f.close()
-
-            with open(changelog_path, 'r+', encoding='utf-8') as f:
-                lines = f.readlines()
-                f.seek(0)
-                f.writelines([build_version + timestamp + '\n'] + lines)
-
-            f.close()
-            print('Ok\n')
-        except Exception:
-            print('Error reading or writing changelog file\n')
+            timestamp = ' (' + datetime.datetime.now().strftime(changelog['datetimeformat']) + ')'
+        except ValueError:
+            print('Invalid changelog.datetimeformat string in build.json')
+    lines = readChangelog()
+    if isThisVersion(lines[0]):
+        lines = lines[1:]
+    lines = [build_version + timestamp + '\n'] + lines
+    try:
+        with open(changelogPath(), 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+        print('Changelog: ' + lines[0].strip())
+    except OSError:
+        print('Error writing the changelog file')
 
 
 def backgroundScripts(worker):
@@ -245,12 +270,13 @@ def buildZip(firefox):
     print(len(files), 'files' + (', manifest.json written for Firefox' if firefox else ''))
 
 
+checkChangelog()
 os.makedirs(BUILD_PATH, exist_ok=True)
 for target in targets:
     buildZip(target)
 
-# one changelog line per version: the Chrome build writes it
+# the Chrome build stamps the version's line with the date
 if False in targets:
-    writeToChangelogFile()
+    stampChangelog()
 
 print('Done!')
