@@ -11,13 +11,12 @@
 # Keys (AMO Developer Hub, Tools, Manage API Keys): AMO_JWT_ISSUER and AMO_JWT_SECRET, from the environment or from
 # .work/store-keys.env (KEY=value lines, kept out of git).
 
-import os, re, sys, json, time, hmac, hashlib, base64, uuid, mimetypes, urllib.request, urllib.error, urllib.parse
+import os, re, sys, json, time, hmac, hashlib, base64, uuid, mimetypes, urllib.parse
 from zipfile import ZipFile
+from store_common import CUR_PATH, PRJ_PATH, WORK_PATH, fail, readText, readKeys, http, expect, confirm
 
-CUR_PATH = os.path.dirname(os.path.abspath(__file__))
-PRJ_PATH = os.path.dirname(CUR_PATH)
-MARKET_PATH = os.path.join(PRJ_PATH, '.work', 'firefox_market')
-KEYS_FILE = os.path.join(PRJ_PATH, '.work', 'store-keys.env')
+MARKET_PATH = os.path.join(WORK_PATH, 'firefox_market')
+KEY_NAMES = ('AMO_JWT_ISSUER', 'AMO_JWT_SECRET')
 API = 'https://addons.mozilla.org/api/v5/'
 # our _locales folders and AMO's names for them
 LOCALES = {'en': 'en-US', 'es': 'es-ES', 'fr': 'fr', 'hu': 'hu', 'sr': 'sr', 'uk': 'uk'}
@@ -27,26 +26,9 @@ PRIVACY_START = 'TabHamster is a browser extension'
 UPLOAD_WAIT = 300
 
 
-def fail(*message):
-    print('Error.', *message)
-    sys.exit(1)
-
-
-def readText(path):
-    with open(path, encoding='utf-8') as f:
-        return f.read()
-
-
 def keys():
-    found = {name: os.environ.get(name) for name in ('AMO_JWT_ISSUER', 'AMO_JWT_SECRET')}
-    if os.path.isfile(KEYS_FILE):
-        for line in readText(KEYS_FILE).splitlines():
-            name, sep, value = line.partition('=')
-            if sep and name.strip() in found and not found[name.strip()]:
-                found[name.strip()] = value.strip()
-    if not all(found.values()):
-        return None
-    return found['AMO_JWT_ISSUER'], found['AMO_JWT_SECRET']
+    found = readKeys(KEY_NAMES)
+    return (found['AMO_JWT_ISSUER'], found['AMO_JWT_SECRET']) if found else None
 
 
 def b64(data):
@@ -79,34 +61,12 @@ def multipart(fields, files):
 
 
 def call(method, path, data=None, files=None):
-    # returns (status, the answer's JSON or text); errors come back as a status too, the caller decides
-    headers = {'Authorization': 'JWT ' + token(*keys()), 'User-Agent': 'TabHamster-build'}
-    body = None
+    # (status, the answer's JSON or text)
+    headers = {'Authorization': 'JWT ' + token(*keys())}
+    body = data
     if files is not None:
         body, headers['Content-Type'] = multipart(data or {}, files)
-    elif data is not None:
-        body = json.dumps(data).encode()
-        headers['Content-Type'] = 'application/json'
-    request = urllib.request.Request(path if path.startswith('https:') else API + path, body, headers, method=method)
-    try:
-        with urllib.request.urlopen(request, timeout=120) as response:
-            status, text = response.status, response.read().decode('utf-8', 'replace')
-    except urllib.error.HTTPError as error:
-        status, text = error.code, error.read().decode('utf-8', 'replace')
-    except urllib.error.URLError as error:
-        fail(method, path, 'failed:', error.reason)
-    try:
-        return status, json.loads(text) if text else None
-    except ValueError:
-        return status, text
-
-
-def expect(answer, what):
-    status, body = answer
-    if status >= 400:
-        fail(what, 'failed (HTTP %d):' % status, json.dumps(body, indent=2, ensure_ascii=False)
-             if isinstance(body, (dict, list)) else body)
-    return body
+    return http(method, path if path.startswith('https:') else API + path, headers, body, 120)[:2]
 
 
 def translated(texts):
@@ -189,12 +149,6 @@ def remoteState(guid, slug):
         return None, 'the slug "%s" is your add-on %s (%s), not %s' % (slug, other.get('guid'), other.get('status'),
                                                                        guid)
     return None, 'the slug "%s" belongs to another add-on (HTTP %d): change "slug" in amo.json' % (slug, status)
-
-
-def confirm(question):
-    if input(question + ' Type "y" to go on: ').strip().lower() != 'y':
-        print('Stopped, nothing sent.')
-        sys.exit(1)
 
 
 def waitForUpload(upload):

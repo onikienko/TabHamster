@@ -62,6 +62,8 @@ Tests (Node 22 or newer): `node --test test/*.test.js test/*.test.mjs`
 Store package: `python3 build/build.py` writes `build/releases/<version>.zip` (the version from `manifest.json`) and
 adds that version to the top of [the changelog](build/releases/changelog.txt). `--all` writes the Firefox package
 next to it. The files go into the zip as they are, not minified.
+`build/cws.py`, `build/edge.py` and `build/amo.py` (Firefox) upload a built package to each store and submit it for
+review, `check` first; the keys and what each sends are in each script's top comment.
 
 ### Firefox
 
