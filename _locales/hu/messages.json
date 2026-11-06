@@ -1706,7 +1706,7 @@
         }
     },
     "s_help_shift": {
-        "message": "Új ablakban nyit meg egy csoportot, ugyanúgy, mint egy linket. Ugyanezt teszi a Megnyitás melletti ablak gomb és a középső kattintás. A $KEY$ a kijelölt csoporttal teszi ezt, üres mezőnél pedig a mutató alatti csoporttal.",
+        "message": "Új ablakban nyit meg egy csoportot, ugyanúgy, mint egy linket. Ugyanezt teszi a Megnyitás melletti ablak gomb és a középső kattintás. A $KEY$ a kijelölt csoporttal teszi ezt.",
         "description": "Settings page. Help, key list: Shift+click on a group. KEY: Shift+Return as the keyboard shows it (⇧ ↩ on a Mac, Shift+Enter elsewhere)",
         "placeholders": {
             "key": {

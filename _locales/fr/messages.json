@@ -1709,7 +1709,7 @@
         }
     },
     "s_help_shift": {
-        "message": "Ouvre un groupe dans une nouvelle fenêtre, comme pour un lien. Le bouton fenêtre à côté d’Ouvrir et le clic du milieu font de même. $KEY$ le fait pour le groupe sélectionné ou, quand le champ est vide, pour le groupe sous le pointeur.",
+        "message": "Ouvre un groupe dans une nouvelle fenêtre, comme pour un lien. Le bouton fenêtre à côté d’Ouvrir et le clic du milieu font de même. $KEY$ le fait pour le groupe sélectionné.",
         "description": "Settings page. Help, key list: Shift+click on a group. KEY: Shift+Return as the keyboard shows it (⇧ ↩ on a Mac, Shift+Enter elsewhere)",
         "placeholders": {
             "key": {
