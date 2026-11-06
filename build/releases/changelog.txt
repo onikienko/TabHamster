@@ -1,3 +1,14 @@
+    NOW ALSO IN FIREFOX (140 or newer), from Firefox Add-ons
+    The browser's tab groups: with "Remember tab groups" on (Settings > Saving and opening tabs), saved groups and sessions keep the names and colors of tab groups and open them as tab groups again (always on in Firefox). The browser asks for its permission once, and the popup offers it once
+    Tab lists show the tab group of each tab; a tab group's line opens only that tab group (Return, or Shift+Return in a new window)
+    "Save tab group" under the field saves the current tab's tab group, or "Update group" when it was saved and has changed since
+    Group menu: Open as tab group
+    F2 renames the selected group, the menu shows it next to Rename. F2 and the menu key act on the hovered row while you type in the field; Return with Shift or Ctrl there always saves
+    Unnamed groups: two date formats in the browser's language (Settings > General), the one with the month name for new installs
+    A blank new tab is reused only when it is the window's only tab apart from pinned ones; Vivaldi's and Opera's start pages count as blank new tabs
+    Settings: the version and store are shown in About too
+    Firefox: groups sync with Firefox Sync when Add-ons is checked (every few minutes, or Sync now); site icons are kept by TabHamster (Settings shows how many, with Clear); tabs Firefox can't open are marked, a click copies the address, and Open says how many it leaves out
+    Spanish, French, Hungarian, Serbian: new texts added (machine translated)
 1.1.0 (03.11.2026 15:30)
     Opened tabs keep the group's order in every browser, also in one set to open new tabs next to the current one (Cent Browser, Vivaldi, Opera)
     New setting "Switch to each tab as it opens" (Settings > Saving and opening tabs): each tab comes to the front as it opens, the browser places it, and the last one stays in front, as in 0.3.0. A blank new tab is left as it is then
