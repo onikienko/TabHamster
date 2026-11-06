@@ -2,3 +2,7 @@
 work-docs/
 .DS_Store
 build/firefox/
+
+.work/store-keys.env
+store-keys.env
+.env

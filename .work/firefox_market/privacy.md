@@ -11,7 +11,7 @@ Last updated: (the day 1.2.0 is published)
 TabHamster is a browser extension that saves groups of tabs and keeps your recent browser sessions.
 Chrome Web Store: https://chromewebstore.google.com/detail/tabhamster/mkfjjmjmnplabnplceaekkjcmdddokee
 Edge Add-ons: https://microsoftedge.microsoft.com/addons/detail/tabhamster/pifbgknmgjnlibbcbdblinmmlmdihkgc
-Firefox Add-ons: https://addons.mozilla.org/firefox/addon/tabhamster/
+Firefox Add-ons: https://addons.mozilla.org/firefox/addon/tab-hamster/
 
 ## What TabHamster stores
 

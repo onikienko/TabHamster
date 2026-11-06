@@ -1,10 +1,6 @@
 {
     "exclude": [".*", "readme.md", "build", "test", "work-docs"],
     "reminder": "",
-    "minify": {
-        "dirs": [],
-        "exclude": ["*.min.js"]
-    },
     "changelog": {
         "filename": "changelog.txt",
         "datetimeformat": "%d.%m.%Y %H:%M"

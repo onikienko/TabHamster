@@ -6,21 +6,19 @@
 # Read more on GitHub - https://github.com/onikienko/chrome-extensions-box
 ##########################################################################
 
-import os, re, json, fnmatch, zipfile, datetime, time, urllib.request, shutil, sys
+import os, re, json, fnmatch, zipfile, datetime, time, shutil, sys
 from zipfile import ZipFile
-from urllib.parse import urlencode
-from urllib.error import HTTPError, URLError
 
 # the build folder and the project around it, wherever the script is run from
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 PRJ_PATH = os.path.dirname(CUR_PATH)
-PRJ_PAR_DIR, PRJ_DIR_NAME = os.path.split(PRJ_PATH)
+PRJ_DIR_NAME = os.path.basename(PRJ_PATH)
 BUILD_PATH = os.path.join(CUR_PATH, 'releases')
 PACKAGE_FILE = os.path.join(CUR_PATH, 'build.json')
 MANIFEST_FILE = os.path.join(PRJ_PATH, 'manifest.json')
-TMP_DIR = os.path.join(CUR_PATH, 'tmp')
 
-ARG_NO_MINIFY = '-m'
+# both store packages: <version>.zip (Chrome Web Store, Edge Add-ons) and <version>-firefox.zip
+ARG_ALL = '--all'
 # Firefox: a zip with the manifest rewritten for Firefox, or a folder to run with `npx web-ext run -s build/firefox`
 ARG_FIREFOX = '--firefox'
 ARG_FIREFOX_DEV = '--firefox-dev'
@@ -35,7 +33,6 @@ FIREFOX_REQUIRED = ['tabGroups']
 # Chrome only: the _favicon/ icon cache
 FIREFOX_DROPPED = ['favicon']
 
-exclude_dirs = []
 # TODO collect and print errors after creating a package
 # errors = []
 
@@ -48,7 +45,7 @@ def getJSON(json_file):
         return j
     except:
         print('Error reading', json_file, 'file')
-        exit()
+        sys.exit(1)
 
 
 def isNameMatch(name, match_list):
@@ -85,36 +82,6 @@ def writeToChangelogFile():
             print('Ok\n')
         except Exception:
             print('Error reading or writing changelog file\n')
-
-
-def minifyJs(file_path, arcname):
-    print('Start minifying', arcname[1:])
-
-    try:
-        f = open(file_path, encoding='utf-8')
-        data = urllib.parse.urlencode({'js_code': f.read(), 'utf-8': 'utf-8'})
-        data = data.encode('utf-8')
-        req = urllib.request.Request(url='http://marijnhaverbeke.nl/uglifyjs')
-        minified = urllib.request.urlopen(req, data).read().decode('utf-8')
-    except (HTTPError, URLError) as error:
-        print('HTTP or URL error:', error)
-        print(arcname[1:], 'was not minified')
-        return file_path
-
-    try:
-        if not os.path.isdir(TMP_DIR):
-            os.makedirs(TMP_DIR)
-        tmp_file_path = os.path.join(TMP_DIR, os.path.basename(file_path))
-        tmp_file = open(tmp_file_path, 'w+', encoding='utf-8')
-        tmp_file.write(minified)
-        tmp_file.close()
-    except Exception:
-        print('Error during the creation temp file')
-        print(arcname[1:], 'was not minified')
-        return file_path
-
-    print('Ok. File was minified')
-    return tmp_file_path
 
 
 def backgroundScripts(worker):
@@ -217,89 +184,73 @@ try:
     build_version = getJSON(MANIFEST_FILE)['version']
 except KeyError:
     print('Error. Check "manifest.json" file. "version" is not defined')
-    exit()
-firefox = ARG_FIREFOX in sys.argv
+    sys.exit(1)
 firefox_dev = ARG_FIREFOX_DEV in sys.argv
-zip_basename = build_version + ('-firefox' if firefox else '') + '.zip'
-if not firefox_dev and os.path.exists(os.path.join(BUILD_PATH, zip_basename)):
-    print('Error.', zip_basename, 'already exists')
-    exit()
+# False: the Chrome Web Store and Edge Add-ons zip, True: the Firefox one
+targets = [False, True] if ARG_ALL in sys.argv else [ARG_FIREFOX in sys.argv]
+
+
+def zipBasename(firefox):
+    return build_version + ('-firefox' if firefox else '') + '.zip'
+
+
+if not firefox_dev:
+    for target in targets:
+        if os.path.exists(os.path.join(BUILD_PATH, zipBasename(target))):
+            print('Error.', zipBasename(target), 'already exists')
+            sys.exit(1)
 # the Firefox manifest can be made: it needs the worker's importScripts line
-if firefox or firefox_dev:
+if firefox_dev or True in targets:
     try:
         firefoxManifest(getJSON(MANIFEST_FILE))
     except (OSError, ValueError) as error:
         print('Error.', error)
-        exit()
+        sys.exit(1)
 
 # get package info
 try:
     package = getJSON(PACKAGE_FILE)
-    exclude, minify, reminder, changelog = package['exclude'], package['minify'], package['reminder'], package[
-        "changelog"]
-    if ARG_NO_MINIFY not in sys.argv:
-        for index, dirname in enumerate(minify['dirs']):
-            minify['dirs'][index] = os.path.abspath(os.path.join(CUR_PATH, dirname))
-    else:
-        minify['dirs'] = []
+    exclude, reminder, changelog = package['exclude'], package['reminder'], package['changelog']
 except Exception:
     print('Error in build.json file')
-    exit()
+    sys.exit(1)
 
 if firefox_dev:
     try:
         writeFirefoxDev(ARG_WATCH in sys.argv)
     except KeyboardInterrupt:
         pass
-    exit()
+    sys.exit()
 
 if reminder:
     i = input(reminder + ' ' + ' Press "y" (then "ENTER") to continue or just  "ENTER" to abort: ')
     if i.lower() != 'y':
-        exit()
+        sys.exit(1)
 
-if not os.path.isdir(BUILD_PATH):
-    os.makedirs(BUILD_PATH)
 
-zipname = os.path.join(BUILD_PATH, zip_basename)
-z = ZipFile(zipname, 'w', zipfile.ZIP_DEFLATED)
-print('\nStart building package ', os.path.abspath(zipname), '...\n')
+def buildZip(firefox):
+    zipname = os.path.join(BUILD_PATH, zipBasename(firefox))
+    print('Building', os.path.relpath(zipname, PRJ_PATH), '...')
+    files = sorted(projectFiles())
+    with ZipFile(zipname, 'w', zipfile.ZIP_DEFLATED) as z:
+        for rel in files:
+            # addons.mozilla.org wants manifest.json at the top of the zip, Chrome takes the project folder
+            arcname = rel.replace(os.sep, '/')
+            if not firefox:
+                arcname = PRJ_DIR_NAME + '/' + arcname
+            if firefox and rel == 'manifest.json':
+                z.writestr(arcname, firefoxManifest(getJSON(MANIFEST_FILE)))
+            else:
+                z.write(os.path.join(PRJ_PATH, rel), arcname)
+    print(len(files), 'files' + (', manifest.json written for Firefox' if firefox else ''))
 
-for root, dirs, files in os.walk(PRJ_PATH):
-    is_exclude_dir = root.startswith(tuple(exclude_dirs))
-    if (isNameMatch(os.path.basename(root), exclude) or is_exclude_dir) and root != PRJ_PATH:
-        if not is_exclude_dir:
-            exclude_dirs.append(root)
-        continue
-    else:
-        for name in files:
-            if not isNameMatch(name, exclude):
-                fullname = os.path.join(root, name)
-                # addons.mozilla.org wants manifest.json at the top of the zip, Chrome takes the project folder
-                arcname = fullname[len(PRJ_PATH if firefox else PRJ_PAR_DIR):]
-                if firefox and fullname == MANIFEST_FILE:
-                    z.writestr(arcname[1:], firefoxManifest(getJSON(MANIFEST_FILE)))
-                    print(arcname[1:], 'was written for Firefox\n')
-                    continue
-                if len(minify['dirs']) > 0 and root.startswith(tuple(minify['dirs'])) and fnmatch.fnmatch(name,
-                                                                                                          '*.js') and not isNameMatch(
-                        name,
-                        minify[
-                            'exclude']):
-                    fullname = minifyJs(fullname, arcname)
-                z.write(fullname, arcname)
-                print(arcname[1:], 'was added to the package\n')
-z.close()
-print('Package was created')
 
-if os.path.exists(TMP_DIR):
-    print('\nDeleting temporary files...')
-    shutil.rmtree(TMP_DIR, ignore_errors=False, onerror=None)
-    print('Ok')
+os.makedirs(BUILD_PATH, exist_ok=True)
+for target in targets:
+    buildZip(target)
 
 # one changelog line per version: the Chrome build writes it
-if not firefox:
+if False in targets:
     writeToChangelogFile()
 
 print('Done!')
-input('\nPress "Enter" to exit')

@@ -1,0 +1,55 @@
+{
+    "slug": "tab-hamster",
+    "license": "GPL-3.0-only",
+    "categories": [
+        "tabs"
+    ],
+    "homepage": "https://github.com/onikienko/TabHamster",
+    "support_url": "https://github.com/onikienko/TabHamster/issues",
+    "summary": {
+        "en": "Save open tabs as named groups and find them again. Sessions keep everything that was open in your last 30 browser sessions. Groups sync through Firefox Sync. Free and open source.",
+        "es": "Guarde las pestañas abiertas como grupos con nombre y vuelva a encontrarlas. Las sesiones guardan todo lo que estuvo abierto en sus últimas 30 sesiones del navegador. Los grupos se sincronizan con Firefox Sync. Gratis y de código abierto.",
+        "fr": "Enregistrez les onglets ouverts en groupes nommés et retrouvez-les. Les sessions gardent tout ce qui était ouvert lors de vos 30 dernières sessions. Les groupes se synchronisent avec Firefox. Gratuit et open source.",
+        "hu": "Mentse a megnyitott füleket elnevezett csoportokba, és találja meg őket újra. A munkamenetek mindent megőriznek, ami az utolsó 30 munkamenetben nyitva volt. A csoportok a Firefox szinkronizálással szinkronizálódnak. Ingyenes, nyílt forráskódú.",
+        "sr": "Сачувајте отворене картице као именоване групе и поново их пронађите. Сесије чувају све што је било отворено у последњих 30 сесија прегледача. Групе се синхронизују преко Firefox синхронизације. Бесплатно и отвореног кода.",
+        "uk": "Зберігайте відкриті вкладки в групи з назвами й легко знаходьте їх знову. Сесії зберігають усе, що було відкрито в останніх 30 сесіях браузера. Групи синхронізуються через Firefox. Безплатно, з відкритим кодом."
+    },
+    "screenshots": [
+        {
+            "file": "screenshots/en/1-save.png",
+            "caption": {
+                "en": "Save open tabs as a group. Press Enter. Name it, or let the date do it."
+            }
+        },
+        {
+            "file": "screenshots/en/2-search.png",
+            "caption": {
+                "en": "Find any tab. Search group names, tab titles and addresses as you type."
+            }
+        },
+        {
+            "file": "screenshots/en/3-sessions.png",
+            "caption": {
+                "en": "Everything that was open. Your last 30 sessions, with the tabs and windows you closed."
+            }
+        },
+        {
+            "file": "screenshots/en/4-menu.png",
+            "caption": {
+                "en": "Arrange it your way. Drag groups and tabs. Edit, move and remove tabs. Undo any change."
+            }
+        },
+        {
+            "file": "screenshots/en/5-dark.png",
+            "caption": {
+                "en": "Light or dark. Tab groups keep their names and colors."
+            }
+        }
+    ],
+    "release_notes": {
+        "1.2.0": {
+            "en": "First version for Firefox, with everything TabHamster 1.2.0 has in Chrome and Edge."
+        }
+    },
+    "approval_notes": "TabHamster saves open tabs as named groups and keeps a list of recent browser sessions. No account or login is needed. The package is not minified or bundled: the files are the ones in https://github.com/onikienko/TabHamster (only manifest.json is generated for Firefox by build/build.py).\n\nTo test:\n1. Open a few tabs, click the TabHamster toolbar button and press Enter (or click \"Save N tabs\"). The tabs are saved as a group named by the date; type a name first to name it.\n2. Click the group to see its tabs; \"Open\" opens them, the group's menu has more actions (replace with open tabs, rename, open in a private window, copy links, delete with Undo). Opening in a private window needs \"Run in Private Windows\" allowed for the add-on; without it the popup says where to allow it.\n3. The \"Sessions\" tab lists the current and past browser sessions; \"Restore\" reopens a session's windows.\n4. Settings (the icon at the bottom right of the popup): theme, backup and restore, recently deleted groups, help.\n5. Tab groups: put some tabs in a tab group, save the window, close it, and open the group: the tab group comes back with its name and color.\n\nPermissions: storage (groups in storage.sync and storage.local, sessions in storage.local), tabs (addresses and titles of open tabs, to save them and to keep the session list), unlimitedStorage (a local copy of every group, the last 30 sessions, and the site icon cache), tabGroups (tab groups' names and colors in saved groups and sessions).\n\nSite icons: Firefox gives extensions no access to its icon cache, so the background keeps the icon of each site the tabs show (tab.favIconUrl, scaled to 32 px) in IndexedDB, up to 20,000 sites (js/icon_cache.js); tabs in private windows are left out; Settings > General shows how many and has Clear. Nothing leaves the computer.\n\nNetwork: the add-on makes no requests of its own, except the optional \"Load missing icons from sites\" (Settings > General, off until the user allows it), which loads /favicon.ico from the saved sites."
+}
