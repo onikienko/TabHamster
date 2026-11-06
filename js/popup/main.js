@@ -2695,8 +2695,8 @@ function isRowKey(e) {
 
 // From the field only the keys it has no use for (F2, the menu key), and only while the pointer is on a row now that
 // does something with that key: else the focus would leave the field for nothing, and the typing after it would be lost.
-// Also Shift+Return (⌘ / Ctrl too: a new window) while the field is empty: while typing, Shift may still be down from a
-// capital, so then it saves as Return does. Return, Space, Delete and the arrows stay the field's.
+// Return, with Shift or ⌘ / Ctrl too, always saves from the field, wherever the pointer is: a Shift+click opens the
+// hovered group in a new window. Space, Delete and the arrows stay the field's too.
 function isFieldRowKey(e) {
     if (!pointerNow || !rowAt(pointerNow)) {
         return false;
@@ -2704,9 +2704,6 @@ function isFieldRowKey(e) {
     const stop = rowUnderPointer();
     if (!stop) {
         return false;
-    }
-    if (e.key === 'Enter') {
-        return (e.shiftKey || (isMac() ? e.metaKey : e.ctrlKey)) && !e.isComposing && el.field.value === '';
     }
     if (e.key === 'F2') {
         // a saved group's tab (edit) or name (rename)
