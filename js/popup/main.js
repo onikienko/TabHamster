@@ -271,6 +271,41 @@ function openInNewWindow(tabs) {
     openElsewhere('window', tabs);
 }
 
+// Firefox doesn't let add-ons open its own about: pages, file:, data: and other browsers' pages: their rows look dimmed
+// and copy the address instead, and Open says how many it leaves out (the background skips them)
+const FIREFOX = isFirefox();
+
+/** a saved address Firefox won't open for us (groupStore.firefoxUrl, which the background goes by) */
+function blockedInFirefox(url) {
+    return FIREFOX && !groupStore.firefoxUrl(url);
+}
+
+/** the tooltip line of Open and Restore when Firefox leaves some of `tabs` out, else null */
+function skippedNote(tabs) {
+    const skipped = FIREFOX ? tabs.filter((tab) => blockedInFirefox(tab.url)).length : 0;
+    return skipped ? plural('p_firefoxSkipped', skipped) : null;
+}
+
+/** a click, Enter or the middle button on a row Firefox won't open: the address goes to the clipboard */
+async function copyBlockedRow(e) {
+    const link = e.target.closest && e.target.closest('a.tab-row.blocked');
+    if (!link || e.defaultPrevented || e.button > 1) {
+        return;
+    }
+    e.preventDefault();
+    // a double click copies once
+    if (e.detail > 1) {
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(link.getAttribute('href'));
+        showBar(t('p_addressCopied'));
+    } catch (err) {
+        console.error('TabHamster: copy failed', err);
+        showBar(t('p_copyFailed'));
+    }
+}
+
 /**
  * A click on a tab row that is another add-on's page, in Firefox: it doesn't follow a link from our page to another
  * add-on's page unless that add-on lists it as web accessible, and says nothing. tabs.create can open it, so the popup
@@ -1768,11 +1803,12 @@ function tabGroupHead(tg) {
             setTip(h('button', {
                 class: 'open', type: 'button', 'aria-description': which, onClick: single(open),
                 onAuxclick: single((e) => e.button === 1 && openTabGroup('window', tg.run())),
-            }, t('p_open')), {text: t('p_openInThisWindow'), keys: [ENTER]}),
+            }, t('p_open')), {text: t('p_openInThisWindow'), keys: [ENTER], note: () => skippedNote(tg.run())}),
             setTip(h('button', {
                 class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'), 'aria-description': which,
                 onClick: single(() => openTabGroup('window', tg.run())),
-            }, icon('newWindow', 16)), {text: t('p_openNewWindow'), keys: [keyCombo(['shift', 'enter'])]})));
+            }, icon('newWindow', 16)), {text: t('p_openNewWindow'), keys: [keyCombo(['shift', 'enter'])],
+                note: () => skippedNote(tg.run())})));
 }
 
 /**
@@ -1785,15 +1821,17 @@ function tabGroupHead(tg) {
 function tabRow(tab, at, opts = {}) {
     const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
     const trail = opts.trail;
-    // only for a title the row cuts off: the full title and the address
+    const blocked = blockedInFirefox(tab.url);
+    // only for a title the row cuts off: the full title and the address; always for a page Firefox won't open
     const link = setTip(h('a', {
-        class: ['tab-row', opts.step && 'step'], href: tab.url, target: '_blank',
+        class: ['tab-row', opts.step && 'step', blocked && 'blocked'], href: tab.url, target: '_blank',
         dataset: at ? {key: at.key, index: String(at.index)} : trail ? {toggle: trail.id, auto: trail.auto ? '1' : ''} : {},
         'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
         'aria-expanded': trail ? String(trail.open) : null,
         // the pill over a run is only seen: each tab says its tab group
         'aria-description': [opts.tg && (opts.tg.t ? t('p_inTabGroup', [opts.tg.t]) : t('p_unnamedTabGroup')),
-            trail && plural('p_trailCount', trail.count)].filter(Boolean).join(', ') || null,
+            trail && plural('p_trailCount', trail.count),
+            blocked && t('p_firefoxBlocked') + ' ' + t('p_firefoxBlockedCopy')].filter(Boolean).join(', ') || null,
     },
     favicon(tab.url),
     tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
@@ -1814,8 +1852,9 @@ function tabRow(tab, at, opts = {}) {
         },
     }, icon('history', 12), numbers.format(trail.count)), {text: plural('p_trailCount', trail.count), keys: ['→']}) : null,
     h('span', {class: ['domain', 'ellipsis', opts.right && 'num']}, opts.right || marked(hostOf(tab.url)))),
-    {text: tab.title || tab.url, sub: tab.title ? tab.url : null, align: 'start', focus: false, quiet: true,
-        when: () => isCut(title)});
+    {text: tab.title || tab.url, sub: tab.title ? tab.url : null,
+        why: blocked ? {text: t('p_firefoxBlocked'), sub: t('p_firefoxBlockedCopy')} : null,
+        align: 'start', focus: false, quiet: true, when: blocked ? null : () => isCut(title)});
     const head = opts.tg && opts.tg.start ? tabGroupHead(opts.tg) : null;
     if (!at) {
         return h('div', tabItem(opts.tg), head, link);
@@ -2013,11 +2052,11 @@ function groupItem(result, target) {
                 setTip(h('button', {
                     class: 'open', type: 'button', onClick: single(open),
                     onAuxclick: single((e) => e.button === 1 && openInNewWindow(group.tabs)),
-                }, t('p_open')), {text: t('p_openInThisWindow'), keys: [ENTER]}),
+                }, t('p_open')), {text: t('p_openInThisWindow'), keys: [ENTER], note: () => skippedNote(group.tabs)}),
                 setTip(h('button', {
                     class: 'ib', type: 'button', 'aria-label': t('p_openNewWindow'),
                     onClick: single(() => openInNewWindow(group.tabs)),
-                }, icon('newWindow', 16)), NEW_WINDOW_TIP),
+                }, icon('newWindow', 16)), Object.assign({note: () => skippedNote(group.tabs)}, NEW_WINDOW_TIP)),
                 moreButton((button) => groupMenu(key, button))))));
     const editing = state.editingTab && state.editingTab.key === key ? state.editingTab : null;
     if (isExpanded('saved:' + key, partial) || editing) {
@@ -2092,7 +2131,7 @@ function sessionItem(result) {
             // the live session is open right now: nothing to restore
             ], current ? null : h('div', {class: 'actions'},
                 setTip(h('button', {class: 'open', type: 'button', onClick: single(() => restoreSession(session))}, t('p_restore')),
-                    {text: t('p_restore_tip'), keys: [ENTER]}),
+                    {text: t('p_restore_tip'), keys: [ENTER], note: () => skippedNote(endTabs(session))}),
                 moreButton((button) => sessionMenu(key, button))))));
     if (isExpanded(id, partial)) {
         // the live session lists only windows with something closed, numbered among those; with nothing closed yet,
@@ -2614,6 +2653,8 @@ el.list.addEventListener('keydown', (e) => {
     }
 });
 
+el.list.addEventListener('click', copyBlockedRow);
+el.list.addEventListener('auxclick', copyBlockedRow);
 el.list.addEventListener('click', openAddonRow);
 el.list.addEventListener('auxclick', openAddonRow);
 

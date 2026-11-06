@@ -77,6 +77,25 @@ var groupStore = (function () {
             chrome.runtime.getURL('').startsWith('moz-extension:');
     }
 
+    // Firefox refuses Chrome's pages, file:, data:, javascript: and its own about: pages, and hands addresses it doesn't
+    // show itself to other apps or an error page (mailto: opens a new mail, edge: and chrome-extension: an error).
+    // The background opens only what this lets through; the popup marks the rest.
+    /** the address Firefox opens for a saved one: web pages (also as view-source:), add-on pages and about:blank; a
+     * reader view tab opens its page; null for the rest. An add-on page's address changes when the add-on is installed
+     * again (and differs on each computer): an old one opens as a blank tab, as a page of a removed extension does in
+     * Chrome */
+    function firefoxUrl(url) {
+        const reader = /^about:reader\?(?:[^#]*&)?url=([^&#]+)/.exec(url);
+        if (reader) {
+            try {
+                url = decodeURIComponent(reader[1]);
+            } catch (e) {
+                return null;
+            }
+        }
+        return /^((view-source:)?https?|moz-extension):\/\//i.test(url) || url === 'about:blank' ? url : null;
+    }
+
     // chrome.storage.sync's limits: the ones the browser gives, else the same numbers (Firefox has them but doesn't
     // give them). The way of counting goes by the browser, not by the missing constants: Firefox checks its total as
     // the JSON of one object of all items, so each item adds its key's quotes, a colon and a comma to what
@@ -1357,6 +1376,7 @@ var groupStore = (function () {
         itemBytes,
         syncLimits,
         inFirefox,
+        firefoxUrl,
         hash,
         tabsHash,
         writeId,

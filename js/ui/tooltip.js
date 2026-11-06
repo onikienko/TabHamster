@@ -2,9 +2,13 @@
 // sooner, follow the theme and appear for keyboard users too. One at a time, under the element (above it if there
 // is no room), always inside the page: a popup can't draw outside its window.
 //
-// setTip(element, {text, sub?, keys?, bold?, align?, focus?})
+// setTip(element, {text, sub?, note?, keys?, bold?, align?, focus?})
 //   text   first line; `bold` for a name
 //   sub    second, muted line
+//   note   one more muted line, or () => the line or null, asked each time the tooltip shows (what a button will
+//          leave out, without working it out for every row as the list is drawn)
+//   why    {text, sub}: why the element doesn't do what its kind usually does, under a divider: the reason in the
+//          text's own colour, what to do instead muted
 //   keys   ['Return'] or ['⇧ Return']: key caps after the text (platform.js keyCombo)
 //   align  'center' (default) under the element, or 'start' at its left edge (names, tab rows)
 //   focus  false: not shown when the element gets keyboard focus (rows moved through with ↑ ↓)
@@ -99,6 +103,15 @@ function show(el, byKeyboard) {
         h('div', {class: 'tip-line'}, h('span', {class: spec.bold ? 'tip-name' : 'tip-text', dir: 'auto'}, spec.text), keys));
     if (spec.sub) {
         box.append(h('div', {class: 'tip-sub', dir: 'auto'}, spec.sub));
+    }
+    const note = typeof spec.note === 'function' ? spec.note() : spec.note;
+    if (note) {
+        box.append(h('div', {class: 'tip-sub', dir: 'auto'}, note));
+    }
+    if (spec.why) {
+        box.append(h('div', {class: 'tip-why'},
+            h('div', {class: 'tip-why-text', dir: 'auto'}, spec.why.text),
+            spec.why.sub ? h('div', {class: 'tip-sub', dir: 'auto'}, spec.why.sub) : null));
     }
     box.hidden = false;
     place(el, spec);

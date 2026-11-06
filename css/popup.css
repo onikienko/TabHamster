@@ -893,6 +893,15 @@ body.keyboard .fold:focus {
     color: var(--muted);
 }
 
+/* a page Firefox won't open for an add-on (js/popup/main.js blockedInFirefox): dimmed, the address as it is */
+.tab-row.blocked {
+    color: var(--muted);
+}
+
+.tab-row.blocked .fav {
+    opacity: .5;
+}
+
 .message {
     margin: 0;
     padding: 28px 24px;

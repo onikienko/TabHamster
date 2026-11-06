@@ -284,6 +284,20 @@ button, input, select, textarea {
     opacity: .72;
 }
 
+/* why the element behaves otherwise (setTip's `why`): apart from what it is */
+.tip-why {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 3px;
+    padding-top: 5px;
+    border-top: 1px solid var(--tip-line);
+}
+
+.tip-why-text {
+    overflow-wrap: anywhere;
+}
+
 .tip-keys {
     flex: none;
     display: flex;

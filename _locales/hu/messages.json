@@ -771,6 +771,38 @@
         "message": "Nem sikerült másolni a linkeket.",
         "description": "Bar when copying to the clipboard failed"
     },
+    "p_firefoxBlocked": {
+        "message": "A Firefox nem engedi, hogy kiegészítők megnyissák ezt az oldalt.",
+        "description": "Popup, Firefox: tooltip of a tab row whose page Firefox doesn't let add-ons open (its about: pages, file:, other browsers' pages), under the title and address; also read by screen readers, with p_firefoxBlockedCopy"
+    },
+    "p_firefoxBlockedCopy": {
+        "message": "Kattintson a címe másolásához.",
+        "description": "Popup, Firefox: the muted line under p_firefoxBlocked in the tooltip: a click on the row copies its address"
+    },
+    "p_addressCopied": {
+        "message": "Cím másolva. Illessze be a címsorba.",
+        "description": "Bar after a click on a tab row Firefox doesn't open (p_firefoxBlocked): its address is on the clipboard"
+    },
+    "p_firefoxSkipped_one": {
+        "message": "$COUNT$ fül kimarad, mert a Firefox nem nyitja meg",
+        "description": "Popup, Firefox: last line of the tooltip of Open, Open in a new window and Restore when some of the tabs are pages Firefox doesn't open (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_firefoxSkipped_other": {
+        "message": "$COUNT$ fül kimarad, mert a Firefox nem nyitja meg",
+        "description": "Popup, Firefox: last line of the tooltip of Open, Open in a new window and Restore when some of the tabs are pages Firefox doesn't open (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "5"
+            }
+        }
+    },
     "p_openFailed": {
         "message": "Nem sikerült megnyitni a füleket.",
         "description": "Bar when Chrome refused to open the tabs (for example incognito is turned off by an administrator)"

@@ -969,6 +969,48 @@
         "message": "Не вдалося скопіювати посилання.",
         "description": "Bar when copying to the clipboard failed"
     },
+    "p_firefoxBlocked": {
+        "message": "Firefox не дозволяє додаткам відкривати цю сторінку.",
+        "description": "Popup, Firefox: tooltip of a tab row whose page Firefox doesn't let add-ons open (its about: pages, file:, other browsers' pages), under the title and address; also read by screen readers, with p_firefoxBlockedCopy"
+    },
+    "p_firefoxBlockedCopy": {
+        "message": "Натисніть, щоб скопіювати її адресу.",
+        "description": "Popup, Firefox: the muted line under p_firefoxBlocked in the tooltip: a click on the row copies its address"
+    },
+    "p_addressCopied": {
+        "message": "Адресу скопійовано. Вставте її в адресний рядок.",
+        "description": "Bar after a click on a tab row Firefox doesn't open (p_firefoxBlocked): its address is on the clipboard"
+    },
+    "p_firefoxSkipped_one": {
+        "message": "Буде пропущено $COUNT$ вкладку, яку Firefox не відкриває",
+        "description": "Popup, Firefox: last line of the tooltip of Open, Open in a new window and Restore when some of the tabs are pages Firefox doesn't open (plural form 'one')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "p_firefoxSkipped_few": {
+        "message": "Буде пропущено $COUNT$ вкладки, які Firefox не відкриває",
+        "description": "Popup, Firefox: last line of the tooltip of Open, Open in a new window and Restore when some of the tabs are pages Firefox doesn't open (plural form 'few')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "3"
+            }
+        }
+    },
+    "p_firefoxSkipped_other": {
+        "message": "Буде пропущено $COUNT$ вкладок, які Firefox не відкриває",
+        "description": "Popup, Firefox: last line of the tooltip of Open, Open in a new window and Restore when some of the tabs are pages Firefox doesn't open (plural form 'other')",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "5"
+            }
+        }
+    },
     "p_openFailed": {
         "message": "Не вдалося відкрити вкладки.",
         "description": "Bar when Chrome refused to open the tabs (for example incognito is turned off by an administrator)"

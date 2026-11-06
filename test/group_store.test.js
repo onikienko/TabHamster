@@ -1492,3 +1492,22 @@ test('firefox: sync is counted by the browser it runs in, not by whether the lim
     // Node has no chrome: not Firefox
     assert.equal(gs.syncLimits(given).item_overhead, 0);
 });
+
+test('firefoxUrl: web pages, view-source, add-on pages and about:blank open; a reader view tab opens its page', () => {
+    for (const url of ['https://example.com/a?b#c', 'HTTP://example.com/', 'view-source:https://example.com/',
+        'moz-extension://0d1e/options.html', 'about:blank']) {
+        assert.equal(gs.firefoxUrl(url), url);
+    }
+    assert.equal(gs.firefoxUrl('about:reader?url=https%3A%2F%2Fexample.com%2Fpost%3Fid%3D1'),
+        'https://example.com/post?id=1');
+    assert.equal(gs.firefoxUrl('about:reader?x=1&url=https%3A%2F%2Fexample.com%2F#top'), 'https://example.com/');
+});
+
+test('firefoxUrl: its own pages, files, other browsers\' pages and other apps\' addresses are refused', () => {
+    for (const url of ['about:debugging#/runtime/this-firefox', 'about:config', 'about:addons', 'about:newtab',
+        'file:///Users/me/notes.html', 'data:text/html,hi', 'javascript:void(0)', 'chrome://settings/',
+        'edge://flags/', 'chrome-extension://abc/page.html', 'mailto:me@example.com', 'about:reader?url=%E0%A4%A',
+        '', undefined, null]) {
+        assert.equal(gs.firefoxUrl(url), null, String(url));
+    }
+});
