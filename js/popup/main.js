@@ -2693,14 +2693,31 @@ function isRowKey(e) {
         (e.key === 'F10' && e.shiftKey);
 }
 
-// From the field only the keys it has no use for (F2, the menu key), and only while the pointer is on a row now. Also
-// Shift+Return (⌘ / Ctrl too: a new window) while the field is empty: while typing, Shift may still be down from a capital,
-// so then it saves as Return does. Return, Space, Delete and the arrows stay the field's.
+// From the field only the keys it has no use for (F2, the menu key), and only while the pointer is on a row now that
+// does something with that key: else the focus would leave the field for nothing, and the typing after it would be lost.
+// Also Shift+Return (⌘ / Ctrl too: a new window) while the field is empty: while typing, Shift may still be down from a
+// capital, so then it saves as Return does. Return, Space, Delete and the arrows stay the field's.
 function isFieldRowKey(e) {
-    const newWindow = e.key === 'Enter' && (e.shiftKey || (isMac() ? e.metaKey : e.ctrlKey)) && !e.isComposing &&
-        el.field.value === '';
-    return (newWindow || e.key === 'F2' || e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) &&
-        !!pointerNow && !!rowAt(pointerNow);
+    if (!pointerNow || !rowAt(pointerNow)) {
+        return false;
+    }
+    const stop = rowUnderPointer();
+    if (!stop) {
+        return false;
+    }
+    if (e.key === 'Enter') {
+        return (e.shiftKey || (isMac() ? e.metaKey : e.ctrlKey)) && !e.isComposing && el.field.value === '';
+    }
+    if (e.key === 'F2') {
+        // a saved group's tab (edit) or name (rename)
+        return rowTabs.has(stop) || (stop.matches('button.name') && stop.dataset.toggle.startsWith('saved:'));
+    }
+    if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
+        // a row with a ⋯ menu
+        const row = stop.closest('.row');
+        return !!(row && row.querySelector('.more'));
+    }
+    return false;
 }
 
 // Keys in use: the focused row looks selected, not the one under a resting pointer; moving the pointer takes over.
