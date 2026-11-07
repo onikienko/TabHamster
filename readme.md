@@ -14,9 +14,11 @@ Install for your browser:
 
 **[Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/tabhamster/pifbgknmgjnlibbcbdblinmmlmdihkgc)**
 
-Install it from the same store on every computer you sync: copies from the two stores keep separate groups (a backup
-file moves groups between them). Brave, Vivaldi, Opera and other Chromium browsers can install it from the Chrome Web
-Store.
+**[Firefox Add-ons](https://addons.mozilla.org/firefox/addon/tab-hamster/)** (Firefox 140 or newer)
+
+Install it from the same store on every computer you sync: copies from different stores keep separate groups (a
+backup file moves groups between them). Brave, Vivaldi, Opera and other Chromium browsers can install it from the
+Chrome Web Store.
 
 ![TabHamster popup: saved groups with the tabs of one group open](.work/chrome_market/screenshots/en/1-save.png)
 
