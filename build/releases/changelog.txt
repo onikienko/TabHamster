@@ -1,3 +1,4 @@
+1.2.0 (06.11.2026 16:51)
     NOW ALSO IN FIREFOX (140 or newer), from Firefox Add-ons
     The browser's tab groups: with "Remember tab groups" on (Settings > Saving and opening tabs), saved groups and sessions keep the names and colors of tab groups and open them as tab groups again (always on in Firefox). The browser asks for its permission once, and the popup offers it once
     Tab lists show the tab group of each tab; a tab group's line opens only that tab group (Return, or Shift+Return in a new window)
