@@ -92,7 +92,7 @@ To test:
 2. Click the group to see its tabs; "Open" opens them, the group's menu has more actions (replace with open tabs, rename, open in an incognito (InPrivate) window, copy links, delete with Undo).
 3. The "Sessions" tab lists the current and past browser sessions; "Restore" reopens a session's windows.
 4. Settings (the icon at the bottom right of the popup): theme, backup and restore, recently deleted groups, help.
-5. Tab groups (optional): Settings > Saving > "Remember tab groups" asks for the tabGroups permission. Put some tabs in a tab group, save the window, close it, and open the group: the tab group comes back with its name and color. The ⋯ menu's "Open as tab group" opens a saved group as one tab group.
+5. Tab groups (optional): Settings > Saving and opening tabs > "Remember tab groups" asks for the tabGroups permission. Put some tabs in a tab group, save the window, close it, and open the group: the tab group comes back with its name and color. The ⋯ menu's "Open as tab group" opens a saved group as one tab group.
 
 Data: groups are kept in chrome.storage.sync (browser sync) and in chrome.storage.local; sessions only in chrome.storage.local. The extension makes no network requests of its own, except the optional "Load missing icons from sites" (Settings > General, off until the user allows it), which loads /favicon.ico from the saved sites. Source code: https://github.com/onikienko/TabHamster
 ```
