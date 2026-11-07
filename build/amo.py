@@ -24,6 +24,11 @@ SUMMARY_MAX = 250
 # where privacy.md stops being the page around the policy (title, date) and becomes the policy
 PRIVACY_START = 'TabHamster is a browser extension'
 UPLOAD_WAIT = 300
+# HTTP 429 answers waited out per request
+THROTTLE_RETRIES = 5
+# longer waits than this stop the script instead
+THROTTLE_MAX_WAIT = 180
+ICON_FILE = os.path.join(PRJ_PATH, 'img', 'ext_icons', '128.png')
 
 
 def keys():
@@ -60,13 +65,33 @@ def multipart(fields, files):
     return b''.join(parts), 'multipart/form-data; boundary=' + boundary
 
 
+def throttleWait(answer):
+    # AMO answers HTTP 429 when writes come too fast: "Expected available in 56 seconds.", or the Retry-After header
+    status, body, headers = answer
+    if status != 429:
+        return None
+    found = re.search(r'available in (\d+) second', json.dumps(body))
+    seconds = int(found.group(1)) if found else int((headers or {}).get('Retry-After') or 60)
+    return seconds + 2
+
+
 def call(method, path, data=None, files=None):
-    # (status, the answer's JSON or text)
-    headers = {'Authorization': 'JWT ' + token(*keys())}
-    body = data
-    if files is not None:
-        body, headers['Content-Type'] = multipart(data or {}, files)
-    return http(method, path if path.startswith('https:') else API + path, headers, body, 120)[:2]
+    # (status, the answer's JSON or text); waits out AMO's throttling, a few times at most
+    for attempt in range(THROTTLE_RETRIES + 1):
+        headers = {'Authorization': 'JWT ' + token(*keys())}
+        body = data
+        if files is not None:
+            body, headers['Content-Type'] = multipart(data or {}, files)
+        answer = http(method, path if path.startswith('https:') else API + path, headers, body, 120)
+        wait = throttleWait(answer)
+        if wait is None or attempt == THROTTLE_RETRIES:
+            return answer[:2]
+        if wait > THROTTLE_MAX_WAIT:
+            # past the per-minute limit AMO has an hourly one: rather than hang for an hour, say when to run again
+            fail('AMO takes no more changes for %d minutes; run the same command again after %s'
+                 % (wait // 60 + 1, time.strftime('%H:%M', time.localtime(time.time() + wait))))
+        print('  AMO asks to wait, trying again in %d s ...' % wait)
+        time.sleep(wait)
 
 
 def translated(texts):
@@ -180,6 +205,9 @@ def sendListing(guid, data, descriptions):
         'support_url': {'en-US': data['support_url']},
         'categories': data['categories'],
     }), 'Listing')
+    # AMO's listing icon is its own upload, not the package's manifest icon
+    print('Icon ...')
+    expect(call('PATCH', addonPath(guid), {}, {'icon': ICON_FILE}), 'Icon')
     print('Privacy policy ...')
     expect(call('PATCH', addonPath(guid) + 'eula_policy/', {'privacy_policy': {'en-US': privacyPolicy()}}),
            'Privacy policy')
