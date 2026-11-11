@@ -1677,6 +1677,20 @@
             }
         }
     },
+    "s_trashShowAll": {
+        "message": "Az összes mutatása ($COUNT$)",
+        "description": "Settings page, Recently deleted: button under the first rows that shows the rest of the list; the number of deleted groups",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "30"
+            }
+        }
+    },
+    "s_trashShowFewer": {
+        "message": "Kevesebb mutatása",
+        "description": "Settings page, Recently deleted: button under the whole list that shows only the first rows again"
+    },
     "s_groupRestored": {
         "message": "„$NAME$” visszaállítva",
         "description": "Settings page. Bar after restoring a deleted group",

@@ -2097,6 +2097,20 @@
             }
         }
     },
+    "s_trashShowAll": {
+        "message": "Показати всі ($COUNT$)",
+        "description": "Settings page, Recently deleted: button under the first rows that shows the rest of the list; the number of deleted groups",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": "30"
+            }
+        }
+    },
+    "s_trashShowFewer": {
+        "message": "Показати менше",
+        "description": "Settings page, Recently deleted: button under the whole list that shows only the first rows again"
+    },
     "s_groupRestored": {
         "message": "«$NAME$» відновлено",
         "description": "Settings page. Bar after restoring a deleted group",

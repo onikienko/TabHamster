@@ -320,6 +320,10 @@ h2 {
     text-decoration: underline;
 }
 
+.trash-toggle {
+    margin-top: 4px;
+}
+
 /* sync and storage */
 
 .sync-help {

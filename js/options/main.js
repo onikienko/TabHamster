@@ -20,6 +20,8 @@ const DEVELOPER = ['Mykhailo Onikiienko', 'https://github.com/onikienko'];
 const PRIVACY = 'https://onikienko.github.io/browser-extensions/tabhamster-privacy';
 // waiting groups named in the sync section; the rest are counted
 const NAMES_SHOWN = 3;
+// Recently deleted rows shown until Show all: someone who deletes groups often has a month of them there
+const TRASH_SHOWN = 4;
 // "45%", "45 %" in French
 const percents = new Intl.NumberFormat(lang, {style: 'percent', maximumFractionDigits: 0});
 const numbers = new Intl.NumberFormat(lang);
@@ -30,6 +32,8 @@ const state = {
     usage: null,
     // null: the background didn't answer (the page says so instead of showing nothing)
     trash: [],
+    // Recently deleted shows all its rows, not only the first TRASH_SHOWN
+    trashAll: false,
     groupsFailed: false,
     // the restore that can be undone: {time, restored, trashed} or null
     restore: null,
@@ -413,7 +417,32 @@ function renderTrash() {
         box.append(h('p', {class: 'row empty'}, t('o_trash_empty')));
         return;
     }
-    box.append(h('ul', {class: 'rows'}, state.trash.map(trashRow)));
+    const rows = state.trash.map(trashRow);
+    box.append(h('ul', {class: 'rows', id: 'trash_rows'}, rows));
+    if (rows.length > TRASH_SHOWN) {
+        box.append(trashToggle(rows));
+    }
+}
+
+/** Show all / Show fewer under the rows; hides rows in place, so the button keeps the focus */
+function trashToggle(rows) {
+    const button = h('button', {class: 'link-btn trash-toggle', type: 'button', 'aria-controls': 'trash_rows'});
+    const show = () => {
+        rows.forEach((row, i) => {
+            row.hidden = !state.trashAll && i >= TRASH_SHOWN;
+        });
+        button.setAttribute('aria-expanded', String(state.trashAll));
+        button.replaceChildren(icon(state.trashAll ? 'chevronUp' : 'chevronDown', 14),
+            state.trashAll ? t('s_trashShowFewer') : t('s_trashShowAll', numbers.format(rows.length)));
+    };
+    button.addEventListener('click', () => {
+        state.trashAll = !state.trashAll;
+        show();
+        // after Show fewer the button moves up, maybe out of the window
+        button.scrollIntoView({block: 'nearest'});
+    });
+    show();
+    return button;
 }
 
 // a key marked in a text, drawn as a key cap by keyCaps(); private use characters, never in translations
