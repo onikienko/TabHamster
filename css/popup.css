@@ -917,7 +917,7 @@ body.keyboard .fold:focus {
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 44px;
+    height: 37px;
     padding: 0 6px 0 14px;
     border-top: 1px solid var(--line);
     color: var(--muted);
@@ -978,8 +978,8 @@ body.keyboard .fold:focus {
 }
 
 .footer .ib {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
 }
 
 /* first run */

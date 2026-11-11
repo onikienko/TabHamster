@@ -2402,7 +2402,7 @@ function settingsButton() {
     return setTip(h('button', {
         class: 'ib', type: 'button', 'aria-label': t('p_optionsBtn'),
         onClick: () => chrome.runtime.openOptionsPage(),
-    }, icon('settings', 17)), {text: t('p_optionsBtn')});
+    }, icon('settings', 18)), {text: t('p_optionsBtn')});
 }
 
 function renderFooter() {
