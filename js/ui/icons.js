@@ -65,7 +65,6 @@ const ICONS = {
     tabGroup: [['path', {d: 'M3 7V5a2 2 0 0 1 2-2h2'}], ['path', {d: 'M17 3h2a2 2 0 0 1 2 2v2'}],
         ['path', {d: 'M21 17v2a2 2 0 0 1-2 2h-2'}], ['path', {d: 'M7 21H5a2 2 0 0 1-2-2v-2'}],
         ['rect', {x: 7, y: 7, width: 7, height: 5, rx: 1}], ['rect', {x: 10, y: 12, width: 7, height: 5, rx: 1}]],
-    closedTab: [['rect', {x: 3, y: 3, width: 18, height: 18, rx: 2}], ['path', {d: 'm15 9-6 6'}], ['path', {d: 'm9 9 6 6'}]],
     computer: [['rect', {x: 2, y: 3, width: 20, height: 14, rx: 2}], ['path', {d: 'M8 21h8'}], ['path', {d: 'M12 17v4'}]],
     download: [['path', {d: 'M12 3v12'}], ['path', {d: 'm7 10 5 5 5-5'}], ['path', {d: 'M5 21h14'}]],
     pin: [['path', {d: 'M12 17v5'}],

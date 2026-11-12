@@ -321,9 +321,8 @@ body.keyboard .row:has(> .name:focus) {
     width: var(--w-date, auto);
 }
 
-/* windows of a session; the current session's closed tabs */
-.meta.wins,
-.meta.closed {
+/* windows of a session */
+.meta.wins {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -332,10 +331,6 @@ body.keyboard .row:has(> .name:focus) {
 
 .meta.wins {
     width: var(--w-wins, auto);
-}
-
-.meta.closed {
-    width: var(--w-closed, auto);
 }
 
 /* space in sync storage ("Biggest first"); also next to the row's buttons */

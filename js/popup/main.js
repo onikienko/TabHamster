@@ -1982,7 +1982,7 @@ function rowEnd(details, actions) {
 }
 
 // columns of the row details; fitColumns sets --w-<column> on the list
-const COLUMNS = ['closed', 'count', 'date', 'size', 'wins'];
+const COLUMNS = ['count', 'date', 'size', 'wins'];
 
 /**
  * Sets the column widths for the list's new content, before it goes in. Measured on a copy of each different entry,
@@ -2124,10 +2124,6 @@ function sessionItem(result) {
                     closed > 0 && plural('p_closedTabs', closed),
                 ]),
             rowEnd([
-                // the live session's tabs are open: what it has to show is what was closed (while searching, the
-                // count is of those already)
-                current && closed > 0 && !partial ? countMeta('closed', numbers.format(closed),
-                    plural('p_closedTabs', closed), icon('closedTab', 13)) : null,
                 // one window is the usual case: only the tabs then
                 ends.length > 1 ? countMeta('wins', numbers.format(ends.length),
                     plural('p_windowsCount', ends.length), icon('window', 13)) : null,
