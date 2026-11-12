@@ -1100,12 +1100,12 @@ body.keyboard .fold:focus {
 /* search */
 
 .hit {
-    padding: 0 1px;
+    padding: 0;
     border-radius: 3px;
     background: var(--hit);
     /* not the muted colour of a tab's address: on --hit that is below 4.5:1 in dark mode */
     color: var(--text);
-    font-weight: 600;
+    font-weight: inherit;
 }
 
 /* the group that Enter would replace: an accent tint (as a just-saved group), not the grey of the selected row,

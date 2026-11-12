@@ -22,14 +22,25 @@ test('segments marks matches and merges overlaps', () => {
     assert.deepEqual(segments('Frontend Developer', ['dev', 'deve']), [
         {text: 'Frontend ', hit: false}, {text: 'Deve', hit: true}, {text: 'loper', hit: false}]);
     assert.deepEqual(segments('Tofino trip', ['tofino', 'trip']), [
-        {text: 'Tofino', hit: true}, {text: ' ', hit: false}, {text: 'trip', hit: true}]);
+        {text: 'Tofino trip', hit: true}]);
     assert.deepEqual(segments('abc', []), [{text: 'abc', hit: false}]);
+});
+
+test('segments joins matches across whitespace, preserving punctuation and unmatched words', () => {
+    assert.deepEqual(segments('Sunshine Coast, BC', parseQuery('sunshine coast')), [
+        {text: 'Sunshine Coast', hit: true}, {text: ', BC', hit: false}]);
+    assert.deepEqual(segments('Sunshine  Coast\u00a0BC', parseQuery('sunshine coast bc')), [
+        {text: 'Sunshine  Coast\u00a0BC', hit: true}]);
+    assert.deepEqual(segments('Sunshine, Coast', parseQuery('sunshine coast')), [
+        {text: 'Sunshine', hit: true}, {text: ', ', hit: false}, {text: 'Coast', hit: true}]);
+    assert.deepEqual(segments('Sunshine and Coast', parseQuery('sunshine coast')), [
+        {text: 'Sunshine', hit: true}, {text: ' and ', hit: false}, {text: 'Coast', hit: true}]);
 });
 
 test('segments: a word that starts a word is highlighted only there, else wherever it is', () => {
     const hits = (text, query) => segments(text, parseQuery(query)).filter((p) => p.hit).map((p) => p.text);
-    assert.deepEqual(hits('Tofino trip photos', 'trip to tofino'), ['Tofino', 'trip']);
-    assert.deepEqual(hits('Trip to Tofino', 'trip to tofino'), ['Trip', 'to', 'Tofino']);
+    assert.deepEqual(hits('Tofino trip photos', 'trip to tofino'), ['Tofino trip']);
+    assert.deepEqual(hits('Trip to Tofino', 'trip to tofino'), ['Trip to Tofino']);
     // only inside words: still shown, so it's clear why the group is in the list
     assert.deepEqual(hits('Tofino trip photos', 'oto'), ['oto']);
     // after punctuation, in addresses, in other scripts

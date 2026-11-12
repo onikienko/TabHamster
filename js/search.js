@@ -48,7 +48,8 @@ export function matchesAll(text, words) {
 }
 
 /**
- * The text split into parts for highlighting: [{text, hit}]. Overlapping matches merge.
+ * The text split into parts for highlighting: [{text, hit}]. Overlapping matches and those separated only by
+ * whitespace merge.
  * A word found where a word of the text starts is highlighted only there ("to" lights up "Tofino", not the middle
  * of "photos"); otherwise wherever it is found. Without words it is one part that is not a hit.
  */
@@ -66,7 +67,7 @@ export function segments(text, words) {
     const merged = [hits[0].slice()];
     for (const [start, end] of hits.slice(1)) {
         const last = merged[merged.length - 1];
-        if (start <= last[1]) {
+        if (start <= last[1] || /^\s+$/.test(s.slice(last[1], start))) {
             last[1] = Math.max(last[1], end);
         } else {
             merged.push([start, end]);
