@@ -462,7 +462,7 @@ body.keyboard .row:has(:focus) .end-meta {
     gap: 8px;
     height: 28px;
     margin-top: 2px;
-    color: var(--muted);
+    color: var(--text);
     font-size: 12px;
     font-weight: 600;
 }
@@ -482,6 +482,10 @@ body.keyboard .row:has(:focus) .end-meta {
 .win-title .link:hover {
     color: var(--link-hover);
     text-decoration: underline;
+}
+
+.win-content {
+    padding-left: 12px;
 }
 
 .tab-row {

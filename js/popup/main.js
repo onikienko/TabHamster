@@ -2185,6 +2185,7 @@ function sessionWindowRows(key, win, i, live, found) {
                     class: 'link', type: 'button',
                     onClick: single(() => openElsewhere('window', withSessionGroups(state.sessions[key], win.tabs))),
                 }, t('p_openWindow'))),
+        h('div', {class: 'win-content'},
         sessionTabGroups(key, shown, tabs, !!found).map((tg, n) => sessionTabRows(key, shown[n], found, undefined, tg)),
         closedShown.length ? [
             h('button', {
@@ -2193,7 +2194,7 @@ function sessionWindowRows(key, win, i, live, found) {
             }, icon(foldOpen ? 'chevronDown' : 'chevronRight', 14), plural('p_closedTabs', closedShown.length)),
             foldOpen ? h('div', {class: 'fold-list'},
                 closedShown.map((tab) => sessionTabRows(key, tab, found, shortTime(tab.closed, lang)))) : null,
-        ] : null,
+        ] : null),
     ];
 }
 
