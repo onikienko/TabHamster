@@ -875,6 +875,10 @@
         "message": "A bezárt fülek és ablakok itt jelennek meg.",
         "description": "Sessions tab: the current session expanded while nothing in it was closed yet"
     },
+    "p_noClosedTabs": {
+        "message": "Nincsenek bezárt fülek",
+        "description": "Plain text under an open window in the current session when none of its tabs were closed"
+    },
     "p_closedTabs_one": {
         "message": "$COUNT$ bezárt fül",
         "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",

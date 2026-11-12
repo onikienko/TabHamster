@@ -488,6 +488,11 @@ body.keyboard .row:has(:focus) .end-meta {
     padding-left: 12px;
 }
 
+.hint.no-closed-tabs {
+    margin: 0;
+    padding: 5px 8px 6px 1px;
+}
+
 .tab-row {
     display: flex;
     align-items: center;

@@ -878,6 +878,10 @@
         "message": "Tabs and windows you close show up here.",
         "description": "Sessions tab: the current session expanded while nothing in it was closed yet"
     },
+    "p_noClosedTabs": {
+        "message": "No closed tabs",
+        "description": "Plain text under an open window in the current session when none of its tabs were closed"
+    },
     "p_closedTabs_one": {
         "message": "$COUNT$ closed tab",
         "description": "Tabs of a session window that were closed by themselves; a line that shows them, and the count in a session's details (plural form 'one')",

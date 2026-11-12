@@ -2138,21 +2138,20 @@ function sessionItem(result) {
                     {text: t('p_restore_tip'), keys: [ENTER], note: () => skippedNote(endTabs(session))}),
                 moreButton((button) => sessionMenu(key, button))))));
     if (isExpanded(id, partial)) {
-        // the live session lists only windows with something closed, numbered among those; with nothing closed yet,
-        // what it will show
-        const listed = current ? windows.filter((win) => win.closed || win.closedTabs.length) : windows;
+        // Keep every window visible; the live session's open windows show only their closed tabs.
+        // Search still leaves out windows without a matching recoverable tab.
         let found = partial ? new Set(result.tabIndexes.map((i) => session.tabs[i])) : null;
         let more = 0;
         if (found) {
             // the first ones in the order they are shown: each window's tabs, then its closed ones
-            const order = listed.flatMap((win) => (current && !win.closed ? [] : win.tabs).concat(win.closedTabs))
+            const order = windows.flatMap((win) => (current && !win.closed ? [] : win.tabs).concat(win.closedTabs))
                 .filter((tab) => found.has(tab));
             const shown = foundShown(id, order.length);
             found = new Set(order.slice(0, shown));
             more = order.length - shown;
         }
-        item.append(h('div', {class: 'tab-list'}, listed.length ?
-            [listed.map((win, i) => sessionWindowRows(key, win, i, current, found)), more ? moreFound(id, more) : null] :
+        item.append(h('div', {class: 'tab-list'}, windows.length ?
+            [windows.map((win, i) => sessionWindowRows(key, win, i, current, found)), more ? moreFound(id, more) : null] :
             h('p', {class: 'hint'}, t('p_nothingClosed'))));
     }
     return item;
@@ -2160,7 +2159,7 @@ function sessionItem(result) {
 
 /**
  * A window of an expanded session: its title, its tabs, then "3 closed tabs" that shows the ones closed by themselves
- * (newest first, with the time). The live session's open windows show only that: their tabs are open anyway.
+ * (newest first, with the time). The live session's open windows show their closed tabs or a "No closed tabs" note.
  * A window with nothing left at the end has no "Open window".
  * `found`: while searching, the session's tabs that were found (only those are shown, closed ones open by themselves).
  */
@@ -2194,7 +2193,7 @@ function sessionWindowRows(key, win, i, live, found) {
             }, icon(foldOpen ? 'chevronDown' : 'chevronRight', 14), plural('p_closedTabs', closedShown.length)),
             foldOpen ? h('div', {class: 'fold-list'},
                 closedShown.map((tab) => sessionTabRows(key, tab, found, shortTime(tab.closed, lang)))) : null,
-        ] : null),
+        ] : live && !win.closed ? h('p', {class: 'hint no-closed-tabs'}, t('p_noClosedTabs')) : null),
     ];
 }
 
