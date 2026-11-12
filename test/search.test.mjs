@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseQuery, matchesAll, segments, search} from '../js/search.js';
+import {parseQuery, matchesAll, segments, search, urlMatchExcerpt} from '../js/search.js';
 
 test('parseQuery splits words and drops duplicates (any case)', () => {
     assert.deepEqual(parseQuery('  trip  to Tofino TRIP '), ['trip', 'to', 'Tofino']);
@@ -62,6 +62,44 @@ const items = [
         {title: 'Why I quit web dev for a month', url: 'https://dev.to/x'},
         {title: 'Long read', url: 'https://example.com/a'}]},
 ];
+
+test('URL excerpts expose path matches with context and omit unrelated ends', () => {
+    const url = 'https://example.com/guides/sunshine-coast/places-to-stay';
+    assert.equal(urlMatchExcerpt('Travel guide', url, parseQuery('sunshine coast')),
+        '….com/guides/sunshine-coast/places-to-s…');
+});
+
+test('URL excerpts are absent when the title explains the match or the URL does not match', () => {
+    assert.equal(urlMatchExcerpt('Sunshine Coast', 'https://example.com/sunshine-coast', ['SUNSHINE', 'coast']), '');
+    assert.equal(urlMatchExcerpt('Travel guide', 'https://example.com/guides', ['sunshine']), '');
+    assert.equal(urlMatchExcerpt('Travel guide', 'https://example.com/guides', []), '');
+    assert.equal(urlMatchExcerpt('', undefined, ['sunshine']), '');
+});
+
+test('URL excerpts explain queries split between title and URL', () => {
+    const url = 'https://example.com/' + 'a'.repeat(50) + '/coast/' + 'b'.repeat(50);
+    const excerpt = urlMatchExcerpt('Sunshine', url, parseQuery('sunshine coast'));
+    assert.equal(excerpt, '…' + 'a'.repeat(11) + '/coast/' + 'b'.repeat(11) + '…');
+});
+
+test('URL excerpts keep distant query words, ordered by URL position without duplicated context', () => {
+    const url = 'https://example.com/coast/' + 'a'.repeat(80) + '/sunshine/coast';
+    const excerpt = urlMatchExcerpt('Travel guide', url, ['sunshine', 'coast']);
+    assert.ok(excerpt.indexOf('coast') < excerpt.indexOf('sunshine'));
+    assert.ok(excerpt.length < url.length);
+    assert.ok(!excerpt.includes('a'.repeat(24)));
+    assert.equal(urlMatchExcerpt('Travel guide', url, ['coast', 'sunshine']), excerpt);
+});
+
+test('URL excerpts handle long hostnames, query strings, literal punctuation and non-Latin text', () => {
+    const url = 'https://' + 'a'.repeat(60) + '.sunshine.example.com/?topic=C++&city=Київ';
+    for (const word of ['sunshine', 'C++', 'КИЇВ']) {
+        const excerpt = urlMatchExcerpt('Travel guide', url, [word]);
+        assert.ok(matchesAll(excerpt, [word]));
+        assert.ok(segments(excerpt, [word]).some((part) => part.hit));
+    }
+    assert.equal(urlMatchExcerpt('', 'about:blank', ['blank']), 'about:blank');
+});
 
 test('search: name matches first, then groups matching through their tabs', () => {
     const res = search(items, 'dev');

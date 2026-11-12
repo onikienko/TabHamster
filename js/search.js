@@ -89,6 +89,36 @@ export function segments(text, words) {
 }
 
 /**
+ * URL excerpts for query words absent from the title. Keep context around the first match of each word,
+ * joining nearby excerpts and replacing omitted text with an ellipsis. No unexplained URL matches: ''.
+ */
+export function urlMatchExcerpt(title, url, words) {
+    const s = String(url || '');
+    const excerpts = [];
+    for (const word of words) {
+        if (matchesAll(title, [word])) {
+            continue;
+        }
+        const match = wordStartRegExp(word).exec(s) || wordRegExp(word).exec(s);
+        if (match) {
+            excerpts.push([Math.max(0, match.index - 12), Math.min(s.length, match.index + match[0].length + 12)]);
+        }
+    }
+    excerpts.sort((a, b) => a[0] - b[0]);
+    const merged = [];
+    for (const [start, end] of excerpts) {
+        const last = merged[merged.length - 1];
+        if (last && start <= last[1]) {
+            last[1] = Math.max(last[1], end);
+        } else {
+            merged.push([start, end]);
+        }
+    }
+    return merged.map(([start, end], i) => (i || start ? '…' : '') + s.slice(start, end) +
+        (i === merged.length - 1 && end < s.length ? '…' : '')).join('');
+}
+
+/**
  * @param {Array<{key: string, name: string, tabs: Array<{title?: string, url?: string}>}>} items in display order
  * @param {string} query
  * @returns {Array<{key: string, byName: boolean, tabIndexes: number[]}>} matching items, name matches first,

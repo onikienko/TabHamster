@@ -13,7 +13,7 @@ import {setTip} from '../ui/tooltip.js';
 import {applyTheme} from '../ui/theme.js';
 import {openMenu, closeMenu, isMenuOpen} from '../ui/menu.js';
 import {normalizeName, findByName, countByName, freeName} from '../names.js';
-import {parseQuery, segments, search, matchesAll} from '../search.js';
+import {parseQuery, segments, search, matchesAll, urlMatchExcerpt} from '../search.js';
 import {moveTo} from '../order.js';
 import {enableDrag} from './drag.js';
 import {queryTabGroups, tabGroupFields, tabGroupRuns, tabGroupRun, requestTabGroups, hasTabGroups, TAB_GROUP_COLORS} from '../ui/tab_groups.js';
@@ -1820,22 +1820,10 @@ function tabGroupHead(tg) {
  */
 function tabRow(tab, at, opts = {}) {
     const title = h('span', {class: 'tab-title ellipsis', dir: 'auto'}, marked(tab.title || tab.url));
+    const excerpt = urlMatchExcerpt(tab.title, tab.url, state.words);
     const trail = opts.trail;
     const blocked = blockedInFirefox(tab.url);
-    // only for a title the row cuts off: the full title and the address; always for a page Firefox won't open
-    const link = setTip(h('a', {
-        class: ['tab-row', opts.step && 'step', blocked && 'blocked'], href: tab.url, target: '_blank',
-        dataset: at ? {key: at.key, index: String(at.index)} : trail ? {toggle: trail.id, auto: trail.auto ? '1' : ''} : {},
-        'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
-        'aria-expanded': trail ? String(trail.open) : null,
-        // the pill over a run is only seen: each tab says its tab group
-        'aria-description': [opts.tg && (opts.tg.t ? t('p_inTabGroup', [opts.tg.t]) : t('p_unnamedTabGroup')),
-            trail && plural('p_trailCount', trail.count),
-            blocked && t('p_firefoxBlocked') + ' ' + t('p_firefoxBlockedCopy')].filter(Boolean).join(', ') || null,
-    },
-    favicon(tab.url),
-    tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
-    title,
+    const details = [title,
     trail ? setTip(h('span', {
         class: 'trail-count num', 'aria-hidden': 'true',
         // not the link's own click or middle click: they would open the tab; a double click toggles once
@@ -1851,10 +1839,26 @@ function tabRow(tab, at, opts = {}) {
             e.stopPropagation();
         },
     }, icon('history', 12), numbers.format(trail.count)), {text: plural('p_trailCount', trail.count), keys: ['→']}) : null,
-    h('span', {class: ['domain', 'ellipsis', opts.right && 'num']}, opts.right || marked(hostOf(tab.url)))),
+    h('span', {class: ['domain', 'ellipsis', opts.right && 'num']}, opts.right || marked(hostOf(tab.url)))];
+    // URL-only matches get their own line: the hostname may omit the match or cut it off.
+    // The tooltip gives the full URL, including the context the excerpt leaves out.
+    const link = setTip(h('a', {
+        class: ['tab-row', excerpt && 'has-url-match', opts.step && 'step', blocked && 'blocked'], href: tab.url, target: '_blank',
+        dataset: at ? {key: at.key, index: String(at.index)} : trail ? {toggle: trail.id, auto: trail.auto ? '1' : ''} : {},
+        'aria-keyshortcuts': at ? (isMac() ? 'Backspace F2' : 'Delete F2') : null,
+        'aria-expanded': trail ? String(trail.open) : null,
+        // the pill over a run is only seen: each tab says its tab group
+        'aria-description': [opts.tg && (opts.tg.t ? t('p_inTabGroup', [opts.tg.t]) : t('p_unnamedTabGroup')),
+            trail && plural('p_trailCount', trail.count),
+            blocked && t('p_firefoxBlocked') + ' ' + t('p_firefoxBlockedCopy')].filter(Boolean).join(', ') || null,
+    },
+    favicon(tab.url),
+    tab.pinned ? h('span', {class: 'pinned'}, icon('pin', 13, t('p_pinned'))) : null,
+    excerpt ? h('span', {class: 'tab-content'}, h('span', {class: 'tab-line'}, details),
+        h('span', {class: 'url-match', dir: 'ltr'}, marked(excerpt))) : details),
     {text: tab.title || tab.url, sub: tab.title ? tab.url : null,
         why: blocked ? {text: t('p_firefoxBlocked'), sub: t('p_firefoxBlockedCopy')} : null,
-        align: 'start', focus: false, quiet: true, when: blocked ? null : () => isCut(title)});
+        align: 'start', focus: false, quiet: true, when: blocked || excerpt ? null : () => isCut(title)});
     const head = opts.tg && opts.tg.start ? tabGroupHead(opts.tg) : null;
     if (!at) {
         return h('div', tabItem(opts.tg), head, link);
