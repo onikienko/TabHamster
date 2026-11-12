@@ -172,6 +172,10 @@ button {
     font-weight: 400;
 }
 
+.tab[aria-selected="true"] .count {
+    color: inherit;
+}
+
 /* list */
 
 .list {
