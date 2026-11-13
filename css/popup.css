@@ -408,8 +408,9 @@ body.keyboard .row:has(:focus) .actions {
     pointer-events: auto;
 }
 
-body:not(.keyboard) .row:hover .end-meta,
-body.keyboard .row:has(:focus) .end-meta {
+/* Details give way only when the row has action buttons to show. */
+body:not(.keyboard) .row:has(> .actions):hover > .end-meta,
+body.keyboard .row:has(> .actions):has(:focus) > .end-meta {
     visibility: hidden;
 }
 
