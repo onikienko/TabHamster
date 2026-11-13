@@ -1,3 +1,4 @@
+1.2.1 (12.11.2026 18:02)
     Search: tabs found by their address show the matching part below the title, including matches in paths and query strings; the tooltip shows the full address
     Search highlights are more compact, with adjacent matching words highlighted together
     Sessions: the current session shows all open windows, including those with no closed tabs; window contents are indented more clearly
