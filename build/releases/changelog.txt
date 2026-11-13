@@ -1,3 +1,10 @@
+    Search: tabs found by their address show the matching part below the title, including matches in paths and query strings; the tooltip shows the full address
+    Search highlights are more compact, with adjacent matching words highlighted together
+    Sessions: the current session shows all open windows, including those with no closed tabs; window contents are indented more clearly
+    Current session: removed the closed-tab badge; open-window and tab counts stay visible on hover and keyboard focus
+    Settings: Recently deleted shows the first 4 groups, with Show all and Show fewer
+    Popup: slimmer footer and a clearer selected tab in dark mode
+    New texts added in all supported languages
 1.2.0 (06.11.2026 16:51)
     NOW ALSO IN FIREFOX (140 or newer), from Firefox Add-ons
     The browser's tab groups: with "Remember tab groups" on (Settings > Saving and opening tabs), saved groups and sessions keep the names and colors of tab groups and open them as tab groups again (always on in Firefox). The browser asks for its permission once, and the popup offers it once
