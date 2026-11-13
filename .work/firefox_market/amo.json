@@ -47,6 +47,9 @@
         }
     ],
     "release_notes": {
+        "1.2.1": {
+            "en": "Search results now show the matching part of a tab's address when its title doesn't explain the match. Search highlights are more compact, with adjacent matching words highlighted together.\n\nThe current session shows all open windows, including those with no closed tabs. Window contents are indented more clearly. The closed-tab badge has been removed, and open-window and tab counts stay visible on hover and keyboard focus.\n\nRecently deleted in Settings shows the first 4 groups, with Show all and Show fewer.\n\nThe popup has a slimmer footer and a clearer selected tab in dark mode. New texts have been added in all supported languages."
+        },
         "1.2.0": {
             "en": "First version for Firefox, with everything TabHamster 1.2.0 has in Chrome and Edge."
         }
